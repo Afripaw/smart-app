@@ -6,12 +6,13 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    provider  = "postgresql"
     // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
     // Further reading:
     // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
     // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+    url       = env("DATABASE_URL")
+    directUrl = env("DIRECT_URL")
 }
 
 model Post {
@@ -54,14 +55,28 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+    id                     String    @id @default(cuid())
+    name                   String?
+    email                  String?   @unique
+    emailVerified          DateTime?
+    image                  String?
+    surname                String
+    mobile                 String
+    addressGreaterArea     String
+    addressStreet          String
+    addressStreetCode      String
+    addressStreetNumber    String
+    addressSuburb          String
+    addressPostalCode      String
+    preferredCommunication String
+    role                   String
+    status                 String
+    comments               String
+    createdAt              DateTime  @default(now())
+    updatedAt              DateTime  @updatedAt
+    accounts               Account[]
+    sessions               Session[]
+    posts                  Post[]
 }
 
 model VerificationToken {
@@ -70,4 +85,96 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model petOwner {
+    ownerID                Int      @id @default(autoincrement())
+    firstName              String
+    surname                String
+    email                  String
+    mobile                 String
+    addressGreaterArea     String
+    addressStreet          String
+    addressStreetCode      String
+    addressStreetNumber    String
+    addressSuburb          String
+    addressPostalCode      String
+    preferredCommunication String
+    pets                   pet[]
+    status                 String
+    comments               String
+    createdAt              DateTime @default(now())
+    updatedAt              DateTime @updatedAt
+}
+
+model pet {
+    petID   Int    @id @default(autoincrement())
+    petName String
+
+    owner   petOwner @relation(fields: [ownerID], references: [ownerID])
+    ownerID Int
+
+    petTreatments petTreatment[]
+
+    species                 String
+    sex                     String
+    age                     String
+    breed                   String
+    colour                  String
+    markings                String
+    status                  String
+    sterilisedStatus        String
+    sterilisedRequested     String
+    sterilisedRequestSigned String
+    vaccinatedStatus        String
+    treatments              String
+    clinicsAttended         String[]
+    lastDeworming           String
+    membership              String
+    cardStatus              String
+    kennelReceived          String //year kennel was received
+    comments                String
+    createdAt               DateTime @default(now())
+    updatedAt               DateTime @updatedAt
+}
+
+model petClinic {
+    clinicID    Int      @id @default(autoincrement())
+    date        DateTime @default(now())
+    greaterArea String
+    area        String
+    conditions  String
+    comments    String
+}
+
+model petTreatment {
+    treatmentID Int      @id @default(autoincrement())
+    date        DateTime @default(now())
+
+    pet   pet @relation(fields: [petID], references: [petID])
+    petID Int
+
+    category String
+    type     String
+    comments String
+}
+
+model volunteer {
+    volunteerID            Int      @id @default(autoincrement())
+    firstName              String
+    surname                String
+    email                  String
+    mobile                 String
+    addressGreaterArea     String
+    addressStreet          String
+    addressStreetCode      String
+    addressStreetNumber    String
+    addressSuburb          String
+    addressPostalCode      String
+    preferredCommunication String
+    status                 String
+    clinicsAttended        String[]
+    comments               String
+    createdAt              DateTime @default(now())
+    updatedAt              DateTime @updatedAt
 }

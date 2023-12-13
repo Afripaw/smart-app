@@ -30,6 +30,32 @@ export const petTreatmentRouter = createTRPCRouter({
       return petTreatment;
     }),
 
+  //update specific treatment
+  update: protectedProcedure
+    .input(
+      z.object({
+        petID: z.number(),
+        treatmentID: z.number(),
+        category: z.string().min(1),
+        type: z.string().min(1),
+        comments: z.string().min(1),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const petTreatment = await ctx.db.petTreatment.update({
+        where: {
+          treatmentID: input.treatmentID,
+        },
+        data: {
+          category: input.category,
+          type: input.type,
+          comments: input.comments,
+        },
+      });
+      return petTreatment;
+    }),
+
+  //get one pet's treatment
   getTreatment: protectedProcedure
     .input(
       z.object({
@@ -50,6 +76,7 @@ export const petTreatmentRouter = createTRPCRouter({
       return petTreatment;
     }),
 
+  //get all treatments
   getAllTreatments: protectedProcedure.query(async ({ ctx }) => {
     const petTreatment = await ctx.db.petTreatment.findMany();
     return petTreatment;

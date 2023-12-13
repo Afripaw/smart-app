@@ -60,20 +60,20 @@ model User {
     email                  String?   @unique
     emailVerified          DateTime?
     image                  String?
-    surname                String
-    mobile                 String
-    addressGreaterArea     String
-    addressStreet          String
-    addressStreetCode      String
-    addressStreetNumber    String
-    addressSuburb          String
-    addressPostalCode      String
-    preferredCommunication String
-    role                   String
-    status                 String
-    comments               String
+    surname                String?
+    mobile                 String?
+    addressGreaterArea     String?
+    addressStreet          String?
+    addressStreetCode      String?
+    addressStreetNumber    String?
+    addressSuburb          String?
+    addressPostalCode      String?
+    preferredCommunication String?
+    role                   String?
+    status                 String?
+    comments               String?
     createdAt              DateTime  @default(now())
-    updatedAt              DateTime  @updatedAt
+    updatedAt              DateTime? @updatedAt
     accounts               Account[]
     sessions               Session[]
     posts                  Post[]

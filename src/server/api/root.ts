@@ -1,4 +1,10 @@
 import { postRouter } from "~/server/api/routers/post";
+import { petRouter } from "~/server/api/routers/pet";
+import { petOwnerRouter } from "~/server/api/routers/petOwner";
+import { petClinicRouter } from "~/server/api/routers/petClinic";
+import { petTreatmentRouter } from "~/server/api/routers/petTreatment";
+import { UserRouter } from "./routers/user";
+import { volunteerRouter } from "./routers/volunteer";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +14,12 @@ import { createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   post: postRouter,
+  pet: petRouter,
+  petOwner: petOwnerRouter,
+  petClinic: petClinicRouter,
+  petTreatment: petTreatmentRouter,
+  user: UserRouter,
+  volunteer: volunteerRouter,
 });
 
 // export type definition of API

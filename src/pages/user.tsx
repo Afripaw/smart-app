@@ -1,25 +1,19 @@
-import { signIn, signOut, useSession } from "next-auth/react";
+import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
-
+import { SetStateAction, useEffect, useRef, useState } from "react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
-import { SetStateAction, useState, useEffect, useRef, use } from "react";
-import { authOptions } from "~/server/auth";
-import { set } from "zod";
-//import { sign } from "crypto";
+import Navbar from "../components/navbar";
+import { Trash } from "phosphor-react";
 
-export default function Home() {
-  //const hello = api.post.hello.useQuery({ text: "from tRPC" });
-
-  const { data: session } = useSession();
-  const newUser = api.user.create.useMutation();
-  const deleteAll = api.user.deleteAll.useMutation();
-  const newPet = api.pet.create.useMutation();
-  const [signUp, setSignUp] = useState(false);
-  const [signIn_, setSignIn_] = useState(false);
-  //For moving between different pages
+const User: NextPage = () => {
   const router = useRouter();
+  const newUser = api.user.create.useMutation();
+  const updateUser = api.user.update.useMutation();
+  //const [user, setUser] = useState<{ id: string } | null>(null);
+  const [isUpdate, setIsUpdate] = useState(false);
+  const [isCreate, setIsCreate] = useState(false);
+  const userTable = api.user.getAllUsers.useQuery();
 
   //---------------------------------EDIT BOXES----------------------------------
   const [firstName, setFirstName] = useState("");
@@ -174,34 +168,14 @@ export default function Home() {
     };
   }, []);
 
-  //--------------------------------LOGIN BUTTONS--------------------------------
-  //handle sign up
-  const handleSignUp = async () => {
-    signUp ? setSignUp(false) : setSignUp(true);
+  const handleCreateNewUser = async () => {
+    isCreate ? setIsCreate(false) : setIsCreate(true);
+    isUpdate ? setIsUpdate(false) : setIsUpdate(false);
   };
 
-  //handle sign in
-  const handleSignIn = async () => {
-    signIn_ ? setSignIn_(false) : setSignIn_(true);
-  };
-
-  //delete all records button
-  const deleteAllRecords = async () => {
-    await deleteAll.mutateAsync();
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      const result = await signIn();
-      if (result) {
-        console.log("Sign-in successful");
-        void router.push("/dashboard");
-      } else {
-        console.log("Sign-in failed");
-      }
-    } catch (error) {
-      console.log("Error during sign-in:", error);
-    }
+  const handleUpdateUser = async () => {
+    isUpdate ? setIsUpdate(false) : setIsUpdate(true);
+    isCreate ? setIsCreate(false) : setIsCreate(false);
   };
 
   const handleNewUser = async () => {
@@ -221,7 +195,7 @@ export default function Home() {
     if (statusOption === "Status") {
       setStatusOption(" ");
     }
-    //void signIn();
+
     await newUser.mutateAsync({
       firstName: firstName,
       email: email,
@@ -239,147 +213,114 @@ export default function Home() {
       status: statusOption,
       comments: comments,
     });
-    //if succesful go to dashboard
-    //else display error message
-    if (newUser) {
-      void router.push("/dashboard");
-    } else {
-      console.log("error");
-    }
-  };
-
-  const handleUser = async () => {
-    //void signIn();
-    const result = await signIn("credentials", {
-      email: email,
-      password: password,
-      redirect: false,
-    });
-    console.log(result);
-    if (result) {
-      console.log("Sign-in successful");
-      void router.push("/dashboard");
-    } else {
-      console.log("Sign-in failed");
-    }
-  };
-
-  const handleNewPet = async () => {
-    await newPet.mutateAsync({
-      petName: "Dixie",
-      species: "Dog",
-      sex: "Male",
-      age: "6",
-      breed: "Golden Retriever",
-      colour: "Blue",
-      markings: "Big green circle on the face",
-      status: "Active",
-      sterilisedStatus: "Yes",
-      sterilisedRequested: "Yes",
-      sterilisedRequestSigned: "Yes",
-      vaccinatedStatus: "Yes",
-      treatments: "Tender Love and Care",
-      clinicsAttended: ["Vet Clinic", "Soweto Vet"],
-      lastDeWorming: "2021-08-01",
-      membership: "Golden",
-      cardStatus: "True",
-      kennelReceived: "Yes",
-      comments: "Very happy dog",
-    });
   };
 
   return (
     <>
       <Head>
-        <title>Afripaw Smart App</title>
-        <meta name="description" content="Smart App" />
-        <link rel="icon" href="/favicon.ico" />
+        <title>User Profiles</title>
       </Head>
-      <main className=" flex min-h-screen flex-col bg-gray-100">
-        {!signIn_ && !signUp && (
-          <div className="flex grow flex-col items-center justify-center">
-            <div className="text-3xl">Welcome to the Afripaw Smart App</div>
-            <div className="flex items-center justify-center">
-              <button
-                className=" m-2 rounded-lg border-zinc-800 bg-orange-500 p-2 text-2xl duration-150 hover:bg-orange-600"
-                onClick={() => void handleSignUp()}
-              >
-                Sign up
-              </button>
-              <button
-                className=" m-2 rounded-lg border-zinc-800 bg-orange-500 p-2 text-2xl duration-150 hover:bg-orange-600"
-                onClick={() => void handleSignIn()}
-              >
-                Sign in
-              </button>
-            </div>
+      <main className="flex flex-col">
+        <Navbar />
+        <div className="flex grow flex-col justify-center">
+          <div className="mx-96 flex justify-between">
+            <button
+              className="rounded-lg bg-orange-600 p-3 hover:bg-orange-700"
+              onClick={handleCreateNewUser}
+            >
+              Create new User
+            </button>
+            <button
+              className="rounded-lg bg-orange-600 p-3 hover:bg-orange-700"
+              onClick={handleUpdateUser}
+            >
+              Update User
+            </button>
           </div>
-        )}
-        {signIn_ && !signUp && (
+        </div>
+        {isUpdate && !isCreate && (
           <>
-            <div className="mb-2 flex flex-col">
-              <div className="flex grow justify-end">
-                <button
-                  className="m-3 rounded-lg bg-slate-400 p-2"
-                  onClick={handleGoogleSignIn}
-                >
-                  Sign In with Google
-                </button>
-                <button
-                  className="m-3 rounded-lg bg-slate-400 p-2"
-                  onClick={deleteAllRecords}
-                >
-                  Delete all user records
-                </button>
-              </div>
-              <div className="flex justify-center">
-                <div className="mb-2 flex flex-col items-center rounded-lg bg-slate-300 px-5 py-3">
-                  <div className="mb-3 mt-3 text-4xl">Sign In</div>
-                  <div className="text-lg">Enter Credentials</div>
-                </div>
-              </div>
-            </div>
-            <div className="flex grow flex-col items-center">
+            <div className="mb-2 mt-3 flex flex-col items-center">
               <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Email"
+                className="m-2 w-1/3 rounded-lg border-2 border-zinc-800 px-2"
+                placeholder="Search..."
                 onChange={(e) => setEmail(e.target.value)}
               />
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                className="mt-4 rounded-md bg-orange-500 px-8 py-3 text-lg text-white hover:bg-orange-600"
-                onClick={() => void handleUser()}
-              >
-                Sign in
-              </button>
+              {/*Make a table with all the users and then when you click on the user it will populate the fields*/}
+              {/*<button
+                    className="rounded-lg bg-orange-600 p-3 hover:bg-orange-700"
+                    onClick={handleUpdateUser}
+                    >
+                    Search
+                    </button>*/}
+              <article className="horisonal-scroll flex max-h-[80rem] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+                <table className="table-auto">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2">First Name</th>
+                      <th className="px-4 py-2">Surname</th>
+                      <th className="px-4 py-2">Email</th>
+                      <th className="px-4 py-2">Mobile</th>
+                      <th className="px-4 py-2">Greater Area</th>
+                      <th className="px-4 py-2">Street</th>
+                      <th className="px-4 py-2">Street Code</th>
+                      <th className="px-4 py-2">Street Number</th>
+                      <th className="px-4 py-2">Suburb</th>
+                      <th className="px-4 py-2">Postal Code</th>
+                      <th className="px-4 py-2">Preferred Communication</th>
+                      <th className="px-4 py-2">Role</th>
+                      <th className="px-4 py-2">Status</th>
+                      <th className="px-4 py-2">Comments</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {userTable.data?.map((user) => {
+                      return (
+                        <tr className="items-center">
+                          <td className="border px-4 py-2">{user.name}</td>
+                          <td className="border px-4 py-2">{user.surname}</td>
+                          <td className="border px-4 py-2">{user.email}</td>
+                          <td className="border px-4 py-2">{user.mobile}</td>
+                          <td className="border px-4 py-2">
+                            {user.addressGreaterArea}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {user.addressStreet}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {user.addressStreetCode}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {user.addressStreetNumber}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {user.addressSuburb}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {user.addressPostalCode}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {user.preferredCommunication}
+                          </td>
+                          <td className="border px-4 py-2">{user.role}</td>
+                          <td className="border px-4 py-2">{user.status}</td>
+                          <td className="border px-4 py-2">{user.comments}</td>
+                          <Trash size={24} className="mx-2 my-3" />
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </article>
             </div>
           </>
         )}
-        {!signIn_ && signUp && (
+        {!isUpdate && isCreate && (
           <>
             <div className="mb-2 flex flex-col">
-              <div className="flex grow justify-end">
-                <button
-                  className="m-3 rounded-lg bg-orange-500 p-2"
-                  onClick={handleGoogleSignIn}
-                >
-                  Sign Up with Google
-                </button>
-                <button
-                  className="m-3 rounded-lg bg-slate-400 p-2"
-                  onClick={deleteAllRecords}
-                >
-                  Delete all user records
-                </button>
-              </div>
               <div className="flex justify-center">
-                <div className="mb-2 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-3">
-                  <div className="mb-3 mt-3 text-4xl">Create Account</div>
-                  <div className="text-lg">Enter the following fields</div>
+                <div className="mb-2 mt-3 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-3">
+                  <div className="mb-3 mt-3 text-2xl">Create New User</div>
                 </div>
               </div>
             </div>
@@ -675,65 +616,6 @@ export default function Home() {
                 )}
               </div>
 
-              {/*<div className="flex flex-col">
-                <button
-                  ref={btnStatusRef}
-                  className="my-3 inline-flex items-center rounded-lg bg-orange-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  type="button"
-                  onClick={handleToggleStatus}
-                >
-                  {statusOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </button>
-                {status && (
-                  <div
-                    ref={statusRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
-                      <li onClick={() => handleStatusOption("Active")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Active
-                        </a>
-                      </li>
-                      <li onClick={() => handleStatusOption("Passive")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Passive
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Comments"
-                onChange={(e) => setComments(e.target.value)}
-              />*/}
-
               <input
                 className="m-2 rounded-lg border-zinc-800 px-2"
                 placeholder="Password"
@@ -746,10 +628,10 @@ export default function Home() {
               />
 
               <button
-                className="mt-4 rounded-md bg-orange-500 px-8 py-3 text-lg text-white hover:bg-orange-600"
+                className="my-4 rounded-md bg-orange-500 px-8 py-3 text-lg text-white hover:bg-orange-600"
                 onClick={() => void handleNewUser()}
               >
-                Sign up
+                Create
               </button>
             </div>
           </>
@@ -757,15 +639,6 @@ export default function Home() {
       </main>
     </>
   );
-}
+};
 
-//flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]
-//<main className=" flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c]">
-//<div className="container flex flex-col items-center justify-center gap-12 px-4 py-16 ">
-
-/*<button
-className="my-3 bg-red-500"
-onClick={() => void handleNewUser()}
->
-Sign in
-</button>*/
+export default User;

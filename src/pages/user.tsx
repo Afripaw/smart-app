@@ -13,6 +13,8 @@ const User: NextPage = () => {
   //const [user, setUser] = useState<{ id: string } | null>(null);
   const [isUpdate, setIsUpdate] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
+  //Update the table when user is deleted
+  const [isDeleted, setIsDeleted] = useState(false);
   // const userTable = api.user.getAllUsers.useQuery();
 
   //-------------------------------SEARCH BAR------------------------------------
@@ -25,7 +27,12 @@ const User: NextPage = () => {
   const deleteRow = api.user.deleteUser.useMutation();
   const handleDeleteRow = async (id: string) => {
     await deleteRow.mutateAsync({ userID: id });
+    isDeleted ? setIsDeleted(false) : setIsDeleted(true);
   };
+  //autoload the table
+  useEffect(() => {
+    void data.refetch();
+  }, [isUpdate, isDeleted]);
 
   //---------------------------------EDIT BOXES----------------------------------
   const [firstName, setFirstName] = useState("");
@@ -225,6 +232,23 @@ const User: NextPage = () => {
       status: statusOption,
       comments: comments,
     });
+    //After the newUser has been created make sure to set the fields back to empty
+    setFirstName("");
+    setEmail("");
+    setSurname("");
+    setPassword("");
+    setConfirmPassword("");
+    setMobile("");
+    setGreaterAreaOption("Greater Area");
+    setAddressStreet("");
+    setAddressStreetCode("");
+    setAddressStreetNumber("");
+    setAddressSuburb("");
+    setAddressPostalCode("");
+    setPreferredCommunicationOption("Preferred Communication");
+    setRoleOption("Role");
+    setStatusOption("Status");
+    setComments("");
   };
 
   //On change of search bar, query the users table

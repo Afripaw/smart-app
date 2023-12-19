@@ -75,7 +75,9 @@ const Navbar = () => {
             <Link
               key={link.name}
               href={link.href}
-              className="flex rounded-lg px-6 py-2 text-black hover:bg-gray-200/30"
+              className={`flex rounded-lg px-6 py-2 text-black hover:bg-gray-200/30 ${
+                router.pathname === link.href ? "bg-gray-200" : ""
+              }`}
             >
               <div className="mr-2">{link.icon}</div>
               {link.name}

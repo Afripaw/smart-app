@@ -190,6 +190,11 @@ export default function Home() {
     await deleteAll.mutateAsync();
   };
 
+  const handleWelcomePage = async () => {
+    setSignIn_(false);
+    setSignUp(false);
+  };
+
   const handleGoogleSignIn = async () => {
     try {
       const result = await signIn();
@@ -317,24 +322,30 @@ export default function Home() {
         )}
         {signIn_ && !signUp && (
           <>
-            <div className="mb-2 flex flex-col">
-              <div className="flex grow justify-end">
+            <div className="mb-2 flex flex-col bg-slate-300">
+              <div className="flex grow justify-between bg-white">
                 <button
-                  className="m-3 rounded-lg bg-slate-400 p-2"
+                  className="m-3 rounded-lg bg-orange-500 p-2"
+                  onClick={handleWelcomePage}
+                >
+                  Back to Welcome Page
+                </button>
+                <button
+                  className="mb-3 ml-3 mr-3 mt-3 rounded-lg bg-orange-400 p-2"
                   onClick={handleGoogleSignIn}
                 >
                   Sign In with Google
                 </button>
-                <button
+                {/*<button
                   className="m-3 rounded-lg bg-slate-400 p-2"
                   onClick={deleteAllRecords}
                 >
                   Delete all user records
-                </button>
+        </button>*/}
               </div>
               <div className="flex justify-center">
                 <div className="mb-2 flex flex-col items-center rounded-lg bg-slate-300 px-5 py-3">
-                  <div className="mb-3 mt-3 text-4xl">Sign In</div>
+                  <div className="mb-3 text-4xl">Sign In</div>
                   <div className="text-lg">Enter Credentials</div>
                 </div>
               </div>
@@ -361,20 +372,26 @@ export default function Home() {
         )}
         {!signIn_ && signUp && (
           <>
-            <div className="mb-2 flex flex-col">
-              <div className="flex grow justify-end">
+            <div className="mb-2 flex flex-col bg-slate-300">
+              <div className="flex grow justify-between bg-white">
+                <button
+                  className="m-3 rounded-lg bg-orange-500 p-2"
+                  onClick={handleWelcomePage}
+                >
+                  Back to Welcome Page
+                </button>
                 <button
                   className="m-3 rounded-lg bg-orange-500 p-2"
                   onClick={handleGoogleSignIn}
                 >
                   Sign Up with Google
                 </button>
-                <button
+                {/*<button
                   className="m-3 rounded-lg bg-slate-400 p-2"
                   onClick={deleteAllRecords}
                 >
                   Delete all user records
-                </button>
+        </button>*/}
               </div>
               <div className="flex justify-center">
                 <div className="mb-2 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-3">

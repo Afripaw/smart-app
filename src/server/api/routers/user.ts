@@ -108,7 +108,7 @@ export const UserRouter = createTRPCRouter({
     });
   }),
 
-  getAllUsers: protectedProcedure.query(({ ctx }) => {
+  getAllUsers: publicProcedure.query(({ ctx }) => {
     return ctx.db.user.findMany();
   }),
 });

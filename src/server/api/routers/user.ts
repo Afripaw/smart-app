@@ -111,4 +111,34 @@ export const UserRouter = createTRPCRouter({
   getAllUsers: publicProcedure.query(({ ctx }) => {
     return ctx.db.user.findMany();
   }),
+
+  //implement full text search for users
+  searchUsers: publicProcedure
+    .input(
+      z.object({
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.user.findMany({
+        where: {
+          OR: [
+            { name: { contains: input.searchQuery } },
+            { surname: { contains: input.searchQuery } },
+            { email: { contains: input.searchQuery } },
+            { role: { contains: input.searchQuery } },
+            { status: { contains: input.searchQuery } },
+            { mobile: { contains: input.searchQuery } },
+            { addressGreaterArea: { contains: input.searchQuery } },
+            { addressStreet: { contains: input.searchQuery } },
+            { addressStreetCode: { contains: input.searchQuery } },
+            { addressStreetNumber: { contains: input.searchQuery } },
+            { addressSuburb: { contains: input.searchQuery } },
+            { addressPostalCode: { contains: input.searchQuery } },
+            { preferredCommunication: { contains: input.searchQuery } },
+            { comments: { contains: input.searchQuery } },
+          ],
+        },
+      });
+    }),
 });

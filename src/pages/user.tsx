@@ -15,6 +15,10 @@ const User: NextPage = () => {
   const [isCreate, setIsCreate] = useState(false);
   const userTable = api.user.getAllUsers.useQuery();
 
+  //-------------------------------SEARCH BAR------------------------------------
+  //Query the users table
+  const [query, setQuery] = useState("");
+
   //---------------------------------EDIT BOXES----------------------------------
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
@@ -215,6 +219,13 @@ const User: NextPage = () => {
     });
   };
 
+  //On change of search bar, query the users table
+  /* useEffect(() => {
+        const userTableSearch = api.user.searchUsers.useQuery({ searchQuery: query });
+    },[query]);*/
+
+  const data = api.user.searchUsers.useQuery({ searchQuery: query });
+
   return (
     <>
       <Head>
@@ -244,7 +255,7 @@ const User: NextPage = () => {
               <input
                 className="m-2 w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                 placeholder="Search..."
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setQuery(e.target.value)}
               />
               {/*Make a table with all the users and then when you click on the user it will populate the fields*/}
               {/*<button
@@ -274,7 +285,7 @@ const User: NextPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {userTable.data?.map((user) => {
+                    {data.data?.map((user) => {
                       return (
                         <tr className="items-center">
                           <td className="border px-4 py-2">{user.name}</td>
@@ -615,6 +626,11 @@ const User: NextPage = () => {
                   </div>
                 )}
               </div>
+              <input
+                className="m-2 rounded-lg border-zinc-800 px-2"
+                placeholder="Comments"
+                onChange={(e) => setComments(e.target.value)}
+              />
 
               <input
                 className="m-2 rounded-lg border-zinc-800 px-2"

@@ -13,11 +13,19 @@ const User: NextPage = () => {
   //const [user, setUser] = useState<{ id: string } | null>(null);
   const [isUpdate, setIsUpdate] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
-  const userTable = api.user.getAllUsers.useQuery();
+  // const userTable = api.user.getAllUsers.useQuery();
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
   const [query, setQuery] = useState("");
+
+  //-------------------------------TABLE-----------------------------------------
+  const data = api.user.searchUsers.useQuery({ searchQuery: query });
+  //delete specific row
+  const deleteRow = api.user.deleteUser.useMutation();
+  const handleDeleteRow = async (id: string) => {
+    await deleteRow.mutateAsync({ userID: id });
+  };
 
   //---------------------------------EDIT BOXES----------------------------------
   const [firstName, setFirstName] = useState("");
@@ -224,8 +232,6 @@ const User: NextPage = () => {
         const userTableSearch = api.user.searchUsers.useQuery({ searchQuery: query });
     },[query]);*/
 
-  const data = api.user.searchUsers.useQuery({ searchQuery: query });
-
   return (
     <>
       <Head>
@@ -316,7 +322,11 @@ const User: NextPage = () => {
                           <td className="border px-4 py-2">{user.role}</td>
                           <td className="border px-4 py-2">{user.status}</td>
                           <td className="border px-4 py-2">{user.comments}</td>
-                          <Trash size={24} className="mx-2 my-3" />
+                          <Trash
+                            size={24}
+                            className="mx-2 my-3"
+                            onClick={() => handleDeleteRow(user.id)}
+                          />
                         </tr>
                       );
                     })}

@@ -8,6 +8,7 @@ import {
   Bed,
   Info,
   SignOut,
+  Person,
 } from "phosphor-react";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
@@ -21,32 +22,37 @@ const NavbarLinks = [
     icon: <Gauge size={24} />,
   },
   {
-    name: "User profiles",
+    name: "Users",
     href: "/user",
     icon: <User size={24} />,
   },
   {
-    name: "Owner profiles",
+    name: "Volunteers",
+    href: "/volunteer",
+    icon: <Person size={24} />,
+  },
+  {
+    name: "Owners",
     href: "/owner",
     icon: <Users size={24} />,
   },
   {
-    name: "Pet profiles",
+    name: "Pets",
     href: "/pet",
     icon: <Dog size={24} />,
   },
   {
-    name: "Pet treatment",
+    name: "Treatments",
     href: "/treatment",
     icon: <FirstAidKit size={24} />,
   },
   {
-    name: "Pet clinic",
+    name: "Clinics",
     href: "/clinic",
     icon: <Bed size={24} />,
   },
   {
-    name: "Information Retrieval",
+    name: "Database",
     href: "/info",
     icon: <Info size={24} />,
   },
@@ -59,7 +65,7 @@ const Navbar = () => {
     //void signOut();
   };
   return (
-    <div className="mb-4 flex grow items-center justify-between bg-orange-500 p-3 text-black">
+    <div className=" sticky top-0 z-10 flex grow items-center justify-between bg-main-orange p-3 text-black">
       <div className="justify-begin flex">
         <Image
           src={"/afripaw-logo.jpg"}
@@ -76,7 +82,7 @@ const Navbar = () => {
               key={link.name}
               href={link.href}
               className={`flex rounded-lg px-6 py-2 text-black hover:bg-gray-200/30 ${
-                router.pathname === link.href ? "bg-gray-200" : ""
+                router.pathname === link.href ? "bg-white" : ""
               }`}
             >
               <div className="mr-2">{link.icon}</div>

@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { SetStateAction, useState, useEffect, useRef, use } from "react";
 import { authOptions } from "~/server/auth";
 import { set } from "zod";
+import Image from "next/image";
 //import { sign } from "crypto";
 
 export default function Home() {
@@ -301,472 +302,161 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className=" flex min-h-screen flex-col bg-gray-100">
-        {!signIn_ && !signUp && (
-          <div className="flex grow flex-col items-center justify-center">
-            <div className="text-3xl">Welcome to the Afripaw Smart App</div>
-            <div className="flex items-center justify-center">
-              <button
-                className=" m-2 rounded-lg border-zinc-800 bg-orange-500 p-2 text-2xl duration-150 hover:bg-orange-600"
-                onClick={() => void handleSignUp()}
-              >
-                Sign up
-              </button>
-              <button
-                className=" m-2 rounded-lg border-zinc-800 bg-orange-500 p-2 text-2xl duration-150 hover:bg-orange-600"
-                onClick={() => void handleSignIn()}
-              >
-                Sign in
-              </button>
+        {!signIn_ && (
+          <>
+            <div className="flex grow flex-col bg-white">
+              <div className="flex items-center justify-between bg-main-orange">
+                <div className="justify-begin flex">
+                  <Image
+                    src={"/afripaw-logo.jpg"}
+                    alt="Afripaw Logo"
+                    className="m-2 ml-2 aspect-square h-max rounded-full"
+                    width={62}
+                    height={62}
+                  />
+                </div>
+                <div className="text-3xl">Welcome to the Afripaw Smart App</div>
+                <button
+                  className=" m-2 rounded-lg border-black bg-white p-2 text-lg text-black duration-150 hover:bg-gray-200/30"
+                  onClick={() => void handleSignIn()}
+                >
+                  Sign in
+                </button>
+              </div>
+              <div className="flex grow flex-col items-center justify-center">
+                {/*<div className=" flex grow flex-col items-center">
+                  <Image
+                    className="mb-3 rounded-lg border-2 border-black px-2"
+                    src={"/login-image1.png"}
+                    alt="first login image"
+                    width={448}
+                    height={310}
+                  />
+                  <Image
+                    className="rounded-lg border-2 border-black px-2"
+                    src={"/login-image3.png"}
+                    alt="first login image"
+                    width={448}
+                    height={310}
+                  />
+        </div>*/}
+                {/*<div className="flex flex-col items-center">
+                  <Image
+                    className="mt-3"
+                    src={"/login-graph2.png"}
+                    alt="first login graph"
+                    width={448}
+                    height={260}
+      />*/}
+                <div className="relative my-5 flex items-center p-28 text-black">
+                  <div className="absolute left-0 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-6 text-white">
+                    <div className="text-2xl">6505</div>
+                    <div>Pet Clinic visits</div>
+                  </div>
+                  <div className="absolute right-0 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-8 text-white">
+                    <div className="text-2xl">752</div>
+                    <div>Pets Sterilised</div>
+                  </div>
+                  <div className="absolute bottom-0 left-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-4 text-white">
+                    <div className="text-2xl">68</div>
+                    <div>Kennels Provided</div>
+                  </div>
+                  <div className="absolute bottom-0 right-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-5 text-white">
+                    <div className="text-2xl">90</div>
+                    <div>Active Volunteers</div>
+                  </div>
+                  <p className="w-52 border-2 border-black p-3">
+                    <strong className="text-lg text-main-orange">
+                      Our Mision
+                    </strong>{" "}
+                    is to partner with low-income communities to educate
+                    families on their pets’ primary needs and facilitate access
+                    to affordable support services with a focus on free mass
+                    sterilisation.
+                  </p>
+                  <p className="ml-5 w-52 border-2 border-black p-6 py-9">
+                    <strong className="text-lg text-main-orange">
+                      Our Vision
+                    </strong>{" "}
+                    is to see communities that treasure their pets, provide for
+                    their needs, and protect them from suffering and disease.
+                  </p>
+                </div>
+                {/* <Image
+                    className="mt-2"
+                    src={"/login-graph1.png"}
+                    alt="first login graph"
+                    width={448}
+                    height={260}
+                  />
+    </div>*/}
+                {/*<div className=" flex grow flex-col items-center">
+                  <Image
+                    className="mb-3 rounded-lg border-2 border-black px-2"
+                    src={"/login-image4.png"}
+                    alt="first login image"
+                    width={448}
+                    height={310}
+                  />
+                  <Image
+                    className="rounded-lg border-2 border-black px-2"
+                    src={"/login-image2.png"}
+                    alt="first login image"
+                    width={448}
+                    height={310}
+                  />
+  </div>*/}
+              </div>
             </div>
-          </div>
+          </>
         )}
         {signIn_ && !signUp && (
           <>
             <div className="mb-2 flex flex-col bg-slate-300">
-              <div className="flex grow justify-between bg-white">
+              <div className="flex grow justify-between bg-main-orange">
+                <div className="justify-begin flex items-center">
+                  <Image
+                    src={"/afripaw-logo.jpg"}
+                    alt="Afripaw Logo"
+                    className="m-2 ml-2 aspect-square h-max rounded-full"
+                    width={62}
+                    height={62}
+                  />
+                </div>
+                <div className="flex flex-col items-center justify-center py-3 pl-32 pr-5">
+                  <div className=" text-3xl">Sign In</div>
+                </div>
                 <button
-                  className="m-3 rounded-lg bg-orange-500 p-2"
+                  className="m-3 rounded-lg border-black bg-white p-3 text-base text-black duration-150 hover:bg-gray-200/30"
                   onClick={handleWelcomePage}
                 >
                   Back to Welcome Page
                 </button>
-                <button
-                  className="mb-3 ml-3 mr-3 mt-3 rounded-lg bg-orange-400 p-2"
+                {/*<button
+                  className=" my-6 ml-3 mr-3 rounded-lg bg-white p-2"
                   onClick={handleGoogleSignIn}
                 >
                   Sign In with Google
-                </button>
-                {/*<button
-                  className="m-3 rounded-lg bg-slate-400 p-2"
-                  onClick={deleteAllRecords}
-                >
-                  Delete all user records
         </button>*/}
               </div>
-              <div className="flex justify-center">
-                <div className="mb-2 flex flex-col items-center rounded-lg bg-slate-300 px-5 py-3">
-                  <div className="mb-3 text-4xl">Sign In</div>
-                  <div className="text-lg">Enter Credentials</div>
-                </div>
-              </div>
             </div>
-            <div className="flex grow flex-col items-center">
+            <div className="mb-14 flex grow flex-col items-center justify-center">
+              <div className="mb-5 text-lg">Enter Credentials</div>
               <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
+                className="m-2 rounded-lg border-2 border-zinc-800 px-2"
                 placeholder="Email"
                 onChange={(e) => setEmail(e.target.value)}
               />
               <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
+                className="m-2 rounded-lg border-2 border-zinc-800 px-2"
                 placeholder="Password"
                 onChange={(e) => setPassword(e.target.value)}
               />
               <button
-                className="mt-4 rounded-md bg-orange-500 px-8 py-3 text-lg text-white hover:bg-orange-600"
+                className="mt-4 rounded-md border-black bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
                 onClick={() => void handleUser()}
               >
                 Sign in
-              </button>
-            </div>
-          </>
-        )}
-        {!signIn_ && signUp && (
-          <>
-            <div className="mb-2 flex flex-col bg-slate-300">
-              <div className="flex grow justify-between bg-white">
-                <button
-                  className="m-3 rounded-lg bg-orange-500 p-2"
-                  onClick={handleWelcomePage}
-                >
-                  Back to Welcome Page
-                </button>
-                <button
-                  className="m-3 rounded-lg bg-orange-500 p-2"
-                  onClick={handleGoogleSignIn}
-                >
-                  Sign Up with Google
-                </button>
-                {/*<button
-                  className="m-3 rounded-lg bg-slate-400 p-2"
-                  onClick={deleteAllRecords}
-                >
-                  Delete all user records
-        </button>*/}
-              </div>
-              <div className="flex justify-center">
-                <div className="mb-2 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-3">
-                  <div className="mb-3 mt-3 text-4xl">Create Account</div>
-                  <div className="text-lg">Enter the following fields</div>
-                </div>
-              </div>
-            </div>
-            <div className="flex grow flex-col items-center">
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2 "
-                placeholder="First Name"
-                onChange={(e) => setFirstName(e.target.value)}
-              />
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Surname"
-                onChange={(e) => setSurname(e.target.value)}
-              />
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Email"
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Mobile"
-                onChange={(e) => setMobile(e.target.value)}
-              />
-
-              <div className="flex flex-col">
-                <button
-                  ref={btnGreaterAreaRef}
-                  className="my-3 inline-flex items-center rounded-lg bg-orange-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  type="button"
-                  onClick={handleToggleGreaterArea}
-                >
-                  {greaterAreaOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </button>
-                {isGreaterAreaOpen && (
-                  <div
-                    ref={greaterAreaRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
-                      <li
-                        onClick={() =>
-                          handleGreaterAreaOption("Not applicable")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Not applicable
-                        </a>
-                      </li>
-                      <li onClick={() => handleGreaterAreaOption("Flagship")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Flagship
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handleGreaterAreaOption("Replication area 1")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Replication area 1
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handleGreaterAreaOption("Replication area 2")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Replication area 2
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2 "
-                placeholder="Address Street"
-                onChange={(e) => setAddressStreet(e.target.value)}
-              />
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2 "
-                placeholder="Address Street Code"
-                onChange={(e) => setAddressStreetCode(e.target.value)}
-              />
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Address Street Number"
-                onChange={(e) => setAddressStreetNumber(e.target.value)}
-              />
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Address Suburb"
-                onChange={(e) => setAddressSuburb(e.target.value)}
-              />
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Address Postal Code"
-                onChange={(e) => setAddressPostalCode(e.target.value)}
-              />
-
-              <div className="flex flex-col">
-                <button
-                  ref={btnPreferredCommunicationRef}
-                  className="my-3 inline-flex items-center rounded-lg bg-orange-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  type="button"
-                  onClick={handleTogglePreferredCommunication}
-                >
-                  {preferredOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </button>
-                {preferredCommunication && (
-                  <div
-                    ref={preferredCommunicationRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
-                      <li
-                        onClick={() =>
-                          handlePreferredCommunicationOption("Email")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Email
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handlePreferredCommunicationOption("SMS")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          SMS
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handlePreferredCommunicationOption("Whatsapp")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Whatsapp
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col">
-                <button
-                  ref={btnRoleRef}
-                  className="my-3 inline-flex items-center rounded-lg bg-orange-700 px-5  py-2.5 text-center text-sm font-medium text-white hover:bg-orange-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  type="button"
-                  onClick={handleToggleRole}
-                >
-                  {roleOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </button>
-                {role && (
-                  <div
-                    ref={roleRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
-                      <li
-                        onClick={() => handleRoleOption("System Administrator")}
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          System administrator
-                        </a>
-                      </li>
-                      <li onClick={() => handleRoleOption("Data analyst")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Data analyst
-                        </a>
-                      </li>
-                      <li onClick={() => handleRoleOption("Data consumer")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Data consumer
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handleRoleOption("Treatment data capturer")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Treatment data capturer
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handleRoleOption("General data capturer")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          General data capturer
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              {/*<div className="flex flex-col">
-                <button
-                  ref={btnStatusRef}
-                  className="my-3 inline-flex items-center rounded-lg bg-orange-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  type="button"
-                  onClick={handleToggleStatus}
-                >
-                  {statusOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="m1 1 4 4 4-4"
-                    />
-                  </svg>
-                </button>
-                {status && (
-                  <div
-                    ref={statusRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
-                      <li onClick={() => handleStatusOption("Active")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Active
-                        </a>
-                      </li>
-                      <li onClick={() => handleStatusOption("Passive")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Passive
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Comments"
-                onChange={(e) => setComments(e.target.value)}
-              />*/}
-
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Password"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <input
-                className="m-2 rounded-lg border-zinc-800 px-2"
-                placeholder="Confirm Password"
-                onChange={(e) => setConfirmPassword(e.target.value)}
-              />
-
-              <button
-                className="mt-4 rounded-md bg-orange-500 px-8 py-3 text-lg text-white hover:bg-orange-600"
-                onClick={() => void handleNewUser()}
-              >
-                Sign up
               </button>
             </div>
           </>

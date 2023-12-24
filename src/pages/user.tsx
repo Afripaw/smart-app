@@ -65,6 +65,18 @@ const User: NextPage = () => {
   const greaterAreaRef = useRef<HTMLDivElement>(null);
   const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
 
+  const [isAreaOpen, setIsAreaOpen] = useState(false);
+  const [areaOption, setAreaOption] = useState("Area");
+  const areaRef = useRef<HTMLDivElement>(null);
+  const btnAreaRef = useRef<HTMLButtonElement>(null);
+
+  const [isStreetOpen, setIsStreetOpen] = useState(false);
+  const [streetOption, setStreetOption] = useState("Street");
+  const streetRef = useRef<HTMLDivElement>(null);
+  const btnStreetRef = useRef<HTMLButtonElement>(null);
+  const [streetOptions, setStreetOptions] = useState<string[]>([]);
+  const [selectedStreet, setSelectedStreet] = useState<string>("");
+
   const [preferredCommunication, setPreferredCommunication] = useState(false);
   const [preferredOption, setPreferredCommunicationOption] = useState(
     "Preferred Communication",
@@ -113,6 +125,373 @@ const User: NextPage = () => {
     };
   }, []);
 
+  const greaterAreaOptions = [
+    "Flagship",
+    "Replication area 1",
+    "Replication area 2",
+  ];
+
+  //AREA
+  const handleToggleArea = () => {
+    setIsAreaOpen(!isAreaOpen);
+    setStreetOption("Street");
+  };
+
+  //SetStateAction<string>
+  const handleAreaOption = (option: string) => {
+    setAreaOption(option);
+    setIsAreaOpen(false);
+
+    //Makes the options one word for the key of the areaStreetMapping
+    if (option === "Coniston Park") option = "ConistonPark";
+    if (option === "Grassy Park") option = "GrassyPark";
+    if (option === "Lavendar Hill") option = "LavendarHill";
+    if (option === "Costa da Gamma") option = "CostaDaGamma";
+    if (option === "Marina Da Gamma") option = "MarinaDaGamma";
+    if (option === "Montagu V") option = "MontaguV";
+    if (option === "Overcome Heights") option = "OvercomeHeights";
+    if (option === "Pelican Park") option = "PelicanPark";
+    if (option === "Seekoei vlei") option = "Seekoeivlei";
+    if (option === "St Ruth") option = "StRuth";
+    setStreetOptions(areaStreetMapping[option] ?? []);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        areaRef.current &&
+        !areaRef.current.contains(event.target as Node) &&
+        btnAreaRef.current &&
+        !btnAreaRef.current.contains(event.target as Node)
+      ) {
+        setIsAreaOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const areaOptions = [
+    "Cafda",
+    "Coniston Park",
+    "Costa da Gamma",
+    "Grassy Park",
+    "Heideveld",
+    "Hillview",
+    "Khayelitsha",
+    "Lavendar Hill",
+    "Leeds",
+    "Marina Da Gamma",
+    "Montagu V",
+    "Muizenberg",
+    "Overcome Heights",
+    "Pelican Park",
+    "Seawinds",
+    "Seekoei vlei",
+    "St Ruth",
+    "Steenberg",
+    "Strandfontein",
+    "Southfield",
+    "Vrygrond",
+  ];
+
+  //STREET
+  const handleToggleStreet = () => {
+    setIsStreetOpen(!isStreetOpen);
+  };
+
+  const handleStreetOption = (option: SetStateAction<string>) => {
+    setStreetOption(option);
+    setIsStreetOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        streetRef.current &&
+        !streetRef.current.contains(event.target as Node) &&
+        btnStreetRef.current &&
+        !btnStreetRef.current.contains(event.target as Node)
+      ) {
+        setIsStreetOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  type AreaStreetMapping = Record<string, string[]>;
+
+  const areaStreetMapping: AreaStreetMapping = {
+    Cafda: ["12th Ave", "Komlossy", "Obeo Str"],
+    ConistonPark: ["Coniston Court", "Frome Cres", "St Lucia Cres"],
+    CostaDaGamma: ["Madeira Dr", "Minorca Rd", "Pembroke Pl", "The Breakers"],
+    GrassyPark: [
+      "1st Ave",
+      "Grendell Cres",
+      "Ishack Rd",
+      "Perth Str",
+      "Prince George Dr",
+      "Stable Rd",
+    ],
+    Heideveld: ["Amber Str"],
+    Hillview: [
+      "Aster Rd",
+      "Bog Str",
+      "Bonteberg Rd",
+      "Cederberg Rd",
+      "China Town",
+      "Dahliah Rd",
+      "Daisy Rd",
+      "Darling Rd",
+      "Depsiton Cres",
+      "Drakensberg Rd",
+      "Gladiola Rd",
+      "Hillview Ave",
+      "Hillview Heights",
+      "Kamiesberg",
+      "Langeberg Str",
+      "Lebombo Rd",
+      "Lilly Way",
+      "Matola Rd",
+      "Orchard Rd",
+      "Outeniqua Str",
+      "Pagoda Rd",
+      "Phase 1",
+      "Pilansberg",
+      "Protea Way",
+      "Rose Court",
+      "Rose Str",
+      "Sneeuberg",
+      "Soutpansberg",
+      "St Beatrice",
+      "St Charles",
+      "St Edwards",
+      "St Irene",
+      "St Orchard",
+      "St Patricks",
+      "St Paul",
+      "St Swithin",
+      "St Timothy",
+      "St Vincent",
+      "Sunflower Rd",
+      "Tafelberg Rd",
+      "Village Heights",
+    ],
+    Khayelitsha: ["Vuyani Str"],
+    LavendarHill: [
+      "Arundal Court",
+      "Bartholomew Rd",
+      "Chapel Rd",
+      "Depsiton Cres",
+      "Dover Court",
+      "Elister",
+      "Epston Cres",
+      "Epston Rd",
+      "Grindal Ave",
+      "Hillary Dr",
+      "Langeberg Rd",
+      "Lebombo Str",
+      "Maluti Str",
+      "Parkin Court",
+      "Pontac Court",
+      "St Barbara Rd",
+      "St Barnard",
+      "St Benedict Str",
+      "St Blaze Str",
+      "St Paul Circ",
+      "St Thomas Str",
+      "Stone Court",
+      "Stormvoel Rd",
+      "Stuckeris Close",
+      "Urfield Rd",
+      "Van der Leur Court",
+      "Village Heights",
+      "Welton Rd",
+    ],
+    Leeds: ["Philbert Str"],
+    MarinaDaGamma: ["Shearwater Dr"],
+    MontaguV: [
+      "St Agatha Rd",
+      "St Ambrose",
+      "St Augustine Rd",
+      "St Barbara Rd",
+      "St Barnabas",
+      "St Bartholomew",
+      "St Basil Str",
+      "St Bede Str",
+      "St Benedict Str",
+      "St Bernard Cres",
+      "St Blaize Str",
+      "St Brendan Rd",
+      "St Breda Str",
+      "St Bridget",
+      "St Cecilia",
+      "St Christopher Rd",
+      "St Paulse Circ",
+      "St Thomas Str",
+      "St Urban",
+      "St Victor",
+    ],
+    Muizenberg: [
+      "Hastings Rd",
+      "Kensington Rd",
+      "Ocean Breeze",
+      "Ocean Villas",
+      "Pambrook Pl",
+      "Promenade Rd",
+      "Shearwater Dr",
+    ],
+    OvercomeHeights: [
+      "7th Avenue",
+      "Aster Rd",
+      "Blaizer Str",
+      "Bree Str",
+      "Errol Str",
+      "Freedom Rd",
+      "Ghetto",
+      "Italyfield",
+      "Kennedy Rd",
+      "Liberty Rd",
+      "Masakoni Rd",
+      "Mercy Rd",
+      "Mountain Rd",
+      "Phase 1",
+      "Rasta Str",
+      "United Ave",
+      "Victory Str",
+    ],
+    PelicanPark: ["Penguin Str"],
+    Retreat: [
+      "3rdAve",
+      "11 Ave",
+      "12th Ave",
+      "Brahms Rd",
+      "Chad Rd",
+      "Consort Rd",
+      "Elgar Str",
+      "Hugo Naude",
+      "Komlossy Str",
+      "Military Rd",
+      "Oboe Str",
+      "Runge Str",
+      "Taupo Cl",
+      "Tambourine Str",
+      "Walton Rd",
+    ],
+    Seawinds: [
+      "Falcon Str",
+      "Finch Cres",
+      "Francolin Str",
+      "Kingfisher Rd",
+      "Military Heights",
+      "Orchard Str",
+      "Penguin Str",
+      "Puffin Rd",
+      "Rooibekkie Str",
+      "Seemeeu Circ",
+      "Shrike Rd",
+      "Sonata Str",
+      "Spoonbill Cres",
+      "St Beatrice",
+      "St Edwards",
+      "St Lewis Cl",
+      "St Luke Cl",
+      "St Patrick Ave",
+      "St Peters",
+      "St Phillips",
+      "St Raymond Rd",
+      "St Regis Str",
+      "St Richard",
+      "St Roberts",
+      "St Sebastian",
+      "St Stanislas",
+      "St Stephens",
+      "St Theresa",
+      "St Theresa Cres",
+      "St Timothy",
+      "St Titus",
+      "St Titus Cres",
+      "St Urban",
+      "St Urban Cl",
+      "St Ursula",
+      "St Wenceslas",
+      "St William Cres",
+      "Stormvoel Rd",
+      "Sugarbird Str",
+      "Swallow Str",
+      "Swift Rd",
+      "Woodpecker Str",
+    ],
+    Seekoeivlei: ["Victoria Rd"],
+    StRuth: ["Cuban Heights"],
+    Steenberg: [
+      "Amber Rd",
+      "Botma Str",
+      "Craddock Rd",
+      "Crystal Rd",
+      "Flute Str",
+      "Fontein Rd",
+      "Grensweg",
+      "Klavier Ln",
+      "Orchestra Rd",
+      "Rose Quartz",
+      "Solo Str",
+      "Squaw Rd",
+      "Steen Villa",
+      "Symphony Ave",
+      "Turquoise Cres",
+      "Zircon Circ",
+    ],
+    Strandfontein: ["Cabot Way", "Dennegeur"],
+    Southfield: ["Princess Vuyo"],
+    Vrygrond: [
+      "Apple Cl",
+      "Apple Rd",
+      "Berg Str",
+      "Berry Cl",
+      "Berry Rd",
+      "Church Circ",
+      "Classen Rd",
+      "Dassie Cl",
+      "Dassie Rd",
+      "Davids Rd",
+      "Dawn Rd",
+      "Disa Cl",
+      "Disa Rd",
+      "Doring Cl",
+      "Doring Rd",
+      "Drury Cl",
+      "Drury Rd",
+      "Fredericks Cl",
+      "Fredericks Rd",
+      "Harmony Cl",
+      "Harmony Rd",
+      "Jappie Rd",
+      "Jonathan Rd",
+      "Neville Riley Rd",
+      "Orange Cl",
+      "Orange Rd",
+      "Peach Cl",
+      "Peach Rd",
+      "Philemon Rd",
+      "Plum Str",
+      "Thys Witbooi Cl",
+      "Thys Witbooi Rd",
+      "Trevor Siljeur Cl",
+      "Trevor Siljeur Rd",
+      "Vrygrond Ave",
+      "Vuyo Cl",
+      "Vuyo Rd",
+    ],
+  };
+
   //PREFERRED COMMUNICATION
   const handleTogglePreferredCommunication = () => {
     setPreferredCommunication(!preferredCommunication);
@@ -143,6 +522,8 @@ const User: NextPage = () => {
     };
   }, []);
 
+  const preferredCommunicationOptions = ["Email", "SMS", "Whatsapp"];
+
   //ROLE
   const handleToggleRole = () => {
     setRole(!role);
@@ -171,6 +552,14 @@ const User: NextPage = () => {
     };
   }, []);
 
+  const roleOptions = [
+    "System Administrator",
+    "Data Analyst",
+    "Data Consumer",
+    "Treatment Data Capturer",
+    "General Data Capturer",
+  ];
+
   //STATUS
   const handleToggleStatus = () => {
     setStatus(!status);
@@ -198,6 +587,10 @@ const User: NextPage = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const statusOptions = ["Active", "Passive"];
+
+  //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
     isCreate ? setIsCreate(false) : setIsCreate(true);
@@ -263,7 +656,7 @@ const User: NextPage = () => {
     setComments("");
   };
 
-  //-----------------------------CHECK IF FIELDS ARE ENTERED CORRECTLY---------------------------
+  //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
   const [mobileMessage, setMobileMessage] = useState("");
   //mobile must be 10 digits
   useEffect(() => {
@@ -465,9 +858,9 @@ const User: NextPage = () => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -481,60 +874,126 @@ const User: NextPage = () => {
                       className="py-2 text-sm text-gray-700 dark:text-gray-200"
                       aria-labelledby="dropdownHoverButton"
                     >
-                      <li
-                        onClick={() =>
-                          handleGreaterAreaOption("Not applicable")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      {greaterAreaOptions.map((option) => (
+                        <li
+                          key={option}
+                          onClick={() => handleGreaterAreaOption(option)}
                         >
-                          Not applicable
-                        </a>
-                      </li>
-                      <li onClick={() => handleGreaterAreaOption("Flagship")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Flagship
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handleGreaterAreaOption("Replication area 1")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Replication area 1
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handleGreaterAreaOption("Replication area 2")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Replication area 2
-                        </a>
-                      </li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                          >
+                            {option}
+                          </a>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 )}
               </div>
 
-              <input
-                className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black "
-                placeholder="Street"
-                onChange={(e) => setAddressStreet(e.target.value)}
-              />
+              <div className="flex flex-col">
+                <button
+                  ref={btnAreaRef}
+                  className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  type="button"
+                  onClick={handleToggleArea}
+                >
+                  {areaOption + " "}
+                  <svg
+                    className="ms-3 h-2.5 w-2.5"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                {isAreaOpen && (
+                  <div
+                    ref={areaRef}
+                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
+                  >
+                    <ul
+                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
+                      aria-labelledby="dropdownHoverButton"
+                    >
+                      {areaOptions.map((option) => (
+                        <li
+                          key={option}
+                          onClick={() => handleAreaOption(option)}
+                        >
+                          <a
+                            href="#"
+                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                          >
+                            {option}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col">
+                <button
+                  ref={btnStreetRef}
+                  className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  type="button"
+                  onClick={handleToggleStreet}
+                >
+                  {streetOption + " "}
+                  <svg
+                    className="ms-3 h-2.5 w-2.5"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 10 6"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m1 1 4 4 4-4"
+                    />
+                  </svg>
+                </button>
+                {isStreetOpen && (
+                  <div
+                    ref={streetRef}
+                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
+                  >
+                    <ul
+                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
+                      aria-labelledby="dropdownHoverButton"
+                    >
+                      {streetOptions.map((option) => (
+                        <li
+                          key={option}
+                          onClick={() => handleStreetOption(option)}
+                        >
+                          <a
+                            href="#"
+                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                          >
+                            {option}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black "
                 placeholder="Street Code"
@@ -573,9 +1032,9 @@ const User: NextPage = () => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -589,42 +1048,21 @@ const User: NextPage = () => {
                       className="py-2 text-sm text-gray-700 dark:text-gray-200"
                       aria-labelledby="dropdownHoverButton"
                     >
-                      <li
-                        onClick={() =>
-                          handlePreferredCommunicationOption("Email")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      {preferredCommunicationOptions.map((option) => (
+                        <li
+                          key={option}
+                          onClick={() =>
+                            handlePreferredCommunicationOption(option)
+                          }
                         >
-                          Email
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handlePreferredCommunicationOption("SMS")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          SMS
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handlePreferredCommunicationOption("Whatsapp")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Whatsapp
-                        </a>
-                      </li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                          >
+                            {option}
+                          </a>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 )}
@@ -633,7 +1071,7 @@ const User: NextPage = () => {
               <div className="flex flex-col">
                 <button
                   ref={btnRoleRef}
-                  className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5  py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                  className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                   type="button"
                   onClick={handleToggleRole}
                 >
@@ -647,9 +1085,9 @@ const User: NextPage = () => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -663,56 +1101,19 @@ const User: NextPage = () => {
                       className="py-2 text-sm text-gray-700 dark:text-gray-200"
                       aria-labelledby="dropdownHoverButton"
                     >
-                      <li
-                        onClick={() => handleRoleOption("System Administrator")}
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      {roleOptions.map((option) => (
+                        <li
+                          key={option}
+                          onClick={() => handleRoleOption(option)}
                         >
-                          System administrator
-                        </a>
-                      </li>
-                      <li onClick={() => handleRoleOption("Data analyst")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Data analyst
-                        </a>
-                      </li>
-                      <li onClick={() => handleRoleOption("Data consumer")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Data consumer
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handleRoleOption("Treatment data capturer")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Treatment data capturer
-                        </a>
-                      </li>
-                      <li
-                        onClick={() =>
-                          handleRoleOption("General data capturer")
-                        }
-                      >
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          General data capturer
-                        </a>
-                      </li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                          >
+                            {option}
+                          </a>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 )}
@@ -735,9 +1136,9 @@ const User: NextPage = () => {
                   >
                     <path
                       stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
                       d="m1 1 4 4 4-4"
                     />
                   </svg>
@@ -751,22 +1152,19 @@ const User: NextPage = () => {
                       className="py-2 text-sm text-gray-700 dark:text-gray-200"
                       aria-labelledby="dropdownHoverButton"
                     >
-                      <li onClick={() => handleStatusOption("Active")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                      {statusOptions.map((option) => (
+                        <li
+                          key={option}
+                          onClick={() => handleStatusOption(option)}
                         >
-                          Active
-                        </a>
-                      </li>
-                      <li onClick={() => handleStatusOption("Passive")}>
-                        <a
-                          href="#"
-                          className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                          Passive
-                        </a>
-                      </li>
+                          <a
+                            href="#"
+                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                          >
+                            {option}
+                          </a>
+                        </li>
+                      ))}
                     </ul>
                   </div>
                 )}

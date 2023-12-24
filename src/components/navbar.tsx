@@ -65,7 +65,7 @@ const Navbar = () => {
     //void signOut();
   };
   return (
-    <div className=" sticky top-0 z-10 flex grow items-center justify-between bg-main-orange p-3 text-black">
+    <div className=" sticky top-0 z-20 flex grow items-center justify-between bg-main-orange p-3 text-black">
       <div className="justify-begin flex">
         <Image
           src={"/afripaw-logo.jpg"}

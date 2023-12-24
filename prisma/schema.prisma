@@ -60,10 +60,12 @@ model User {
     email                  String    @unique
     emailVerified          DateTime?
     image                  String?
+    userID                 Int       @default(autoincrement())
     password               String?
     surname                String?
     mobile                 String?
     addressGreaterArea     String?
+    addressArea            String?
     addressStreet          String?
     addressStreetCode      String?
     addressStreetNumber    String?

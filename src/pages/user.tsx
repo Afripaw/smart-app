@@ -657,12 +657,13 @@ const User: NextPage = () => {
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
+  //Mobile number
   const [mobileMessage, setMobileMessage] = useState("");
-  //mobile must be 10 digits
   useEffect(() => {
     console.log(mobile.length);
-    if (mobile.length != 10 && mobile.length != 0) {
-      console.log(mobile.length);
+    if (mobile.match(/^[0-9]+$/) == null && mobile.length != 0) {
+      setMobileMessage("Mobile number must only contain numbers");
+    } else if (mobile.length != 10 && mobile.length != 0) {
       setMobileMessage("Mobile number must be 10 digits");
     } else if (!mobile.startsWith("0") && mobile.length != 0) {
       setMobileMessage("Mobile number must start with 0");
@@ -670,6 +671,82 @@ const User: NextPage = () => {
       setMobileMessage("");
     }
   }, [mobile]);
+
+  //Street code
+  const [streetCodeMessage, setStreetCodeMessage] = useState("");
+  useEffect(() => {
+    if (
+      addressStreetCode.match(/^[0-9]+$/) == null &&
+      addressStreetCode.length != 0
+    ) {
+      setStreetCodeMessage("Street code must only contain numbers");
+    } else if (addressStreetCode.length != 4 && addressStreetCode.length != 0) {
+      setStreetCodeMessage("Street code must be 4 digits");
+    } else {
+      setStreetCodeMessage("");
+    }
+  }, [addressStreetCode]);
+
+  //Street number
+  const [streetNumberMessage, setStreetNumberMessage] = useState("");
+  useEffect(() => {
+    if (
+      addressStreetNumber.match(/^[0-9]+$/) == null &&
+      addressStreetNumber.length != 0
+    ) {
+      setStreetNumberMessage("Street number must only contain numbers");
+    } else if (
+      addressStreetNumber.length != 4 &&
+      addressStreetNumber.length != 0
+    ) {
+      setStreetNumberMessage("Street number must be 4 digits");
+    } else {
+      setStreetNumberMessage("");
+    }
+  }, [addressStreetNumber]);
+
+  //Postal code
+  const [postalCodeMessage, setPostalCodeMessage] = useState("");
+  useEffect(() => {
+    if (
+      addressPostalCode.match(/^[0-9]+$/) == null &&
+      addressPostalCode.length != 0
+    ) {
+      setPostalCodeMessage("Postal code must only contain numbers");
+    } else if (addressPostalCode.length != 4 && addressPostalCode.length != 0) {
+      setPostalCodeMessage("Postal code must be 4 digits");
+    } else {
+      setPostalCodeMessage("");
+    }
+  }, [addressPostalCode]);
+
+  //Password
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [confirmPasswordMessage, setConfirmPasswordMessage] = useState("");
+  useEffect(() => {
+    if (password.length < 8 && password.length != 0) {
+      setPasswordMessage("Password must be at least 8 characters long");
+    }
+    //check if password is strong enough. Should contain Upper case, lower case, number and special character
+    else if (
+      password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/) ==
+        null &&
+      password.length != 0
+    ) {
+      setPasswordMessage(
+        "Password must contain at least one upper case, one lower case, one number and one special character",
+      );
+    }
+    //check if both passwords match
+    else if (password != confirmPassword && confirmPassword.length != 0) {
+      setConfirmPasswordMessage("Passwords must match");
+    } else if (password.length > 20 && password.length != 0) {
+      setPasswordMessage("Password must be less than 20 characters long");
+    } else {
+      setPasswordMessage("");
+      setConfirmPasswordMessage("");
+    }
+  }, [password, confirmPassword]);
 
   //On change of search bar, query the users table
   /* useEffect(() => {
@@ -999,11 +1076,19 @@ const User: NextPage = () => {
                 placeholder="Street Code"
                 onChange={(e) => setAddressStreetCode(e.target.value)}
               />
+              {streetCodeMessage && (
+                <div className="text-sm text-red-500">{streetCodeMessage}</div>
+              )}
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Street Number"
                 onChange={(e) => setAddressStreetNumber(e.target.value)}
               />
+              {streetNumberMessage && (
+                <div className="text-sm text-red-500">
+                  {streetNumberMessage}
+                </div>
+              )}
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Suburb"
@@ -1014,6 +1099,9 @@ const User: NextPage = () => {
                 placeholder="Postal Code"
                 onChange={(e) => setAddressPostalCode(e.target.value)}
               />
+              {postalCodeMessage && (
+                <div className="text-sm text-red-500">{postalCodeMessage}</div>
+              )}
 
               <div className="flex flex-col">
                 <button
@@ -1191,11 +1279,19 @@ const User: NextPage = () => {
                 placeholder="Password"
                 onChange={(e) => setPassword(e.target.value)}
               />
+              {passwordMessage && (
+                <div className="text-sm text-red-500">{passwordMessage}</div>
+              )}
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Confirm Password"
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
+              {confirmPasswordMessage && (
+                <div className="text-sm text-red-500">
+                  {confirmPasswordMessage}
+                </div>
+              )}
 
               {/*Make a checkbox to confirm: "Welcome new user to preferred communication channel"  */}
               <div className="flex items-center">

@@ -15,6 +15,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "~/server/auth";
 import { db } from "~/server/db";
+import { decode, encode, hash } from "~/utils/security";
 
 /**
  * 1. CONTEXT
@@ -42,6 +43,11 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
     db,
+    security: {
+      decode,
+      encode,
+      hash,
+    },
   };
 };
 

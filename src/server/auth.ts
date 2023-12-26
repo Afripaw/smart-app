@@ -11,6 +11,7 @@ import { env } from "~/env";
 import { db } from "~/server/db";
 
 import CredentialsProvider from "next-auth/providers/credentials";
+import { hash } from "~/utils/security";
 //import bcrypt from "bcrypt";
 
 /**
@@ -49,9 +50,9 @@ export const authOptions: NextAuthOptions = {
         id: user.id,
       },
     }),
-    async redirect() {
+    /* async redirect({ }) {
       return "/dashboard"; // Redirect to dashboard after sign-in
-    },
+    }, */
   },
   adapter: PrismaAdapter(db),
   providers: [
@@ -62,48 +63,56 @@ export const authOptions: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
+        username: {
+          label: "Username / User ID",
+          type: "text",
+          placeholder: "jsmith",
+        },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Add logic here to look up the user from the credentials supplied
-        // You can also use the `redirect` function to redirect the user to a URL to retrieve their credentials
-        // You can use either use a RegEx to test the redirect URL against, or simply check if the redirect URL starts with a known value
-        // if (regex.test(redirectUrl)) { return redirectUrl }
-        // if (redirectUrl.startsWith("/")) { return redirectUrl }
-        // return Promise.resolve(null)
-        // const user = await db.user.findFirst({
-        //   where: {
-        //     email: credentials.username,
-        //   },
-        // });
-        // if (user && bcrypt.compareSync(credentials.password, user.password)) {
-        //   return user;
-        // }
-        // return null;
-        //   const user = await db.user.findFirst({
-        //     where: {
-        //       email: credentials?.username,
-        //     },
-        //   });
-        //   if (user) {
-        //     return user;
-        //   }
-        //   return null;
-        // },
-        // Here you would fetch user from your database
-        const user = await db.user.findUnique({
-          where: { email: credentials?.username },
+        if (!credentials) return null;
+
+        // 1. Check user credentials
+        const users = await db.user.findMany({
+          where: {
+            OR: [
+              {
+                email: credentials.username,
+              },
+              {
+                userID: parseInt(credentials.username) || -1,
+              },
+            ],
+          },
         });
 
-        // Verify the password
-        //if (user && bcrypt.compareSync(credentials?.password, user.password)) {
-        if (user && credentials?.password === user.password) {
-          return { id: user.id, name: user.name, email: user.email };
+        // 2. Check Data
+        if (users.length > 1) {
+          console.error("Multiple users found for credentials:", credentials);
+          return null;
         }
 
-        // Return null if user data is not valid
-        return null;
+        if (users.length === 0) {
+          console.error("No users found for credentials:", credentials);
+          return null;
+        }
+
+        const user = users[0]!;
+
+        // 3. Check password
+        if (hash(credentials.password) !== user.password) {
+          console.error(
+            "Password does not match for credentials:",
+            credentials,
+          );
+          return null;
+        }
+
+        console.log("User logged in with credentials:", credentials);
+
+        // 4. Return user
+        return user;
       },
     }),
     /**

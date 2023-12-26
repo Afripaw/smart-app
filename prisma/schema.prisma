@@ -57,7 +57,7 @@ model Session {
 model User {
     id                     String    @id @default(cuid())
     name                   String?
-    email                  String    @unique
+    email                  String?   @unique
     emailVerified          DateTime?
     image                  String?
     userID                 Int       @default(autoincrement())
@@ -75,6 +75,7 @@ model User {
     role                   String?
     status                 String?
     comments               String?
+    startingDate           DateTime?
     createdAt              DateTime  @default(now())
     updatedAt              DateTime? @updatedAt
     accounts               Account[]

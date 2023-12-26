@@ -16,12 +16,14 @@ export const UserRouter = createTRPCRouter({
         surname: z.string(),
         mobile: z.string().max(10),
         addressGreaterArea: z.string(),
+        addressArea: z.string(),
         addressStreet: z.string(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
         addressSuburb: z.string(),
         addressPostalCode: z.string(),
         preferredCommunication: z.string(),
+        startingDate: z.date(),
         role: z.string(),
         status: z.string(),
         comments: z.string(),
@@ -32,10 +34,11 @@ export const UserRouter = createTRPCRouter({
         data: {
           name: input.firstName,
           email: input.email,
-          password: input.password,
+          password: ctx.security.hash(input.password),
           surname: input.surname,
           mobile: input.mobile,
           addressGreaterArea: input.addressGreaterArea,
+          addressArea: input.addressArea,
           addressStreet: input.addressStreet,
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
@@ -45,6 +48,7 @@ export const UserRouter = createTRPCRouter({
           role: input.role,
           status: input.status,
           comments: input.comments,
+          startingDate: input.startingDate,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -67,6 +71,7 @@ export const UserRouter = createTRPCRouter({
         addressSuburb: z.string(),
         addressPostalCode: z.string(),
         preferredCommunication: z.string(),
+        startingDate: z.string(),
         role: z.string(),
         status: z.string(),
         comments: z.string(),
@@ -90,6 +95,7 @@ export const UserRouter = createTRPCRouter({
           addressSuburb: input.addressSuburb,
           addressPostalCode: input.addressPostalCode,
           preferredCommunication: input.preferredCommunication,
+          startingDate: input.startingDate,
           role: input.role,
           status: input.status,
           comments: input.comments,
@@ -112,6 +118,15 @@ export const UserRouter = createTRPCRouter({
     return ctx.db.user.findMany();
   }),
 
+  //get the las id of the user
+  getLastUserID: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.db.user.findFirst({
+      orderBy: {
+        id: "desc",
+      },
+    });
+  }),
+
   //implement full text search for users
   searchUsers: publicProcedure
     .input(
@@ -123,6 +138,7 @@ export const UserRouter = createTRPCRouter({
       return await ctx.db.user.findMany({
         where: {
           OR: [
+            //{ userID: { contains: input.searchQuery } },
             { name: { contains: input.searchQuery } },
             { surname: { contains: input.searchQuery } },
             { email: { contains: input.searchQuery } },
@@ -141,6 +157,46 @@ export const UserRouter = createTRPCRouter({
         },
       });
     }),
+  /*    searchUsers: publicProcedure
+  .input(
+    z.object({
+      searchQuery: z.string(),
+    }),
+  )
+  .query(async ({ ctx, input }) => {
+    // Attempt to parse the search query as an integer for userID
+    const parsedQuery = parseInt(input.searchQuery, 10);
+    const isQueryNumber = !isNaN(parsedQuery);
+
+    // Build the query conditions
+    const queryConditions = [
+      { name: { contains: input.searchQuery } },
+      { surname: { contains: input.searchQuery } },
+      { email: { contains: input.searchQuery } },
+      { role: { contains: input.searchQuery } },
+      { status: { contains: input.searchQuery } },
+      { mobile: { contains: input.searchQuery } },
+      { addressGreaterArea: { contains: input.searchQuery } },
+      { addressStreet: { contains: input.searchQuery } },
+      { addressStreetCode: { contains: input.searchQuery } },
+      { addressStreetNumber: { contains: input.searchQuery } },
+      { addressSuburb: { contains: input.searchQuery } },
+      { addressPostalCode: { contains: input.searchQuery } },
+      { preferredCommunication: { contains: input.searchQuery } },
+      { comments: { contains: input.searchQuery } },
+    ];
+
+    // Include userID in search if the query is a number
+    if (isQueryNumber) {
+      queryConditions.push({ userID: parsedQuery });
+    }
+
+    return await ctx.db.user.findMany({
+      where: {
+        OR: queryConditions,
+      },
+    });
+  }),*/
 
   //delete user
   deleteUser: publicProcedure

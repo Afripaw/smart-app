@@ -4,7 +4,15 @@ import Link from "next/link";
 
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
-import { SetStateAction, useState, useEffect, useRef, use } from "react";
+import {
+  SetStateAction,
+  useState,
+  useEffect,
+  useRef,
+  use,
+  FormEventHandler,
+  FormEvent,
+} from "react";
 import { authOptions } from "~/server/auth";
 import { set } from "zod";
 import Image from "next/image";
@@ -37,6 +45,7 @@ export default function Home() {
   //passwords
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
 
   //--------------------------------DROPDOWN BOXES--------------------------------
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
@@ -228,7 +237,7 @@ export default function Home() {
       setStatusOption(" ");
     }
     //void signIn();
-    await newUser.mutateAsync({
+    /*  await newUser.mutateAsync({
       firstName: firstName,
       email: email,
       surname: surname,
@@ -244,7 +253,7 @@ export default function Home() {
       role: roleOption,
       status: statusOption,
       comments: comments,
-    });
+    });*/
     //if succesful go to dashboard
     //else display error message
     if (newUser) {
@@ -254,20 +263,33 @@ export default function Home() {
     }
   };
 
-  const handleUser = async () => {
-    //void signIn();
+  const handleUser = async (event: FormEvent<HTMLFormElement>) => {
+    setPasswordError(false);
+    event.preventDefault();
+
+    const formTarget = event.target as typeof event.target & {
+      0: { value: string };
+      1: { value: string };
+    };
+
+    if (!formTarget[0].value || !formTarget[1].value)
+      return console.warn("Missing fields");
+
     const result = await signIn("credentials", {
-      email: email,
-      password: password,
+      username: formTarget[0].value,
+      password: formTarget[1].value,
       redirect: false,
     });
-    console.log(result);
-    if (result) {
-      console.log("Sign-in successful");
-      void router.push("/dashboard");
+
+    if (!result?.ok) {
+      //Display error message to user
+      setPasswordError(true);
+      return console.warn("Sign in failed");
     } else {
-      console.log("Sign-in failed");
+      setPasswordError(false);
     }
+
+    await router.push("/dashboard");
   };
 
   const handleNewPet = async () => {
@@ -440,25 +462,41 @@ export default function Home() {
         </button>*/}
               </div>
             </div>
-            <div className="mb-14 flex grow flex-col items-center justify-center">
+            <form
+              className="mb-14 flex grow flex-col items-center justify-center"
+              onSubmit={(event) => void handleUser(event)}
+            >
               <div className="mb-5 text-lg">Enter Credentials</div>
               <input
-                className="m-2 rounded-lg border-2 border-zinc-800 px-2"
-                placeholder="Email"
+                className={`m-2 rounded-lg border-2 border-zinc-800 px-2 ${
+                  passwordError ? " border-red-500" : ""
+                }`}
+                placeholder="User ID / Email"
+                type="text"
+                name="password"
                 onChange={(e) => setEmail(e.target.value)}
               />
               <input
-                className="m-2 rounded-lg border-2 border-zinc-800 px-2"
+                className={`m-2 rounded-lg border-2 border-zinc-800 px-2 ${
+                  passwordError ? " border-red-500" : ""
+                }`}
                 placeholder="Password"
+                type="password"
+                name="password"
                 onChange={(e) => setPassword(e.target.value)}
               />
+              {passwordError && (
+                <div className="text-red-500">
+                  Incorrect User ID or Password
+                </div>
+              )}
               <button
                 className="mt-4 rounded-md border-black bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
-                onClick={() => void handleUser()}
+                type="submit"
               >
                 Sign in
               </button>
-            </div>
+            </form>
           </>
         )}
       </main>

@@ -54,6 +54,7 @@ const User: NextPage = () => {
   const [addressSuburb, setAddressSuburb] = useState("");
   const [addressPostalCode, setAddressPostalCode] = useState("");
   const [comments, setComments] = useState("");
+  const [startingDate, setStartingDate] = useState(new Date());
 
   //passwords
   const [password, setPassword] = useState("");
@@ -96,6 +97,11 @@ const User: NextPage = () => {
 
   //Send user's details to user
   const [sendUserDetails, setSendUserDetails] = useState(false);
+
+  //ID
+  //get the last id of the users table
+  const lastUserCreated = api.user.getLastUserID.useQuery();
+  const [id, setID] = useState("");
 
   //GREATER AREA
   const handleToggleGreaterArea = () => {
@@ -627,12 +633,14 @@ const User: NextPage = () => {
       password: password,
       mobile: mobile,
       addressGreaterArea: greaterAreaOption,
-      addressStreet: addressStreet,
+      addressArea: areaOption,
+      addressStreet: streetOption,
       addressStreetCode: addressStreetCode,
       addressStreetNumber: addressStreetNumber,
       addressSuburb: addressSuburb,
       addressPostalCode: addressPostalCode,
       preferredCommunication: preferredOption,
+      startingDate: startingDate,
       role: roleOption,
       status: statusOption,
       comments: comments,
@@ -645,7 +653,7 @@ const User: NextPage = () => {
     setConfirmPassword("");
     setMobile("");
     setGreaterAreaOption("Greater Area");
-    setAddressStreet("");
+    setStreetOption("Street");
     setAddressStreetCode("");
     setAddressStreetNumber("");
     setAddressSuburb("");
@@ -680,8 +688,8 @@ const User: NextPage = () => {
       addressStreetCode.length != 0
     ) {
       setStreetCodeMessage("Street code must only contain numbers");
-    } else if (addressStreetCode.length != 4 && addressStreetCode.length != 0) {
-      setStreetCodeMessage("Street code must be 4 digits");
+    } else if (addressStreetCode.length > 4 && addressStreetCode.length != 0) {
+      setStreetCodeMessage("Street code must be 4 digits or less");
     } else {
       setStreetCodeMessage("");
     }
@@ -696,10 +704,10 @@ const User: NextPage = () => {
     ) {
       setStreetNumberMessage("Street number must only contain numbers");
     } else if (
-      addressStreetNumber.length != 4 &&
+      addressStreetNumber.length > 4 &&
       addressStreetNumber.length != 0
     ) {
-      setStreetNumberMessage("Street number must be 4 digits");
+      setStreetNumberMessage("Street number must be 4 digits or less");
     } else {
       setStreetNumberMessage("");
     }
@@ -713,8 +721,8 @@ const User: NextPage = () => {
       addressPostalCode.length != 0
     ) {
       setPostalCodeMessage("Postal code must only contain numbers");
-    } else if (addressPostalCode.length != 4 && addressPostalCode.length != 0) {
-      setPostalCodeMessage("Postal code must be 4 digits");
+    } else if (addressPostalCode.length > 4 && addressPostalCode.length != 0) {
+      setPostalCodeMessage("Postal code must be 4 digits or less");
     } else {
       setPostalCodeMessage("");
     }
@@ -780,8 +788,6 @@ const User: NextPage = () => {
     </button>
   );
 
-  const [startDate, setStartDate] = useState(new Date());
-
   return (
     <>
       <Head>
@@ -816,11 +822,13 @@ const User: NextPage = () => {
                 <table className="table-auto">
                   <thead>
                     <tr>
+                      <th className="px-4 py-2">User ID</th>
                       <th className="px-4 py-2">First Name</th>
                       <th className="px-4 py-2">Surname</th>
                       <th className="px-4 py-2">Email</th>
                       <th className="px-4 py-2">Mobile</th>
                       <th className="px-4 py-2">Greater Area</th>
+                      <th className="px-4 py-2">Area</th>
                       <th className="px-4 py-2">Street</th>
                       <th className="px-4 py-2">Street Code</th>
                       <th className="px-4 py-2">Street Number</th>
@@ -836,12 +844,16 @@ const User: NextPage = () => {
                     {data.data?.map((user) => {
                       return (
                         <tr className="items-center">
+                          <td className="border px-4 py-2">{user.userID}</td>
                           <td className="border px-4 py-2">{user.name}</td>
                           <td className="border px-4 py-2">{user.surname}</td>
                           <td className="border px-4 py-2">{user.email}</td>
                           <td className="border px-4 py-2">{user.mobile}</td>
                           <td className="border px-4 py-2">
                             {user.addressGreaterArea}
+                          </td>
+                          <td className="border px-4 py-2">
+                            {user.addressArea}
                           </td>
                           <td className="border px-4 py-2">
                             {user.addressStreet}
@@ -894,6 +906,9 @@ const User: NextPage = () => {
               </div>
             </div>
             <div className="flex grow flex-col items-center">
+              <div className="p-2">
+                User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}
+              </div>
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="First Name"
@@ -1261,8 +1276,8 @@ const User: NextPage = () => {
               {/*DATEPICKER*/}
               <div className="p-4">
                 <DatePicker
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date!)}
+                  selected={startingDate}
+                  onChange={(date) => setStartingDate(date!)}
                   customInput={<CustomInput />}
                   className="form-input rounded-md border px-4 py-2"
                 />

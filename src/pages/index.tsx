@@ -46,6 +46,7 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState(false);
+  const [missingFields, setMissingFields] = useState(false);
 
   //--------------------------------DROPDOWN BOXES--------------------------------
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
@@ -205,7 +206,7 @@ export default function Home() {
     setSignUp(false);
   };
 
-  const handleGoogleSignIn = async () => {
+  /*const handleGoogleSignIn = async () => {
     try {
       const result = await signIn();
       if (result) {
@@ -236,35 +237,17 @@ export default function Home() {
     if (statusOption === "Status") {
       setStatusOption(" ");
     }
-    //void signIn();
-    /*  await newUser.mutateAsync({
-      firstName: firstName,
-      email: email,
-      surname: surname,
-      password: password,
-      mobile: mobile,
-      addressGreaterArea: greaterAreaOption,
-      addressStreet: addressStreet,
-      addressStreetCode: addressStreetCode,
-      addressStreetNumber: addressStreetNumber,
-      addressSuburb: addressSuburb,
-      addressPostalCode: addressPostalCode,
-      preferredCommunication: preferredOption,
-      role: roleOption,
-      status: statusOption,
-      comments: comments,
-    });*/
-    //if succesful go to dashboard
-    //else display error message
+
     if (newUser) {
       void router.push("/dashboard");
     } else {
       console.log("error");
     }
-  };
+  };*/
 
   const handleUser = async (event: FormEvent<HTMLFormElement>) => {
     setPasswordError(false);
+    setMissingFields(false);
     event.preventDefault();
 
     const formTarget = event.target as typeof event.target & {
@@ -272,8 +255,12 @@ export default function Home() {
       1: { value: string };
     };
 
-    if (!formTarget[0].value || !formTarget[1].value)
+    if (!formTarget[0].value || !formTarget[1].value) {
+      setMissingFields(true);
       return console.warn("Missing fields");
+    } else {
+      setMissingFields(false);
+    }
 
     const result = await signIn("credentials", {
       username: formTarget[0].value,
@@ -469,22 +456,28 @@ export default function Home() {
               <div className="mb-5 text-lg">Enter Credentials</div>
               <input
                 className={`m-2 rounded-lg border-2 border-zinc-800 px-2 ${
-                  passwordError ? " border-red-500" : ""
-                }`}
-                placeholder="User ID / Email"
+                  missingFields ? "border-red-500" : ""
+                } ${passwordError ? " border-red-500" : ""}`}
+                placeholder="User ID"
                 type="text"
                 name="password"
                 onChange={(e) => setEmail(e.target.value)}
               />
               <input
-                className={`m-2 rounded-lg border-2 border-zinc-800 px-2 ${
-                  passwordError ? " border-red-500" : ""
-                }`}
+                className={`m-2 rounded-lg border-2  px-2 ${
+                  missingFields ? " border-red-500" : "border-zinc-800"
+                } 
+                  ${passwordError ? " border-red-500" : "border-zinc-800"}`}
                 placeholder="Password"
                 type="password"
                 name="password"
                 onChange={(e) => setPassword(e.target.value)}
               />
+              {missingFields && (
+                <div className="text-red-500">
+                  Missing fields. Enter UserID and Password
+                </div>
+              )}
               {passwordError && (
                 <div className="text-red-500">
                   Incorrect User ID or Password

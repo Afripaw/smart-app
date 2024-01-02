@@ -4,7 +4,7 @@ import React, { SetStateAction, useEffect, useRef, useState } from "react";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 import Navbar from "../components/navbar";
-import { Trash } from "phosphor-react";
+import { Pencil, Trash } from "phosphor-react";
 
 //---------------------------------------------DATEPICKER---------------------------------------------
 // TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com
@@ -14,6 +14,11 @@ import { Trash } from "phosphor-react";
 //initTE({ Datepicker, Input });
 import DatePicker, { ReactDatePickerProps } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import CreateButtonModal from "../components/createButtonModal";
+import { date } from "zod";
+import DeleteButtonModal from "~/components/deleteButtonModal";
+import { set } from "date-fns";
+import { start } from "repl";
 
 const User: NextPage = () => {
   const router = useRouter();
@@ -35,6 +40,7 @@ const User: NextPage = () => {
   //delete specific row
   const deleteRow = api.user.deleteUser.useMutation();
   const handleDeleteRow = async (id: string) => {
+    setIsDeleteModalOpen(false);
     await deleteRow.mutateAsync({ userID: id });
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
   };
@@ -60,6 +66,13 @@ const User: NextPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  //userID
+  const [userID, setUserID] = useState("");
+  const [id, setID] = useState("");
+
+  //-------------------------------UPDATE-----------------------------------------
+  const user = api.user.getUserByID.useQuery({ id: id });
+
   //--------------------------------DROPDOWN BOXES--------------------------------
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
   const [greaterAreaOption, setGreaterAreaOption] = useState("Greater Area");
@@ -79,9 +92,7 @@ const User: NextPage = () => {
   const [selectedStreet, setSelectedStreet] = useState<string>("");
 
   const [preferredCommunication, setPreferredCommunication] = useState(false);
-  const [preferredOption, setPreferredCommunicationOption] = useState(
-    "Preferred Communication",
-  );
+  const [preferredOption, setPreferredCommunicationOption] = useState("Preferred Communication");
   const preferredCommunicationRef = useRef<HTMLDivElement>(null);
   const btnPreferredCommunicationRef = useRef<HTMLButtonElement>(null);
 
@@ -101,7 +112,7 @@ const User: NextPage = () => {
   //ID
   //get the last id of the users table
   const lastUserCreated = api.user.getLastUserID.useQuery();
-  const [id, setID] = useState("");
+  // const [id, setID] = useState("");
 
   //GREATER AREA
   const handleToggleGreaterArea = () => {
@@ -131,11 +142,7 @@ const User: NextPage = () => {
     };
   }, []);
 
-  const greaterAreaOptions = [
-    "Flagship",
-    "Replication area 1",
-    "Replication area 2",
-  ];
+  const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
 
   //AREA
   const handleToggleArea = () => {
@@ -164,12 +171,7 @@ const User: NextPage = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        areaRef.current &&
-        !areaRef.current.contains(event.target as Node) &&
-        btnAreaRef.current &&
-        !btnAreaRef.current.contains(event.target as Node)
-      ) {
+      if (areaRef.current && !areaRef.current.contains(event.target as Node) && btnAreaRef.current && !btnAreaRef.current.contains(event.target as Node)) {
         setIsAreaOpen(false);
       }
     };
@@ -238,14 +240,7 @@ const User: NextPage = () => {
     Cafda: ["12th Ave", "Komlossy", "Obeo Str"],
     ConistonPark: ["Coniston Court", "Frome Cres", "St Lucia Cres"],
     CostaDaGamma: ["Madeira Dr", "Minorca Rd", "Pembroke Pl", "The Breakers"],
-    GrassyPark: [
-      "1st Ave",
-      "Grendell Cres",
-      "Ishack Rd",
-      "Perth Str",
-      "Prince George Dr",
-      "Stable Rd",
-    ],
+    GrassyPark: ["1st Ave", "Grendell Cres", "Ishack Rd", "Perth Str", "Prince George Dr", "Stable Rd"],
     Heideveld: ["Amber Str"],
     Hillview: [
       "Aster Rd",
@@ -345,15 +340,7 @@ const User: NextPage = () => {
       "St Urban",
       "St Victor",
     ],
-    Muizenberg: [
-      "Hastings Rd",
-      "Kensington Rd",
-      "Ocean Breeze",
-      "Ocean Villas",
-      "Pambrook Pl",
-      "Promenade Rd",
-      "Shearwater Dr",
-    ],
+    Muizenberg: ["Hastings Rd", "Kensington Rd", "Ocean Breeze", "Ocean Villas", "Pambrook Pl", "Promenade Rd", "Shearwater Dr"],
     OvercomeHeights: [
       "7th Avenue",
       "Aster Rd",
@@ -503,9 +490,7 @@ const User: NextPage = () => {
     setPreferredCommunication(!preferredCommunication);
   };
 
-  const handlePreferredCommunicationOption = (
-    option: SetStateAction<string>,
-  ) => {
+  const handlePreferredCommunicationOption = (option: SetStateAction<string>) => {
     setPreferredCommunicationOption(option);
     setPreferredCommunication(false);
   };
@@ -542,12 +527,7 @@ const User: NextPage = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        roleRef.current &&
-        !roleRef.current.contains(event.target as Node) &&
-        btnRoleRef.current &&
-        !btnRoleRef.current.contains(event.target as Node)
-      ) {
+      if (roleRef.current && !roleRef.current.contains(event.target as Node) && btnRoleRef.current && !btnRoleRef.current.contains(event.target as Node)) {
         setRole(false);
       }
     };
@@ -558,13 +538,7 @@ const User: NextPage = () => {
     };
   }, []);
 
-  const roleOptions = [
-    "System Administrator",
-    "Data Analyst",
-    "Data Consumer",
-    "Treatment Data Capturer",
-    "General Data Capturer",
-  ];
+  const roleOptions = ["System Administrator", "Data Analyst", "Data Consumer", "Treatment Data Capturer", "General Data Capturer"];
 
   //STATUS
   const handleToggleStatus = () => {
@@ -596,17 +570,131 @@ const User: NextPage = () => {
 
   const statusOptions = ["Active", "Passive"];
 
+  /*const handleUpdateUser = async () => {
+    isUpdate ? setIsUpdate(false) : setIsUpdate(true);
+    isCreate ? setIsCreate(false) : setIsCreate(false);
+  };*/
+
+  //-------------------------------UPDATE USER-----------------------------------------
+  //Update the user's details
+  const handleUpdateUserProfile = async (id: string) => {
+    setID(id);
+
+    if (user.data) {
+      // Assuming userQuery.data contains the user object
+      const userData = user.data;
+      setFirstName(userData.name ?? "");
+      setSurname(userData.surname ?? "");
+      setEmail(userData.email ?? "");
+      setMobile(userData.mobile ?? "");
+      setGreaterAreaOption(userData.addressGreaterArea ?? "");
+      setAreaOption(userData.addressArea ?? "");
+      setStreetOption(userData.addressStreet ?? "");
+      setAddressStreetCode(userData.addressStreetCode ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressSuburb(userData.addressSuburb ?? "");
+      setAddressPostalCode(userData.addressPostalCode ?? "");
+      setPreferredCommunicationOption(userData.preferredCommunication ?? "");
+      setStartingDate(userData.startingDate ?? new Date());
+      setRoleOption(userData.role ?? "");
+      setStatusOption(userData.status ?? "");
+      setComments(userData.comments ?? "");
+    }
+
+    isUpdate ? setIsUpdate(true) : setIsUpdate(true);
+    isCreate ? setIsCreate(false) : setIsCreate(false);
+  };
+
+  useEffect(() => {
+    if (user.data) {
+      // Assuming userQuery.data contains the user object
+      const userData = user.data;
+      setFirstName(userData.name ?? "");
+      setSurname(userData.surname ?? "");
+      setEmail(userData.email ?? "");
+      setMobile(userData.mobile ?? "");
+      setGreaterAreaOption(userData.addressGreaterArea ?? "");
+      setAreaOption(userData.addressArea ?? "");
+      setStreetOption(userData.addressStreet ?? "");
+      setAddressStreetCode(userData.addressStreetCode ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressSuburb(userData.addressSuburb ?? "");
+      setAddressPostalCode(userData.addressPostalCode ?? "");
+      setPreferredCommunicationOption(userData.preferredCommunication ?? "");
+      setStartingDate(userData.startingDate ?? new Date());
+      setRoleOption(userData.role ?? "");
+      setStatusOption(userData.status ?? "");
+      setComments(userData.comments ?? "");
+    }
+  }, [user.data]); // Effect runs when userQuery.data changes
+
+  /*useEffect(() => {
+    //set the user's details
+    //handleUpdateUserProfile(userID);
+  }, [userID]);*/
+
+  const handleUpdateUser = async () => {
+    if (greaterAreaOption === "Greater Area") {
+      setGreaterAreaOption(" ");
+    }
+    if (preferredOption === "Preferred Communication") {
+      setPreferredCommunicationOption(" ");
+    }
+    if (roleOption === "Role") {
+      setRoleOption(" ");
+    }
+    if (statusOption === "Status") {
+      setStatusOption(" ");
+    }
+
+    await updateUser.mutateAsync({
+      id: id,
+      firstName: firstName,
+      email: email,
+      surname: surname,
+      mobile: mobile,
+      addressGreaterArea: greaterAreaOption,
+      addressArea: areaOption,
+      addressStreet: streetOption,
+      addressStreetCode: addressStreetCode,
+      addressStreetNumber: addressStreetNumber,
+      addressSuburb: addressSuburb,
+      addressPostalCode: addressPostalCode,
+      preferredCommunication: preferredOption,
+      startingDate: startingDate,
+      role: roleOption,
+      status: statusOption,
+      comments: comments,
+      password: password,
+    });
+    //After the newUser has been created make sure to set the fields back to empty
+    setFirstName("");
+    setEmail("");
+    setSurname("");
+    setPassword("");
+    setConfirmPassword("");
+    setMobile("");
+    setGreaterAreaOption("Greater Area");
+    setStreetOption("Street");
+    setAddressStreetCode("");
+    setAddressStreetNumber("");
+    setAddressSuburb("");
+    setAddressPostalCode("");
+    setPreferredCommunicationOption("Preferred Communication");
+    setRoleOption("Role");
+    setStatusOption("Status");
+    setComments("");
+    isUpdate ? setIsUpdate(false) : setIsUpdate(false);
+    isCreate ? setIsCreate(false) : setIsCreate(false);
+  };
+
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
     isCreate ? setIsCreate(false) : setIsCreate(true);
-    isUpdate ? setIsUpdate(false) : setIsUpdate(false);
+    setIsUpdate(false);
   };
-
-  const handleUpdateUser = async () => {
-    isUpdate ? setIsUpdate(false) : setIsUpdate(true);
-    isCreate ? setIsCreate(false) : setIsCreate(false);
-  };
+  //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
     if (password != confirmPassword) {
@@ -662,6 +750,33 @@ const User: NextPage = () => {
     setRoleOption("Role");
     setStatusOption("Status");
     setComments("");
+
+    isCreate ? setIsCreate(false) : setIsCreate(false);
+    isUpdate ? setIsUpdate(false) : setIsUpdate(false);
+  };
+
+  //-------------------------------BACK BUTTON-----------------------------------------
+  const handleBackButton = () => {
+    console.log("Back button pressed");
+    setIsUpdate(false);
+    setIsCreate(false);
+    setID("");
+    setFirstName("");
+    setEmail("");
+    setSurname("");
+    setPassword("");
+    setConfirmPassword("");
+    setMobile("");
+    setGreaterAreaOption("Greater Area");
+    setStreetOption("Street");
+    setAddressStreetCode("");
+    setAddressStreetNumber("");
+    setAddressSuburb("");
+    setAddressPostalCode("");
+    setPreferredCommunicationOption("Preferred Communication");
+    setRoleOption("Role");
+    setStatusOption("Status");
+    setComments("");
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -683,10 +798,7 @@ const User: NextPage = () => {
   //Street code
   const [streetCodeMessage, setStreetCodeMessage] = useState("");
   useEffect(() => {
-    if (
-      addressStreetCode.match(/^[0-9]+$/) == null &&
-      addressStreetCode.length != 0
-    ) {
+    if (addressStreetCode.match(/^[0-9]+$/) == null && addressStreetCode.length != 0) {
       setStreetCodeMessage("Street code must only contain numbers");
     } else if (addressStreetCode.length > 4 && addressStreetCode.length != 0) {
       setStreetCodeMessage("Street code must be 4 digits or less");
@@ -698,15 +810,9 @@ const User: NextPage = () => {
   //Street number
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
   useEffect(() => {
-    if (
-      addressStreetNumber.match(/^[0-9]+$/) == null &&
-      addressStreetNumber.length != 0
-    ) {
+    if (addressStreetNumber.match(/^[0-9]+$/) == null && addressStreetNumber.length != 0) {
       setStreetNumberMessage("Street number must only contain numbers");
-    } else if (
-      addressStreetNumber.length > 4 &&
-      addressStreetNumber.length != 0
-    ) {
+    } else if (addressStreetNumber.length > 4 && addressStreetNumber.length != 0) {
       setStreetNumberMessage("Street number must be 4 digits or less");
     } else {
       setStreetNumberMessage("");
@@ -716,10 +822,7 @@ const User: NextPage = () => {
   //Postal code
   const [postalCodeMessage, setPostalCodeMessage] = useState("");
   useEffect(() => {
-    if (
-      addressPostalCode.match(/^[0-9]+$/) == null &&
-      addressPostalCode.length != 0
-    ) {
+    if (addressPostalCode.match(/^[0-9]+$/) == null && addressPostalCode.length != 0) {
       setPostalCodeMessage("Postal code must only contain numbers");
     } else if (addressPostalCode.length > 4 && addressPostalCode.length != 0) {
       setPostalCodeMessage("Postal code must be 4 digits or less");
@@ -736,14 +839,8 @@ const User: NextPage = () => {
       setPasswordMessage("Password must be at least 8 characters long");
     }
     //check if password is strong enough. Should contain Upper case, lower case, number and special character
-    else if (
-      password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/) ==
-        null &&
-      password.length != 0
-    ) {
-      setPasswordMessage(
-        "Password must contain at least one upper case, one lower case, one number and one special character",
-      );
+    else if (password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])/) == null && password.length != 0) {
+      setPasswordMessage("Password must contain at least one upper case, one lower case, one number and one special character");
     }
     //check if both passwords match
     else if (password != confirmPassword && confirmPassword.length != 0) {
@@ -761,7 +858,71 @@ const User: NextPage = () => {
         const userTableSearch = api.user.searchUsers.useQuery({ searchQuery: query });
     },[query]);*/
 
-  //DATEPICKER
+  //-------------------------------MODAL-----------------------------------------
+  //CREATE BUTTON MODAL
+  const [isCreateButtonModalOpen, setIsCreateButtonModalOpen] = useState(false);
+  const [mandatoryFields, setMandatoryFields] = useState<string[]>([]);
+  const [errorFields, setErrorFields] = useState<{ field: string; message: string }[]>([]);
+
+  const handleCreateButtonModal = () => {
+    const mandatoryFields: string[] = [];
+    const errorFields: { field: string; message: string }[] = [];
+
+    if (firstName === "") mandatoryFields.push("First Name");
+    if (surname === "") mandatoryFields.push("Surname");
+    //if (email === "") mandatoryFields.push("Email");
+    if (mobile === "") mandatoryFields.push("Mobile");
+    if (greaterAreaOption === "Greater Area") mandatoryFields.push("Greater Area");
+    //if (addressStreet === "") mandatoryFields.push("Street");
+    //if (addressStreetCode === "") mandatoryFields.push("Street Code");
+    //if (addressStreetNumber === "") mandatoryFields.push("Street Number");
+    //if (addressSuburb === "") mandatoryFields.push("Suburb");
+    //if (addressPostalCode === "") mandatoryFields.push("Postal Code");
+    //if (preferredOption === "Preferred Communication") mandatoryFields.push("Preferred Communication");
+    if (roleOption === "Role") mandatoryFields.push("Role");
+    if (statusOption === "Status") mandatoryFields.push("Status");
+    if (startingDate === null) mandatoryFields.push("Starting Date");
+
+    if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
+    if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
+    if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
+    if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
+    if (passwordMessage !== "") errorFields.push({ field: "Password", message: passwordMessage });
+    if (confirmPasswordMessage !== "") errorFields.push({ field: "Confirm Password", message: confirmPasswordMessage });
+
+    setMandatoryFields(mandatoryFields);
+    setErrorFields(errorFields);
+
+    if (mandatoryFields.length > 0 || errorFields.length > 0) {
+      setIsCreateButtonModalOpen(true);
+    } else {
+      if (isUpdate) {
+        void handleUpdateUser();
+      } else {
+        void handleNewUser();
+      }
+    }
+  };
+  const handleCreateButtonModalClose = () => {
+    setIsCreateButtonModalOpen(false);
+  };
+  const handleCreateButtonModalOpen = () => {
+    setIsCreateButtonModalOpen(true);
+  };
+
+  //DELETE BUTTON MODAL
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteModalID, setDeleteModalID] = useState("");
+  const [deleteModalName, setDeleteModalName] = useState("");
+  const [deleteUserID, setDeleteUserID] = useState("");
+  const handleDeleteModal = (id: string, userID: string, name: string) => {
+    setDeleteUserID(id);
+    setDeleteModalID(userID);
+    setDeleteModalName(name);
+    setIsDeleteModalOpen(true);
+  };
+
+  //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
   interface CustomInputProps {
     value?: string;
@@ -770,10 +931,7 @@ const User: NextPage = () => {
 
   // Your CustomInput component with explicit types for the props
   const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button
-      className="form-input flex items-center rounded-md border px-4 py-2"
-      onClick={onClick}
-    >
+    <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
       <svg
         className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
         aria-hidden="true"
@@ -783,8 +941,8 @@ const User: NextPage = () => {
       >
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
-      <div className="m-1 mr-2">Starting date:</div>
-      {value ?? "Select date"}
+      <div className="m-1 mr-2">Starting date*:</div>
+      {isUpdate ? startingDate?.toLocaleDateString() : value}
     </button>
   );
 
@@ -795,19 +953,23 @@ const User: NextPage = () => {
       </Head>
       <main className="flex flex-col">
         <Navbar />
-        {!isCreate && (
+        {!isCreate && !isUpdate && (
           <>
             <div className="mb-2 mt-9 flex flex-col text-black">
+              <DeleteButtonModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                userID={deleteModalID}
+                userName={deleteModalName}
+                onDelete={() => handleDeleteRow(deleteUserID)}
+              />
               <div className="relative flex justify-center">
                 <input
                   className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                   placeholder="Search..."
                   onChange={(e) => setQuery(e.target.value)}
                 />
-                <button
-                  className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500"
-                  onClick={handleCreateNewUser}
-                >
+                <button className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleCreateNewUser}>
                   Create new User
                 </button>
               </div>
@@ -849,38 +1011,25 @@ const User: NextPage = () => {
                           <td className="border px-4 py-2">{user.surname}</td>
                           <td className="border px-4 py-2">{user.email}</td>
                           <td className="border px-4 py-2">{user.mobile}</td>
-                          <td className="border px-4 py-2">
-                            {user.addressGreaterArea}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {user.addressArea}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {user.addressStreet}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {user.addressStreetCode}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {user.addressStreetNumber}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {user.addressSuburb}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {user.addressPostalCode}
-                          </td>
-                          <td className="border px-4 py-2">
-                            {user.preferredCommunication}
-                          </td>
+                          <td className="border px-4 py-2">{user.addressGreaterArea}</td>
+                          <td className="border px-4 py-2">{user.addressArea}</td>
+                          <td className="border px-4 py-2">{user.addressStreet}</td>
+                          <td className="border px-4 py-2">{user.addressStreetCode}</td>
+                          <td className="border px-4 py-2">{user.addressStreetNumber}</td>
+                          <td className="border px-4 py-2">{user.addressSuburb}</td>
+                          <td className="border px-4 py-2">{user.addressPostalCode}</td>
+                          <td className="border px-4 py-2">{user.preferredCommunication}</td>
                           <td className="border px-4 py-2">{user.role}</td>
                           <td className="border px-4 py-2">{user.status}</td>
                           <td className="border px-4 py-2">{user.comments}</td>
-                          <Trash
-                            size={24}
-                            className="mx-2 my-3"
-                            onClick={() => handleDeleteRow(user.id)}
-                          />
+                          <div className="flex">
+                            <Trash
+                              size={24}
+                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                              onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")}
+                            />
+                            <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(String(user.id))} />
+                          </div>
                         </tr>
                       );
                     })}
@@ -890,48 +1039,55 @@ const User: NextPage = () => {
             </div>
           </>
         )}
-        {isCreate && (
+        {(isCreate || isUpdate) && (
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">Create New User</div>
+                <div className=" text-2xl">{isUpdate ? "Update User" : "Create New User"}</div>
                 <div className="flex justify-center">
-                  <button
-                    className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500"
-                    onClick={handleCreateNewUser}
-                  >
+                  <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleBackButton}>
                     Back
                   </button>
                 </div>
+                <CreateButtonModal
+                  isOpen={isCreateButtonModalOpen}
+                  mandatoryFields={mandatoryFields}
+                  errorFields={errorFields}
+                  onClose={() => setIsCreateButtonModalOpen(false)}
+                />
               </div>
             </div>
             <div className="flex grow flex-col items-center">
-              <div className="p-2">
-                User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}
-              </div>
+              {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
+              <div className="mb-2">All fields with * must be entered</div>
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                placeholder="First Name"
+                placeholder="First Name*"
                 onChange={(e) => setFirstName(e.target.value)}
+                value={firstName}
               />
+
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                placeholder="Surname"
+                placeholder="Surname*"
                 onChange={(e) => setSurname(e.target.value)}
+                value={surname}
               />
+
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Email"
                 onChange={(e) => setEmail(e.target.value)}
+                value={email}
               />
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                placeholder="Mobile"
+                placeholder="Mobile*"
                 onChange={(e) => setMobile(e.target.value)}
+                value={mobile}
               />
-              {mobileMessage && (
-                <div className="text-sm text-red-500">{mobileMessage}</div>
-              )}
+
+              {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
               <div className="flex flex-col">
                 <button
@@ -940,41 +1096,17 @@ const User: NextPage = () => {
                   type="button"
                   onClick={handleToggleGreaterArea}
                 >
-                  {greaterAreaOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
+                  {isUpdate ? greaterAreaOption : greaterAreaOption + "*" + " "}
+                  <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                   </svg>
                 </button>
                 {isGreaterAreaOpen && (
-                  <div
-                    ref={greaterAreaRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
+                  <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                       {greaterAreaOptions.map((option) => (
-                        <li
-                          key={option}
-                          onClick={() => handleGreaterAreaOption(option)}
-                        >
-                          <a
-                            href="#"
-                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                          >
+                        <li key={option} onClick={() => handleGreaterAreaOption(option)}>
+                          <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                             {option}
                           </a>
                         </li>
@@ -992,40 +1124,16 @@ const User: NextPage = () => {
                   onClick={handleToggleArea}
                 >
                   {areaOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
+                  <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                   </svg>
                 </button>
                 {isAreaOpen && (
-                  <div
-                    ref={areaRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
+                  <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                       {areaOptions.map((option) => (
-                        <li
-                          key={option}
-                          onClick={() => handleAreaOption(option)}
-                        >
-                          <a
-                            href="#"
-                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                          >
+                        <li key={option} onClick={() => handleAreaOption(option)}>
+                          <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                             {option}
                           </a>
                         </li>
@@ -1043,40 +1151,16 @@ const User: NextPage = () => {
                   onClick={handleToggleStreet}
                 >
                   {streetOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
+                  <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                   </svg>
                 </button>
                 {isStreetOpen && (
-                  <div
-                    ref={streetRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
+                  <div ref={streetRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                       {streetOptions.map((option) => (
-                        <li
-                          key={option}
-                          onClick={() => handleStreetOption(option)}
-                        >
-                          <a
-                            href="#"
-                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                          >
+                        <li key={option} onClick={() => handleStreetOption(option)}>
+                          <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                             {option}
                           </a>
                         </li>
@@ -1090,33 +1174,29 @@ const User: NextPage = () => {
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black "
                 placeholder="Street Code"
                 onChange={(e) => setAddressStreetCode(e.target.value)}
+                value={addressStreetCode}
               />
-              {streetCodeMessage && (
-                <div className="text-sm text-red-500">{streetCodeMessage}</div>
-              )}
+              {streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Street Number"
                 onChange={(e) => setAddressStreetNumber(e.target.value)}
+                value={addressStreetNumber}
               />
-              {streetNumberMessage && (
-                <div className="text-sm text-red-500">
-                  {streetNumberMessage}
-                </div>
-              )}
+              {streetNumberMessage && <div className="text-sm text-red-500">{streetNumberMessage}</div>}
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Suburb"
                 onChange={(e) => setAddressSuburb(e.target.value)}
+                value={addressSuburb}
               />
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Postal Code"
                 onChange={(e) => setAddressPostalCode(e.target.value)}
+                value={addressPostalCode}
               />
-              {postalCodeMessage && (
-                <div className="text-sm text-red-500">{postalCodeMessage}</div>
-              )}
+              {postalCodeMessage && <div className="text-sm text-red-500">{postalCodeMessage}</div>}
 
               <div className="flex flex-col">
                 <button
@@ -1126,42 +1206,16 @@ const User: NextPage = () => {
                   onClick={handleTogglePreferredCommunication}
                 >
                   {preferredOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
+                  <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                   </svg>
                 </button>
                 {preferredCommunication && (
-                  <div
-                    ref={preferredCommunicationRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
+                  <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                       {preferredCommunicationOptions.map((option) => (
-                        <li
-                          key={option}
-                          onClick={() =>
-                            handlePreferredCommunicationOption(option)
-                          }
-                        >
-                          <a
-                            href="#"
-                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                          >
+                        <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
+                          <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                             {option}
                           </a>
                         </li>
@@ -1178,41 +1232,17 @@ const User: NextPage = () => {
                   type="button"
                   onClick={handleToggleRole}
                 >
-                  {roleOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
+                  {roleOption + "*" + " "}
+                  <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                   </svg>
                 </button>
                 {role && (
-                  <div
-                    ref={roleRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
+                  <div ref={roleRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                       {roleOptions.map((option) => (
-                        <li
-                          key={option}
-                          onClick={() => handleRoleOption(option)}
-                        >
-                          <a
-                            href="#"
-                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                          >
+                        <li key={option} onClick={() => handleRoleOption(option)}>
+                          <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                             {option}
                           </a>
                         </li>
@@ -1229,41 +1259,17 @@ const User: NextPage = () => {
                   type="button"
                   onClick={handleToggleStatus}
                 >
-                  {statusOption + " "}
-                  <svg
-                    className="ms-3 h-2.5 w-2.5"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 10 6"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m1 1 4 4 4-4"
-                    />
+                  {statusOption + "*" + " "}
+                  <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                   </svg>
                 </button>
                 {status && (
-                  <div
-                    ref={statusRef}
-                    className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                  >
-                    <ul
-                      className="py-2 text-sm text-gray-700 dark:text-gray-200"
-                      aria-labelledby="dropdownHoverButton"
-                    >
+                  <div ref={statusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                       {statusOptions.map((option) => (
-                        <li
-                          key={option}
-                          onClick={() => handleStatusOption(option)}
-                        >
-                          <a
-                            href="#"
-                            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                          >
+                        <li key={option} onClick={() => handleStatusOption(option)}>
+                          <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                             {option}
                           </a>
                         </li>
@@ -1278,6 +1284,7 @@ const User: NextPage = () => {
                 <DatePicker
                   selected={startingDate}
                   onChange={(date) => setStartingDate(date!)}
+                  dateFormat="dd/MM/yyyy"
                   customInput={<CustomInput />}
                   className="form-input rounded-md border px-4 py-2"
                 />
@@ -1287,6 +1294,7 @@ const User: NextPage = () => {
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Comments"
                 onChange={(e) => setComments(e.target.value)}
+                value={comments}
               />
 
               <input
@@ -1294,19 +1302,13 @@ const User: NextPage = () => {
                 placeholder="Password"
                 onChange={(e) => setPassword(e.target.value)}
               />
-              {passwordMessage && (
-                <div className="text-sm text-red-500">{passwordMessage}</div>
-              )}
+              {passwordMessage && <div className="text-sm text-red-500">{passwordMessage}</div>}
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Confirm Password"
                 onChange={(e) => setConfirmPassword(e.target.value)}
               />
-              {confirmPasswordMessage && (
-                <div className="text-sm text-red-500">
-                  {confirmPasswordMessage}
-                </div>
-              )}
+              {confirmPasswordMessage && <div className="text-sm text-red-500">{confirmPasswordMessage}</div>}
 
               {/*Make a checkbox to confirm: "Welcome new user to preferred communication channel"  */}
               <div className="flex items-center">
@@ -1316,19 +1318,13 @@ const User: NextPage = () => {
                   onChange={(e) => setSendUserDetails(e.target.checked)}
                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                 />
-                <label
-                  htmlFor="checked-checkbox"
-                  className="ms-2 text-sm font-medium text-gray-900"
-                >
+                <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
                   Welcome user to preferred communication channel
                 </label>
               </div>
 
-              <button
-                className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg hover:bg-orange-500"
-                onClick={() => void handleNewUser()}
-              >
-                Create
+              <button className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg hover:bg-orange-500" onClick={() => void handleCreateButtonModal()}>
+                {isUpdate ? "Update" : "Create"}
               </button>
             </div>
           </>

@@ -188,6 +188,56 @@ export const UserRouter = createTRPCRouter({
       });
     }),
 
+  //Infinite query and search for users
+  searchUsersInfinite: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        limit: z.number(),
+        cursor: z.string().default(""),
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.db.user.findMany({
+        where: {
+          OR: [
+            //{ userID: { contains: input.searchQuery } },
+            { name: { contains: input.searchQuery } },
+            { surname: { contains: input.searchQuery } },
+            { email: { contains: input.searchQuery } },
+            { role: { contains: input.searchQuery } },
+            { status: { contains: input.searchQuery } },
+            { mobile: { contains: input.searchQuery } },
+            { addressGreaterArea: { contains: input.searchQuery } },
+            { addressStreet: { contains: input.searchQuery } },
+            { addressStreetCode: { contains: input.searchQuery } },
+            { addressStreetNumber: { contains: input.searchQuery } },
+            { addressSuburb: { contains: input.searchQuery } },
+            { addressPostalCode: { contains: input.searchQuery } },
+            { preferredCommunication: { contains: input.searchQuery } },
+            { comments: { contains: input.searchQuery } },
+          ],
+        },
+        orderBy: {
+          userID: "asc",
+        },
+        take: input.limit + 1,
+        cursor: input.cursor ? { id: input.cursor } : undefined,
+      });
+
+      let nextCursor: typeof input.cursor | undefined = undefined;
+      if (user.length > input.limit) {
+        const nextRow = user.pop();
+        nextCursor = nextRow?.id;
+      }
+
+      return {
+        user_data: user,
+        nextCursor,
+      };
+    }),
+
   //get user by it's userID
   getUserByID: publicProcedure
     .input(

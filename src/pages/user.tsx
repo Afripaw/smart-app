@@ -28,7 +28,7 @@ const User: NextPage = () => {
   const [query, setQuery] = useState("");
 
   //-------------------------------TABLE-----------------------------------------
-  const data = api.user.searchUsers.useQuery({ searchQuery: query });
+  //const data = api.user.searchUsers.useQuery({ searchQuery: query });
   //delete specific row
   const deleteRow = api.user.deleteUser.useMutation();
   const handleDeleteRow = async (id: string) => {
@@ -38,9 +38,9 @@ const User: NextPage = () => {
   };
 
   //autoload the table
-  useEffect(() => {
+  /* useEffect(() => {
     void data.refetch();
-  }, [isUpdate, isDeleted, isCreate]);
+  }, [isUpdate, isDeleted, isCreate]);*/
 
   //---------------------------------EDIT BOXES----------------------------------
   const [firstName, setFirstName] = useState("");
@@ -881,6 +881,58 @@ const User: NextPage = () => {
     setIsDeleteModalOpen(true);
   };
 
+  //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
+  const observerTarget = useRef<HTMLDivElement | null>(null);
+
+  const [limit] = useState(12);
+  const {
+    data: queryData,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = api.user.searchUsersInfinite.useInfiniteQuery(
+    {
+      id: id,
+      limit: limit,
+      searchQuery: query,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        console.log("Next Cursor: " + lastPage.nextCursor);
+        return lastPage.nextCursor;
+      },
+      enabled: false,
+    },
+  );
+
+  //Flattens the pages array into one array
+  const user_data = queryData?.pages.flatMap((page) => page.user_data);
+
+  //Checks intersection of the observer target and reassigns target element once true
+  useEffect(() => {
+    if (!observerTarget.current || !fetchNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+      },
+      { threshold: 1 },
+    );
+
+    if (observerTarget.current) observer.observe(observerTarget.current);
+
+    const currentTarget = observerTarget.current;
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [fetchNextPage, hasNextPage, observerTarget]);
+
+  //Make it retrieve the data from tab;e again when the user is updated, deleted or created
+  useEffect(() => {
+    void refetch();
+  }, [isUpdate, isDeleted, isCreate, query]);
+
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
   interface CustomInputProps {
@@ -933,7 +985,7 @@ const User: NextPage = () => {
                 </button>
               </div>
               <article className="horisonal-scroll mt-6 flex max-h-[80rem] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                <table className="table-auto">
+                {/*<table className="table-auto">
                   <thead>
                     <tr>
                       <th className="px-4 py-2">User ID</th>
@@ -986,8 +1038,64 @@ const User: NextPage = () => {
                       );
                     })}
                   </tbody>
+                </table>*/}
+
+                <table className="table-auto">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2">User ID</th>
+                      <th className="px-4 py-2">First Name</th>
+                      <th className="px-4 py-2">Surname</th>
+                      <th className="px-4 py-2">Email</th>
+                      <th className="px-4 py-2">Mobile</th>
+                      <th className="px-4 py-2">Greater Area</th>
+                      <th className="px-4 py-2">Area</th>
+                      <th className="px-4 py-2">Street</th>
+                      <th className="px-4 py-2">Street Code</th>
+                      <th className="px-4 py-2">Street Number</th>
+                      <th className="px-4 py-2">Suburb</th>
+                      <th className="px-4 py-2">Postal Code</th>
+                      <th className="px-4 py-2">Preferred Communication</th>
+                      <th className="px-4 py-2">Role</th>
+                      <th className="px-4 py-2">Status</th>
+                      <th className="px-4 py-2">Comments</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {user_data?.map((user) => {
+                      return (
+                        <tr className="items-center">
+                          <td className="border px-4 py-2">{user.userID}</td>
+                          <td className="border px-4 py-2">{user.name}</td>
+                          <td className="border px-4 py-2">{user.surname}</td>
+                          <td className="border px-4 py-2">{user.email}</td>
+                          <td className="border px-4 py-2">{user.mobile}</td>
+                          <td className="border px-4 py-2">{user.addressGreaterArea}</td>
+                          <td className="border px-4 py-2">{user.addressArea}</td>
+                          <td className="border px-4 py-2">{user.addressStreet}</td>
+                          <td className="border px-4 py-2">{user.addressStreetCode}</td>
+                          <td className="border px-4 py-2">{user.addressStreetNumber}</td>
+                          <td className="border px-4 py-2">{user.addressSuburb}</td>
+                          <td className="border px-4 py-2">{user.addressPostalCode}</td>
+                          <td className="border px-4 py-2">{user.preferredCommunication}</td>
+                          <td className="border px-4 py-2">{user.role}</td>
+                          <td className="border px-4 py-2">{user.status}</td>
+                          <td className="border px-4 py-2">{user.comments}</td>
+                          <div className="flex">
+                            <Trash
+                              size={24}
+                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                              onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")}
+                            />
+                            <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(String(user.id))} />
+                          </div>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
                 </table>
               </article>
+              <div ref={observerTarget} />
             </div>
           </>
         )}

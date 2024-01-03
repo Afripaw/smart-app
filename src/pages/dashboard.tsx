@@ -2,12 +2,9 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import { useState } from "react";
 import { api } from "~/utils/api";
-import { useRouter } from "next/router";
 import Navbar from "../components/navbar";
 
 const Dashboard: NextPage = () => {
-  const router = useRouter();
-
   return (
     <>
       <Head>
@@ -20,9 +17,7 @@ const Dashboard: NextPage = () => {
           <div className="border border-gray-300">Block 2</div>
           <div className="border border-gray-300">Block 3</div>
           <div className="border border-gray-300">Block 4</div>
-          <div className="flex items-center justify-center border border-gray-300 text-center text-2xl">
-            KPI's
-          </div>
+          <div className="flex items-center justify-center border border-gray-300 text-center text-2xl">KPI's</div>
           <div className="border border-gray-300">Block 6</div>
           <div className="border border-gray-300">Block 7</div>
           <div className="border border-gray-300">Block 8</div>

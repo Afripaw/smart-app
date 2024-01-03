@@ -2,34 +2,26 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import React, { SetStateAction, useEffect, useRef, useState } from "react";
 import { api } from "~/utils/api";
-import { useRouter } from "next/router";
+
+//Components
 import Navbar from "../components/navbar";
+import CreateButtonModal from "../components/createButtonModal";
+import DeleteButtonModal from "~/components/deleteButtonModal";
+
+//Icons
 import { Pencil, Trash } from "phosphor-react";
 
-//---------------------------------------------DATEPICKER---------------------------------------------
-// TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com
-// Initialization for ES Users
-//import { Datepicker, Input, initTE } from "tw-elements";
-
-//initTE({ Datepicker, Input });
-import DatePicker, { ReactDatePickerProps } from "react-datepicker";
+//Date picker
+import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import CreateButtonModal from "../components/createButtonModal";
-import { date } from "zod";
-import DeleteButtonModal from "~/components/deleteButtonModal";
-import { set } from "date-fns";
-import { start } from "repl";
 
 const User: NextPage = () => {
-  const router = useRouter();
   const newUser = api.user.create.useMutation();
   const updateUser = api.user.update.useMutation();
-  //const [user, setUser] = useState<{ id: string } | null>(null);
   const [isUpdate, setIsUpdate] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
-  // const userTable = api.user.getAllUsers.useQuery();
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -44,6 +36,7 @@ const User: NextPage = () => {
     await deleteRow.mutateAsync({ userID: id });
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
   };
+
   //autoload the table
   useEffect(() => {
     void data.refetch();
@@ -54,7 +47,6 @@ const User: NextPage = () => {
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
-  const [addressStreet, setAddressStreet] = useState("");
   const [addressStreetCode, setAddressStreetCode] = useState("");
   const [addressStreetNumber, setAddressStreetNumber] = useState("");
   const [addressSuburb, setAddressSuburb] = useState("");
@@ -67,13 +59,14 @@ const User: NextPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   //userID
-  const [userID, setUserID] = useState("");
+  //const [userID, setUserID] = useState("");
   const [id, setID] = useState("");
 
-  //-------------------------------UPDATE-----------------------------------------
+  //-------------------------------UPDATE USER-----------------------------------------
   const user = api.user.getUserByID.useQuery({ id: id });
 
-  //--------------------------------DROPDOWN BOXES--------------------------------
+  //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
+  //WEBHOOKS FOR DROPDOWN BOXES
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
   const [greaterAreaOption, setGreaterAreaOption] = useState("Greater Area");
   const greaterAreaRef = useRef<HTMLDivElement>(null);
@@ -89,7 +82,6 @@ const User: NextPage = () => {
   const streetRef = useRef<HTMLDivElement>(null);
   const btnStreetRef = useRef<HTMLButtonElement>(null);
   const [streetOptions, setStreetOptions] = useState<string[]>([]);
-  const [selectedStreet, setSelectedStreet] = useState<string>("");
 
   const [preferredCommunication, setPreferredCommunication] = useState(false);
   const [preferredOption, setPreferredCommunicationOption] = useState("Preferred Communication");
@@ -105,14 +97,6 @@ const User: NextPage = () => {
   const [statusOption, setStatusOption] = useState("Status");
   const statusRef = useRef<HTMLDivElement>(null);
   const btnStatusRef = useRef<HTMLButtonElement>(null);
-
-  //Send user's details to user
-  const [sendUserDetails, setSendUserDetails] = useState(false);
-
-  //ID
-  //get the last id of the users table
-  const lastUserCreated = api.user.getLastUserID.useQuery();
-  // const [id, setID] = useState("");
 
   //GREATER AREA
   const handleToggleGreaterArea = () => {
@@ -570,13 +554,11 @@ const User: NextPage = () => {
 
   const statusOptions = ["Active", "Passive"];
 
-  /*const handleUpdateUser = async () => {
-    isUpdate ? setIsUpdate(false) : setIsUpdate(true);
-    isCreate ? setIsCreate(false) : setIsCreate(false);
-  };*/
+  //Send user's details to user
+  const [sendUserDetails, setSendUserDetails] = useState(false);
 
   //-------------------------------UPDATE USER-----------------------------------------
-  //Update the user's details
+  //Update the user's details in fields
   const handleUpdateUserProfile = async (id: string) => {
     setID(id);
 
@@ -627,11 +609,6 @@ const User: NextPage = () => {
       setComments(userData.comments ?? "");
     }
   }, [user.data]); // Effect runs when userQuery.data changes
-
-  /*useEffect(() => {
-    //set the user's details
-    //handleUpdateUserProfile(userID);
-  }, [userID]);*/
 
   const handleUpdateUser = async () => {
     if (greaterAreaOption === "Greater Area") {
@@ -853,11 +830,6 @@ const User: NextPage = () => {
     }
   }, [password, confirmPassword]);
 
-  //On change of search bar, query the users table
-  /* useEffect(() => {
-        const userTableSearch = api.user.searchUsers.useQuery({ searchQuery: query });
-    },[query]);*/
-
   //-------------------------------MODAL-----------------------------------------
   //CREATE BUTTON MODAL
   const [isCreateButtonModalOpen, setIsCreateButtonModalOpen] = useState(false);
@@ -870,15 +842,8 @@ const User: NextPage = () => {
 
     if (firstName === "") mandatoryFields.push("First Name");
     if (surname === "") mandatoryFields.push("Surname");
-    //if (email === "") mandatoryFields.push("Email");
     if (mobile === "") mandatoryFields.push("Mobile");
     if (greaterAreaOption === "Greater Area") mandatoryFields.push("Greater Area");
-    //if (addressStreet === "") mandatoryFields.push("Street");
-    //if (addressStreetCode === "") mandatoryFields.push("Street Code");
-    //if (addressStreetNumber === "") mandatoryFields.push("Street Number");
-    //if (addressSuburb === "") mandatoryFields.push("Suburb");
-    //if (addressPostalCode === "") mandatoryFields.push("Postal Code");
-    //if (preferredOption === "Preferred Communication") mandatoryFields.push("Preferred Communication");
     if (roleOption === "Role") mandatoryFields.push("Role");
     if (statusOption === "Status") mandatoryFields.push("Status");
     if (startingDate === null) mandatoryFields.push("Starting Date");
@@ -903,12 +868,6 @@ const User: NextPage = () => {
       }
     }
   };
-  const handleCreateButtonModalClose = () => {
-    setIsCreateButtonModalOpen(false);
-  };
-  const handleCreateButtonModalOpen = () => {
-    setIsCreateButtonModalOpen(true);
-  };
 
   //DELETE BUTTON MODAL
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -929,7 +888,7 @@ const User: NextPage = () => {
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   }
 
-  // Your CustomInput component with explicit types for the props
+  // CustomInput component with explicit types for the props
   const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
     <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
       <svg
@@ -973,13 +932,6 @@ const User: NextPage = () => {
                   Create new User
                 </button>
               </div>
-              {/*Make a table with all the users and then when you click on the user it will populate the fields*/}
-              {/*<button
-                    className="rounded-lg bg-orange-600 p-3 hover:bg-orange-700"
-                    onClick={handleUpdateUser}
-                    >
-                    Search
-                    </button>*/}
               <article className="horisonal-scroll mt-6 flex max-h-[80rem] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
                 <table className="table-auto">
                   <thead>
@@ -1310,7 +1262,6 @@ const User: NextPage = () => {
               />
               {confirmPasswordMessage && <div className="text-sm text-red-500">{confirmPasswordMessage}</div>}
 
-              {/*Make a checkbox to confirm: "Welcome new user to preferred communication channel"  */}
               <div className="flex items-center">
                 <input
                   id="checked-checkbox"

@@ -182,6 +182,9 @@ export const UserRouter = createTRPCRouter({
             { comments: { contains: input.searchQuery } },
           ],
         },
+        orderBy: {
+          userID: "asc",
+        },
       });
     }),
 
@@ -202,47 +205,6 @@ export const UserRouter = createTRPCRouter({
       console.log(user);
       return user;
     }),
-
-  /*    searchUsers: publicProcedure
-  .input(
-    z.object({
-      searchQuery: z.string(),
-    }),
-  )
-  .query(async ({ ctx, input }) => {
-    // Attempt to parse the search query as an integer for userID
-    const parsedQuery = parseInt(input.searchQuery, 10);
-    const isQueryNumber = !isNaN(parsedQuery);
-
-    // Build the query conditions
-    const queryConditions = [
-      { name: { contains: input.searchQuery } },
-      { surname: { contains: input.searchQuery } },
-      { email: { contains: input.searchQuery } },
-      { role: { contains: input.searchQuery } },
-      { status: { contains: input.searchQuery } },
-      { mobile: { contains: input.searchQuery } },
-      { addressGreaterArea: { contains: input.searchQuery } },
-      { addressStreet: { contains: input.searchQuery } },
-      { addressStreetCode: { contains: input.searchQuery } },
-      { addressStreetNumber: { contains: input.searchQuery } },
-      { addressSuburb: { contains: input.searchQuery } },
-      { addressPostalCode: { contains: input.searchQuery } },
-      { preferredCommunication: { contains: input.searchQuery } },
-      { comments: { contains: input.searchQuery } },
-    ];
-
-    // Include userID in search if the query is a number
-    if (isQueryNumber) {
-      queryConditions.push({ userID: parsedQuery });
-    }
-
-    return await ctx.db.user.findMany({
-      where: {
-        OR: queryConditions,
-      },
-    });
-  }),*/
 
   //delete user
   deleteUser: publicProcedure

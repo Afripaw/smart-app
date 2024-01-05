@@ -4,7 +4,7 @@ import Head from "next/head";
 
 //import { api } from "~/utils/api";
 import { useRouter } from "next/router";
-import { useState, FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import Image from "next/image";
 
 export default function Home() {

@@ -53,6 +53,7 @@ const Volunteer: NextPage = () => {
   const [addressPostalCode, setAddressPostalCode] = useState("");
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
+  const [addressStreet, setAddressStreet] = useState("");
 
   //passwords
   //const [password, setPassword] = useState("");
@@ -72,8 +73,9 @@ const Volunteer: NextPage = () => {
   const greaterAreaRef = useRef<HTMLDivElement>(null);
   const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
 
+  /*
   const [isAreaOpen, setIsAreaOpen] = useState(false);
-  const [areaOption, setAreaOption] = useState("Area");
+ // const [areaOption, setAreaOption] = useState("Area");
   const areaRef = useRef<HTMLDivElement>(null);
   const btnAreaRef = useRef<HTMLButtonElement>(null);
 
@@ -81,7 +83,7 @@ const Volunteer: NextPage = () => {
   const [streetOption, setStreetOption] = useState("Street");
   const streetRef = useRef<HTMLDivElement>(null);
   const btnStreetRef = useRef<HTMLButtonElement>(null);
-  const [streetOptions, setStreetOptions] = useState<string[]>([]);
+  const [streetOptions, setStreetOptions] = useState<string[]>([]);*/
 
   const [preferredCommunication, setPreferredCommunication] = useState(false);
   const [preferredOption, setPreferredCommunicationOption] = useState("Preferred Communication");
@@ -124,7 +126,7 @@ const Volunteer: NextPage = () => {
   const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
 
   //AREA
-  const handleToggleArea = () => {
+  /* const handleToggleArea = () => {
     setIsAreaOpen(!isAreaOpen);
     setStreetOption("Street");
   };
@@ -184,9 +186,9 @@ const Volunteer: NextPage = () => {
     "Southfield",
     "Vrygrond",
   ];
-
+*/
   //STREET
-  const handleToggleStreet = () => {
+  /* const handleToggleStreet = () => {
     setIsStreetOpen(!isStreetOpen);
   };
 
@@ -462,7 +464,7 @@ const Volunteer: NextPage = () => {
       "Vuyo Cl",
       "Vuyo Rd",
     ],
-  };
+  };*/
 
   //PREFERRED COMMUNICATION
   const handleTogglePreferredCommunication = () => {
@@ -495,7 +497,7 @@ const Volunteer: NextPage = () => {
   const preferredCommunicationOptions = ["Email", "SMS", "Whatsapp"];
 
   //CLINICS ATTENDED
-  const [clinicsAttended, setClinicsAttended] = useState<Date[]>([]);
+  /*const [clinicsAttended, setClinicsAttended] = useState<Date[]>([]);
   const [clinic, setClinic] = useState(new Date());
   const [clinicOptions, setClinicOptions] = useState<string[]>([]);
   const [isClinicOpen, setIsClinicOpen] = useState(false);
@@ -526,7 +528,7 @@ const Volunteer: NextPage = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, []);*/
 
   //STATUS
   const handleToggleStatus = () => {
@@ -559,7 +561,7 @@ const Volunteer: NextPage = () => {
   const statusOptions = ["Active", "Passive"];
 
   //Send user's details to user
-  const [sendUserDetails, setSendUserDetails] = useState(false);
+  //const [sendUserDetails, setSendUserDetails] = useState(false);
 
   //-------------------------------UPDATE USER-----------------------------------------
   //Update the user's details in fields
@@ -574,7 +576,7 @@ const Volunteer: NextPage = () => {
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
       setGreaterAreaOption(userData.addressGreaterArea ?? "");
-      setStreetOption(userData.addressStreet ?? "");
+      setAddressStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -598,7 +600,7 @@ const Volunteer: NextPage = () => {
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
       setGreaterAreaOption(userData.addressGreaterArea ?? "");
-      setStreetOption(userData.addressStreet ?? "");
+      setAddressStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -628,7 +630,7 @@ const Volunteer: NextPage = () => {
       surname: surname,
       mobile: mobile,
       addressGreaterArea: greaterAreaOption,
-      addressStreet: streetOption,
+      addressStreet: addressStreet,
       addressStreetCode: addressStreetCode,
       addressStreetNumber: addressStreetNumber,
       addressSuburb: addressSuburb,
@@ -636,7 +638,8 @@ const Volunteer: NextPage = () => {
       preferredCommunication: preferredOption,
       startingDate: startingDate,
       status: statusOption,
-      clinicAttended: clinicsAttended ?? ["No clinics attended"],
+      clinicAttended: [new Date()],
+      //clinicAttended: clinicsAttended ?? ["No clinics attended"],
       comments: comments,
     });
     //After the newUser has been created make sure to set the fields back to empty
@@ -645,13 +648,13 @@ const Volunteer: NextPage = () => {
     setSurname("");
     setMobile("");
     setGreaterAreaOption("Greater Area");
-    setStreetOption("Street");
+    setAddressStreet("Street");
     setAddressStreetCode("");
     setAddressStreetNumber("");
     setAddressSuburb("");
     setAddressPostalCode("");
     setPreferredCommunicationOption("Preferred Communication");
-    setClinicOptions([]);
+    //setClinicOptions([]);
     setStatusOption("Status");
     setComments("");
     isUpdate ? setIsUpdate(false) : setIsUpdate(false);
@@ -682,9 +685,9 @@ const Volunteer: NextPage = () => {
     }
 
     //clinicsAttended.push(clinic);
-    const clinic = new Date();
+    /*const clinic = new Date();
     const newClinic = [...clinicsAttended, clinic];
-    setClinicsAttended(newClinic);
+    setClinicsAttended(newClinic);*/
 
     await newVolunteer.mutateAsync({
       firstName: firstName,
@@ -692,14 +695,14 @@ const Volunteer: NextPage = () => {
       surname: surname,
       mobile: mobile,
       addressGreaterArea: greaterAreaOption,
-      addressStreet: streetOption,
+      addressStreet: addressStreet,
       addressStreetCode: addressStreetCode,
       addressStreetNumber: addressStreetNumber,
       addressSuburb: addressSuburb,
       addressPostalCode: addressPostalCode,
       preferredCommunication: preferredOption,
       startingDate: startingDate,
-      clinicAttended: clinicsAttended ?? ["No clinics attended"],
+      clinicAttended: [new Date()],
       status: statusOption,
       comments: comments,
     });
@@ -709,13 +712,13 @@ const Volunteer: NextPage = () => {
     setSurname("");
     setMobile("");
     setGreaterAreaOption("Greater Area");
-    setStreetOption("Street");
+    setAddressStreet("Street");
     setAddressStreetCode("");
     setAddressStreetNumber("");
     setAddressSuburb("");
     setAddressPostalCode("");
     setPreferredCommunicationOption("Preferred Communication");
-    setClinicOptions([]);
+    //setClinicOptions([]);
     setStatusOption("Status");
     setComments("");
 
@@ -734,13 +737,13 @@ const Volunteer: NextPage = () => {
     setSurname("");
     setMobile("");
     setGreaterAreaOption("Greater Area");
-    setStreetOption("Street");
+    setAddressStreet("Street");
     setAddressStreetCode("");
     setAddressStreetNumber("");
     setAddressSuburb("");
     setAddressPostalCode("");
     setPreferredCommunicationOption("Preferred Communication");
-    setClinicOptions([]);
+    //setClinicOptions([]);
     setStatusOption("Status");
     setComments("");
   };
@@ -760,18 +763,6 @@ const Volunteer: NextPage = () => {
       setMobileMessage("");
     }
   }, [mobile]);
-
-  //Street code
-  const [streetCodeMessage, setStreetCodeMessage] = useState("");
-  useEffect(() => {
-    if (addressStreetCode.match(/^[0-9]+$/) == null && addressStreetCode.length != 0) {
-      setStreetCodeMessage("Street code must only contain numbers");
-    } else if (addressStreetCode.length > 4 && addressStreetCode.length != 0) {
-      setStreetCodeMessage("Street code must be 4 digits or less");
-    } else {
-      setStreetCodeMessage("");
-    }
-  }, [addressStreetCode]);
 
   //Street number
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
@@ -816,7 +807,6 @@ const Volunteer: NextPage = () => {
     if (startingDate === null) mandatoryFields.push("Starting Date");
 
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
-    if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
 
@@ -986,7 +976,7 @@ const Volunteer: NextPage = () => {
                           <td className="border px-4 py-2">{user.addressSuburb}</td>
                           <td className="border px-4 py-2">{user.addressPostalCode}</td>
                           <td className="border px-4 py-2">{user.preferredCommunication}</td>
-                          <td className="border px-4 py-2">{(user.clinicsAttended as Date[]).map((date) => date.toLocaleDateString()).join(", ")}</td>
+                          {/* <td className="border px-4 py-2">{(user.clinicsAttended as Date[]).map((date) => date.toLocaleDateString()).join(", ")}</td>*/}
                           <td className="border px-4 py-2">{user.status}</td>
                           <td className="border px-4 py-2">{user.comments}</td>
                           <div className="flex">
@@ -1088,32 +1078,12 @@ const Volunteer: NextPage = () => {
                 )}
               </div>
 
-              <div className="flex flex-col">
-                <button
-                  ref={btnStreetRef}
-                  className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                  type="button"
-                  onClick={handleToggleStreet}
-                >
-                  {streetOption + " "}
-                  <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                  </svg>
-                </button>
-                {isStreetOpen && (
-                  <div ref={streetRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                    <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                      {streetOptions.map((option) => (
-                        <li key={option} onClick={() => handleStreetOption(option)}>
-                          <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                            {option}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
+              <input
+                className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black "
+                placeholder="Street"
+                onChange={(e) => setAddressStreet(e.target.value)}
+                value={addressStreet}
+              />
 
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black "
@@ -1121,7 +1091,7 @@ const Volunteer: NextPage = () => {
                 onChange={(e) => setAddressStreetCode(e.target.value)}
                 value={addressStreetCode}
               />
-              {streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}
+
               <input
                 className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                 placeholder="Street Number"
@@ -1171,7 +1141,7 @@ const Volunteer: NextPage = () => {
               </div>
 
               {/*CLINICS ATTENDED. Make it be able to select a date as well have all the dates displayed below each other*/}
-              <div className="flex flex-col">
+              {/*<div className="flex flex-col">
                 <DatePicker
                   selected={clinic}
                   onChange={(date) => setClinicsAttended([...clinicsAttended, date!])}
@@ -1189,7 +1159,7 @@ const Volunteer: NextPage = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+                  </div>*/}
 
               <div className="flex flex-col">
                 <button
@@ -1240,7 +1210,7 @@ const Volunteer: NextPage = () => {
                 <input
                   id="checked-checkbox"
                   type="checkbox"
-                  onChange={(e) => setSendUserDetails(e.target.checked)}
+                  //onChange={(e) => setSendUserDetails(e.target.checked)}
                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                 />
                 <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">

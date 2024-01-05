@@ -1,17 +1,7 @@
 import Link from "next/link";
-import {
-  Gauge,
-  Users,
-  User,
-  Dog,
-  FirstAidKit,
-  Bed,
-  Info,
-  SignOut,
-  Person,
-} from "phosphor-react";
+import { Gauge, Users, User, Dog, FirstAidKit, Bed, Info, SignOut, Person } from "phosphor-react";
 import Image from "next/image";
-import { signOut } from "next-auth/react";
+//import { signOut } from "next-auth/react";
 //import { router } from "@trpc/server";
 import { useRouter } from "next/router";
 
@@ -67,13 +57,7 @@ const Navbar = () => {
   return (
     <div className=" sticky top-0 z-20 flex grow items-center justify-between bg-main-orange p-3 text-black">
       <div className="justify-begin flex">
-        <Image
-          src={"/afripaw-logo.jpg"}
-          alt="Afripaw Logo"
-          className="ml-auto aspect-square h-max rounded-full"
-          width={56}
-          height={56}
-        />
+        <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="ml-auto aspect-square h-max rounded-full" width={56} height={56} />
       </div>
       <div className="mx-auto flex items-center gap-4">
         {NavbarLinks.map((link) => (
@@ -81,9 +65,7 @@ const Navbar = () => {
             <Link
               key={link.name}
               href={link.href}
-              className={`flex rounded-lg px-6 py-2 text-black hover:bg-gray-200/30 ${
-                router.pathname === link.href ? "bg-white" : ""
-              }`}
+              className={`flex rounded-lg px-6 py-2 text-black hover:bg-gray-200/30 ${router.pathname === link.href ? "bg-white" : ""}`}
             >
               <div className="mr-2">{link.icon}</div>
               {link.name}
@@ -91,11 +73,7 @@ const Navbar = () => {
           </div>
         ))}
       </div>
-      <Link
-        className="flex rounded-lg px-6 py-2 text-black hover:bg-gray-200/30"
-        href="/"
-        onClick={handleLogout}
-      >
+      <Link className="flex rounded-lg px-6 py-2 text-black hover:bg-gray-200/30" href="/" onClick={handleLogout}>
         <SignOut size={24} />
         Logout
       </Link>

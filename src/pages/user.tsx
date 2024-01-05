@@ -44,11 +44,11 @@ const User: NextPage = () => {
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
-  const deleteAllUsers = api.user.deleteAll.useMutation();
+  /*const deleteAllUsers = api.user.deleteAll.useMutation();
   const handleDeleteAllUsers = async () => {
     await deleteAllUsers.mutateAsync();
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
-  };
+  };*/
 
   //---------------------------------EDIT BOXES----------------------------------
   const [firstName, setFirstName] = useState("");
@@ -562,8 +562,9 @@ const User: NextPage = () => {
 
   const statusOptions = ["Active", "Passive"];
 
+  //----------------------------COMMUNICATION OF USER DETAILS---------------------------
   //Send user's details to user
-  const [sendUserDetails, setSendUserDetails] = useState(false);
+  //const [sendUserDetails, setSendUserDetails] = useState(false);
 
   //-------------------------------UPDATE USER-----------------------------------------
   //Update the user's details in fields
@@ -852,7 +853,7 @@ const User: NextPage = () => {
   }, [mobile]);
 
   //Street code
-  const [streetCodeMessage, setStreetCodeMessage] = useState("");
+  //const [streetCodeMessage, setStreetCodeMessage] = useState("");
   /*useEffect(() => {
     if (addressStreetCode.match(/^[0-9]+$/) == null && addressStreetCode.length != 0) {
       setStreetCodeMessage("Street code must only contain numbers");
@@ -931,7 +932,7 @@ const User: NextPage = () => {
     if (confirmPassword === "" && !isUpdate) mandatoryFields.push("Confirm Password");
 
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
-    if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
+    //if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
     if (passwordMessage !== "") errorFields.push({ field: "Password", message: passwordMessage });
@@ -1299,7 +1300,7 @@ const User: NextPage = () => {
                     value={addressStreetCode}
                   />
                 </div>
-                {streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}
+                {/*{streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}*/}
 
                 <div className="flex items-center">
                   <div className="mr-3">Street Number: </div>
@@ -1495,7 +1496,7 @@ const User: NextPage = () => {
                   <input
                     id="checked-checkbox"
                     type="checkbox"
-                    onChange={(e) => setSendUserDetails(e.target.checked)}
+                    // onChange={(e) => setSendUserDetails(e.target.checked)}
                     className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                   />
                   <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">

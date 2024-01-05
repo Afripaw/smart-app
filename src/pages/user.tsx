@@ -9,7 +9,7 @@ import CreateButtonModal from "../components/createButtonModal";
 import DeleteButtonModal from "~/components/deleteButtonModal";
 
 //Icons
-import { Pencil, Trash } from "phosphor-react";
+import { AddressBook, Pencil, Trash } from "phosphor-react";
 
 //Date picker
 import DatePicker from "react-datepicker";
@@ -734,11 +734,88 @@ const User: NextPage = () => {
     isUpdate ? setIsUpdate(false) : setIsUpdate(false);
   };
 
+  //-------------------------------VIEW PROFILE PAGE-----------------------------------------
+  const [isViewProfilePage, setIsViewProfilePage] = useState(false);
+  const handleViewProfilePage = async (id: string) => {
+    setIsViewProfilePage(true);
+    setID(id);
+
+    console.log("View profile page: ", JSON.stringify(user.data));
+    if (user.data) {
+      // Assuming userQuery.data contains the user object
+      const userData = user.data;
+      setFirstName(userData.name ?? "");
+      setSurname(userData.surname ?? "");
+      setEmail(userData.email ?? "");
+      setMobile(userData.mobile ?? "");
+      setGreaterAreaOption(userData.addressGreaterArea ?? "");
+      setAreaOption(userData.addressArea ?? "");
+      setStreetOption(userData.addressStreet ?? "");
+      setAddressStreetCode(userData.addressStreetCode ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressSuburb(userData.addressSuburb ?? "");
+      setAddressPostalCode(userData.addressPostalCode ?? "");
+      setPreferredCommunicationOption(userData.preferredCommunication ?? "");
+      setStartingDate(userData.startingDate ?? new Date());
+      setRoleOption(userData.role ?? "");
+      setStatusOption(userData.status ?? "");
+      setComments(userData.comments ?? "");
+      console.log("Select one");
+
+      //Make sure thet area and street options have a value
+      if (userData.addressArea === "Select one") {
+        setAreaOption("");
+        console.log("Area option is select one");
+      }
+      if (userData.addressStreet === "Select one") {
+        setStreetOption("");
+        console.log("Street option is select one");
+      }
+    }
+
+    setIsUpdate(false);
+    setIsCreate(false);
+    setIsViewProfilePage(true);
+  };
+
+  useEffect(() => {
+    //console.log("View profile page: ", JSON.stringify(user.data));
+    if (user.data) {
+      const userData = user.data;
+
+      setFirstName(userData.name ?? "");
+      setSurname(userData.surname ?? "");
+      setEmail(userData.email ?? "");
+      setMobile(userData.mobile ?? "");
+      setGreaterAreaOption(userData.addressGreaterArea ?? "");
+      setAreaOption(userData.addressArea ?? "");
+      setStreetOption(userData.addressStreet ?? "");
+      setAddressStreetCode(userData.addressStreetCode ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressSuburb(userData.addressSuburb ?? "");
+      setAddressPostalCode(userData.addressPostalCode ?? "");
+      setPreferredCommunicationOption(userData.preferredCommunication ?? "");
+      setStartingDate(userData.startingDate ?? new Date());
+      setRoleOption(userData.role ?? "");
+      setStatusOption(userData.status ?? "");
+      setComments(userData.comments ?? "");
+      //console.log("Select one");
+      //Make sure thet area and street options have a value
+      if (userData.addressArea === "Select one") {
+        setAreaOption("");
+      }
+      if (userData.addressStreet === "Select one") {
+        setStreetOption("");
+      }
+    }
+  }, [isViewProfilePage, user.data]); // Effect runs when userQuery.data changes
+
   //-------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = () => {
     //console.log("Back button pressed");
     setIsUpdate(false);
     setIsCreate(false);
+    setIsViewProfilePage(false);
     setID("");
     setFirstName("");
     setEmail("");
@@ -850,8 +927,8 @@ const User: NextPage = () => {
     if (roleOption === "Select one") mandatoryFields.push("Role");
     if (statusOption === "Select one") mandatoryFields.push("Status");
     if (startingDate === null) mandatoryFields.push("Starting Date");
-    if (password === "") mandatoryFields.push("Password");
-    if (confirmPassword === "") mandatoryFields.push("Confirm Password");
+    if (password === "" && !isUpdate) mandatoryFields.push("Password");
+    if (confirmPassword === "" && !isUpdate) mandatoryFields.push("Confirm Password");
 
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
     if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
@@ -969,7 +1046,7 @@ const User: NextPage = () => {
       </Head>
       <main className="flex flex-col">
         <Navbar />
-        {!isCreate && !isUpdate && (
+        {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
             <div className="mb-2 mt-9 flex flex-col text-black">
               <DeleteButtonModal
@@ -1025,6 +1102,11 @@ const User: NextPage = () => {
                               onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")}
                             />
                             <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(String(user.id))} />
+                            <AddressBook
+                              size={24}
+                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                              onClick={() => handleViewProfilePage(String(user.id))}
+                            />
                           </div>
                         </tr>
                       );
@@ -1369,14 +1451,20 @@ const User: NextPage = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <div className="mr-3">Comments: </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                <div className="flex items-start">
+                  <div className="mr-3 pt-3">Comments: </div>
+                  <textarea
+                    className="m-2 h-24 w-60 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                     placeholder="Type here: e.g. Hard worker"
                     onChange={(e) => setComments(e.target.value)}
                     value={comments}
                   />
+                  {/*<input
+                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                    placeholder="Type here: e.g. Hard worker"
+                    onChange={(e) => setComments(e.target.value)}
+                    value={comments}
+                          />*/}
                 </div>
 
                 <div className="flex items-center">
@@ -1419,6 +1507,89 @@ const User: NextPage = () => {
               <button className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg hover:bg-orange-500" onClick={() => void handleCreateButtonModal()}>
                 {isUpdate ? "Update" : "Create"}
               </button>
+            </div>
+          </>
+        )}
+
+        {isViewProfilePage && (
+          <>
+            <div className="flex justify-center">
+              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+                <div className=" text-2xl">User Profile</div>
+                <div className="flex justify-center">
+                  <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleBackButton}>
+                    Back
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="flex grow flex-col items-center">
+              <div className="flex max-w-xs flex-col items-start">
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">First name:</b> {firstName}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Surname:</b> {surname}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Email:</b> {email}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Mobile:</b> {mobile}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Greater Area:</b> {greaterAreaOption}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Area:</b> {areaOption}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Street:</b> {streetOption}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Street Code:</b> {addressStreetCode}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Street Number:</b> {addressStreetNumber}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Suburb:</b> {addressSuburb}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Postal Code:</b> {addressPostalCode}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Preferred Communication:</b> {preferredOption}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Role:</b> {roleOption}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Status:</b> {statusOption}
+                </div>
+
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">Starting Date:</b> {startingDate?.toLocaleDateString()}
+                </div>
+
+                <div className="mb-2 flex items-start">
+                  <b className="mr-3">Comments:</b>
+                  {comments}
+                </div>
+              </div>
             </div>
           </>
         )}

@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
 export const petOwnerRouter = createTRPCRouter({
   create: protectedProcedure
@@ -15,14 +11,15 @@ export const petOwnerRouter = createTRPCRouter({
         surname: z.string().min(1),
         mobile: z.string().min(1),
         addressGreaterArea: z.string().min(1),
+        addressArea: z.string().min(1),
         addressStreet: z.string().min(1),
         addressStreetCode: z.string().min(1),
         addressStreetNumber: z.string().min(1),
         addressSuburb: z.string().min(1),
-        addressPostalCode: z.string().min(1),
         preferredCommunication: z.string().min(1),
         role: z.string().min(1),
         status: z.string().min(1),
+        startingDate: z.date(),
         comments: z.string().min(1),
       }),
     )
@@ -34,13 +31,13 @@ export const petOwnerRouter = createTRPCRouter({
           surname: input.surname,
           mobile: input.mobile,
           addressGreaterArea: input.addressGreaterArea,
+          addressArea: input.addressArea,
           addressStreet: input.addressStreet,
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
-          addressSuburb: input.addressSuburb,
-          addressPostalCode: input.addressPostalCode,
           preferredCommunication: input.preferredCommunication,
           status: input.status,
+          startingDate: input.startingDate,
           comments: input.comments,
           createdAt: new Date(),
         },
@@ -62,8 +59,6 @@ export const petOwnerRouter = createTRPCRouter({
         addressStreet: z.string().min(1),
         addressStreetCode: z.string().min(1),
         addressStreetNumber: z.string().min(1),
-        addressSuburb: z.string().min(1),
-        addressPostalCode: z.string().min(1),
         preferredCommunication: z.string().min(1),
         role: z.string().min(1),
         status: z.string().min(1),
@@ -84,8 +79,6 @@ export const petOwnerRouter = createTRPCRouter({
           addressStreet: input.addressStreet,
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
-          addressSuburb: input.addressSuburb,
-          addressPostalCode: input.addressPostalCode,
           preferredCommunication: input.preferredCommunication,
           status: input.status,
           comments: input.comments,

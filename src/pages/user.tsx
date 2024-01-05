@@ -2,6 +2,7 @@ import { type NextPage } from "next";
 import Head from "next/head";
 import React, { SetStateAction, useEffect, useRef, useState } from "react";
 import { api } from "~/utils/api";
+import ReactToPrint from "react-to-print";
 
 //Components
 import Navbar from "../components/navbar";
@@ -9,7 +10,7 @@ import CreateButtonModal from "../components/createButtonModal";
 import DeleteButtonModal from "~/components/deleteButtonModal";
 
 //Icons
-import { AddressBook, Pencil, Trash } from "phosphor-react";
+import { AddressBook, Pencil, Printer, Trash } from "phosphor-react";
 
 //Date picker
 import DatePicker from "react-datepicker";
@@ -49,6 +50,9 @@ const User: NextPage = () => {
     await deleteAllUsers.mutateAsync();
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
   };*/
+
+  //---------------------------------PRINTING----------------------------------
+  const printComponentRef = useRef(null);
 
   //---------------------------------EDIT BOXES----------------------------------
   const [firstName, setFirstName] = useState("");
@@ -139,7 +143,7 @@ const User: NextPage = () => {
   //AREA
   const handleToggleArea = () => {
     setIsAreaOpen(!isAreaOpen);
-    setStreetOption("Street");
+    setStreetOption("Select one");
   };
 
   //SetStateAction<string>
@@ -613,8 +617,8 @@ const User: NextPage = () => {
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
       setGreaterAreaOption(userData.addressGreaterArea ?? "Select one");
-      setAreaOption(userData.addressArea ?? "Select one");
-      setStreetOption(userData.addressStreet ?? "Select one");
+      setAreaOption(userData.addressArea ?? "");
+      setStreetOption(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -626,14 +630,16 @@ const User: NextPage = () => {
       setComments(userData.comments ?? "");
 
       //Make sure thet area and street options have a value
+      console.log("Helllooo address area: " + userData.addressArea);
       if (userData.addressArea === "") {
+        console.log("Area option is select one");
         setAreaOption("Select one");
       }
       if (userData.addressStreet === "") {
         setStreetOption("Select one");
       }
     }
-  }, [user.data]); // Effect runs when userQuery.data changes
+  }, [user.data, isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
     await updateUser.mutateAsync({
@@ -802,11 +808,17 @@ const User: NextPage = () => {
       setComments(userData.comments ?? "");
       //console.log("Select one");
       //Make sure thet area and street options have a value
-      if (userData.addressArea === "Select one") {
+      if (userData.addressArea === "Select one" && !isUpdate) {
         setAreaOption("");
       }
-      if (userData.addressStreet === "Select one") {
+      if (userData.addressStreet === "Select one" && !isUpdate) {
         setStreetOption("");
+      }
+      if (userData.addressArea === "" && isUpdate) {
+        setAreaOption("Select one");
+      }
+      if (userData.addressStreet === "" && isUpdate) {
+        setStreetOption("Select one");
       }
     }
   }, [isViewProfilePage, user.data]); // Effect runs when userQuery.data changes
@@ -825,6 +837,7 @@ const User: NextPage = () => {
     setConfirmPassword("");
     setMobile("");
     setGreaterAreaOption("Select one");
+    setAreaOption("Select one");
     setStreetOption("Select one");
     setAddressStreetCode("");
     setAddressStreetNumber("");
@@ -1524,8 +1537,12 @@ const User: NextPage = () => {
                 </div>
               </div>
             </div>
-            <div className="flex grow flex-col items-center">
+            <div ref={printComponentRef} className="flex grow flex-col items-center">
               <div className="flex max-w-xs flex-col items-start">
+                <div className="mb-2 flex items-center">
+                  <b className="mr-3">User ID:</b> {user?.data?.userID}
+                </div>
+
                 <div className="mb-2 flex items-center">
                   <b className="mr-3">First name:</b> {firstName}
                 </div>
@@ -1591,6 +1608,17 @@ const User: NextPage = () => {
                   {comments}
                 </div>
               </div>
+            </div>
+            <div className="mt-4 flex justify-center">
+              <ReactToPrint
+                trigger={() => (
+                  <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3">
+                    <Printer size={24} className="mr-1" />
+                    Print
+                  </button>
+                )}
+                content={() => printComponentRef.current}
+              />
             </div>
           </>
         )}

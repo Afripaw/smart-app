@@ -56,26 +56,26 @@ model Session {
 
 model User {
     id                     String    @id @default(cuid())
-    name                   String?
+    name                   String
     email                  String?   @unique
     emailVerified          DateTime?
     image                  String?
     userID                 Int       @default(autoincrement())
-    password               String?
-    surname                String?
-    mobile                 String?
-    addressGreaterArea     String?
+    password               String
+    surname                String
+    mobile                 String
+    addressGreaterArea     String
     addressArea            String?
     addressStreet          String?
     addressStreetCode      String?
     addressStreetNumber    String?
     addressSuburb          String?
     addressPostalCode      String?
-    preferredCommunication String?
-    role                   String?
-    status                 String?
+    preferredCommunication String
+    role                   String
+    status                 String
     comments               String?
-    startingDate           DateTime?
+    startingDate           DateTime
     createdAt              DateTime  @default(now())
     updatedAt              DateTime? @updatedAt
     accounts               Account[]
@@ -95,18 +95,18 @@ model petOwner {
     ownerID                Int      @id @default(autoincrement())
     firstName              String
     surname                String
-    email                  String
-    mobile                 String
+    email                  String?
+    mobile                 String?
     addressGreaterArea     String
+    addressArea            String
     addressStreet          String
-    addressStreetCode      String
+    addressStreetCode      String?
     addressStreetNumber    String
-    addressSuburb          String
-    addressPostalCode      String
+    status                 String
+    startingDate           DateTime
     preferredCommunication String
     pets                   pet[]
-    status                 String
-    comments               String
+    comments               String?
     createdAt              DateTime @default(now())
     updatedAt              DateTime @updatedAt
 }
@@ -124,22 +124,23 @@ model pet {
     sex                     String
     age                     String
     breed                   String
-    colour                  String
-    markings                String
+    colour                  String?
+    markings                String?
     status                  String
     sterilisedStatus        String
-    sterilisedRequested     String
-    sterilisedRequestSigned String
+    sterilisedRequested     String?
+    sterilisedRequestSigned String?
+    sterilisationOutcome    String?
     vaccinatedStatus        String
-    treatments              String
-    clinicsAttended         String[]
-    lastDeworming           String
+    treatments              String?
+    clinicsAttended         DateTime[]
+    lastDeworming           String?
     membership              String
     cardStatus              String
-    kennelReceived          String //year kennel was received
-    comments                String
-    createdAt               DateTime @default(now())
-    updatedAt               DateTime @updatedAt
+    kennelReceived          String? //year kennel was received
+    comments                String?
+    createdAt               DateTime   @default(now())
+    updatedAt               DateTime   @updatedAt
 }
 
 model petClinic {
@@ -148,37 +149,38 @@ model petClinic {
     greaterArea String
     area        String
     conditions  String
-    comments    String
+    comments    String?
 }
 
 model petTreatment {
     treatmentID Int      @id @default(autoincrement())
-    date        DateTime @default(now())
+    date        DateTime
 
     pet   pet @relation(fields: [petID], references: [petID])
     petID Int
 
     category String
     type     String
-    comments String
+    comments String?
 }
 
 model volunteer {
-    volunteerID            Int      @id @default(autoincrement())
+    volunteerID            Int        @id @default(autoincrement())
     firstName              String
     surname                String
-    email                  String
-    mobile                 String
+    email                  String?
+    mobile                 String?
     addressGreaterArea     String
-    addressStreet          String
-    addressStreetCode      String
-    addressStreetNumber    String
-    addressSuburb          String
-    addressPostalCode      String
+    addressStreet          String?
+    addressStreetCode      String?
+    addressStreetNumber    String?
+    addressSuburb          String?
+    addressPostalCode      String?
     preferredCommunication String
     status                 String
-    clinicsAttended        String[]
+    clinicsAttended        DateTime[]
     comments               String
-    createdAt              DateTime @default(now())
-    updatedAt              DateTime @updatedAt
+    startingDate           DateTime
+    createdAt              DateTime   @default(now())
+    updatedAt              DateTime   @updatedAt
 }

@@ -102,7 +102,7 @@ export const volunteerRouter = createTRPCRouter({
   searchVolunteersInfinite: publicProcedure
     .input(
       z.object({
-        id: z.number(),
+        volunteerID: z.number(),
         limit: z.number(),
         cursor: z.number().default(0),
         searchQuery: z.string(),
@@ -180,7 +180,7 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //get one volunteer
-  getVolunteer: protectedProcedure
+  getVolunteer: publicProcedure
     .input(
       z.object({
         volunteerID: z.number(),
@@ -199,6 +199,19 @@ export const volunteerRouter = createTRPCRouter({
   //get all volunteers
   getVolunteers: protectedProcedure.query(async ({ ctx }) => {
     const volunteers = await ctx.db.volunteer.findMany();
+
+    return volunteers;
+  }),
+
+  //get all the volunteers that are active
+  getActiveVolunteers: protectedProcedure.query(async ({ ctx }) => {
+    const volunteers = await ctx.db.volunteer.findMany({
+      where: {
+        status: {
+          equals: "Active",
+        },
+      },
+    });
 
     return volunteers;
   }),

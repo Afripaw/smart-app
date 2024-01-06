@@ -1473,12 +1473,6 @@ const User: NextPage = () => {
                     onChange={(e) => setComments(e.target.value)}
                     value={comments}
                   />
-                  {/*<input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. Hard worker"
-                    onChange={(e) => setComments(e.target.value)}
-                    value={comments}
-                          />*/}
                 </div>
 
                 <div className="flex items-center">
@@ -1538,7 +1532,7 @@ const User: NextPage = () => {
               </div>
             </div>
             <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="flex max-w-xs flex-col items-start">
+              <div className="mt-6 flex max-w-xs flex-col items-start">
                 <div className="mb-2 flex items-center">
                   <b className="mr-3">User ID:</b> {user?.data?.userID}
                 </div>
@@ -1609,7 +1603,7 @@ const User: NextPage = () => {
                 </div>
               </div>
             </div>
-            <div className="mt-4 flex justify-center">
+            <div className="my-6 flex justify-center">
               <ReactToPrint
                 trigger={() => (
                   <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3">

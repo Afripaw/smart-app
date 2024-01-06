@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
 export const petRouter = createTRPCRouter({
   create: publicProcedure
@@ -158,6 +154,42 @@ export const petRouter = createTRPCRouter({
   //get all pets
   getAllPets: protectedProcedure.query(async ({ ctx }) => {
     const pet = await ctx.db.pet.findMany();
+    return pet;
+  }),
+
+  //get all the pets who visited any pet clinic
+  getAllPetsClinic: protectedProcedure.query(async ({ ctx }) => {
+    const pet = await ctx.db.pet.findMany({
+      where: {
+        clinicsAttended: {
+          isEmpty: false,
+        },
+      },
+    });
+    return pet;
+  }),
+
+  //get all the pets that are sterilised
+  getAllPetsSterilised: protectedProcedure.query(async ({ ctx }) => {
+    const pet = await ctx.db.pet.findMany({
+      where: {
+        sterilisedStatus: {
+          not: "",
+        },
+      },
+    });
+    return pet;
+  }),
+
+  //get all the pets that have kennels
+  getAllPetsKennel: protectedProcedure.query(async ({ ctx }) => {
+    const pet = await ctx.db.pet.findMany({
+      where: {
+        kennelReceived: {
+          not: "",
+        },
+      },
+    });
     return pet;
   }),
 });

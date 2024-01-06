@@ -17,7 +17,7 @@ const CreateButtonModal: React.FC<CreateButtonModalProps> = ({ isOpen, mandatory
         <div className="flex justify-center">
           <h1 className="mb-3 text-3xl font-semibold">Error</h1>
         </div>
-        <h2 className="text-lg font-semibold">Required Fields</h2>
+        <h2 className="text-lg font-semibold">Required Fields Not Completed</h2>
         {mandatoryFields.length > 0 ? (
           <ul>
             {mandatoryFields.map((field) => (
@@ -29,7 +29,7 @@ const CreateButtonModal: React.FC<CreateButtonModalProps> = ({ isOpen, mandatory
         ) : (
           <p>No mandatory fields missing.</p>
         )}
-        <h2 className="mt-4 text-lg font-semibold">Error Fields</h2>
+        <h2 className="mt-4 text-lg font-semibold">Error In Fields Completed</h2>
         {errorFields.length > 0 ? (
           <ul>
             {errorFields.map((error) => (

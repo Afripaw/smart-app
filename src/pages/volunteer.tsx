@@ -689,7 +689,7 @@ const Volunteer: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">{isUpdate ? "Update Volunteer" : "Create New Volunteer"}</div>
+                <div className=" text-2xl">{isUpdate ? "Update Volunteer Information" : "Create New Volunteer"}</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -708,12 +708,12 @@ const Volunteer: NextPage = () => {
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="flex grow items-center justify-center">
                   <div className="mb-2 flex text-lg">
-                    All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary
+                    {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
                   </div>
                 </div>
                 <div className="flex items-center">
                   <div className="flex">
-                    First name<div className="text-lg text-main-orange">*</div>:{" "}
+                    First Name<div className="text-lg text-main-orange">*</div>:{" "}
                   </div>
                   <input
                     className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
@@ -758,6 +758,40 @@ const Volunteer: NextPage = () => {
                 </div>
 
                 {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
+
+                <div className="flex items-start">
+                  <div className="mr-3 flex items-center pt-5">
+                    <div className="mr-3 flex">
+                      Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <button
+                      ref={btnPreferredCommunicationRef}
+                      className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      type="button"
+                      onClick={handleTogglePreferredCommunication}
+                    >
+                      {preferredOption + " "}
+                      <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                      </svg>
+                    </button>
+                    {preferredCommunication && (
+                      <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          {preferredCommunicationOptions.map((option) => (
+                            <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
+                              <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                {option}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 <div className="flex items-start">
                   <div className="mr-3 flex items-center pt-4">
@@ -850,40 +884,6 @@ const Volunteer: NextPage = () => {
                 <div className="flex items-start">
                   <div className="mr-3 flex items-center pt-5">
                     <div className="mr-3 flex">
-                      Preferred Communication<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <button
-                      ref={btnPreferredCommunicationRef}
-                      className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      type="button"
-                      onClick={handleTogglePreferredCommunication}
-                    >
-                      {preferredOption + " "}
-                      <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                      </svg>
-                    </button>
-                    {preferredCommunication && (
-                      <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                          {preferredCommunicationOptions.map((option) => (
-                            <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
-                              <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                {option}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="mr-3 flex items-center pt-5">
-                    <div className="mr-3 flex">
                       Status<div className="text-lg text-main-orange">*</div>:{" "}
                     </div>
                   </div>
@@ -939,18 +939,6 @@ const Volunteer: NextPage = () => {
                     onChange={(e) => setComments(e.target.value)}
                     value={comments}
                   />
-                </div>
-
-                <div className="flex items-center">
-                  <input
-                    id="checked-checkbox"
-                    type="checkbox"
-                    // onChange={(e) => setSendUserDetails(e.target.checked)}
-                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
-                  />
-                  <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
-                    Welcome volunteer to preferred communication channel
-                  </label>
                 </div>
               </div>
 

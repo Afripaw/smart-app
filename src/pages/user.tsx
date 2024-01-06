@@ -59,6 +59,7 @@ const User: NextPage = () => {
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
+  const [addressFreeForm, setAddressFreeForm] = useState("");
   const [addressStreetCode, setAddressStreetCode] = useState("");
   const [addressStreetNumber, setAddressStreetNumber] = useState("");
   const [addressSuburb, setAddressSuburb] = useState("");
@@ -1136,7 +1137,7 @@ const User: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">{isUpdate ? "Update User" : "Create New User"}</div>
+                <b className=" text-2xl">{isUpdate ? "Update User Data" : "Create New User"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -1154,364 +1155,402 @@ const User: NextPage = () => {
               <div className="flex flex-col items-start">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="flex grow items-center justify-center">
-                  <div className="mb-2 flex text-lg">
-                    All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary
+                  <div className="mb-2 flex text-center">
+                    {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
                   </div>
                 </div>
-                <div className="flex items-center">
-                  <div className="flex">
-                    First name<div className="text-lg text-main-orange">*</div>:{" "}
-                  </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. John"
-                    onChange={(e) => setFirstName(e.target.value)}
-                    value={firstName}
-                  />
-                </div>
 
-                <div className="flex items-center">
-                  <div className="flex">
-                    Surname<div className="text-lg text-main-orange">*</div>:{" "}
-                  </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. Doe"
-                    onChange={(e) => setSurname(e.target.value)}
-                    value={surname}
-                  />
-                </div>
-
-                <div className="flex items-center">
-                  <div>Email: </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. jd@gmail.com"
-                    onChange={(e) => setEmail(e.target.value)}
-                    value={email}
-                  />
-                </div>
-
-                <div className="flex items-center">
-                  <div className="flex">
-                    Mobile<div className="text-lg text-main-orange">*</div>:{" "}
-                  </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. 0821234567"
-                    onChange={(e) => setMobile(e.target.value)}
-                    value={mobile}
-                  />
-                </div>
-
-                {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
-
-                <div className="flex items-start">
-                  <div className="mr-3 flex items-center pt-4">
+                <div className="my-2 flex w-full flex-col rounded-lg border-2 p-4">
+                  <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
+                  <div className="flex items-center">
                     <div className="flex">
-                      Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
+                      <span className="text-white">1</span>
+                      1. First Name<div className="text-lg text-main-orange">*</div>:{" "}
                     </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <button
-                      ref={btnGreaterAreaRef}
-                      className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      type="button"
-                      onClick={handleToggleGreaterArea}
-                    >
-                      {isUpdate ? greaterAreaOption : greaterAreaOption + " "}
-                      <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                      </svg>
-                    </button>
-                    {isGreaterAreaOpen && (
-                      <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                          {greaterAreaOptions.map((option) => (
-                            <li key={option} onClick={() => handleGreaterAreaOption(option)}>
-                              <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                {option}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="mr-3 flex items-center pt-5">
-                    <div className="mr-3">Area: </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <button
-                      ref={btnAreaRef}
-                      className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      type="button"
-                      onClick={handleToggleArea}
-                    >
-                      {areaOption + " "}
-                      <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                      </svg>
-                    </button>
-                    {isAreaOpen && (
-                      <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                          {areaOptions.map((option) => (
-                            <li key={option} onClick={() => handleAreaOption(option)}>
-                              <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                {option}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="mr-3 flex items-center pt-5">
-                    <div className="mr-3">Street: </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <button
-                      ref={btnStreetRef}
-                      className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      type="button"
-                      onClick={handleToggleStreet}
-                    >
-                      {streetOption + " "}
-                      <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                      </svg>
-                    </button>
-                    {isStreetOpen && (
-                      <div ref={streetRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                          {streetOptions.map((option) => (
-                            <li key={option} onClick={() => handleStreetOption(option)}>
-                              <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                {option}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <div className="mr-3">Street Code: </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black "
-                    placeholder="Type here: e.g. 1234"
-                    onChange={(e) => setAddressStreetCode(e.target.value)}
-                    value={addressStreetCode}
-                  />
-                </div>
-                {/*{streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}*/}
-
-                <div className="flex items-center">
-                  <div className="mr-3">Street Number: </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. 1234"
-                    onChange={(e) => setAddressStreetNumber(e.target.value)}
-                    value={addressStreetNumber}
-                  />
-                </div>
-                {streetNumberMessage && <div className="text-sm text-red-500">{streetNumberMessage}</div>}
-
-                <div className="flex items-center">
-                  <div>Suburb: </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. Plaza"
-                    onChange={(e) => setAddressSuburb(e.target.value)}
-                    value={addressSuburb}
-                  />
-                </div>
-
-                <div className="flex items-center">
-                  <div>Postal Code: </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. 7102"
-                    onChange={(e) => setAddressPostalCode(e.target.value)}
-                    value={addressPostalCode}
-                  />
-                </div>
-                {postalCodeMessage && <div className="text-sm text-red-500">{postalCodeMessage}</div>}
-
-                <div className="flex items-start">
-                  <div className="mr-3 flex items-center pt-5">
-                    <div className="mr-3 flex">
-                      Preferred Communication<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <button
-                      ref={btnPreferredCommunicationRef}
-                      className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      type="button"
-                      onClick={handleTogglePreferredCommunication}
-                    >
-                      {preferredOption + " "}
-                      <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                      </svg>
-                    </button>
-                    {preferredCommunication && (
-                      <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                          {preferredCommunicationOptions.map((option) => (
-                            <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
-                              <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                {option}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="mr-3 flex items-center pt-5">
-                    <div className="mr-3 flex">
-                      Role<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <button
-                      ref={btnRoleRef}
-                      className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      type="button"
-                      onClick={handleToggleRole}
-                    >
-                      {roleOption + " "}
-                      <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                      </svg>
-                    </button>
-                    {role && (
-                      <div ref={roleRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                          {roleOptions.map((option) => (
-                            <li key={option} onClick={() => handleRoleOption(option)}>
-                              <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                {option}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="mr-3 flex items-center pt-5">
-                    <div className="mr-3 flex">
-                      Status<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <button
-                      ref={btnStatusRef}
-                      className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      type="button"
-                      onClick={handleToggleStatus}
-                    >
-                      {statusOption + " "}
-                      <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                      </svg>
-                    </button>
-                    {status && (
-                      <div ref={statusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                          {statusOptions.map((option) => (
-                            <li key={option} onClick={() => handleStatusOption(option)}>
-                              <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                {option}
-                              </a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/*DATEPICKER*/}
-                <div className="flex items-center">
-                  <div className="mr-3 flex">
-                    Starting Date<div className="text-lg text-main-orange">*</div>:{" "}
-                  </div>
-                  <div className="p-4">
-                    <DatePicker
-                      selected={startingDate}
-                      onChange={(date) => setStartingDate(date!)}
-                      dateFormat="dd/MM/yyyy"
-                      customInput={<CustomInput />}
-                      className="form-input rounded-md border px-4 py-2"
+                    <input
+                      className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                      placeholder="Type here: e.g. John"
+                      onChange={(e) => setFirstName(e.target.value)}
+                      value={firstName}
                     />
                   </div>
-                </div>
 
-                <div className="flex items-start">
-                  <div className="mr-3 pt-3">Comments: </div>
-                  <textarea
-                    className="m-2 h-24 w-60 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. Hard worker"
-                    onChange={(e) => setComments(e.target.value)}
-                    value={comments}
-                  />
-                </div>
-
-                <div className="flex items-center">
-                  <div className="mr-3 flex ">
-                    Password<div className="text-lg text-main-orange">*</div>:{" "}
+                  <div className="flex items-center">
+                    <div className="flex">
+                      <span className="text-white">1</span>
+                      2. Surname<div className="text-lg text-main-orange">*</div>:{" "}
+                    </div>
+                    <input
+                      className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                      placeholder="Type here: e.g. Doe"
+                      onChange={(e) => setSurname(e.target.value)}
+                      value={surname}
+                    />
                   </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. JohnDoe$123"
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-                {passwordMessage && <div className="text-sm text-red-500">{passwordMessage}</div>}
 
-                <div className="flex items-center">
-                  <div className="mr-3 flex">
-                    Confirm Password<div className="text-lg text-main-orange">*</div>:{" "}
+                  <div className="flex items-center">
+                    <span className="text-white">1</span>
+                    <div>3. Email: </div>
+                    <input
+                      className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                      placeholder="Type here: e.g. jd@gmail.com"
+                      onChange={(e) => setEmail(e.target.value)}
+                      value={email}
+                    />
                   </div>
-                  <input
-                    className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                    placeholder="Type here: e.g. JohnDoe$123"
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
-                {confirmPasswordMessage && <div className="text-sm text-red-500">{confirmPasswordMessage}</div>}
 
-                <div className="flex items-center">
-                  <input
-                    id="checked-checkbox"
-                    type="checkbox"
-                    // onChange={(e) => setSendUserDetails(e.target.checked)}
-                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
-                  />
-                  <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
-                    Welcome user to preferred communication channel
-                  </label>
+                  <div className="flex items-center">
+                    <div className="flex">
+                      <span className="text-white">1</span>
+                      4. Mobile<div className="text-lg text-main-orange">*</div>:{" "}
+                    </div>
+                    <input
+                      className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                      placeholder="Type here: e.g. 0821234567"
+                      onChange={(e) => setMobile(e.target.value)}
+                      value={mobile}
+                    />
+                  </div>
+                  {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className="mr-3 flex">
+                        <span className="text-white">1</span>
+                        5. Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnPreferredCommunicationRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleTogglePreferredCommunication}
+                      >
+                        {preferredOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {preferredCommunication && (
+                        <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {preferredCommunicationOptions.map((option) => (
+                              <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
+                                <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                  {option}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="my-2 flex w-full flex-col rounded-lg border-2 p-4">
+                  <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
+                  <div className="flex flex-col divide-y-2 divide-gray-300">
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-4">
+                        <div className="flex">
+                          <span className="text-white">1</span>
+                          6. Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
+                        </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnGreaterAreaRef}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleToggleGreaterArea}
+                        >
+                          {isUpdate ? greaterAreaOption : greaterAreaOption + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {isGreaterAreaOpen && (
+                          <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {greaterAreaOptions.map((option) => (
+                                <li key={option} onClick={() => handleGreaterAreaOption(option)}>
+                                  <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                    {option}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-start divide-x-2 divide-gray-300">
+                      <div className="flex flex-col pr-2">
+                        <div className="flex items-start">
+                          <div className="mr-3 flex items-center pt-5">
+                            <div className="mr-3 flex">
+                              <span className="text-white">1</span>7. Area:{" "}
+                            </div>
+                          </div>
+                          <div className="flex flex-col">
+                            <button
+                              ref={btnAreaRef}
+                              className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                              type="button"
+                              onClick={handleToggleArea}
+                            >
+                              {areaOption + " "}
+                              <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                              </svg>
+                            </button>
+                            {isAreaOpen && (
+                              <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                                <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                  {areaOptions.map((option) => (
+                                    <li key={option} onClick={() => handleAreaOption(option)}>
+                                      <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                        {option}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-start">
+                          <div className="mr-3 flex items-center pt-5">
+                            <div className="mr-3 flex">
+                              <span className="text-white">1</span>8. Street:{" "}
+                            </div>
+                          </div>
+                          <div className="flex flex-col">
+                            <button
+                              ref={btnStreetRef}
+                              className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                              type="button"
+                              onClick={handleToggleStreet}
+                            >
+                              {streetOption + " "}
+                              <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                              </svg>
+                            </button>
+                            {isStreetOpen && (
+                              <div ref={streetRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                                <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                  {streetOptions.map((option) => (
+                                    <li key={option} onClick={() => handleStreetOption(option)}>
+                                      <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                        {option}
+                                      </a>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center">
+                          <div className="mr-3 flex">
+                            <span className="text-white">1</span> 9. Street Code:{" "}
+                          </div>
+                          <input
+                            className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black "
+                            placeholder="Type here: e.g. 1234"
+                            onChange={(e) => setAddressStreetCode(e.target.value)}
+                            value={addressStreetCode}
+                          />
+                        </div>
+                        {/*{streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}*/}
+
+                        <div className="flex items-center">
+                          <div className="mr-3">10. Street Number: </div>
+                          <input
+                            className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                            placeholder="Type here: e.g. 1234"
+                            onChange={(e) => setAddressStreetNumber(e.target.value)}
+                            value={addressStreetNumber}
+                          />
+                        </div>
+                        {streetNumberMessage && <div className="text-sm text-red-500">{streetNumberMessage}</div>}
+
+                        <div className="flex items-center">
+                          <div>11. Suburb: </div>
+                          <input
+                            className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                            placeholder="Type here: e.g. Plaza"
+                            onChange={(e) => setAddressSuburb(e.target.value)}
+                            value={addressSuburb}
+                          />
+                        </div>
+
+                        <div className="flex items-center">
+                          <div>12. Postal Code: </div>
+                          <input
+                            className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                            placeholder="Type here: e.g. 7102"
+                            onChange={(e) => setAddressPostalCode(e.target.value)}
+                            value={addressPostalCode}
+                          />
+                        </div>
+                        {postalCodeMessage && <div className="text-sm text-red-500">{postalCodeMessage}</div>}
+                      </div>
+
+                      {/*Free form address */}
+                      <div className="mt-3 flex flex-col pl-4">
+                        <div>Or Alternatively Free Form Address</div>
+                        <textarea
+                          className=" h-64 w-72 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                          placeholder="Type here: e.g. 1234 Plaza, 1234"
+                          onChange={(e) => setAddressFreeForm(e.target.value)}
+                          value={addressFreeForm}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="my-2 flex w-full flex-col rounded-lg border-2 p-4">
+                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className="mr-3 flex">
+                        13. Role<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnRoleRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleRole}
+                      >
+                        {roleOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {role && (
+                        <div ref={roleRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {roleOptions.map((option) => (
+                              <li key={option} onClick={() => handleRoleOption(option)}>
+                                <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                  {option}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className="mr-3 flex">
+                        14. Status<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnStatusRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleStatus}
+                      >
+                        {statusOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {status && (
+                        <div ref={statusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {statusOptions.map((option) => (
+                              <li key={option} onClick={() => handleStatusOption(option)}>
+                                <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                  {option}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/*DATEPICKER*/}
+                  <div className="flex items-center">
+                    <div className="mr-3 flex">
+                      15. Starting Date<div className="text-lg text-main-orange">*</div>:{" "}
+                    </div>
+                    <div className="p-4">
+                      <DatePicker
+                        selected={startingDate}
+                        onChange={(date) => setStartingDate(date!)}
+                        dateFormat="dd/MM/yyyy"
+                        customInput={<CustomInput />}
+                        className="form-input rounded-md border px-4 py-2"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 pt-3">16. Comments: </div>
+                    <textarea
+                      className="m-2 h-24 w-60 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                      placeholder="Type here: e.g. Hard worker"
+                      onChange={(e) => setComments(e.target.value)}
+                      value={comments}
+                    />
+                  </div>
+
+                  <div className="flex items-center">
+                    <div className="mr-3 flex ">
+                      17. Password<div className="text-lg text-main-orange">*</div>:{" "}
+                    </div>
+                    <input
+                      className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                      placeholder="Type here: e.g. JohnDoe$123"
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  {passwordMessage && <div className="text-sm text-red-500">{passwordMessage}</div>}
+
+                  <div className="flex items-center">
+                    <div className="mr-3 flex">
+                      <span className="text-white">17. </span> Confirm Password<div className="text-lg text-main-orange">*</div>:{" "}
+                    </div>
+                    <input
+                      className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                      placeholder="Type here: e.g. JohnDoe$123"
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                  </div>
+                  {confirmPasswordMessage && <div className="text-sm text-red-500">{confirmPasswordMessage}</div>}
+
+                  <div className="flex items-center">
+                    <span className="text-white">17. </span>
+                    <input
+                      id="checked-checkbox"
+                      type="checkbox"
+                      // onChange={(e) => setSendUserDetails(e.target.checked)}
+                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                    />
+                    <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
+                      Send login credentials via preferred communication channel
+                    </label>
+                  </div>
                 </div>
               </div>
-
               <button className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg hover:bg-orange-500" onClick={() => void handleCreateButtonModal()}>
                 {isUpdate ? "Update" : "Create"}
               </button>

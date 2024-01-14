@@ -81,11 +81,13 @@ export default function Home() {
         <meta name="description" content="Smart App" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className=" flex min-h-screen flex-col bg-gray-100">
+      <main className=" relative flex min-h-screen flex-col bg-gray-100">
+        {/*Background image*/}
+        <Image src={"/Collage Greyed Out.jpg"} alt="Afripaw backdrop" className="absolute left-0 top-0 max-h-screen min-w-full" width={720} height={480} />
         {!signIn_ && (
           <>
-            <div className="flex grow flex-col bg-white">
-              <div className="flex items-center justify-between bg-main-orange">
+            <div className=" flex grow flex-col bg-white">
+              <div className="z-10 flex items-center justify-between bg-main-orange">
                 <div className="justify-begin flex">
                   <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="m-2 ml-2 aspect-square h-max rounded-full" width={62} height={62} />
                 </div>
@@ -115,11 +117,11 @@ export default function Home() {
                     <div className="text-2xl">90</div>
                     <div>Active Volunteers</div>
                   </div>
-                  <p className="w-52 border-2 border-black p-3">
+                  <p className="w-52 border-2 border-black bg-white p-3">
                     <strong className="text-lg text-main-orange">Our Mision</strong> is to partner with low-income communities to educate families on their
                     pets’ primary needs and facilitate access to affordable support services with a focus on free mass sterilisation.
                   </p>
-                  <p className="ml-5 w-52 border-2 border-black p-6 py-9">
+                  <p className="ml-5 w-52 border-2 border-black bg-white p-6 py-9">
                     <strong className="text-lg text-main-orange">Our Vision</strong> is to see communities that treasure their pets, provide for their needs,
                     and protect them from suffering and disease.
                   </p>
@@ -130,7 +132,7 @@ export default function Home() {
         )}
         {signIn_ && (
           <>
-            <div className="mb-2 flex flex-col bg-slate-300">
+            <div className="z-10 mb-2 flex flex-col bg-slate-300">
               <div className="flex grow justify-between bg-main-orange">
                 <div className="justify-begin flex items-center">
                   <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="m-2 ml-2 aspect-square h-max rounded-full" width={62} height={62} />
@@ -143,7 +145,7 @@ export default function Home() {
                 </button>
               </div>
             </div>
-            <form className="mb-14 flex grow flex-col items-center justify-center" onSubmit={(event) => void handleUser(event)}>
+            <form className="z-10 mb-14 flex grow flex-col items-center justify-center" onSubmit={(event) => void handleUser(event)}>
               <div className="mb-5 text-lg">Enter Credentials</div>
               <input
                 className={`m-2 rounded-lg border-2 border-zinc-800 px-2 ${missingFields ? "border-red-500" : ""} ${passwordError ? " border-red-500" : ""}`}
@@ -169,7 +171,7 @@ export default function Home() {
           </>
         )}
         {loading && (
-          <div className="absolute left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-gray-200" role="status">
+          <div className="absolute left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-gray-200 " role="status">
             <svg
               aria-hidden="true"
               className="h-20 w-20 animate-spin fill-main-orange text-gray-200 dark:text-gray-600"

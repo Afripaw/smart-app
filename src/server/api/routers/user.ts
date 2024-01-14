@@ -18,6 +18,7 @@ export const UserRouter = createTRPCRouter({
         addressStreetNumber: z.string(),
         addressSuburb: z.string(),
         addressPostalCode: z.string(),
+        addressFreeForm: z.string(),
         preferredCommunication: z.string(),
         startingDate: z.date(),
         role: z.string(),
@@ -40,6 +41,7 @@ export const UserRouter = createTRPCRouter({
           addressStreetNumber: input.addressStreetNumber,
           addressSuburb: input.addressSuburb,
           addressPostalCode: input.addressPostalCode,
+          addressFreeForm: input.addressFreeForm,
           preferredCommunication: input.preferredCommunication,
           role: input.role,
           status: input.status,
@@ -67,6 +69,7 @@ export const UserRouter = createTRPCRouter({
         addressStreetNumber: z.string(),
         addressSuburb: z.string(),
         addressPostalCode: z.string(),
+        addressFreeForm: z.string(),
         preferredCommunication: z.string(),
         startingDate: z.date(),
         role: z.string(),
@@ -93,6 +96,7 @@ export const UserRouter = createTRPCRouter({
             addressStreetNumber: input.addressStreetNumber,
             addressSuburb: input.addressSuburb,
             addressPostalCode: input.addressPostalCode,
+            addressFreeForm: input.addressFreeForm,
             preferredCommunication: input.preferredCommunication,
             startingDate: input.startingDate,
             role: input.role,
@@ -119,6 +123,7 @@ export const UserRouter = createTRPCRouter({
             addressStreetNumber: input.addressStreetNumber,
             addressSuburb: input.addressSuburb,
             addressPostalCode: input.addressPostalCode,
+            addressFreeForm: input.addressFreeForm,
             preferredCommunication: input.preferredCommunication,
             startingDate: input.startingDate,
             role: input.role,
@@ -173,11 +178,13 @@ export const UserRouter = createTRPCRouter({
             { status: { contains: input.searchQuery } },
             { mobile: { contains: input.searchQuery } },
             { addressGreaterArea: { contains: input.searchQuery } },
+            { addressArea: { contains: input.searchQuery } },
             { addressStreet: { contains: input.searchQuery } },
             { addressStreetCode: { contains: input.searchQuery } },
             { addressStreetNumber: { contains: input.searchQuery } },
             { addressSuburb: { contains: input.searchQuery } },
             { addressPostalCode: { contains: input.searchQuery } },
+            { addressFreeForm: { contains: input.searchQuery } },
             { preferredCommunication: { contains: input.searchQuery } },
             { comments: { contains: input.searchQuery } },
           ],
@@ -199,25 +206,34 @@ export const UserRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+
+      // Construct a complex search condition
+      const searchConditions = terms.map((term) => ({
+        OR: [
+          { name: { contains: term } },
+          { surname: { contains: term } },
+          { email: { contains: term } },
+          { role: { contains: term } },
+          { status: { contains: term } },
+          { mobile: { contains: term } },
+          { addressGreaterArea: { contains: term } },
+          { addressArea: { contains: term } },
+          { addressStreet: { contains: term } },
+          { addressStreetCode: { contains: term } },
+          { addressStreetNumber: { contains: term } },
+          { addressSuburb: { contains: term } },
+          { addressPostalCode: { contains: term } },
+          { addressFreeForm: { contains: term } },
+          { preferredCommunication: { contains: term } },
+          { comments: { contains: term } },
+        ],
+      }));
+
       const user = await ctx.db.user.findMany({
         where: {
-          OR: [
-            //{ userID: { contains: input.searchQuery } },
-            { name: { contains: input.searchQuery } },
-            { surname: { contains: input.searchQuery } },
-            { email: { contains: input.searchQuery } },
-            { role: { contains: input.searchQuery } },
-            { status: { contains: input.searchQuery } },
-            { mobile: { contains: input.searchQuery } },
-            { addressGreaterArea: { contains: input.searchQuery } },
-            { addressStreet: { contains: input.searchQuery } },
-            { addressStreetCode: { contains: input.searchQuery } },
-            { addressStreetNumber: { contains: input.searchQuery } },
-            { addressSuburb: { contains: input.searchQuery } },
-            { addressPostalCode: { contains: input.searchQuery } },
-            { preferredCommunication: { contains: input.searchQuery } },
-            { comments: { contains: input.searchQuery } },
-          ],
+          AND: searchConditions,
         },
         orderBy: {
           userID: "asc",

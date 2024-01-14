@@ -1,10 +1,6 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { type GetServerSidePropsContext } from "next";
-import {
-  getServerSession,
-  type DefaultSession,
-  type NextAuthOptions,
-} from "next-auth";
+import { getServerSession, type DefaultSession, type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "~/env";
@@ -43,23 +39,28 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: ({ session, token }) => {
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.sub,
+        },
+      };
+    },
     /* async redirect({ }) {
       return "/dashboard"; // Redirect to dashboard after sign-in
     }, */
   },
+  pages: {
+    signIn: "/",
+  },
   adapter: PrismaAdapter(db),
   providers: [
-    GoogleProvider({
+    /*   GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
-    }),
+    }), */
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -102,19 +103,17 @@ export const authOptions: NextAuthOptions = {
 
         // 3. Check password
         if (hash(credentials.password) !== user.password) {
-          console.error(
-            "Password does not match for credentials:",
-            credentials,
-          );
+          console.error("Password does not match for credentials:", credentials);
           return null;
         }
 
-        console.log("User logged in with credentials:", credentials);
+        console.log("User logged in with credentials:", credentials, user);
 
         // 4. Return user
         return user;
       },
     }),
+
     /**
      * ...add more providers here.
      *
@@ -125,6 +124,9 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  session: {
+    strategy: "jwt",
+  },
 };
 
 /**
@@ -132,9 +134,6 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
+export const getServerAuthSession = (ctx: { req: GetServerSidePropsContext["req"]; res: GetServerSidePropsContext["res"] }) => {
   return getServerSession(ctx.req, ctx.res, authOptions);
 };

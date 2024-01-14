@@ -17,6 +17,13 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    remotePatterns: [
+      {
+        hostname: "utfs.io",
+      },
+    ],
+  },
 };
 
 export default config;

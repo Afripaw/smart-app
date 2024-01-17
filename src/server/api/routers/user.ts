@@ -210,33 +210,40 @@ export const UserRouter = createTRPCRouter({
       const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
 
       // Construct a complex search condition
-      const searchConditions = terms.map((term) => ({
-        OR: [
-          { name: { contains: term } },
-          { surname: { contains: term } },
-          { email: { contains: term } },
-          { role: { contains: term } },
-          { status: { contains: term } },
-          { mobile: { contains: term } },
-          { addressGreaterArea: { contains: term } },
-          { addressArea: { contains: term } },
-          { addressStreet: { contains: term } },
-          { addressStreetCode: { contains: term } },
-          { addressStreetNumber: { contains: term } },
-          { addressSuburb: { contains: term } },
-          { addressPostalCode: { contains: term } },
-          { addressFreeForm: { contains: term } },
-          { preferredCommunication: { contains: term } },
-          { comments: { contains: term } },
-        ],
-      }));
+      const searchConditions = terms.map((term) => {
+        // Check if term is a date
+        const termAsDate: Date = new Date(term);
+        console.log(termAsDate);
+        const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+        return {
+          OR: [
+            { name: { contains: term } },
+            { surname: { contains: term } },
+            { email: { contains: term } },
+            { role: { contains: term } },
+            { status: { contains: term } },
+            { mobile: { contains: term } },
+            { addressGreaterArea: { contains: term } },
+            { addressArea: { contains: term } },
+            { addressStreet: { contains: term } },
+            { addressStreetCode: { contains: term } },
+            { addressStreetNumber: { contains: term } },
+            { addressSuburb: { contains: term } },
+            { addressPostalCode: { contains: term } },
+            { addressFreeForm: { contains: term } },
+            { preferredCommunication: { contains: term } },
+            { comments: { contains: term } },
+            dateCondition,
+          ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+        };
+      });
 
       const user = await ctx.db.user.findMany({
         where: {
           AND: searchConditions,
         },
         orderBy: {
-          userID: "asc",
+          surname: "asc",
         },
         take: input.limit + 1,
         cursor: input.cursor ? { id: input.cursor } : undefined,

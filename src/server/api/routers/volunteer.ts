@@ -19,7 +19,7 @@ export const volunteerRouter = createTRPCRouter({
         preferredCommunication: z.string().min(1),
         status: z.string().min(1),
         startingDate: z.date(),
-        clinicAttended: z.date().array().min(1),
+        clinicAttended: z.string().array().min(1),
         comments: z.string().min(1),
       }),
     )
@@ -67,7 +67,7 @@ export const volunteerRouter = createTRPCRouter({
         preferredCommunication: z.string().min(1),
         status: z.string().min(1),
         startingDate: z.date(),
-        clinicAttended: z.date().array().min(1),
+        clinicAttended: z.string().array().min(1),
         comments: z.string().min(1),
       }),
     )
@@ -109,40 +109,55 @@ export const volunteerRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const volunteer = await ctx.db.volunteer.findMany({
-        where: {
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+
+      // Construct a complex search condition
+      const searchConditions = terms.map((term) => {
+        // Check if term is a date
+        const termAsDate: Date = new Date(term);
+        console.log(termAsDate);
+        const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+        return {
           OR: [
-            { firstName: { contains: input.searchQuery } },
-            { surname: { contains: input.searchQuery } },
-            { email: { contains: input.searchQuery } },
-            { status: { contains: input.searchQuery } },
-            { mobile: { contains: input.searchQuery } },
-            { addressGreaterArea: { contains: input.searchQuery } },
-            { addressStreet: { contains: input.searchQuery } },
-            { addressStreetCode: { contains: input.searchQuery } },
-            { addressStreetNumber: { contains: input.searchQuery } },
-            { addressSuburb: { contains: input.searchQuery } },
-            { addressPostalCode: { contains: input.searchQuery } },
-            { preferredCommunication: { contains: input.searchQuery } },
-            { comments: { contains: input.searchQuery } },
-          ],
+            { firstName: { contains: term } },
+            { surname: { contains: term } },
+            { email: { contains: term } },
+            { status: { contains: term } },
+            { mobile: { contains: term } },
+            { addressGreaterArea: { contains: term } },
+            { addressStreet: { contains: term } },
+            { addressStreetCode: { contains: term } },
+            { addressStreetNumber: { contains: term } },
+            { addressSuburb: { contains: term } },
+            { addressPostalCode: { contains: term } },
+            { preferredCommunication: { contains: term } },
+            { comments: { contains: term } },
+            dateCondition,
+          ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+        };
+      });
+
+      const user = await ctx.db.volunteer.findMany({
+        where: {
+          AND: searchConditions,
         },
         orderBy: {
-          volunteerID: "asc",
+          surname: "asc",
         },
         take: input.limit + 1,
         cursor: input.cursor ? { volunteerID: input.cursor } : undefined,
       });
 
-      let nextCursor: typeof input.cursor | undefined = undefined;
-      if (volunteer.length > input.limit) {
-        const nextRow = volunteer.pop();
-        nextCursor = nextRow?.volunteerID;
+      let newNextCursor: typeof input.cursor | undefined = undefined;
+      if (user.length > input.limit) {
+        const nextRow = user.pop();
+        newNextCursor = nextRow?.volunteerID;
       }
 
       return {
-        volunteer_data: volunteer,
-        nextCursor,
+        user_data: user,
+        nextCursor: newNextCursor,
       };
     }),
 

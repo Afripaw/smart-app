@@ -1058,9 +1058,7 @@ const User: NextPage = () => {
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {preferredCommunicationOptions.map((option) => (
                               <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
-                                <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                  {option}
-                                </a>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                               </li>
                             ))}
                           </ul>
@@ -1096,9 +1094,7 @@ const User: NextPage = () => {
                             <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                               {greaterAreaOptions.map((option) => (
                                 <li key={option} onClick={() => handleGreaterAreaOption(option)}>
-                                  <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                    {option}
-                                  </a>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                                 </li>
                               ))}
                             </ul>
@@ -1132,9 +1128,7 @@ const User: NextPage = () => {
                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                   {areaOptions.map((option) => (
                                     <li key={option} onClick={() => handleAreaOption(option)}>
-                                      <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                        {option}
-                                      </a>
+                                      <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                                     </li>
                                   ))}
                                 </ul>
@@ -1166,9 +1160,7 @@ const User: NextPage = () => {
                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                   {streetOptions.map((option) => (
                                     <li key={option} onClick={() => handleStreetOption(option)}>
-                                      <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                        {option}
-                                      </a>
+                                      <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                                     </li>
                                   ))}
                                 </ul>
@@ -1250,9 +1242,7 @@ const User: NextPage = () => {
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {roleOptions.map((option) => (
                               <li key={option} onClick={() => handleRoleOption(option)}>
-                                <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                  {option}
-                                </a>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                               </li>
                             ))}
                           </ul>
@@ -1284,9 +1274,7 @@ const User: NextPage = () => {
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {statusOptions.map((option) => (
                               <li key={option} onClick={() => handleStatusOption(option)}>
-                                <a href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                  {option}
-                                </a>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                               </li>
                             ))}
                           </ul>

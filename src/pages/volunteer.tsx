@@ -323,7 +323,7 @@ const Volunteer: NextPage = () => {
       setMobile(userData.mobile ?? "");
       setGreaterAreaOption(userData.addressGreaterArea ?? "Select one");
       setStreet(userData.addressStreet ?? "");
-      setAddressFreeForm((userData.addressFreeForm as string) ?? "");
+      setAddressFreeForm(userData.addressFreeForm ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -451,7 +451,7 @@ const Volunteer: NextPage = () => {
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
-      setAddressFreeForm((userData.addressFreeForm as string) ?? "");
+      setAddressFreeForm(userData.addressFreeForm ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "");
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");

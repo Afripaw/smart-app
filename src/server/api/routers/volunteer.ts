@@ -93,6 +93,7 @@ export const volunteerRouter = createTRPCRouter({
           addressPostalCode: input.addressPostalCode,
           addressFreeForm: input.addressFreeForm,
           preferredCommunication: input.preferredCommunication,
+          startingDate: input.startingDate,
           status: input.status,
           clinicsAttended: input.clinicAttended,
           comments: input.comments,

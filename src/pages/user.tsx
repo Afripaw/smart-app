@@ -11,6 +11,7 @@ import DeleteButtonModal from "~/components/deleteButtonModal";
 import ImageUploadModal from "~/components/imageUploadModal";
 import { areaOptions } from "~/components/GeoLocation/areaOptions";
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
+import { sendUserCredentialsEmail } from "~/components/CommunicationPortals/email";
 
 //Icons
 import { AddressBook, Pencil, Printer, Trash, UserCircle, Users } from "phosphor-react";
@@ -352,7 +353,7 @@ const User: NextPage = () => {
 
   //----------------------------COMMUNICATION OF USER DETAILS---------------------------
   //Send user's details to user
-  //const [sendUserDetails, setSendUserDetails] = useState(false);
+  const [sendUserDetails, setSendUserDetails] = useState(false);
 
   //-------------------------------UPDATE USER-----------------------------------------
   //Update the user's details in fields
@@ -527,10 +528,16 @@ const User: NextPage = () => {
       comments: comments,
     });
 
+    //Send user details
+    //Email
+    if (preferredOption === "Email" && sendUserDetails) {
+      await sendUserCredentialsEmail(email);
+    }
+
     //Image upload
     console.log("ID: ", newUser_?.id, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
 
-    handleUploadModal(newUser_.id, firstName, newUser_?.image ?? "");
+    handleUploadModal(newUser_?.id ?? "", firstName, newUser_?.image ?? "");
     setIsCreate(false);
     setIsUpdate(false);
     setIsUpdatePassword(false);
@@ -1025,7 +1032,7 @@ const User: NextPage = () => {
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
                   {isUpdate && (
-                    <div className="absolute right-12 top-16">
+                    <div className={`absolute ${user.data?.image ? "right-12" : "right-8"} top-16`}>
                       {user.data?.image ? (
                         <Image
                           src={user.data?.image}
@@ -1385,7 +1392,7 @@ const User: NextPage = () => {
                     <input
                       id="checked-checkbox"
                       type="checkbox"
-                      // onChange={(e) => setSendUserDetails(e.target.checked)}
+                      onChange={(e) => setSendUserDetails(e.target.checked)}
                       className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                     />
                     <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">

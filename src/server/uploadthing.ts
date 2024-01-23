@@ -35,6 +35,24 @@ export const fileRouter = {
             image: file.url,
           },
         });
+      } else if (metadata.user === "owner") {
+        await db.petOwner.update({
+          where: {
+            ownerID: Number(metadata.userId),
+          },
+          data: {
+            image: file.url,
+          },
+        });
+      } else if (metadata.user === "pet") {
+        await db.pet.update({
+          where: {
+            petID: Number(metadata.userId),
+          },
+          data: {
+            image: file.url,
+          },
+        });
       }
 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback

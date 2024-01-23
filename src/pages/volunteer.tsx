@@ -846,7 +846,7 @@ const Volunteer: NextPage = () => {
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
                   {isUpdate && (
-                    <div className="absolute right-12 top-16">
+                    <div className={`absolute ${user.data?.image ? "right-12" : "right-8"} top-16`}>
                       {user.data?.image ? (
                         <Image
                           src={user.data?.image}

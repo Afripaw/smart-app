@@ -16,6 +16,7 @@ export const volunteerRouter = createTRPCRouter({
         addressStreetNumber: z.string(),
         addressSuburb: z.string(),
         addressPostalCode: z.string(),
+        addressFreeForm: z.string(),
         preferredCommunication: z.string(),
         status: z.string(),
         startingDate: z.date(),
@@ -37,6 +38,7 @@ export const volunteerRouter = createTRPCRouter({
           addressStreetNumber: input.addressStreetNumber,
           addressSuburb: input.addressSuburb,
           addressPostalCode: input.addressPostalCode,
+          addressFreeForm: input.addressFreeForm,
           preferredCommunication: input.preferredCommunication,
           status: input.status,
           startingDate: input.startingDate,
@@ -64,6 +66,7 @@ export const volunteerRouter = createTRPCRouter({
         addressStreetNumber: z.string(),
         addressSuburb: z.string(),
         addressPostalCode: z.string(),
+        addressFreeForm: z.string(),
         preferredCommunication: z.string(),
         status: z.string(),
         startingDate: z.date(),
@@ -88,6 +91,7 @@ export const volunteerRouter = createTRPCRouter({
           addressStreetNumber: input.addressStreetNumber,
           addressSuburb: input.addressSuburb,
           addressPostalCode: input.addressPostalCode,
+          addressFreeForm: input.addressFreeForm,
           preferredCommunication: input.preferredCommunication,
           status: input.status,
           clinicsAttended: input.clinicAttended,
@@ -106,6 +110,7 @@ export const volunteerRouter = createTRPCRouter({
         limit: z.number(),
         cursor: z.number().default(0),
         searchQuery: z.string(),
+        order: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -131,6 +136,7 @@ export const volunteerRouter = createTRPCRouter({
             { addressStreetNumber: { contains: term } },
             { addressSuburb: { contains: term } },
             { addressPostalCode: { contains: term } },
+            { addressFreeForm: { contains: term } },
             { preferredCommunication: { contains: term } },
             { comments: { contains: term } },
             dateCondition,
@@ -138,13 +144,19 @@ export const volunteerRouter = createTRPCRouter({
         };
       });
 
+      const order: Record<string, string> = {};
+
+      if (input.order !== "surname") {
+        order.updatedAt = "desc";
+      } else {
+        order.surname = "asc";
+      }
+
       const user = await ctx.db.volunteer.findMany({
         where: {
           AND: searchConditions,
         },
-        orderBy: {
-          surname: "asc",
-        },
+        orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { volunteerID: input.cursor } : undefined,
       });

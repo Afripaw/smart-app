@@ -203,6 +203,7 @@ export const UserRouter = createTRPCRouter({
         limit: z.number(),
         cursor: z.string().default(""),
         searchQuery: z.string(),
+        order: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -238,13 +239,25 @@ export const UserRouter = createTRPCRouter({
         };
       });
 
+      //let order = { surname: "asc" };
+      //const order = (input.order !== "surname") ? { updatedAt: "desc" } : { surname: "asc" };
+      // Replace this line
+      //const order = (input.order !== "surname") ? { updatedAt: "desc" } : { surname: "asc" };
+
+      // With something like this, where 'SortOrder' is the correct type for sorting
+      const order: Record<string, string> = {};
+
+      if (input.order !== "surname") {
+        order.updatedAt = "desc";
+      } else {
+        order.surname = "asc";
+      }
+
       const user = await ctx.db.user.findMany({
         where: {
           AND: searchConditions,
         },
-        orderBy: {
-          surname: "asc",
-        },
+        orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { id: input.cursor } : undefined,
       });

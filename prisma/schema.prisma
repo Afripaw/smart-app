@@ -104,6 +104,7 @@ model petOwner {
     addressStreet          String
     addressStreetCode      String?
     addressStreetNumber    String
+    addressFreeForm        String?
     status                 String
     startingDate           DateTime
     preferredCommunication String
@@ -180,6 +181,7 @@ model volunteer {
     addressStreetNumber    String?
     addressSuburb          String?
     addressPostalCode      String?
+    addressFreeForm        String?
     preferredCommunication String
     status                 String
     clinicsAttended        String[]

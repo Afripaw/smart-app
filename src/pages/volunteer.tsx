@@ -86,6 +86,7 @@ const Volunteer: NextPage = () => {
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   const [street, setStreet] = useState("");
+  const [addressFreeForm, setAddressFreeForm] = useState("");
   const [addressStreetCode, setAddressStreetCode] = useState("");
   const [addressStreetNumber, setAddressStreetNumber] = useState("");
   const [addressSuburb, setAddressSuburb] = useState("");
@@ -100,6 +101,9 @@ const Volunteer: NextPage = () => {
 
   //-------------------------------UPDATE USER-----------------------------------------
   const user = api.volunteer.getVolunteerByID.useQuery({ volunteerID: id });
+
+  //Order fields
+  const [order, setOrder] = useState("surname");
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
@@ -319,6 +323,7 @@ const Volunteer: NextPage = () => {
       setMobile(userData.mobile ?? "");
       setGreaterAreaOption(userData.addressGreaterArea ?? "Select one");
       setStreet(userData.addressStreet ?? "");
+      setAddressFreeForm((userData.addressFreeForm as string) ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -344,6 +349,7 @@ const Volunteer: NextPage = () => {
       addressStreetNumber: addressStreetNumber,
       addressSuburb: addressSuburb,
       addressPostalCode: addressPostalCode,
+      addressFreeForm: addressFreeForm,
       preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
       startingDate: startingDate,
       status: statusOption === "Select one" ? "" : statusOption,
@@ -361,6 +367,7 @@ const Volunteer: NextPage = () => {
     setAddressStreetNumber("");
     setAddressSuburb("");
     setAddressPostalCode("");
+    setAddressFreeForm("");
     setPreferredCommunicationOption("Select one");
     setStatusOption("Select one");
     setComments("");
@@ -386,6 +393,7 @@ const Volunteer: NextPage = () => {
     setAddressStreetNumber("");
     setAddressSuburb("");
     setAddressPostalCode("");
+    setAddressFreeForm("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
     setIsCreate(true);
@@ -405,6 +413,7 @@ const Volunteer: NextPage = () => {
       addressStreetNumber: addressStreetNumber,
       addressSuburb: addressSuburb,
       addressPostalCode: addressPostalCode,
+      addressFreeForm: addressFreeForm,
       preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
       startingDate: startingDate,
       status: statusOption === "Select one" ? "" : statusOption,
@@ -442,6 +451,7 @@ const Volunteer: NextPage = () => {
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
+      setAddressFreeForm((userData.addressFreeForm as string) ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "");
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
@@ -625,6 +635,11 @@ const Volunteer: NextPage = () => {
     }
   }, [isCreate]);
 
+  //-------------------------------ORDER FIELDS-----------------------------------------
+  const handleOrderFields = (field: string) => {
+    setOrder(field);
+  };
+
   //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
   const observerTarget = useRef<HTMLDivElement | null>(null);
 
@@ -639,6 +654,7 @@ const Volunteer: NextPage = () => {
       volunteerID: id,
       limit: limit,
       searchQuery: query,
+      order: order,
     },
     {
       getNextPageParam: (lastPage) => {
@@ -675,7 +691,7 @@ const Volunteer: NextPage = () => {
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query]);
+  }, [isUpdate, isDeleted, isCreate, query, order]);
 
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
@@ -745,12 +761,20 @@ const Volunteer: NextPage = () => {
                     <tr>
                       <th className="px-4 py-2"></th>
                       <th className="px-4 py-2">First Name</th>
-                      <th className="px-4 py-2">Surname</th>
+                      <th className="px-4 py-2">
+                        <button className={`${order == "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
+                          Surname
+                        </button>
+                      </th>
                       <th className="px-4 py-2">Email</th>
                       <th className="px-4 py-2">Mobile</th>
                       <th className="px-4 py-2">Greater Area</th>
                       <th className="px-4 py-2">Status</th>
-                      <th className="px-4 py-2">Last updated</th>
+                      <th className="px-4 py-2">
+                        <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                          Last update
+                        </button>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -817,28 +841,28 @@ const Volunteer: NextPage = () => {
               <div className="flex">
                 {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
               </div>
-              <div className="flex w-[40%] flex-col items-start">
+              <div className="flex flex-col items-start">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
                   {isUpdate && (
-                    <div className="absolute right-9 top-16">
+                    <div className="absolute right-12 top-16">
                       {user.data?.image ? (
                         <Image
                           src={user.data?.image}
                           alt="Afripaw profile pic"
-                          className="ml-auto aspect-auto max-h-[28rem] max-w-[24rem]"
+                          className="ml-auto aspect-auto max-h-40 max-w-[7rem]"
                           width={140}
-                          height={100}
+                          height={160}
                         />
                       ) : (
-                        <UserCircle size={140} className="ml-auto aspect-auto border-2" />
+                        <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
                       )}
                     </div>
                   )}
                   {isUpdate && (
                     <UploadButton
-                      className="absolute right-9 top-52 ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
+                      className="absolute right-8 top-60 ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
                       endpoint="imageUploader"
                       input={{ userId: String(user.data?.volunteerID) ?? "", user: "volunteer" }}
                       onUploadError={(error: Error) => {
@@ -928,7 +952,7 @@ const Volunteer: NextPage = () => {
 
                     <div className="flex items-start divide-x-2 divide-gray-300">
                       <div className="flex flex-col pr-2">
-                        <Input label="8. Street" placeholder="Type here: e.g. Marina str" value={street} onChange={setStreet} />
+                        <Input label="8. Street" placeholder="Type here: e.g. Marina Str" value={street} onChange={setStreet} />
 
                         <Input label="9. Street Code" placeholder="Type here: e.g. C3" value={addressStreetCode} onChange={setAddressStreetCode} />
 
@@ -963,6 +987,19 @@ const Volunteer: NextPage = () => {
                           />
                         </div>
                         {postalCodeMessage && <div className="text-sm text-red-500">{postalCodeMessage}</div>}
+                      </div>
+                      {/*Free form address */}
+                      <div className="mt-3 flex flex-col pl-4">
+                        <div>Or, Alternatively, Free Form Address</div>
+                        <textarea
+                          className=" h-64 w-72 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                          placeholder="Type here: e.g. 1234 Plaza, 1234.
+                          
+                          
+                          Also to be used if the correct street name is not in the drop-down list"
+                          onChange={(e) => setAddressFreeForm(e.target.value)}
+                          value={addressFreeForm}
+                        />
                       </div>
                     </div>
                   </div>
@@ -1072,7 +1109,7 @@ const Volunteer: NextPage = () => {
                     <div className="w-36 pt-3">17. Comments: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                      placeholder="Type here: e.g. Hard worker"
+                      placeholder="Type here: e.g. Notes on commitment, engagement, etc."
                       onChange={(e) => setComments(e.target.value)}
                       value={comments}
                     />
@@ -1102,7 +1139,7 @@ const Volunteer: NextPage = () => {
               </div>
             </div>
             <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex max-w-xl flex-col items-start">
+              <div className="mt-6 flex min-w-[38rem] max-w-xl flex-col items-start">
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <div className="absolute left-0 top-0">
                     <Image
@@ -1115,7 +1152,7 @@ const Volunteer: NextPage = () => {
                   </div>
                   <div className="absolute right-4 top-20">
                     {user.data?.image ? (
-                      <Image src={user.data?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto " width={150} height={200} />
+                      <Image src={user.data?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
                     ) : (
                       <UserCircle size={140} className="ml-auto aspect-auto" />
                     )}
@@ -1171,6 +1208,14 @@ const Volunteer: NextPage = () => {
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Postal Code:</b> {addressPostalCode}
+                      </div>
+                    </div>
+
+                    {/*Free form address */}
+                    <div className=" flex w-96 flex-col pl-4">
+                      <b>Or, Free Form Address:</b>
+                      <div className=" mt-3 focus:border-black" style={{ whiteSpace: "pre-wrap" }}>
+                        {addressFreeForm}
                       </div>
                     </div>
                   </div>

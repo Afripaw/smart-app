@@ -1,4 +1,26 @@
 export const areaOptions = [
+  "Vrygrond",
+  "Overcome Heights",
+  "Xakabantu",
+  "Seawinds",
+  "Hillview",
+  "Lavendar Hill",
+  "Cafda Village",
+  "Coniston Park",
+  "Retreat",
+  "Sheraton Park",
+  "Steenberg",
+  "Costa da Gama",
+  "Grassy Park",
+  "Heideveld",
+  "Khayelitsha",
+  "Marina da Gama",
+  "Muizenberg",
+  "Pelican Park",
+  "Southfields",
+  "Strandfontein",
+];
+/*export const areaOptions = [
   "Cafda",
   "Coniston Park",
   "Costa da Gamma",
@@ -20,4 +42,4 @@ export const areaOptions = [
   "Strandfontein",
   "Southfield",
   "Vrygrond",
-];
+];*/

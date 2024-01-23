@@ -133,6 +133,9 @@ const User: NextPage = () => {
   //-------------------------------UPDATE USER-----------------------------------------
   const user = api.user.getUserByID.useQuery({ id: id });
 
+  //Order fields
+  const [order, setOrder] = useState("surname");
+
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
@@ -807,6 +810,11 @@ const User: NextPage = () => {
     }
   }, [isCreate]);
 
+  //----------------------------------ORDER FIELDS----------------------------------
+  const handleOrderFields = (field: string) => {
+    setOrder(field);
+  };
+
   //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
   const observerTarget = useRef<HTMLDivElement | null>(null);
 
@@ -821,6 +829,7 @@ const User: NextPage = () => {
       id: id,
       limit: limit,
       searchQuery: query,
+      order: order,
     },
     {
       getNextPageParam: (lastPage) => {
@@ -857,7 +866,7 @@ const User: NextPage = () => {
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query]);
+  }, [isUpdate, isDeleted, isCreate, query, order]);
 
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
@@ -927,14 +936,22 @@ const User: NextPage = () => {
                     <tr>
                       <th className="px-4 py-2"></th>
                       <th className="px-4 py-2">First Name</th>
-                      <th className="px-4 py-2">Surname</th>
+                      <th className="px-4 py-2">
+                        <button className={`${order == "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
+                          Surname
+                        </button>
+                      </th>
                       <th className="px-4 py-2">Email</th>
                       <th className="px-4 py-2">Mobile</th>
                       <th className="px-4 py-2">Greater Area</th>
                       <th className="px-4 py-2">Area</th>
                       <th className="px-4 py-2">Role</th>
                       <th className="px-4 py-2">Status</th>
-                      <th className="px-4 py-2">Last updated</th>
+                      <th className="px-4 py-2">
+                        <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                          Last update
+                        </button>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1003,22 +1020,28 @@ const User: NextPage = () => {
               <div className="flex">
                 {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
               </div>
-              <div className="flex flex-col items-start">
+              <div className="flex flex-col">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
                   {isUpdate && (
-                    <div className="absolute right-9 top-16">
+                    <div className="absolute right-12 top-16">
                       {user.data?.image ? (
-                        <Image src={user.data?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto " width={140} height={100} />
+                        <Image
+                          src={user.data?.image}
+                          alt="Afripaw profile pic"
+                          className="ml-auto aspect-auto max-h-40 max-w-[7rem]"
+                          width={140}
+                          height={100}
+                        />
                       ) : (
-                        <UserCircle size={140} className="ml-auto aspect-auto border-2" />
+                        <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
                       )}
                     </div>
                   )}
                   {isUpdate && (
                     <UploadButton
-                      className="absolute right-9 top-52 ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
+                      className="absolute right-8 top-60 ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
                       endpoint="imageUploader"
                       input={{ userId: user.data?.id ?? "", user: "user" }}
                       onUploadError={(error: Error) => {
@@ -1212,7 +1235,10 @@ const User: NextPage = () => {
                         <div>Or, Alternatively, Free Form Address</div>
                         <textarea
                           className=" h-64 w-72 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                          placeholder="Type here: e.g. 1234 Plaza, 1234"
+                          placeholder="Type here: e.g. 1234 Plaza, 1234.
+                          
+                          
+                          Also to be used if the correct street name is not in the drop-down list"
                           onChange={(e) => setAddressFreeForm(e.target.value)}
                           value={addressFreeForm}
                         />
@@ -1306,7 +1332,7 @@ const User: NextPage = () => {
                     <div className="w-32 pt-3">16. Comments: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                      placeholder="Type here: e.g. Hard worker"
+                      placeholder="Type here: e.g. Notes on commitment, engagement, etc."
                       onChange={(e) => setComments(e.target.value)}
                       value={comments}
                     />
@@ -1333,7 +1359,7 @@ const User: NextPage = () => {
                         onChange={(e) => setPassword(e.target.value)}
                         value={password}
                       />
-                      <button onClick={handleAutogeneratePassword} className="mx-3 rounded-lg bg-main-orange p-1 px-2 text-base text-white">
+                      <button onClick={handleAutogeneratePassword} className="mx-3 rounded-lg bg-main-orange p-1 px-2 text-white">
                         Auto Suggest Password
                       </button>
                     </div>
@@ -1399,14 +1425,14 @@ const User: NextPage = () => {
                       alt="Afripaw Logo"
                       className="m-3  aspect-square h-max rounded-full border-2 border-gray-200"
                       width={80}
-                      height={0}
+                      height={80}
                     />
                   </div>
                   <div className="absolute right-4 top-20">
                     {user.data?.image ? (
-                      <Image src={user.data?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto " width={150} height={200} />
+                      <Image src={user.data?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
                     ) : (
-                      <UserCircle size={140} className="ml-auto aspect-auto" />
+                      <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem]" />
                     )}
                   </div>
                   <b className="mb-14 text-center text-xl">Personal & Contact Data</b>

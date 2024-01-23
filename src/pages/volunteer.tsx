@@ -222,12 +222,34 @@ const Volunteer: NextPage = () => {
     setClinicsAttended(!clinicsAttended);
   };
 
+  // Custom comparison function for date strings
+  const compareDates = (a: string, b: string) => {
+    const [dayA, monthA, yearA] = a.split("/")?.map(Number) ?? [0, 0, 0];
+    const [dayB, monthB, yearB]: number[] = b.split("/").map(Number);
+
+    // Compare by year, then by month, then by day
+    if ((yearA ?? 0) !== (yearB ?? 0)) return (yearA ?? 0) - (yearB ?? 0);
+    if (monthA !== monthB) return (monthA ?? 0) - (monthB ?? 0);
+    return (dayA ?? 0) - (dayB ?? 0);
+  };
+
   const handleClinicsAttendedOption = (option: SetStateAction<string>) => {
     setClinicsAttendedOption(option);
     setClinicsAttended(false);
     setShowClinicsAttended(false);
     setClinicList([...clinicList, String(option)]);
   };
+
+  useEffect(() => {
+    //order the clinicList so that it is from the first date to the last date
+
+    // Sort the list in ascending order (from first date to last date)
+    const updatedClinicList = [...clinicList].sort(compareDates);
+
+    console.log("Updated list", updatedClinicList);
+    // Update the clinicList state
+    setClinicList(updatedClinicList);
+  }, [clinicsAttended]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -305,6 +327,7 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+      setClinicList(userData.clinicsAttended ?? []);
     }
   }, [user.data, isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
@@ -324,7 +347,7 @@ const Volunteer: NextPage = () => {
       preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
       startingDate: startingDate,
       status: statusOption === "Select one" ? "" : statusOption,
-      clinicAttended: ["Empty"],
+      clinicAttended: clinicList,
       comments: comments,
     });
     //After the newUser has been created make sure to set the fields back to empty
@@ -341,6 +364,7 @@ const Volunteer: NextPage = () => {
     setPreferredCommunicationOption("Select one");
     setStatusOption("Select one");
     setComments("");
+    setClinicList([]);
     setIsUpdate(false);
     setIsCreate(false);
   };
@@ -363,14 +387,14 @@ const Volunteer: NextPage = () => {
     setAddressSuburb("");
     setAddressPostalCode("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
+    setClinicList([]);
     setIsCreate(true);
     setIsUpdate(false);
   };
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
-    //const newUser_ =
-    await newVolunteer.mutateAsync({
+    const newUser_ = await newVolunteer.mutateAsync({
       firstName: firstName,
       email: email,
       surname: surname,
@@ -384,14 +408,14 @@ const Volunteer: NextPage = () => {
       preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
       startingDate: startingDate,
       status: statusOption === "Select one" ? "" : statusOption,
-      clinicAttended: ["Empty"],
+      clinicAttended: clinicList,
       comments: comments,
     });
 
     //Image upload
-    // console.log("ID: ", newUser_?.id, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
-
-    // handleUploadModal(newUser_.id, firstName, newUser_?.image ?? "");
+    //console.log("ID: ", newUser_?.volunteerID, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
+    console.log("Clinics attended: ", newUser_.clinicsAttended);
+    handleUploadModal(newUser_.volunteerID, firstName, newUser_?.image ?? "");
     setIsCreate(false);
     setIsUpdate(false);
 
@@ -423,6 +447,7 @@ const Volunteer: NextPage = () => {
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
       console.log("Select one");
+      setClinicList(userData.clinicsAttended ?? []);
     }
 
     setIsUpdate(false);
@@ -449,6 +474,7 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+      setClinicList(userData.clinicsAttended ?? []);
     }
   }, [isViewProfilePage, user.data]); // Effect runs when userQuery.data changes
 
@@ -473,6 +499,7 @@ const Volunteer: NextPage = () => {
     setPreferredCommunicationOption("Select one");
     setStatusOption("Select one");
     setComments("");
+    setClinicList([]);
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -571,11 +598,11 @@ const Volunteer: NextPage = () => {
   const [uploadUserName, setUploadUserName] = useState("");
   const [uploadUserImage, setUploadUserImage] = useState("");
   const [uploadUserID, setUploadUserID] = useState("");
-  const handleUploadModal = (userID: string, name: string, image: string) => {
+  const handleUploadModal = (volunteerID: number, name: string, image: string) => {
     setIsUploadModalOpen(true);
-    console.log("UserID: " + userID + " Name: " + name + " Image: " + image + "IsUploadModalOpen: " + isUploadModalOpen);
+    console.log("UserID: " + volunteerID + " Name: " + name + " Image: " + image + "IsUploadModalOpen: " + isUploadModalOpen);
     //setIsCreate(true);
-    setUploadUserID(userID);
+    setUploadUserID(String(volunteerID));
     // setUploadModalID(userID);
     setUploadUserName(name);
     setUploadUserImage(image);
@@ -695,6 +722,7 @@ const Volunteer: NextPage = () => {
                 isOpen={isUploadModalOpen}
                 onClose={() => setIsUploadModalOpen(false)}
                 userID={uploadUserID}
+                userType={"volunteer"}
                 userName={uploadUserName}
                 userImage={uploadUserImage}
               />
@@ -721,9 +749,8 @@ const Volunteer: NextPage = () => {
                       <th className="px-4 py-2">Email</th>
                       <th className="px-4 py-2">Mobile</th>
                       <th className="px-4 py-2">Greater Area</th>
-                      <th className="px-4 py-2">Area</th>
-                      <th className="px-4 py-2">Role</th>
                       <th className="px-4 py-2">Status</th>
+                      <th className="px-4 py-2">Last updated</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -737,14 +764,15 @@ const Volunteer: NextPage = () => {
                           <td className="border px-4 py-2">{user.mobile}</td>
                           <td className="border px-4 py-2">{user.addressGreaterArea}</td>
                           <td className="border px-4 py-2">{user.status}</td>
+
+                          <td className="border px-4 py-2">
+                            {user?.updatedAt?.getDate()?.toString() ?? ""}
+                            {"/"}
+                            {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                            {"/"}
+                            {user?.updatedAt?.getFullYear()?.toString() ?? ""}
+                          </td>
                           <div className="flex">
-                            <div className="mx-2 my-3 w-40">
-                              Last updated: {user?.updatedAt?.getDate()?.toString() ?? ""}
-                              {"/"}
-                              {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                              {"/"}
-                              {user?.updatedAt?.getFullYear()?.toString() ?? ""}
-                            </div>
                             <Trash
                               size={24}
                               className="mx-2 my-3 rounded-lg hover:bg-orange-200"
@@ -789,25 +817,30 @@ const Volunteer: NextPage = () => {
               <div className="flex">
                 {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
               </div>
-              <div className="flex flex-col items-start">
+              <div className="flex w-[40%] flex-col items-start">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
                   {isUpdate && (
                     <div className="absolute right-9 top-16">
                       {user.data?.image ? (
-                        <Image src={user.data?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto " width={140} height={100} />
+                        <Image
+                          src={user.data?.image}
+                          alt="Afripaw profile pic"
+                          className="ml-auto aspect-auto max-h-[28rem] max-w-[24rem]"
+                          width={140}
+                          height={100}
+                        />
                       ) : (
                         <UserCircle size={140} className="ml-auto aspect-auto border-2" />
                       )}
                     </div>
                   )}
-                  {/*isUpdate &&
-                    {
-                      <UploadButton
+                  {isUpdate && (
+                    <UploadButton
                       className="absolute right-9 top-52 ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
                       endpoint="imageUploader"
-                      input={{ userId: user.data?.id ?? "" }}
+                      input={{ userId: String(user.data?.volunteerID) ?? "", user: "volunteer" }}
                       onUploadError={(error: Error) => {
                         // Do something with the error.
                         alert(`ERROR! ${error.message}`);
@@ -816,7 +849,7 @@ const Volunteer: NextPage = () => {
                         void user.refetch();
                       }}
                     />
-                    }*/}
+                  )}
 
                   <Input label="1. First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="2. Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
@@ -1077,7 +1110,7 @@ const Volunteer: NextPage = () => {
                       alt="Afripaw Logo"
                       className="m-3  aspect-square h-max rounded-full border-2 border-gray-200"
                       width={80}
-                      height={0}
+                      height={80}
                     />
                   </div>
                   <div className="absolute right-4 top-20">
@@ -1148,6 +1181,10 @@ const Volunteer: NextPage = () => {
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Status:</b> {statusOption}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Clinics Attended:</b> {clinicList.map((clinic, index) => (clinicList.length - 1 == index ? clinic : clinic + ", "))}
                   </div>
 
                   <div className="mb-2 flex items-center">

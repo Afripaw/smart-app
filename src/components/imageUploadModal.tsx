@@ -8,12 +8,13 @@ import { api } from "~/utils/api";
 interface ImageUploadModalProps {
   isOpen: boolean;
   userID: string;
+  userType: string;
   userName: string;
   userImage: string;
   onClose: () => void;
 }
 
-const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, userName, userID, userImage, onClose }) => {
+const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, userName, userID, userImage, userType, onClose }) => {
   const user = api.user.getUserByID.useQuery({ id: userID });
   if (!isOpen) return null;
 
@@ -41,7 +42,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, userName, u
           <UploadButton
             className="mt-4 px-4 py-2 text-white ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
             endpoint="imageUploader"
-            input={{ userId: userID ?? "" }}
+            input={{ userId: userID ?? "", user: userType ?? "" }}
             onUploadError={(error: Error) => {
               // Do something with the error.
               alert(`ERROR! ${error.message}`);

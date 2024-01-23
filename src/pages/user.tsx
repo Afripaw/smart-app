@@ -904,6 +904,7 @@ const User: NextPage = () => {
                 isOpen={isUploadModalOpen}
                 onClose={() => setIsUploadModalOpen(false)}
                 userID={uploadUserID}
+                userType={"user"}
                 userName={uploadUserName}
                 userImage={uploadUserImage}
               />
@@ -933,6 +934,7 @@ const User: NextPage = () => {
                       <th className="px-4 py-2">Area</th>
                       <th className="px-4 py-2">Role</th>
                       <th className="px-4 py-2">Status</th>
+                      <th className="px-4 py-2">Last updated</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -948,14 +950,15 @@ const User: NextPage = () => {
                           <td className="border px-4 py-2">{user.addressArea}</td>
                           <td className="border px-4 py-2">{user.role}</td>
                           <td className="border px-4 py-2">{user.status}</td>
+
+                          <td className=" border px-4 py-2">
+                            {user?.updatedAt?.getDate()?.toString() ?? ""}
+                            {"/"}
+                            {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                            {"/"}
+                            {user?.updatedAt?.getFullYear()?.toString() ?? ""}
+                          </td>
                           <div className="flex">
-                            <div className="mx-2 my-3 w-40">
-                              Last updated: {user?.updatedAt?.getDate()?.toString() ?? ""}
-                              {"/"}
-                              {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                              {"/"}
-                              {user?.updatedAt?.getFullYear()?.toString() ?? ""}
-                            </div>
                             <Trash
                               size={24}
                               className="mx-2 my-3 rounded-lg hover:bg-orange-200"
@@ -1017,7 +1020,7 @@ const User: NextPage = () => {
                     <UploadButton
                       className="absolute right-9 top-52 ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
                       endpoint="imageUploader"
-                      input={{ userId: user.data?.id ?? "" }}
+                      input={{ userId: user.data?.id ?? "", user: "user" }}
                       onUploadError={(error: Error) => {
                         // Do something with the error.
                         alert(`ERROR! ${error.message}`);

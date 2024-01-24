@@ -4,6 +4,7 @@ import React, { SetStateAction, useEffect, useRef, useState } from "react";
 import { api } from "~/utils/api";
 import ReactToPrint from "react-to-print";
 import Image from "next/image";
+import { useRouter } from "next/router";
 //Components
 import Navbar from "../components/navbar";
 import CreateButtonModal from "../components/createButtonModal";
@@ -14,7 +15,7 @@ import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { sendUserCredentialsEmail } from "~/components/CommunicationPortals/email";
 
 //Icons
-import { AddressBook, Pencil, Printer, Trash, UserCircle, Users } from "phosphor-react";
+import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "phosphor-react";
 
 //Date picker
 import DatePicker from "react-datepicker";
@@ -24,6 +25,7 @@ import { useSession } from "next-auth/react";
 import Input from "~/components/Base/Input";
 import { bg } from "date-fns/locale";
 import { set } from "date-fns";
+import { router } from "@trpc/server";
 
 const Owner: NextPage = () => {
   useSession({ required: true });
@@ -34,6 +36,9 @@ const Owner: NextPage = () => {
   const [isCreate, setIsCreate] = useState(false);
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
+
+  //For moving between different pages
+  const router = useRouter();
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -512,6 +517,9 @@ const Owner: NextPage = () => {
 
   useEffect(() => {
     //console.log("View profile page: ", JSON.stringify(user.data));
+    if (isViewProfilePage) {
+      void user.refetch();
+    }
     if (user.data) {
       const userData = user.data;
 
@@ -753,6 +761,15 @@ const Owner: NextPage = () => {
     void refetch();
   }, [isUpdate, isDeleted, isCreate, query, order]);
 
+  //------------------------------------CREATE A NEW PET FOR OWNER--------------------------------------
+  //When button is pressed the browser needs to go to the pet's page. The pet's page needs to know the owner's ID
+  const handleCreateNewPet = async (id: number) => {
+    await router.push({
+      pathname: "/pet",
+      query: { ownerID: id },
+    });
+  };
+
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
   interface CustomInputProps {
@@ -866,6 +883,7 @@ const Owner: NextPage = () => {
                             />
                             <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(user.ownerID)} />
                             <AddressBook size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleViewProfilePage(user.ownerID)} />
+                            <Dog size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleCreateNewPet(user.ownerID)} />
                           </div>
                         </tr>
                       );

@@ -466,6 +466,10 @@ const Volunteer: NextPage = () => {
   };
 
   useEffect(() => {
+    if (isViewProfilePage) {
+      void user.refetch();
+    }
+
     //console.log("View profile page: ", JSON.stringify(user.data));
     if (user.data) {
       const userData = user.data;
@@ -691,7 +695,7 @@ const Volunteer: NextPage = () => {
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order]);
+  }, [isUpdate, isDeleted, isCreate, query, order, isViewProfilePage]);
 
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
@@ -1130,7 +1134,7 @@ const Volunteer: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">User Profile</div>
+                <div className=" text-2xl">Volunteer Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back

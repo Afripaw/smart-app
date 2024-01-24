@@ -135,7 +135,9 @@ model pet {
     sterilisedRequested     String?
     sterilisedRequestSigned String?
     sterilisationOutcome    String?
-    vaccinatedStatus        String
+    vaccinationShot1        String
+    vaccinationShot2        String?
+    vaccinationShot3        String?
     treatments              String?
     clinicsAttended         String[]
     lastDeworming           String?

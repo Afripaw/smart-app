@@ -551,7 +551,7 @@ const User: NextPage = () => {
     setIsViewProfilePage(true);
     setID(id);
 
-    console.log("View profile page: ", JSON.stringify(user.data));
+    //console.log("View profile page: ", JSON.stringify(user.data));
     if (user.data) {
       // Assuming userQuery.data contains the user object
       const userData = user.data;
@@ -592,6 +592,9 @@ const User: NextPage = () => {
 
   useEffect(() => {
     //console.log("View profile page: ", JSON.stringify(user.data));
+    if (isViewProfilePage) {
+      void user.refetch();
+    }
     if (user.data) {
       const userData = user.data;
 

@@ -4,6 +4,7 @@ import React, { SetStateAction, useEffect, useRef, useState } from "react";
 import { api } from "~/utils/api";
 import ReactToPrint from "react-to-print";
 import Image from "next/image";
+import { useRouter } from "next/router";
 //Components
 import Navbar from "../components/navbar";
 import CreateButtonModal from "../components/createButtonModal";
@@ -24,12 +25,16 @@ import { useSession } from "next-auth/react";
 import Input from "~/components/Base/Input";
 import { bg } from "date-fns/locale";
 import { set } from "date-fns";
+import { string } from "zod";
 
 const Pet: NextPage = () => {
   useSession({ required: true });
 
-  const newVolunteer = api.volunteer.create.useMutation();
-  const updateVolunteer = api.volunteer.update.useMutation();
+  //For moving between different pages
+  const router = useRouter();
+
+  const newPet = api.pet.create.useMutation();
+  const updatePet = api.pet.update.useMutation();
   const [isUpdate, setIsUpdate] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
   //Update the table when user is deleted
@@ -57,10 +62,10 @@ const Pet: NextPage = () => {
   //-------------------------------TABLE-----------------------------------------
   //const data = api.user.searchUsers.useQuery({ searchQuery: query });
   //delete specific row
-  const deleteRow = api.volunteer.deleteVolunteer.useMutation();
+  const deleteRow = api.pet.deletePet.useMutation();
   const handleDeleteRow = async (id: number) => {
     setIsDeleteModalOpen(false);
-    await deleteRow.mutateAsync({ volunteerID: id });
+    await deleteRow.mutateAsync({ petID: id });
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
   };
 
@@ -81,16 +86,10 @@ const Pet: NextPage = () => {
   const printComponentRef = useRef(null);
 
   //---------------------------------EDIT BOXES----------------------------------
-  const [firstName, setFirstName] = useState("");
-  const [surname, setSurname] = useState("");
-  const [email, setEmail] = useState("");
-  const [mobile, setMobile] = useState("");
-  const [street, setStreet] = useState("");
-  const [addressFreeForm, setAddressFreeForm] = useState("");
-  const [addressStreetCode, setAddressStreetCode] = useState("");
-  const [addressStreetNumber, setAddressStreetNumber] = useState("");
-  const [addressSuburb, setAddressSuburb] = useState("");
-  const [addressPostalCode, setAddressPostalCode] = useState("");
+  const [petName, setPetName] = useState("");
+  const [ownerID, setOwnerID] = useState(0);
+
+  const [markings, setMarkings] = useState("");
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
   const [image, setImage] = useState("");
@@ -99,48 +98,114 @@ const Pet: NextPage = () => {
   //const [userID, setUserID] = useState("");
   const [id, setID] = useState(0);
 
+  //---------------------------------NAVIGATION OF OWNER TO PET----------------------------------
+  useEffect(() => {
+    setOwnerID(Number(router.query.id));
+    setIsCreate(true);
+  }, [router.query.id]);
+
   //-------------------------------UPDATE USER-----------------------------------------
-  const user = api.volunteer.getVolunteerByID.useQuery({ volunteerID: id });
+  const user = api.pet.getPetByID.useQuery({ petID: id });
 
   //Order fields
-  const [order, setOrder] = useState("surname");
+  const [order, setOrder] = useState("petName");
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
-  const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
-  const [greaterAreaOption, setGreaterAreaOption] = useState("Select one");
-  const greaterAreaRef = useRef<HTMLDivElement>(null);
-  const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
+  const [isSpeciesOpen, setIsSpeciesOpen] = useState(false);
+  const [speciesOption, setSpeciesOption] = useState("Select one");
+  const speciesRef = useRef<HTMLDivElement>(null);
+  const btnSpeciesRef = useRef<HTMLButtonElement>(null);
 
-  const [preferredCommunication, setPreferredCommunication] = useState(false);
-  const [preferredOption, setPreferredCommunicationOption] = useState("Select one");
-  const preferredCommunicationRef = useRef<HTMLDivElement>(null);
-  const btnPreferredCommunicationRef = useRef<HTMLButtonElement>(null);
+  const [isSexOpen, setIsSexOpen] = useState(false);
+  const [sexOption, setSexOption] = useState("Select one");
+  const sexRef = useRef<HTMLDivElement>(null);
+  const btnSexRef = useRef<HTMLButtonElement>(null);
+
+  const [isAgeOpen, setIsAgeOpen] = useState(false);
+  const [ageOption, setAgeOption] = useState("Select one");
+  const ageRef = useRef<HTMLDivElement>(null);
+  const btnAgeRef = useRef<HTMLButtonElement>(null);
+
+  const [isBreedOpen, setIsBreedOpen] = useState(false);
+  const [breedOption, setBreedOption] = speciesOption == "Cat" ? useState("Not Applicable") : useState("Select one");
+  const breedRef = useRef<HTMLDivElement>(null);
+  const btnBreedRef = useRef<HTMLButtonElement>(null);
+
+  const [isColourOpen, setIsColourOpen] = useState(false);
+  const [colourOption, setColourOption] = useState("Select one");
+  const colourRef = useRef<HTMLDivElement>(null);
+  const btnColourRef = useRef<HTMLButtonElement>(null);
 
   const [status, setStatus] = useState(false);
   const [statusOption, setStatusOption] = useState("Select one");
   const statusRef = useRef<HTMLDivElement>(null);
   const btnStatusRef = useRef<HTMLButtonElement>(null);
 
-  //GREATER AREA
-  const handleToggleGreaterArea = () => {
-    setIsGreaterAreaOpen(!isGreaterAreaOpen);
+  const [sterilisationStatus, setSterilisationStatus] = useState(false);
+  const [sterilisationStatusOption, setSterilisationStatusOption] = useState("Select one");
+  const sterilisationStatusRef = useRef<HTMLDivElement>(null);
+  const btnSterilisationStatusRef = useRef<HTMLButtonElement>(null);
+
+  const [sterilisationRequested, setSterilisationRequested] = useState(false);
+  const [sterilisationRequestedOption, setSterilisationRequestedOption] = useState("Select one");
+  const sterilisationRequestedRef = useRef<HTMLDivElement>(null);
+  const btnSterilisationRequestedRef = useRef<HTMLButtonElement>(null);
+
+  const [sterilisationOutcome, setSterilisationOutcome] = useState(false);
+  const [sterilisationOutcomeOption, setSterilisationOutcomeOption] = useState("Select one");
+  const sterilisationOutcomeRef = useRef<HTMLDivElement>(null);
+  const btnSterilisationOutcomeRef = useRef<HTMLButtonElement>(null);
+
+  const [vaccinationShot1, setVaccinationShot1] = useState(false);
+  const [vaccinationShot1Option, setVaccinationShot1Option] = useState("Select one");
+  const vaccinationShot1Ref = useRef<HTMLDivElement>(null);
+  const btnVaccinationShot1Ref = useRef<HTMLButtonElement>(null);
+
+  const [vaccinationShot2, setVaccinationShot2] = useState(false);
+  const [vaccinationShot2Option, setVaccinationShot2Option] = useState("Select one");
+  const vaccinationShot2Ref = useRef<HTMLDivElement>(null);
+  const btnVaccinationShot2Ref = useRef<HTMLButtonElement>(null);
+
+  const [vaccinationShot3, setVaccinationShot3] = useState(false);
+  const [vaccinationShot3Option, setVaccinationShot3Option] = useState("Select one");
+  const vaccinationShot3Ref = useRef<HTMLDivElement>(null);
+  const btnVaccinationShot3Ref = useRef<HTMLButtonElement>(null);
+
+  const [membershipType, setMembershipType] = useState(false);
+  const [membershipTypeOption, setMembershipTypeOption] = useState("Select one");
+  const membershipTypeRef = useRef<HTMLDivElement>(null);
+  const btnMembershipTypeRef = useRef<HTMLButtonElement>(null);
+
+  const [cardStatus, setCardStatus] = useState(false);
+  const [cardStatusOption, setCardStatusOption] = useState("Select one");
+  const cardStatusRef = useRef<HTMLDivElement>(null);
+  const btnCardStatusRef = useRef<HTMLButtonElement>(null);
+
+  const [kennelsReceived, setKennelsReceived] = useState(false);
+  const [kennelsReceivedOption, setKennelsReceivedOption] = useState("Select one");
+  const kennelsReceivedRef = useRef<HTMLDivElement>(null);
+  const btnKennelsReceivedRef = useRef<HTMLButtonElement>(null);
+
+  //SPECIES
+  const handleToggleSpecies = () => {
+    setIsSpeciesOpen(!isSpeciesOpen);
   };
 
-  const handleGreaterAreaOption = (option: SetStateAction<string>) => {
-    setGreaterAreaOption(option);
-    setIsGreaterAreaOpen(false);
+  const handleSpeciesOption = (option: SetStateAction<string>) => {
+    setSpeciesOption(option);
+    setIsSpeciesOpen(false);
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        greaterAreaRef.current &&
-        !greaterAreaRef.current.contains(event.target as Node) &&
-        btnGreaterAreaRef.current &&
-        !btnGreaterAreaRef.current.contains(event.target as Node)
+        speciesRef.current &&
+        !speciesRef.current.contains(event.target as Node) &&
+        btnSpeciesRef.current &&
+        !btnSpeciesRef.current.contains(event.target as Node)
       ) {
-        setIsGreaterAreaOpen(false);
+        setIsSpeciesOpen(false);
       }
     };
 
@@ -150,27 +215,22 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+  const speciesOptions = ["Dog", "Cat"];
 
-  //PREFERRED COMMUNICATION
-  const handleTogglePreferredCommunication = () => {
-    setPreferredCommunication(!preferredCommunication);
+  //SEX
+  const handleToggleSex = () => {
+    setIsSexOpen(!isSexOpen);
   };
 
-  const handlePreferredCommunicationOption = (option: SetStateAction<string>) => {
-    setPreferredCommunicationOption(option);
-    setPreferredCommunication(false);
+  const handleSexOption = (option: SetStateAction<string>) => {
+    setSexOption(option);
+    setIsSexOpen(false);
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        preferredCommunicationRef.current &&
-        !preferredCommunicationRef.current.contains(event.target as Node) &&
-        btnPreferredCommunicationRef.current &&
-        !btnPreferredCommunicationRef.current.contains(event.target as Node)
-      ) {
-        setPreferredCommunication(false);
+      if (sexRef.current && !sexRef.current.contains(event.target as Node) && btnSexRef.current && !btnSexRef.current.contains(event.target as Node)) {
+        setIsSexOpen(false);
       }
     };
 
@@ -180,7 +240,173 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const preferredCommunicationOptions = ["Email", "SMS"];
+  const sexOptions = ["Male", "Female"];
+
+  //AGE
+  const handleToggleAge = () => {
+    setIsAgeOpen(!isAgeOpen);
+  };
+
+  const handleAgeOption = (option: SetStateAction<string>) => {
+    setAgeOption(option);
+    setIsAgeOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ageRef.current && !ageRef.current.contains(event.target as Node) && btnAgeRef.current && !btnAgeRef.current.contains(event.target as Node)) {
+        setIsAgeOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const ageDogOptions = ["Puppy", "Adult", "Senior"];
+  const ageCatOptions = ["Kitten", "Adult", "Senior"];
+
+  const [ageOptions, setAgeOptions] = useState([""]);
+
+  useEffect(() => {
+    if (speciesOption == "Cat") {
+      setAgeOption("Select one");
+      setAgeOptions(ageCatOptions);
+    } else if (speciesOption == "Dog") {
+      setAgeOption("Select one");
+      setAgeOptions(ageDogOptions);
+    }
+  }, [speciesOption]);
+
+  //BREED
+  const handleToggleBreed = () => {
+    setIsBreedOpen(!isBreedOpen);
+  };
+
+  const handleBreedOption = (option: SetStateAction<string>) => {
+    setBreedOption(option);
+    setIsBreedOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (breedRef.current && !breedRef.current.contains(event.target as Node) && btnBreedRef.current && !btnBreedRef.current.contains(event.target as Node)) {
+        setIsBreedOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const breedDogOptions = [
+    "Africanis",
+    "Basset",
+    "Beagle",
+    "Boerboel",
+    "Bouvier",
+    "Boxer",
+    "Bull Terrier",
+    "Chihuahua",
+    "Chow",
+    "Collie",
+    "Corgi",
+    "Dachshund",
+    "Dalmation",
+    "Doberman",
+    "Fox Terrier",
+    "German Shepherd",
+    "Husky",
+    "Jack Russell",
+    "Labrador",
+    "Malinois",
+    "Maltese Poodle",
+    "Pinscher",
+    "Pitbull",
+    "Ridgeback",
+    "Rottweilier",
+    "Saint Bernard",
+    "Schnauzer",
+    "Sharpei",
+    "Shepherd",
+    "Staffie",
+    "Wire Haired Terrier",
+    "X-Breed",
+    "Not Applicable",
+  ];
+
+  const [breedOptions, setBreedOptions] = useState([""]);
+
+  useEffect(() => {
+    if (speciesOption == "Cat") {
+      setBreedOption("Not Applicable");
+      setBreedOptions(["Not Applicable"]);
+    } else if (speciesOption == "Dog") {
+      setBreedOption("Select one");
+      setBreedOptions(breedDogOptions);
+    }
+  }, [speciesOption]);
+
+  //COLOUR
+  const handleToggleColour = () => {
+    setIsColourOpen(!isColourOpen);
+  };
+
+  const handleColourOption = (option: SetStateAction<string>) => {
+    setColourOption(option);
+    setIsColourOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        colourRef.current &&
+        !colourRef.current.contains(event.target as Node) &&
+        btnColourRef.current &&
+        !btnColourRef.current.contains(event.target as Node)
+      ) {
+        setIsColourOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const colourDogOptions = ["Black", "Brindle", "Brown", "Chocolate Brown", "Grey", "Tan", "White"];
+
+  const colourCatOptions = [
+    "Black",
+    "Brindle",
+    "Brown",
+    "Calico (Tri-Colour)",
+    "Charcoal",
+    "Chocolate Brown",
+    "Ginger",
+    "Grey",
+    "Tabby",
+    "Tan",
+    "Tortoiseshell",
+    "White",
+  ];
+
+  const [colourOptions, setColourOptions] = useState([""]);
+
+  useEffect(() => {
+    if (speciesOption == "Cat") {
+      setColourOption("Select one");
+      setColourOptions(colourCatOptions);
+    } else if (speciesOption == "Dog") {
+      setColourOption("Select one");
+      setColourOptions(colourDogOptions);
+    }
+  }, [speciesOption]);
 
   //STATUS
   const handleToggleStatus = () => {
@@ -210,7 +436,294 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const statusOptions = ["Active", "Passive"];
+  const statusOptions = [
+    "Active",
+    "Deceased",
+    "Given away",
+    "Lost",
+    "Moved",
+    "No reason",
+    "Poisoned",
+    "Ran away",
+    "Re-homed",
+    "Shot",
+    "Sold",
+    "Stolen",
+    "Surrendered",
+    "Taken by SPCA",
+    "TEARS",
+  ];
+
+  //STERILISATION STATUS
+  const handleToggleSterilisationStatus = () => {
+    setSterilisationStatus(!sterilisationStatus);
+  };
+
+  const handleSterilisationStatusOption = (option: SetStateAction<string>) => {
+    setSterilisationStatusOption(option);
+    setSterilisationStatus(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sterilisationStatusRef.current &&
+        !sterilisationStatusRef.current.contains(event.target as Node) &&
+        btnSterilisationStatusRef.current &&
+        !btnSterilisationStatusRef.current.contains(event.target as Node)
+      ) {
+        setSterilisationStatus(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const sterilisationStatusOptions = ["No", "Unknown", "Calender entry"];
+
+  //STERILISATION REQUESTED
+  const handleToggleSterilisationRequested = () => {
+    setSterilisationRequested(!sterilisationRequested);
+  };
+
+  const handleSterilisationRequestedOption = (option: SetStateAction<string>) => {
+    setSterilisationRequestedOption(option);
+    setSterilisationRequested(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sterilisationRequestedRef.current &&
+        !sterilisationRequestedRef.current.contains(event.target as Node) &&
+        btnSterilisationRequestedRef.current &&
+        !btnSterilisationRequestedRef.current.contains(event.target as Node)
+      ) {
+        setSterilisationRequested(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const sterilisationRequestedOptions = ["No", "Calender entry"];
+
+  //STERILISATION OUTCOME
+  const handleToggleSterilisationOutcome = () => {
+    setSterilisationOutcome(!sterilisationOutcome);
+  };
+
+  const handleSterilisationOutcomeOption = (option: SetStateAction<string>) => {
+    setSterilisationOutcomeOption(option);
+    setSterilisationOutcome(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sterilisationOutcomeRef.current &&
+        !sterilisationOutcomeRef.current.contains(event.target as Node) &&
+        btnSterilisationOutcomeRef.current &&
+        !btnSterilisationOutcomeRef.current.contains(event.target as Node)
+      ) {
+        setSterilisationOutcome(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const sterilisationOutcomeOptions = ["Actioned", "No show"];
+
+  //VACCINATION SHOT 1
+  const handleToggleVaccinationShot1 = () => {
+    setVaccinationShot1(!status);
+  };
+
+  const handleVaccinationShot1Option = (option: SetStateAction<string>) => {
+    setVaccinationShot1Option(option);
+    setVaccinationShot1(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        vaccinationShot1Ref.current &&
+        !vaccinationShot1Ref.current.contains(event.target as Node) &&
+        btnVaccinationShot1Ref.current &&
+        !btnVaccinationShot1Ref.current.contains(event.target as Node)
+      ) {
+        setVaccinationShot1(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const vaccinationShot1Options = ["Not yet", "Calender Entry"];
+
+  //VACCINATION SHOT 2
+  const handleToggleVaccinationShot2 = () => {
+    setVaccinationShot2(!status);
+  };
+
+  const handleVaccinationShot2Option = (option: SetStateAction<string>) => {
+    setVaccinationShot2Option(option);
+    setVaccinationShot2(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        vaccinationShot2Ref.current &&
+        !vaccinationShot2Ref.current.contains(event.target as Node) &&
+        btnVaccinationShot2Ref.current &&
+        !btnVaccinationShot2Ref.current.contains(event.target as Node)
+      ) {
+        setVaccinationShot2(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const vaccinationShot2Options = ["Not yet", "Calender Entry"];
+
+  //VACCINATION SHOT 3
+  const handleToggleVaccinationShot3 = () => {
+    setVaccinationShot3(!status);
+  };
+
+  const handleVaccinationShot3Option = (option: SetStateAction<string>) => {
+    setVaccinationShot3Option(option);
+    setVaccinationShot3(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        vaccinationShot3Ref.current &&
+        !vaccinationShot3Ref.current.contains(event.target as Node) &&
+        btnVaccinationShot3Ref.current &&
+        !btnVaccinationShot3Ref.current.contains(event.target as Node)
+      ) {
+        setVaccinationShot3(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const vaccinationShot3Options = ["Not yet", "Calender Entry"];
+
+  //MEMBERSHIP TYPE
+  const handleToggleMembershipType = () => {
+    setMembershipType(!membershipType);
+  };
+
+  const handleMembershipTypeOption = (option: SetStateAction<string>) => {
+    setMembershipTypeOption(option);
+    setMembershipType(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        membershipTypeRef.current &&
+        !membershipTypeRef.current.contains(event.target as Node) &&
+        btnMembershipTypeRef.current &&
+        !btnMembershipTypeRef.current.contains(event.target as Node)
+      ) {
+        setMembershipType(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const membershipTypeOptions = ["Non-card holder", "Standard card holder", "Gold card holder"];
+
+  //CARD STATUS
+  const handleToggleCardStatus = () => {
+    setCardStatus(!cardStatus);
+  };
+
+  const handleCardStatusOption = (option: SetStateAction<string>) => {
+    setCardStatusOption(option);
+    setCardStatus(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        cardStatusRef.current &&
+        !cardStatusRef.current.contains(event.target as Node) &&
+        btnCardStatusRef.current &&
+        !btnCardStatusRef.current.contains(event.target as Node)
+      ) {
+        setCardStatus(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const cardStatusOptions =
+    membershipTypeOption == "Non-card holder" ? ["Not applicable"] : ["Not applicable", "Collect", "Issued", "Re-print", "Lapsed card holder"];
+
+  //KENNELS RECEIVED
+  const handleToggleKennelsReceived = () => {
+    setKennelsReceived(!kennelsReceived);
+  };
+
+  const handleKennelsReceivedOption = (option: SetStateAction<string>) => {
+    setKennelsReceivedOption(option);
+    setKennelsReceived(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        kennelsReceivedRef.current &&
+        !kennelsReceivedRef.current.contains(event.target as Node) &&
+        btnKennelsReceivedRef.current &&
+        !btnKennelsReceivedRef.current.contains(event.target as Node)
+      ) {
+        setKennelsReceived(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const kennelsReceivedOptions = ["None", "2018", "2019", "2020", "2021", "2022", "2023", "2024"];
 
   //CLINICSATTENDED
   // const clinicsAttendedOptions = ["Clinic 1", "Clinic 2", "Clinic 3"];
@@ -291,19 +804,24 @@ const Pet: NextPage = () => {
     if (user.data) {
       // Assuming userQuery.data contains the user object
       const userData = user.data;
-      setFirstName(userData.firstName ?? "");
-      setSurname(userData.surname ?? "");
-      setEmail(userData.email ?? "");
-      setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "Select one");
-      setStreet(userData.addressStreet ?? "");
-      setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
-      setAddressSuburb(userData.addressSuburb ?? "");
-      setAddressPostalCode(userData.addressPostalCode ?? "");
-      setPreferredCommunicationOption(userData.preferredCommunication ?? "Select one");
-      setStartingDate(userData.startingDate ?? new Date());
+      setPetName(userData.petName ?? "");
+      setSpeciesOption(userData.species ?? "Select one");
+      setSexOption(userData.sex ?? "Select one");
+      setAgeOption(userData.age ?? "Select one");
+      setBreedOption(userData.breed ?? "Select one");
+      setColourOption(userData.colour ?? "Select one");
+      setMarkings(userData.markings ?? "");
       setStatusOption(userData.status ?? "Select one");
+      setSterilisationStatusOption(userData.sterilisedStatus ?? "Select one");
+      setSterilisationRequestedOption(userData.sterilisedRequested ?? "Select one");
+      setSterilisationOutcomeOption(userData.sterilisationOutcome ?? "Select one");
+      setVaccinationShot1Option(userData.vaccinationShot1 ?? "Select one");
+      setVaccinationShot2Option(userData.vaccinationShot2 ?? "Select one");
+      setVaccinationShot3Option(userData.vaccinationShot3 ?? "Select one");
+      setMembershipTypeOption(userData.membership ?? "Select one");
+      setCardStatusOption(userData.cardStatus ?? "Select one");
+      setKennelsReceivedOption(userData.kennelReceived ?? "Select one");
+
       setComments(userData.comments ?? "");
     }
 
@@ -317,19 +835,23 @@ const Pet: NextPage = () => {
     if (user.data) {
       // Assuming userQuery.data contains the user object
       const userData = user.data;
-      setFirstName(userData.firstName ?? "");
-      setSurname(userData.surname ?? "");
-      setEmail(userData.email ?? "");
-      setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "Select one");
-      setStreet(userData.addressStreet ?? "");
-      setAddressFreeForm(userData.addressFreeForm ?? "");
-      setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
-      setAddressSuburb(userData.addressSuburb ?? "");
-      setAddressPostalCode(userData.addressPostalCode ?? "");
-      setPreferredCommunicationOption(userData.preferredCommunication ?? "Select one");
-      setStartingDate(userData.startingDate ?? new Date());
+      setPetName(userData.petName ?? "");
+      setSpeciesOption(userData.species ?? "Select one");
+      setSexOption(userData.sex ?? "Select one");
+      setAgeOption(userData.age ?? "Select one");
+      setBreedOption(userData.breed ?? "Select one");
+      setColourOption(userData.colour ?? "Select one");
+      setMarkings(userData.markings ?? "");
+      setStatusOption(userData.status ?? "Select one");
+      setSterilisationStatusOption(userData.sterilisedStatus ?? "Select one");
+      setSterilisationRequestedOption(userData.sterilisedRequested ?? "Select one");
+      setSterilisationOutcomeOption(userData.sterilisationOutcome ?? "Select one");
+      setVaccinationShot1Option(userData.vaccinationShot1 ?? "Select one");
+      setVaccinationShot2Option(userData.vaccinationShot2 ?? "Select one");
+      setVaccinationShot3Option(userData.vaccinationShot3 ?? "Select one");
+      setMembershipTypeOption(userData.membership ?? "Select one");
+      setCardStatusOption(userData.cardStatus ?? "Select one");
+      setKennelsReceivedOption(userData.kennelReceived ?? "Select one");
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
       setClinicList(userData.clinicsAttended ?? []);
@@ -337,39 +859,49 @@ const Pet: NextPage = () => {
   }, [user.data, isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
-    await updateVolunteer.mutateAsync({
-      volunteerID: id,
-      firstName: firstName,
-      email: email,
-      surname: surname,
-      mobile: mobile,
-      addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      addressStreet: street,
-      addressStreetCode: addressStreetCode,
-      addressStreetNumber: addressStreetNumber,
-      addressSuburb: addressSuburb,
-      addressPostalCode: addressPostalCode,
-      addressFreeForm: addressFreeForm,
-      preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
-      startingDate: startingDate,
+    await updatePet.mutateAsync({
+      petID: id,
+      petName: petName,
+      species: speciesOption === "Select one" ? "" : speciesOption,
+      sex: sexOption === "Select one" ? "" : sexOption,
+      age: ageOption === "Select one" ? "" : ageOption,
+      breed: breedOption === "Select one" ? "" : breedOption,
+      colour: colourOption === "Select one" ? "" : colourOption,
+      markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
-      clinicAttended: clinicList,
+      sterilisedStatus: sterilisationStatusOption === "Select one" ? "" : sterilisationStatusOption,
+      sterilisedRequested: sterilisationRequestedOption === "Select one" ? "" : sterilisationRequestedOption,
+      sterilisedRequestSigned: "",
+      sterilisedOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
+      vaccinationShot1: vaccinationShot1Option === "Select one" ? "" : vaccinationShot1Option,
+      vaccinationShot2: vaccinationShot2Option === "Select one" ? "" : vaccinationShot2Option,
+      vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
+      lastDeWorming: "",
+      membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
+      cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
+      kennelReceived: kennelsReceivedOption === "Select one" ? "" : kennelsReceivedOption,
+      clinicsAttended: clinicList,
       comments: comments,
+      treatments: "",
     });
     //After the newUser has been created make sure to set the fields back to empty
-    setFirstName("");
-    setEmail("");
-    setSurname("");
-    setMobile("");
-    setGreaterAreaOption("Select one");
-    setStreet("");
-    setAddressStreetCode("");
-    setAddressStreetNumber("");
-    setAddressSuburb("");
-    setAddressPostalCode("");
-    setAddressFreeForm("");
-    setPreferredCommunicationOption("Select one");
+    setPetName("");
+    setSpeciesOption("Select one");
+    setSexOption("Select one");
+    setAgeOption("Select one");
+    setBreedOption("Select one");
+    setColourOption("Select one");
+    setMarkings("");
     setStatusOption("Select one");
+    setSterilisationStatusOption("Select one");
+    setSterilisationRequestedOption("Select one");
+    setSterilisationOutcomeOption("Select one");
+    setVaccinationShot1Option("Select one");
+    setVaccinationShot2Option("Select one");
+    setVaccinationShot3Option("Select one");
+    setMembershipTypeOption("Select one");
+    setCardStatusOption("Select one");
+    setKennelsReceivedOption("Select one");
     setComments("");
     setClinicList([]);
     setIsUpdate(false);
@@ -379,21 +911,25 @@ const Pet: NextPage = () => {
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
-    setGreaterAreaOption("Select one");
-    setStreet("");
-    setPreferredCommunicationOption("Select one");
+    setPetName("");
+    setSpeciesOption("Select one");
+    setSexOption("Select one");
+    setAgeOption("Select one");
+    setBreedOption("Select one");
+    setColourOption("Select one");
+    setMarkings("");
     setStatusOption("Select one");
+    setSterilisationStatusOption("Select one");
+    setSterilisationRequestedOption("Select one");
+    setSterilisationOutcomeOption("Select one");
+    setVaccinationShot1Option("Select one");
+    setVaccinationShot2Option("Select one");
+    setVaccinationShot3Option("Select one");
+    setMembershipTypeOption("Select one");
+    setCardStatusOption("Select one");
+    setKennelsReceivedOption("Select one");
     setStartingDate(new Date());
     setComments("");
-    setFirstName("");
-    setEmail("");
-    setSurname("");
-    setMobile("");
-    setAddressStreetCode("");
-    setAddressStreetNumber("");
-    setAddressSuburb("");
-    setAddressPostalCode("");
-    setAddressFreeForm("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
     setIsCreate(true);
@@ -402,29 +938,36 @@ const Pet: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
-    const newUser_ = await newVolunteer.mutateAsync({
-      firstName: firstName,
-      email: email,
-      surname: surname,
-      mobile: mobile,
-      addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      addressStreet: street,
-      addressStreetCode: addressStreetCode,
-      addressStreetNumber: addressStreetNumber,
-      addressSuburb: addressSuburb,
-      addressPostalCode: addressPostalCode,
-      addressFreeForm: addressFreeForm,
-      preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
-      startingDate: startingDate,
+    const newUser_ = await newPet.mutateAsync({
+      ownerID: ownerID,
+      petName: petName,
+      species: speciesOption === "Select one" ? "" : speciesOption,
+      sex: sexOption === "Select one" ? "" : sexOption,
+      age: ageOption === "Select one" ? "" : ageOption,
+      breed: breedOption === "Select one" ? "" : breedOption,
+      colour: colourOption === "Select one" ? "" : colourOption,
+      markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
-      clinicAttended: clinicList,
+      sterilisedStatus: sterilisationStatusOption === "Select one" ? "" : sterilisationStatusOption,
+      sterilisedRequested: sterilisationRequestedOption === "Select one" ? "" : sterilisationRequestedOption,
+      sterilisedRequestSigned: "",
+      sterilisationOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
+      vaccinationShot1: vaccinationShot1Option === "Select one" ? "" : vaccinationShot1Option,
+      vaccinationShot2: vaccinationShot2Option === "Select one" ? "" : vaccinationShot2Option,
+      vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
+      lastDeWorming: "",
+      membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
+      cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
+      kennelReceived: kennelsReceivedOption === "Select one" ? "" : kennelsReceivedOption,
+      clinicsAttended: clinicList,
       comments: comments,
+      treatments: "",
     });
 
     //Image upload
-    //console.log("ID: ", newUser_?.volunteerID, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
+    //console.log("ID: ", newUser_?.petID, "Image: ", newUser_?.image, "Name: ", petName, "IsUploadModalOpen: ", isUploadModalOpen);
     console.log("Clinics attended: ", newUser_.clinicsAttended);
-    handleUploadModal(newUser_.volunteerID, firstName, newUser_?.image ?? "");
+    handleUploadModal(newUser_.petID, petName, newUser_?.image ?? "");
     setIsCreate(false);
     setIsUpdate(false);
 
@@ -441,22 +984,24 @@ const Pet: NextPage = () => {
     if (user.data) {
       // Assuming userQuery.data contains the user object
       const userData = user.data;
-      setFirstName(userData.firstName ?? "");
-      setSurname(userData.surname ?? "");
-      setEmail(userData.email ?? "");
-      setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "");
-      setStreet(userData.addressStreet ?? "");
-      setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
-      setAddressSuburb(userData.addressSuburb ?? "");
-      setAddressPostalCode(userData.addressPostalCode ?? "");
-      setAddressFreeForm(userData.addressFreeForm ?? "");
-      setPreferredCommunicationOption(userData.preferredCommunication ?? "");
-      setStartingDate(userData.startingDate ?? new Date());
+      setPetName(userData.petName ?? "");
+      setSpeciesOption(userData.species ?? "");
+      setSexOption(userData.sex ?? "");
+      setAgeOption(userData.age ?? "");
+      setBreedOption(userData.breed ?? "");
+      setColourOption(userData.colour ?? "");
+      setMarkings(userData.markings ?? "");
       setStatusOption(userData.status ?? "");
+      setSterilisationStatusOption(userData.sterilisedStatus ?? "");
+      setSterilisationRequestedOption(userData.sterilisedRequested ?? "");
+      setSterilisationOutcomeOption(userData.sterilisationOutcome ?? "");
+      setVaccinationShot1Option(userData.vaccinationShot1 ?? "");
+      setVaccinationShot2Option(userData.vaccinationShot2 ?? "");
+      setVaccinationShot3Option(userData.vaccinationShot3 ?? "");
+      setMembershipTypeOption(userData.membership ?? "");
+      setCardStatusOption(userData.cardStatus ?? "");
+      setKennelsReceivedOption(userData.kennelReceived ?? "");
       setComments(userData.comments ?? "");
-      console.log("Select one");
       setClinicList(userData.clinicsAttended ?? []);
     }
 
@@ -470,19 +1015,23 @@ const Pet: NextPage = () => {
     if (user.data) {
       const userData = user.data;
 
-      setFirstName(userData.firstName ?? "");
-      setSurname(userData.surname ?? "");
-      setEmail(userData.email ?? "");
-      setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "");
-      setStreet(userData.addressStreet ?? "");
-      setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
-      setAddressSuburb(userData.addressSuburb ?? "");
-      setAddressPostalCode(userData.addressPostalCode ?? "");
-      setPreferredCommunicationOption(userData.preferredCommunication ?? "");
-      setStartingDate(userData.startingDate ?? new Date());
+      setPetName(userData.petName ?? "");
+      setSpeciesOption(userData.species ?? "");
+      setSexOption(userData.sex ?? "");
+      setAgeOption(userData.age ?? "");
+      setBreedOption(userData.breed ?? "");
+      setColourOption(userData.colour ?? "");
+      setMarkings(userData.markings ?? "");
       setStatusOption(userData.status ?? "");
+      setSterilisationStatusOption(userData.sterilisedStatus ?? "");
+      setSterilisationRequestedOption(userData.sterilisedRequested ?? "");
+      setSterilisationOutcomeOption(userData.sterilisationOutcome ?? "");
+      setVaccinationShot1Option(userData.vaccinationShot1 ?? "");
+      setVaccinationShot2Option(userData.vaccinationShot2 ?? "");
+      setVaccinationShot3Option(userData.vaccinationShot3 ?? "");
+      setMembershipTypeOption(userData.membership ?? "");
+      setCardStatusOption(userData.cardStatus ?? "");
+      setKennelsReceivedOption(userData.kennelReceived ?? "");
       setComments(userData.comments ?? "");
       setClinicList(userData.clinicsAttended ?? []);
     }
@@ -496,61 +1045,28 @@ const Pet: NextPage = () => {
     setIsViewProfilePage(false);
     setIsUploadModalOpen(false);
     setID(0);
-    setFirstName("");
-    setEmail("");
-    setSurname("");
-    setMobile("");
-    setGreaterAreaOption("Select one");
-    setStreet("");
-    setAddressStreetCode("");
-    setAddressStreetNumber("");
-    setAddressSuburb("");
-    setAddressPostalCode("");
-    setPreferredCommunicationOption("Select one");
+    setPetName("");
+    setSpeciesOption("Select one");
+    setSexOption("Select one");
+    setAgeOption("Select one");
+    setBreedOption("Select one");
+    setColourOption("Select one");
+    setMarkings("");
     setStatusOption("Select one");
+    setSterilisationStatusOption("Select one");
+    setSterilisationRequestedOption("Select one");
+    setSterilisationOutcomeOption("Select one");
+    setVaccinationShot1Option("Select one");
+    setVaccinationShot2Option("Select one");
+    setVaccinationShot3Option("Select one");
+    setMembershipTypeOption("Select one");
+    setCardStatusOption("Select one");
+    setKennelsReceivedOption("Select one");
     setComments("");
     setClinicList([]);
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
-  //Mobile number
-  const [mobileMessage, setMobileMessage] = useState("");
-  useEffect(() => {
-    console.log(mobile.length);
-    if (mobile.match(/^[0-9]+$/) == null && mobile.length != 0) {
-      setMobileMessage("Mobile number must only contain numbers");
-    } else if (mobile.length != 10 && mobile.length != 0) {
-      setMobileMessage("Mobile number must be 10 digits");
-    } else if (!mobile.startsWith("0") && mobile.length != 0) {
-      setMobileMessage("Mobile number must start with 0");
-    } else {
-      setMobileMessage("");
-    }
-  }, [mobile]);
-
-  //Street number
-  const [streetNumberMessage, setStreetNumberMessage] = useState("");
-  useEffect(() => {
-    if (addressStreetNumber.match(/^[0-9]+$/) == null && addressStreetNumber.length != 0) {
-      setStreetNumberMessage("Street number must only contain numbers");
-    } else if (addressStreetNumber.length > 4 && addressStreetNumber.length != 0) {
-      setStreetNumberMessage("Street number must be 4 digits or less");
-    } else {
-      setStreetNumberMessage("");
-    }
-  }, [addressStreetNumber]);
-
-  //Postal code
-  const [postalCodeMessage, setPostalCodeMessage] = useState("");
-  useEffect(() => {
-    if (addressPostalCode.match(/^[0-9]+$/) == null && addressPostalCode.length != 0) {
-      setPostalCodeMessage("Postal code must only contain numbers");
-    } else if (addressPostalCode.length > 4 && addressPostalCode.length != 0) {
-      setPostalCodeMessage("Postal code must be 4 digits or less");
-    } else {
-      setPostalCodeMessage("");
-    }
-  }, [addressPostalCode]);
 
   //-------------------------------MODAL-----------------------------------------
   //CREATE BUTTON MODAL
@@ -562,18 +1078,23 @@ const Pet: NextPage = () => {
     const mandatoryFields: string[] = [];
     const errorFields: { field: string; message: string }[] = [];
 
-    if (firstName === "") mandatoryFields.push("First Name");
-    if (surname === "") mandatoryFields.push("Surname");
-    if (mobile === "") mandatoryFields.push("Mobile");
-    if (greaterAreaOption === "Select one") mandatoryFields.push("Greater Area");
-    if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
+    if (petName === "") mandatoryFields.push("Pet Name");
+    if (speciesOption === "Select one") mandatoryFields.push("Species");
+    if (sexOption === "Select one") mandatoryFields.push("Sex");
+    if (ageOption === "Select one") mandatoryFields.push("Age");
+    if (breedOption === "Select one") mandatoryFields.push("Breed");
+    if (colourOption === "Select one") mandatoryFields.push("Colour");
+    if (markings === "") mandatoryFields.push("Markings");
     if (statusOption === "Select one") mandatoryFields.push("Status");
-    if (startingDate === null) mandatoryFields.push("Starting Date");
-
-    if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
-    //if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
-    if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
-    if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
+    if (sterilisationStatusOption === "Select one") mandatoryFields.push("Sterilisation Status");
+    if (sterilisationRequestedOption === "Select one") mandatoryFields.push("Sterilisation Requested");
+    if (sterilisationOutcomeOption === "Select one") mandatoryFields.push("Sterilisation Outcome");
+    if (vaccinationShot1Option === "Select one") mandatoryFields.push("Vaccination Shot 1");
+    if (vaccinationShot2Option === "Select one") mandatoryFields.push("Vaccination Shot 2");
+    if (vaccinationShot3Option === "Select one") mandatoryFields.push("Vaccination Shot 3");
+    if (membershipTypeOption === "Select one") mandatoryFields.push("Membership Type");
+    if (cardStatusOption === "Select one") mandatoryFields.push("Card Status");
+    if (kennelsReceivedOption === "Select one") mandatoryFields.push("Kennels Received");
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -608,11 +1129,11 @@ const Pet: NextPage = () => {
   const [uploadUserName, setUploadUserName] = useState("");
   const [uploadUserImage, setUploadUserImage] = useState("");
   const [uploadUserID, setUploadUserID] = useState("");
-  const handleUploadModal = (volunteerID: number, name: string, image: string) => {
+  const handleUploadModal = (petID: number, name: string, image: string) => {
     setIsUploadModalOpen(true);
-    console.log("UserID: " + volunteerID + " Name: " + name + " Image: " + image + "IsUploadModalOpen: " + isUploadModalOpen);
+    console.log("UserID: " + petID + " Name: " + name + " Image: " + image + "IsUploadModalOpen: " + isUploadModalOpen);
     //setIsCreate(true);
-    setUploadUserID(String(volunteerID));
+    setUploadUserID(String(petID));
     // setUploadModalID(userID);
     setUploadUserName(name);
     setUploadUserImage(image);
@@ -649,9 +1170,9 @@ const Pet: NextPage = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.volunteer.searchVolunteersInfinite.useInfiniteQuery(
+  } = api.pet.searchPetsInfinite.useInfiniteQuery(
     {
-      volunteerID: id,
+      petID: id,
       limit: limit,
       searchQuery: query,
       order: order,
@@ -720,7 +1241,7 @@ const Pet: NextPage = () => {
   return (
     <>
       <Head>
-        <title>User Profiles</title>
+        <title>Pet Profiles</title>
       </Head>
       <main className="flex flex-col">
         <Navbar />
@@ -748,9 +1269,7 @@ const Pet: NextPage = () => {
                   placeholder="Search..."
                   onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
                 />
-                <button className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleCreateNewUser}>
-                  Create new Volunteer
-                </button>
+
                 {/*<button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                   Delete all users
         </button>*/}
@@ -760,15 +1279,12 @@ const Pet: NextPage = () => {
                   <thead>
                     <tr>
                       <th className="px-4 py-2"></th>
-                      <th className="px-4 py-2">First Name</th>
                       <th className="px-4 py-2">
-                        <button className={`${order == "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
-                          Surname
+                        <button className={`${order == "petName" ? "underline" : ""}`} onClick={() => handleOrderFields("petName")}>
+                          Pet Name
                         </button>
                       </th>
-                      <th className="px-4 py-2">Email</th>
-                      <th className="px-4 py-2">Mobile</th>
-                      <th className="px-4 py-2">Greater Area</th>
+                      <th className="px-4 py-2">Species</th>
                       <th className="px-4 py-2">Status</th>
                       <th className="px-4 py-2">
                         <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
@@ -782,11 +1298,8 @@ const Pet: NextPage = () => {
                       return (
                         <tr className="items-center">
                           <div className="px-4 py-2">{index + 1}</div>
-                          <td className="border px-4 py-2">{user.firstName}</td>
-                          <td className="border px-4 py-2">{user.surname}</td>
-                          <td className="border px-4 py-2">{user.email}</td>
-                          <td className="border px-4 py-2">{user.mobile}</td>
-                          <td className="border px-4 py-2">{user.addressGreaterArea}</td>
+                          <td className="border px-4 py-2">{user.petName}</td>
+                          <td className="border px-4 py-2">{user.species}</td>
                           <td className="border px-4 py-2">{user.status}</td>
 
                           <td className="border px-4 py-2">
@@ -800,14 +1313,10 @@ const Pet: NextPage = () => {
                             <Trash
                               size={24}
                               className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleDeleteModal(user.volunteerID, String(user.volunteerID), user.firstName ?? "")}
+                              onClick={() => handleDeleteModal(user.petID, String(user.petID), user.petName ?? "")}
                             />
-                            <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(user.volunteerID)} />
-                            <AddressBook
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleViewProfilePage(user.volunteerID)}
-                            />
+                            <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(user.petID)} />
+                            <AddressBook size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleViewProfilePage(user.petID)} />
                           </div>
                         </tr>
                       );
@@ -823,7 +1332,7 @@ const Pet: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <b className=" text-2xl">{isUpdate ? "Update Volunteer Data" : "Create New Volunteer"}</b>
+                <b className=" text-2xl">{isUpdate ? "Update Pet Data" : "Create New Pet"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -844,7 +1353,7 @@ const Pet: NextPage = () => {
               <div className="flex flex-col items-start">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
+                  <b className="mb-3 text-center text-xl">Personal Data</b>
                   {isUpdate && (
                     <div className={`absolute ${user.data?.image ? "right-12" : "right-8"} top-16`}>
                       {user.data?.image ? (
@@ -864,7 +1373,7 @@ const Pet: NextPage = () => {
                     <UploadButton
                       className="absolute right-8 top-60 ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
                       endpoint="imageUploader"
-                      input={{ userId: String(user.data?.volunteerID) ?? "", user: "volunteer" }}
+                      input={{ userId: String(user.data?.petID) ?? "", user: "pet" }}
                       onUploadError={(error: Error) => {
                         // Do something with the error.
                         alert(`ERROR! ${error.message}`);
@@ -875,36 +1384,32 @@ const Pet: NextPage = () => {
                     />
                   )}
 
-                  <Input label="1. First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
-                  <Input label="2. Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
-                  <Input label="3. Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />
-                  <Input label="4. Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} required />
-                  {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
+                  <Input label="1. Pet Name" placeholder="Type here: e.g. John" value={petName} onChange={setPetName} required />
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
                         <span className="text-gray-200">1</span>
-                        5. Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
+                        5. Species<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <button
-                        ref={btnPreferredCommunicationRef}
+                        ref={btnSpeciesRef}
                         className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         type="button"
-                        onClick={handleTogglePreferredCommunication}
+                        onClick={handleToggleSpecies}
                       >
-                        {preferredOption + " "}
+                        {speciesOption + " "}
                         <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                         </svg>
                       </button>
-                      {preferredCommunication && (
-                        <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                      {isSpeciesOpen && (
+                        <div ref={speciesRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {preferredCommunicationOptions.map((option) => (
-                              <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
+                            {speciesOptions.map((option) => (
+                              <li key={option} onClick={() => handleSpeciesOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                               </li>
                             ))}
@@ -913,104 +1418,149 @@ const Pet: NextPage = () => {
                       )}
                     </div>
                   </div>
-                </div>
-                <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
-                  <div className="flex flex-col divide-y-2 divide-gray-300">
-                    <div className="flex items-start">
-                      <div className="mr-3 flex items-center pt-4">
-                        <div className="flex">
-                          <span className="text-gray-200">1</span>
-                          6. Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
-                        </div>
-                      </div>
-                      <div className="flex flex-col">
-                        <button
-                          ref={btnGreaterAreaRef}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                          type="button"
-                          onClick={handleToggleGreaterArea}
-                        >
-                          {isUpdate ? greaterAreaOption : greaterAreaOption + " "}
-                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                          </svg>
-                        </button>
-                        {isGreaterAreaOpen && (
-                          <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                              {greaterAreaOptions.map((option) => (
-                                <li key={option} onClick={() => handleGreaterAreaOption(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="flex items-start divide-x-2 divide-gray-300">
-                      <div className="flex flex-col pr-2">
-                        <Input label="8. Street" placeholder="Type here: e.g. Marina Str" value={street} onChange={setStreet} />
-
-                        <Input label="9. Street Code" placeholder="Type here: e.g. C3" value={addressStreetCode} onChange={setAddressStreetCode} />
-
-                        <div className="flex items-center">
-                          <div className="">10. Street Number: </div>
-                          <input
-                            className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                            placeholder="Type here: e.g. 14"
-                            onChange={(e) => setAddressStreetNumber(e.target.value)}
-                            value={addressStreetNumber}
-                          />
-                        </div>
-                        {streetNumberMessage && <div className="text-sm text-red-500">{streetNumberMessage}</div>}
-
-                        <div className="flex items-center">
-                          <div>11. Suburb: </div>
-                          <input
-                            className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                            placeholder="Type here: e.g. Lakeside"
-                            onChange={(e) => setAddressSuburb(e.target.value)}
-                            value={addressSuburb}
-                          />
-                        </div>
-
-                        <div className="flex items-center">
-                          <div>12. Postal Code: </div>
-                          <input
-                            className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                            placeholder="Type here: e.g. 7102"
-                            onChange={(e) => setAddressPostalCode(e.target.value)}
-                            value={addressPostalCode}
-                          />
-                        </div>
-                        {postalCodeMessage && <div className="text-sm text-red-500">{postalCodeMessage}</div>}
-                      </div>
-                      {/*Free form address */}
-                      <div className="mt-3 flex flex-col pl-4">
-                        <div>Or, Alternatively, Free Form Address</div>
-                        <textarea
-                          className=" h-64 w-72 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                          placeholder="Type here: e.g. 1234 Plaza, 1234.
-                          
-                          
-                          Also to be used if the correct street name is not in the drop-down list"
-                          onChange={(e) => setAddressFreeForm(e.target.value)}
-                          value={addressFreeForm}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        14. Status<div className="text-lg text-main-orange">*</div>:{" "}
+                        <span className="text-gray-200">1</span>
+                        5. Sex<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnSexRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleSex}
+                      >
+                        {sexOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isSexOpen && (
+                        <div ref={sexRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {sexOptions.map((option) => (
+                              <li key={option} onClick={() => handleSexOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">
+                        <span className="text-gray-200">1</span>
+                        5. Age<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnAgeRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleAge}
+                      >
+                        {ageOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isAgeOpen && (
+                        <div ref={ageRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {ageOptions.map((option) => (
+                              <li key={option} onClick={() => handleAgeOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">
+                        <span className="text-gray-200">1</span>
+                        5. Breed<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnBreedRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleBreed}
+                      >
+                        {breedOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isBreedOpen && (
+                        <div ref={breedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {breedOptions.map((option) => (
+                              <li key={option} onClick={() => handleBreedOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">
+                        <span className="text-gray-200">1</span>
+                        5. Colour:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnColourRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleColour}
+                      >
+                        {colourOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isColourOpen && (
+                        <div ref={colourRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {colourOptions.map((option) => (
+                              <li key={option} onClick={() => handleColourOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Input label="6. Markings" placeholder="Type here: e.g. White paws" value={markings} onChange={setMarkings} />
+                </div>
+
+                <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
+                  <b className="mb-3 text-center text-xl">Pet Health Data</b>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">
+                        14. Pet Status<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1038,6 +1588,102 @@ const Pet: NextPage = () => {
                       )}
                     </div>
                   </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">
+                        14. Sterilisation Status<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnSterilisationStatusRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleSterilisationStatus}
+                      >
+                        {sterilisationStatusOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {sterilisationStatus && (
+                        <div ref={sterilisationStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {sterilisationStatusOptions.map((option) => (
+                              <li key={option} onClick={() => handleSterilisationStatusOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">14. Sterilisation Requested: </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnSterilisationRequestedRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleSterilisationRequested}
+                      >
+                        {sterilisationRequestedOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {sterilisationRequested && (
+                        <div ref={sterilisationRequestedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {sterilisationRequestedOptions.map((option) => (
+                              <li key={option} onClick={() => handleSterilisationRequestedOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">14. Sterilisation Outcome: </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnSterilisationOutcomeRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleSterilisationOutcome}
+                      >
+                        {sterilisationOutcomeOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {sterilisationOutcome && (
+                        <div ref={statusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {sterilisationOutcomeOptions.map((option) => (
+                              <li key={option} onClick={() => handleSterilisationOutcomeOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
+                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
                   {/*Clinics attended*/}
                   <div className="flex items-start">
@@ -1089,8 +1735,102 @@ const Pet: NextPage = () => {
                     </div>
                   </div>
 
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">
+                        14. Mmebership Type<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnMembershipTypeRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleMembershipType}
+                      >
+                        {membershipTypeOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {membershipType && (
+                        <div ref={membershipTypeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {membershipTypeOptions.map((option) => (
+                              <li key={option} onClick={() => handleMembershipTypeOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">
+                        14. Card Status<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnCardStatusRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleCardStatus}
+                      >
+                        {cardStatusOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {cardStatus && (
+                        <div ref={cardStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {cardStatusOptions.map((option) => (
+                              <li key={option} onClick={() => handleCardStatusOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">14. Kennel Received: </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnKennelsReceivedRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleKennelsReceived}
+                      >
+                        {kennelsReceivedOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {kennelsReceived && (
+                        <div ref={kennelsReceivedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {kennelsReceivedOptions.map((option) => (
+                              <li key={option} onClick={() => handleKennelsReceivedOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/*DATEPICKER*/}
-                  <div className="flex items-center">
+                  {/* <div className="flex items-center">
                     <div className=" flex">
                       16. Starting Date<div className="text-lg text-main-orange">*</div>:{" "}
                     </div>
@@ -1103,7 +1843,7 @@ const Pet: NextPage = () => {
                         className="form-input rounded-md border px-4 py-2"
                       />
                     </div>
-                  </div>
+                            </div>*/}
 
                   <div className="flex items-start">
                     <div className="w-36 pt-3">17. Comments: </div>
@@ -1130,7 +1870,7 @@ const Pet: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">User Profile</div>
+                <div className=" text-2xl">Pet Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -1157,67 +1897,57 @@ const Pet: NextPage = () => {
                       <UserCircle size={140} className="ml-auto aspect-auto" />
                     )}
                   </div>
-                  <b className="mb-14 text-center text-xl">Personal & Contact Data</b>
+                  <b className="mb-14 text-center text-xl">Personal Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Volunteer ID:</b> {user?.data?.volunteerID}
+                    <b className="mr-3">Pet ID:</b> {user?.data?.petID}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">First name:</b> {firstName}
+                    <b className="mr-3">Pet name:</b> {petName}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Surname:</b> {surname}
+                    <b className="mr-3">Species:</b> {speciesOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Email:</b> {email}
+                    <b className="mr-3">Sex:</b> {sexOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Mobile:</b> {mobile}
+                    <b className="mr-3">Age:</b> {ageOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Preferred Communication Channel:</b> {preferredOption}
+                    <b className="mr-3">Breed:</b> {breedOption}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Colour:</b> {colourOption}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Markings:</b> {markings}
                   </div>
                 </div>
 
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
+                  <b className="mb-3 text-center text-xl">Pet Health Data</b>
+
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaOption}
+                    <b className="mr-3">Status:</b> {statusOption}
                   </div>
-                  <div className="flex items-start divide-x-2 divide-gray-300">
-                    <div className="flex w-96 flex-col pr-2">
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street:</b> {street}
-                      </div>
 
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street Code:</b> {addressStreetCode}
-                      </div>
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Sterilisation Status:</b> {sterilisationStatusOption}
+                  </div>
 
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street Number:</b> {addressStreetNumber}
-                      </div>
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Sterilisation Requested:</b> {sterilisationRequestedOption}
+                  </div>
 
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Suburb:</b> {addressSuburb}
-                      </div>
-
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Postal Code:</b> {addressPostalCode}
-                      </div>
-                    </div>
-
-                    {/*Free form address */}
-                    <div className=" flex w-96 flex-col pl-4">
-                      <b>Or, Free Form Address:</b>
-                      <div className=" mt-3 focus:border-black" style={{ whiteSpace: "pre-wrap" }}>
-                        {addressFreeForm}
-                      </div>
-                    </div>
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Sterilisation Outcome:</b> {sterilisationOutcomeOption}
                   </div>
                 </div>
 
@@ -1225,15 +1955,19 @@ const Pet: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Status:</b> {statusOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
                     <b className="mr-3">Clinics Attended:</b> {clinicList.map((clinic, index) => (clinicList.length - 1 == index ? clinic : clinic + ", "))}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Starting Date:</b> {startingDate?.toLocaleDateString()}
+                    <b className="mr-3">Membership Type:</b> {membershipTypeOption}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Card Status:</b> {cardStatusOption}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Kennels Received:</b> {kennelsReceivedOption}
                   </div>
 
                   <div className="mb-2 flex items-start">

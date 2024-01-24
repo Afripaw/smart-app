@@ -495,7 +495,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const sterilisationStatusOptions = ["No", "Unknown", "Calender entry"];
+  const sterilisationStatusOptions = ["Sterilised", "Not Sterilised", "Unknown"];
 
   //STERILISATION REQUESTED
   const handleToggleSterilisationRequested = () => {
@@ -525,7 +525,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const sterilisationRequestedOptions = ["No", "Calender entry"];
+  const sterilisationRequestedOptions = ["Yes", "No"];
 
   //STERILISATION REQUEST SIGNED
   const handleToggleSterilisationRequestSigned = () => {
@@ -563,7 +563,7 @@ const Pet: NextPage = () => {
       setSterilisationRequestSignedOption("Not Applicable");
       setSterilisationRequestSignedOptions(["Not Applicable"]);
       //sterilisationRequestedOption must contain Calendar entry or a number
-    } else if (sterilisationRequestedOption == "Calender entry" || sterilisationRequestedOption.match("0123456789")) {
+    } else if (sterilisationRequestedOption == "Yes" || sterilisationRequestedOption.match("0123456789")) {
       setSterilisationRequestSignedOption("Select one");
       setSterilisationRequestSignedOptions(sterilisationRequestConfirmedSignedOptions);
     }
@@ -1183,18 +1183,18 @@ const Pet: NextPage = () => {
     if (sexOption === "Select one") mandatoryFields.push("Sex");
     if (ageOption === "Select one") mandatoryFields.push("Age");
     if (breedOption === "Select one") mandatoryFields.push("Breed");
-    if (colourOption === "Select one") mandatoryFields.push("Colour");
-    if (markings === "") mandatoryFields.push("Markings");
+    // if (colourOption === "Select one") mandatoryFields.push("Colour");
+    // if (markings === "") mandatoryFields.push("Markings");
     if (statusOption === "Select one") mandatoryFields.push("Status");
     if (sterilisationStatusOption === "Select one") mandatoryFields.push("Sterilisation Status");
-    if (sterilisationRequestedOption === "Select one") mandatoryFields.push("Sterilisation Requested");
-    if (sterilisationOutcomeOption === "Select one") mandatoryFields.push("Sterilisation Outcome");
-    if (vaccinationShot1Option === "Select one") mandatoryFields.push("Vaccination Shot 1");
-    if (vaccinationShot2Option === "Select one") mandatoryFields.push("Vaccination Shot 2");
-    if (vaccinationShot3Option === "Select one") mandatoryFields.push("Vaccination Shot 3");
+    //  if (sterilisationRequestedOption === "Select one") mandatoryFields.push("Sterilisation Requested");
+    // if (sterilisationOutcomeOption === "Select one") mandatoryFields.push("Sterilisation Outcome");
+    //if (vaccinationShot1Option === "Select one") mandatoryFields.push("Vaccination Shot 1");
+    //if (vaccinationShot2Option === "Select one") mandatoryFields.push("Vaccination Shot 2");
+    //if (vaccinationShot3Option === "Select one") mandatoryFields.push("Vaccination Shot 3");
     if (membershipTypeOption === "Select one") mandatoryFields.push("Membership Type");
     if (cardStatusOption === "Select one") mandatoryFields.push("Card Status");
-    if (kennelsReceivedOption === "Select one") mandatoryFields.push("Kennels Received");
+    // if (kennelsReceivedOption === "Select one") mandatoryFields.push("Kennels Received");
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -1490,7 +1490,7 @@ const Pet: NextPage = () => {
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
                         <span className="text-gray-200">1</span>
-                        5. Species<div className="text-lg text-main-orange">*</div>:{" "}
+                        2. Species<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1523,7 +1523,7 @@ const Pet: NextPage = () => {
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
                         <span className="text-gray-200">1</span>
-                        5. Sex<div className="text-lg text-main-orange">*</div>:{" "}
+                        3. Sex<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1556,7 +1556,7 @@ const Pet: NextPage = () => {
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
                         <span className="text-gray-200">1</span>
-                        5. Age<div className="text-lg text-main-orange">*</div>:{" "}
+                        4. Age Category<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1622,7 +1622,7 @@ const Pet: NextPage = () => {
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
                         <span className="text-gray-200">1</span>
-                        5. Colour:{" "}
+                        6. Colour:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1652,7 +1652,10 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-36 pt-3">17. Markings: </div>
+                    <div className="w-36 pt-3">
+                      <span className="text-gray-200">1</span>7. Markings:{" "}
+                    </div>
+
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                       placeholder="Type here: e.g. White fur with dark spot on the left side of the face"
@@ -1668,7 +1671,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        14. Pet Status<div className="text-lg text-main-orange">*</div>:{" "}
+                        <span className="text-gray-200">1</span>8. Pet Status<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1700,7 +1703,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        14. Sterilisation Status<div className="text-lg text-main-orange">*</div>:{" "}
+                        <span className="text-gray-200">1</span> 9. Sterilisation Status<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1729,69 +1732,73 @@ const Pet: NextPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">14. Sterilisation Requested: </div>
+                  {sterilisationStatusOption === "Not Sterilised" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">10. Sterilisation Requested?: </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnSterilisationRequestedRef}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleToggleSterilisationRequested}
+                        >
+                          {sterilisationRequestedOption + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {sterilisationRequested && (
+                          <div ref={sterilisationRequestedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {sterilisationRequestedOptions.map((option) => (
+                                <li key={option} onClick={() => handleSterilisationRequestedOption(option)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnSterilisationRequestedRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleToggleSterilisationRequested}
-                      >
-                        {sterilisationRequestedOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {sterilisationRequested && (
-                        <div ref={sterilisationRequestedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {sterilisationRequestedOptions.map((option) => (
-                              <li key={option} onClick={() => handleSterilisationRequestedOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                  )}
+
+                  {sterilisationRequestedOption === "Yes" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">11. Sterilisation Request Signed: </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnSterilisationRequestSignedRef}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleToggleSterilisationRequestSigned}
+                        >
+                          {sterilisationRequestSignedOption + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {sterilisationRequestSigned && (
+                          <div ref={sterilisationRequestSignedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {sterilisationRequestSignedOptions.map((option) => (
+                                <li key={option} onClick={() => handleSterilisationRequestSignedOption(option)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">14. Sterilisation Request Signed: </div>
-                    </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnSterilisationRequestSignedRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleToggleSterilisationRequestSigned}
-                      >
-                        {sterilisationRequestSignedOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {sterilisationRequestSigned && (
-                        <div ref={sterilisationRequestSignedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {sterilisationRequestSignedOptions.map((option) => (
-                              <li key={option} onClick={() => handleSterilisationRequestSignedOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">14. Sterilisation Outcome: </div>
+                      <div className=" flex">12. Sterilisation Outcome: </div>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1826,7 +1833,7 @@ const Pet: NextPage = () => {
                   {/*Clinics attended*/}
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">15. Clinics Attended: </div>
+                      <div className=" flex">13. Clinics Attended ({clinicList.length}): </div>
                     </div>
                     {/*Show list of all the clinics attended */}
                     <div className="flex flex-col items-center">
@@ -1906,7 +1913,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        14. Membership Type<div className="text-lg text-main-orange">*</div>:{" "}
+                        15. Membership Type<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1938,7 +1945,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        14. Card Status<div className="text-lg text-main-orange">*</div>:{" "}
+                        16. Card Status<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1969,7 +1976,7 @@ const Pet: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">14. Kennel Received: </div>
+                      <div className=" flex">17. Kennel Received: </div>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -2014,7 +2021,7 @@ const Pet: NextPage = () => {
                             </div>*/}
 
                   <div className="flex items-start">
-                    <div className="w-36 pt-3">17. Comments: </div>
+                    <div className="w-36 pt-3">18. Comments: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                       placeholder="Type here: e.g. Notes on pet condition, pet behaviour, etc."
@@ -2103,7 +2110,7 @@ const Pet: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Pet Health Data</b>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Status:</b> {statusOption}
+                    <b className="mr-3">Pet Status:</b> {statusOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -2112,6 +2119,10 @@ const Pet: NextPage = () => {
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Sterilisation Requested:</b> {sterilisationRequestedOption}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Sterilisation Request Signed:</b> {sterilisationRequestSignedOption}
                   </div>
 
                   <div className="mb-2 flex items-center">

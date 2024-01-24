@@ -847,6 +847,7 @@ const Owner: NextPage = () => {
                       <th className="px-4 py-2">Mobile</th>
                       <th className="px-4 py-2">Greater Area</th>
                       <th className="px-4 py-2">Area</th>
+                      <th className="px-4 py-2">Address</th>
                       <th className="px-4 py-2">Status</th>
                       <th className="px-4 py-2">
                         <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
@@ -866,6 +867,9 @@ const Owner: NextPage = () => {
                           <td className="border px-4 py-2">{user.mobile}</td>
                           <td className="border px-4 py-2">{user.addressGreaterArea}</td>
                           <td className="border px-4 py-2">{user.addressArea}</td>
+                          <td className="border px-4 py-2">
+                            {user.addressStreetNumber} {user.addressStreet}
+                          </td>
                           <td className="border px-4 py-2">{user.status}</td>
 
                           <td className=" border px-4 py-2">

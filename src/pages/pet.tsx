@@ -100,9 +100,17 @@ const Pet: NextPage = () => {
 
   //---------------------------------NAVIGATION OF OWNER TO PET----------------------------------
   useEffect(() => {
-    setOwnerID(Number(router.query.id));
-    setIsCreate(true);
-  }, [router.query.id]);
+    if (router.asPath.includes("ownerID")) {
+      setOwnerID(Number(router.asPath.split("=")[1]));
+      console.log("Owner ID: ", router.asPath.split("=")[1]);
+      //console.log("Query: ", router.query);
+      //console.log("Route: ", router.route);
+      //console.log("as path: ", router.asPath);
+      //console.log("base path: ", router.basePath);
+      console.log("Owner ID: ", ownerID);
+      setIsCreate(true);
+    }
+  }, [router.asPath]);
 
   //-------------------------------UPDATE USER-----------------------------------------
   const user = api.pet.getPetByID.useQuery({ petID: id });
@@ -151,6 +159,11 @@ const Pet: NextPage = () => {
   const [sterilisationRequestedOption, setSterilisationRequestedOption] = useState("Select one");
   const sterilisationRequestedRef = useRef<HTMLDivElement>(null);
   const btnSterilisationRequestedRef = useRef<HTMLButtonElement>(null);
+
+  const [sterilisationRequestSigned, setSterilisationRequestSigned] = useState(false);
+  const [sterilisationRequestSignedOption, setSterilisationRequestSignedOption] = useState("Select one");
+  const sterilisationRequestSignedRef = useRef<HTMLDivElement>(null);
+  const btnSterilisationRequestSignedRef = useRef<HTMLButtonElement>(null);
 
   const [sterilisationOutcome, setSterilisationOutcome] = useState(false);
   const [sterilisationOutcomeOption, setSterilisationOutcomeOption] = useState("Select one");
@@ -514,6 +527,49 @@ const Pet: NextPage = () => {
 
   const sterilisationRequestedOptions = ["No", "Calender entry"];
 
+  //STERILISATION REQUEST SIGNED
+  const handleToggleSterilisationRequestSigned = () => {
+    setSterilisationRequestSigned(!sterilisationRequestSigned);
+  };
+
+  const handleSterilisationRequestSignedOption = (option: SetStateAction<string>) => {
+    setSterilisationRequestSignedOption(option);
+    setSterilisationRequestSigned(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sterilisationRequestSignedRef.current &&
+        !sterilisationRequestSignedRef.current.contains(event.target as Node) &&
+        btnSterilisationRequestSignedRef.current &&
+        !btnSterilisationRequestSignedRef.current.contains(event.target as Node)
+      ) {
+        setSterilisationRequestSigned(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const sterilisationRequestConfirmedSignedOptions = ["Registration Desk", "Field Hospital", "Vaccination Station", "Outside of Pet Clinic", "Not Applicable"];
+  const [sterilisationRequestSignedOptions, setSterilisationRequestSignedOptions] = useState([""]);
+
+  useEffect(() => {
+    if (sterilisationRequestedOption == "No") {
+      setSterilisationRequestSignedOption("Not Applicable");
+      setSterilisationRequestSignedOptions(["Not Applicable"]);
+      //sterilisationRequestedOption must contain Calendar entry or a number
+    } else if (sterilisationRequestedOption == "Calender entry" || sterilisationRequestedOption.match("0123456789")) {
+      setSterilisationRequestSignedOption("Select one");
+      setSterilisationRequestSignedOptions(sterilisationRequestConfirmedSignedOptions);
+    }
+  }),
+    [sterilisationRequestedOption];
+
   //STERILISATION OUTCOME
   const handleToggleSterilisationOutcome = () => {
     setSterilisationOutcome(!sterilisationOutcome);
@@ -792,6 +848,39 @@ const Pet: NextPage = () => {
     setShowClinicsAttended(!showClinicsAttended);
   };
 
+  //LAST DEWORMING
+  const [lastDeworming, setLastDeworming] = useState(false);
+  const [lastDewormingOption, setLastDewormingOption] = useState("Select here");
+  const lastDewormingRef = useRef<HTMLDivElement>(null);
+  const btnLastDewormingRef = useRef<HTMLButtonElement>(null);
+
+  const handleLastDewormingOption = (option: SetStateAction<string>) => {
+    setLastDewormingOption(option);
+    setLastDeworming(false);
+  };
+
+  const handleToggleLastDeworming = () => {
+    setLastDeworming(!lastDeworming);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        lastDewormingRef.current &&
+        !lastDewormingRef.current.contains(event.target as Node) &&
+        btnLastDewormingRef.current &&
+        !btnLastDewormingRef.current.contains(event.target as Node)
+      ) {
+        setLastDeworming(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   //----------------------------COMMUNICATION OF USER DETAILS---------------------------
   //Send user's details to user
   //const [sendUserDetails, setSendUserDetails] = useState(false);
@@ -821,6 +910,7 @@ const Pet: NextPage = () => {
       setMembershipTypeOption(userData.membership ?? "Select one");
       setCardStatusOption(userData.cardStatus ?? "Select one");
       setKennelsReceivedOption(userData.kennelReceived ?? "Select one");
+      setLastDewormingOption(userData.lastDeworming ?? "Select one");
 
       setComments(userData.comments ?? "");
     }
@@ -845,6 +935,7 @@ const Pet: NextPage = () => {
       setStatusOption(userData.status ?? "Select one");
       setSterilisationStatusOption(userData.sterilisedStatus ?? "Select one");
       setSterilisationRequestedOption(userData.sterilisedRequested ?? "Select one");
+      setSterilisationRequestSignedOption(userData.sterilisedRequestSigned ?? "Select one");
       setSterilisationOutcomeOption(userData.sterilisationOutcome ?? "Select one");
       setVaccinationShot1Option(userData.vaccinationShot1 ?? "Select one");
       setVaccinationShot2Option(userData.vaccinationShot2 ?? "Select one");
@@ -852,6 +943,7 @@ const Pet: NextPage = () => {
       setMembershipTypeOption(userData.membership ?? "Select one");
       setCardStatusOption(userData.cardStatus ?? "Select one");
       setKennelsReceivedOption(userData.kennelReceived ?? "Select one");
+      setLastDewormingOption(userData.lastDeworming ?? "Select one");
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
       setClinicList(userData.clinicsAttended ?? []);
@@ -871,12 +963,12 @@ const Pet: NextPage = () => {
       status: statusOption === "Select one" ? "" : statusOption,
       sterilisedStatus: sterilisationStatusOption === "Select one" ? "" : sterilisationStatusOption,
       sterilisedRequested: sterilisationRequestedOption === "Select one" ? "" : sterilisationRequestedOption,
-      sterilisedRequestSigned: "",
+      sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisedOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
       vaccinationShot1: vaccinationShot1Option === "Select one" ? "" : vaccinationShot1Option,
       vaccinationShot2: vaccinationShot2Option === "Select one" ? "" : vaccinationShot2Option,
       vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
-      lastDeWorming: "",
+      lastDeWorming: lastDewormingOption === "Select one" ? "" : lastDewormingOption,
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
       kennelReceived: kennelsReceivedOption === "Select one" ? "" : kennelsReceivedOption,
@@ -902,6 +994,7 @@ const Pet: NextPage = () => {
     setMembershipTypeOption("Select one");
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select one");
+    setLastDewormingOption("Select one");
     setComments("");
     setClinicList([]);
     setIsUpdate(false);
@@ -929,6 +1022,7 @@ const Pet: NextPage = () => {
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select one");
     setStartingDate(new Date());
+    setLastDewormingOption("Select one");
     setComments("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
@@ -950,12 +1044,12 @@ const Pet: NextPage = () => {
       status: statusOption === "Select one" ? "" : statusOption,
       sterilisedStatus: sterilisationStatusOption === "Select one" ? "" : sterilisationStatusOption,
       sterilisedRequested: sterilisationRequestedOption === "Select one" ? "" : sterilisationRequestedOption,
-      sterilisedRequestSigned: "",
+      sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisationOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
       vaccinationShot1: vaccinationShot1Option === "Select one" ? "" : vaccinationShot1Option,
       vaccinationShot2: vaccinationShot2Option === "Select one" ? "" : vaccinationShot2Option,
       vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
-      lastDeWorming: "",
+      lastDeWorming: lastDewormingOption === "Select one" ? "" : lastDewormingOption,
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
       kennelReceived: kennelsReceivedOption === "Select one" ? "" : kennelsReceivedOption,
@@ -1001,6 +1095,7 @@ const Pet: NextPage = () => {
       setMembershipTypeOption(userData.membership ?? "");
       setCardStatusOption(userData.cardStatus ?? "");
       setKennelsReceivedOption(userData.kennelReceived ?? "");
+      setLastDewormingOption(userData.lastDeworming ?? "");
       setComments(userData.comments ?? "");
       setClinicList(userData.clinicsAttended ?? []);
     }
@@ -1038,8 +1133,13 @@ const Pet: NextPage = () => {
   }, [isViewProfilePage, user.data]); // Effect runs when userQuery.data changes
 
   //-------------------------------BACK BUTTON-----------------------------------------
-  const handleBackButton = () => {
+  const handleBackButton = async () => {
     //console.log("Back button pressed");
+    //if owner id in query then go back to owner page
+    if (ownerID != 0 && !isViewProfilePage && !isUpdate) {
+      await router.push(`/owner`);
+    }
+
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);
@@ -1216,27 +1316,27 @@ const Pet: NextPage = () => {
 
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
-  interface CustomInputProps {
-    value?: string;
-    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  }
+  // interface CustomInputProps {
+  //   value?: string;
+  //   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  // }
 
-  // CustomInput component with explicit types for the props
-  const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
-      <svg
-        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-      </svg>
-      <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? startingDate?.toLocaleDateString() : value}
-    </button>
-  );
+  // // CustomInput component with explicit types for the props
+  // const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
+  //   <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
+  //     <svg
+  //       className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+  //       aria-hidden="true"
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       fill="currentColor"
+  //       viewBox="0 0 20 20"
+  //     >
+  //       <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+  //     </svg>
+  //     <div className="m-1 mr-2">(Select here): </div>
+  //     {isUpdate ? startingDate?.toLocaleDateString() : value}
+  //   </button>
+  // );
 
   return (
     <>
@@ -1350,10 +1450,10 @@ const Pet: NextPage = () => {
               <div className="flex">
                 {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
               </div>
-              <div className="flex flex-col items-start">
+              <div className="flex w-[40%] flex-col items-start">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Personal Data</b>
+                  <b className="mb-3 text-center text-xl">Pet Identification Data</b>
                   {isUpdate && (
                     <div className={`absolute ${user.data?.image ? "right-12" : "right-8"} top-16`}>
                       {user.data?.image ? (
@@ -1384,7 +1484,7 @@ const Pet: NextPage = () => {
                     />
                   )}
 
-                  <Input label="1. Pet Name" placeholder="Type here: e.g. John" value={petName} onChange={setPetName} required />
+                  <Input label="1. Pet Name" placeholder="Type here: e.g. Sally" value={petName} onChange={setPetName} required />
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
@@ -1551,7 +1651,15 @@ const Pet: NextPage = () => {
                     </div>
                   </div>
 
-                  <Input label="6. Markings" placeholder="Type here: e.g. White paws" value={markings} onChange={setMarkings} />
+                  <div className="flex items-start">
+                    <div className="w-36 pt-3">17. Markings: </div>
+                    <textarea
+                      className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                      placeholder="Type here: e.g. White fur with dark spot on the left side of the face"
+                      onChange={(e) => setMarkings(e.target.value)}
+                      value={markings}
+                    />
+                  </div>
                 </div>
 
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -1653,6 +1761,36 @@ const Pet: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">14. Sterilisation Request Signed: </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnSterilisationRequestSignedRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleSterilisationRequestSigned}
+                      >
+                        {sterilisationRequestSignedOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {sterilisationRequestSigned && (
+                        <div ref={sterilisationRequestSignedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {sterilisationRequestSignedOptions.map((option) => (
+                              <li key={option} onClick={() => handleSterilisationRequestSignedOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">14. Sterilisation Outcome: </div>
                     </div>
                     <div className="flex flex-col">
@@ -1668,7 +1806,7 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {sterilisationOutcome && (
-                        <div ref={statusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                        <div ref={sterilisationOutcomeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {sterilisationOutcomeOptions.map((option) => (
                               <li key={option} onClick={() => handleSterilisationOutcomeOption(option)}>
@@ -1737,8 +1875,38 @@ const Pet: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">14. Last Deworming: </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnLastDewormingRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleLastDeworming}
+                      >
+                        {lastDewormingOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {lastDeworming && (
+                        <div ref={lastDewormingRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {clinicDates.map((option) => (
+                              <li key={option} onClick={() => handleLastDewormingOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        14. Mmebership Type<div className="text-lg text-main-orange">*</div>:{" "}
+                        14. Membership Type<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1849,7 +2017,7 @@ const Pet: NextPage = () => {
                     <div className="w-36 pt-3">17. Comments: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                      placeholder="Type here: e.g. Notes on commitment, engagement, etc."
+                      placeholder="Type here: e.g. Notes on pet condition, pet behaviour, etc."
                       onChange={(e) => setComments(e.target.value)}
                       value={comments}
                     />
@@ -1897,7 +2065,7 @@ const Pet: NextPage = () => {
                       <UserCircle size={140} className="ml-auto aspect-auto" />
                     )}
                   </div>
-                  <b className="mb-14 text-center text-xl">Personal Data</b>
+                  <b className="mb-14 text-center text-xl">Pet Identification Data</b>
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Pet ID:</b> {user?.data?.petID}
                   </div>

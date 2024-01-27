@@ -118,12 +118,30 @@ export const petTreatmentRouter = createTRPCRouter({
         select: {
           petID: true,
           petName: true,
+          ownerID: true,
+        },
+      });
+
+      //fetch the owner of the pet
+      const owner = await ctx.db.petOwner.findMany({
+        where: {
+          ownerID: {
+            in: pet.map((pet) => pet.ownerID),
+          },
+        },
+        select: {
+          ownerID: true,
+          firstName: true,
+          surname: true,
+          addressGreaterArea: true,
+          addressArea: true,
         },
       });
 
       return {
         pet_data: pet,
         user_data: user,
+        owner_data: owner,
         nextCursor: newNextCursor,
       };
     }),

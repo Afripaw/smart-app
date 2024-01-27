@@ -74,6 +74,107 @@ const Pet: NextPage = () => {
     void data.refetch();
   }, [isUpdate, isDeleted, isCreate]);*/
 
+  //-------------------------------ID-----------------------------------------
+  const [id, setID] = useState(0);
+
+  //-------------------------------ORDER-----------------------------------------
+  //Order fields
+  const [order, setOrder] = useState("petName");
+
+  //-------------------------------CLINICS ATTENDED-----------------------------------------
+  //The list of clinics that the user has attended
+  const [clinicList, setClinicList] = useState<string[]>([]);
+  const [clinicIDList, setClinicIDList] = useState<number[]>([]);
+
+  //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
+  const observerTarget = useRef<HTMLDivElement | null>(null);
+
+  const [limit] = useState(12);
+  const {
+    data: queryData,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = api.pet.searchPetsInfinite.useInfiniteQuery(
+    {
+      petID: id,
+      limit: limit,
+      searchQuery: query,
+      order: order,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        console.log("Next Cursor: " + lastPage.nextCursor);
+        return lastPage.nextCursor;
+      },
+      enabled: false,
+    },
+  );
+
+  //Flattens the pages array into one array
+  const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
+  const clinic_data = queryData?.pages.flatMap((page) => page.clinic_data);
+  const treatment_data = queryData?.pages.flatMap((page) => page.treatment_data);
+  //combine the following two objects into one object
+  //const pet_data = user_data?.map((user, index) => ({ ...user, ...owner_data?.[index] }));
+
+  // Assuming each user object contains an ownerId or similar property to relate to the owner
+  const pet_data = user_data?.map((user) => {
+    // Find the owner that matches the user's ownerId
+    const owner = owner_data?.find((o) => o.ownerID === user.ownerID);
+    // Combine the user data with the found owner data
+    return { ...user, ...owner };
+  });
+
+  const pet_data_with_clinics = pet_data?.map((pet) => {
+    // Assuming each clinic object has a 'petID' that links it to a pet
+    const associatedClinics = clinic_data?.filter((clinic) => clinic.petID === pet.petID);
+
+    return {
+      ...pet,
+      clinics: associatedClinics,
+    };
+  });
+
+  const pet_data_with_clinics_and_treatments = pet_data_with_clinics?.map((pet) => {
+    // Assuming each treatment object has a 'petID' that links it to a pet
+    const associatedTreatments = treatment_data?.filter((treatment) => treatment.petID === pet.petID);
+
+    return {
+      ...pet,
+      treatment: associatedTreatments,
+    };
+  });
+
+  //Checks intersection of the observer target and reassigns target element once true
+  useEffect(() => {
+    if (!observerTarget.current || !fetchNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+      },
+      { threshold: 1 },
+    );
+
+    if (observerTarget.current) observer.observe(observerTarget.current);
+
+    const currentTarget = observerTarget.current;
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [fetchNextPage, hasNextPage, observerTarget]);
+
+  //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
+  useEffect(() => {
+    void refetch();
+  }, [isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]);
+  //[isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]
+
+  const user = pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
+
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
   /*const deleteAllUsers = api.user.deleteAll.useMutation();
@@ -96,7 +197,7 @@ const Pet: NextPage = () => {
 
   //userID
   //const [userID, setUserID] = useState("");
-  const [id, setID] = useState(0);
+  // const [id, setID] = useState(0);
 
   //---------------------------------NAVIGATION OF OWNER TO PET----------------------------------
   useEffect(() => {
@@ -138,7 +239,7 @@ const Pet: NextPage = () => {
   //-------------------------------NAVIGATING BY CLICKING ON THE TAB---------------------
   useEffect(() => {
     if (!isCreate) {
-      setOwnerID(Number(user?.data?.pet_data?.ownerID ?? 0));
+      setOwnerID(Number(user?.ownerID ?? 0));
     }
   }, [router.asPath]);
 
@@ -155,13 +256,13 @@ const Pet: NextPage = () => {
   // };
 
   //-------------------------------UPDATE USER-----------------------------------------
-  const user = api.pet.getPetByID.useQuery({ petID: id });
+  //const user = api.pet.getPetByID.useQuery({ petID: id });
 
   //Add clinic to pet
   const addClinic = api.pet.addClinicToPet.useMutation();
 
   //Order fields
-  const [order, setOrder] = useState("petName");
+  // const [order, setOrder] = useState("petName");
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
@@ -851,10 +952,6 @@ const Pet: NextPage = () => {
   const clinicsAttendedRef = useRef<HTMLDivElement>(null);
   const btnClinicsAttendedRef = useRef<HTMLButtonElement>(null);
 
-  //The list of clinics that the user has attended
-  const [clinicList, setClinicList] = useState<string[]>([]);
-  const [clinicIDList, setClinicIDList] = useState<number[]>([]);
-
   const handleToggleClinicsAttended = () => {
     setClinicsAttended(!clinicsAttended);
   };
@@ -986,12 +1083,12 @@ const Pet: NextPage = () => {
   //Update the user's details in fields
   const handleUpdateUserProfile = async (id: number) => {
     setID(id);
-
-    if (user.data) {
+    const user = pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
+    if (user) {
       // Assuming userQuery.data contains the user object
-      const userData = user.data.pet_data;
+      const userData = user;
       //Get all the clinic dates and put in a string array
-      const clinicData = user.data.clinic_data;
+      const clinicData = user?.clinics;
       const clinicDates =
         clinicData?.map(
           (clinic) =>
@@ -1032,11 +1129,11 @@ const Pet: NextPage = () => {
   };
 
   useEffect(() => {
-    if (user.data) {
+    if (user) {
       // Assuming userQuery.data contains the user object
-      const userData = user.data.pet_data;
+      const userData = user;
       //Get all the clinic dates and put in a string array
-      const clinicData = user.data.clinic_data;
+      const clinicData = user.clinics;
       const clinicDates =
         clinicData?.map(
           (clinic) =>
@@ -1071,8 +1168,8 @@ const Pet: NextPage = () => {
       setClinicList(clinicDates ?? []);
       setClinicIDList(clinicIDs ?? []);
     }
-  }, [user.data, isUpdate, isCreate]); // Effect runs when userQuery.data changes
-
+  }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
+  //[user, isUpdate, isCreate];
   const handleUpdateUser = async () => {
     await updatePet.mutateAsync({
       petID: id,
@@ -1199,12 +1296,12 @@ const Pet: NextPage = () => {
     setIsViewProfilePage(true);
     setID(id);
 
-    console.log("View profile page: ", JSON.stringify(user.data));
-    if (user.data) {
+    console.log("View profile page: ", JSON.stringify(user));
+    if (user) {
       // Assuming userQuery.data contains the user object
-      const userData = user.data.pet_data;
+      const userData = user;
       //Get all the clinic dates and put in a string array
-      const clinicData = user.data.clinic_data;
+      const clinicData = user.clinics;
       const clinicDates =
         clinicData?.map(
           (clinic) =>
@@ -1245,10 +1342,10 @@ const Pet: NextPage = () => {
 
   useEffect(() => {
     //console.log("View profile page: ", JSON.stringify(user.data));
-    if (user.data) {
-      const userData = user.data.pet_data;
+    if (user) {
+      const userData = user;
       //Get all the clinic dates and put in a string array
-      const clinicData = user.data.clinic_data;
+      const clinicData = user.clinics;
       const clinicDates =
         clinicData?.map(
           (clinic) =>
@@ -1280,8 +1377,8 @@ const Pet: NextPage = () => {
       setClinicList(clinicDates ?? []);
       setClinicIDList(clinicIDs ?? []);
     }
-  }, [isViewProfilePage, user.data]); // Effect runs when userQuery.data changes
-
+  }, [isViewProfilePage, isUpdate]); // Effect runs when userQuery.data changes
+  //[isViewProfilePage, user]
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {
     setIsUpdate(true);
@@ -1399,7 +1496,7 @@ const Pet: NextPage = () => {
   //refetch the image so that it updates
   useEffect(() => {
     if (isUploadModalOpen) {
-      void user.refetch();
+      //void user.refetch();
     }
   }, [isUploadModalOpen]);
 
@@ -1417,91 +1514,91 @@ const Pet: NextPage = () => {
     setOrder(field);
   };
 
-  //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  const observerTarget = useRef<HTMLDivElement | null>(null);
+  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
+  // const observerTarget = useRef<HTMLDivElement | null>(null);
 
-  const [limit] = useState(12);
-  const {
-    data: queryData,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-  } = api.pet.searchPetsInfinite.useInfiniteQuery(
-    {
-      petID: id,
-      limit: limit,
-      searchQuery: query,
-      order: order,
-    },
-    {
-      getNextPageParam: (lastPage) => {
-        console.log("Next Cursor: " + lastPage.nextCursor);
-        return lastPage.nextCursor;
-      },
-      enabled: false,
-    },
-  );
+  // const [limit] = useState(12);
+  // const {
+  //   data: queryData,
+  //   fetchNextPage,
+  //   hasNextPage,
+  //   refetch,
+  // } = api.pet.searchPetsInfinite.useInfiniteQuery(
+  //   {
+  //     petID: id,
+  //     limit: limit,
+  //     searchQuery: query,
+  //     order: order,
+  //   },
+  //   {
+  //     getNextPageParam: (lastPage) => {
+  //       console.log("Next Cursor: " + lastPage.nextCursor);
+  //       return lastPage.nextCursor;
+  //     },
+  //     enabled: false,
+  //   },
+  // );
 
-  //Flattens the pages array into one array
-  const user_data = queryData?.pages.flatMap((page) => page.user_data);
-  const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
-  const clinic_data = queryData?.pages.flatMap((page) => page.clinic_data);
-  const treatment_data = queryData?.pages.flatMap((page) => page.treatment_data);
-  //combine the following two objects into one object
-  //const pet_data = user_data?.map((user, index) => ({ ...user, ...owner_data?.[index] }));
+  // //Flattens the pages array into one array
+  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  // const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
+  // const clinic_data = queryData?.pages.flatMap((page) => page.clinic_data);
+  // const treatment_data = queryData?.pages.flatMap((page) => page.treatment_data);
+  // //combine the following two objects into one object
+  // //const pet_data = user_data?.map((user, index) => ({ ...user, ...owner_data?.[index] }));
 
-  // Assuming each user object contains an ownerId or similar property to relate to the owner
-  const pet_data = user_data?.map((user) => {
-    // Find the owner that matches the user's ownerId
-    const owner = owner_data?.find((o) => o.ownerID === user.ownerID);
-    // Combine the user data with the found owner data
-    return { ...user, ...owner };
-  });
+  // // Assuming each user object contains an ownerId or similar property to relate to the owner
+  // const pet_data = user_data?.map((user) => {
+  //   // Find the owner that matches the user's ownerId
+  //   const owner = owner_data?.find((o) => o.ownerID === user.ownerID);
+  //   // Combine the user data with the found owner data
+  //   return { ...user, ...owner };
+  // });
 
-  const pet_data_with_clinics = pet_data?.map((pet) => {
-    // Assuming each clinic object has a 'petID' that links it to a pet
-    const associatedClinics = clinic_data?.filter((clinic) => clinic.petID === pet.petID);
+  // const pet_data_with_clinics = pet_data?.map((pet) => {
+  //   // Assuming each clinic object has a 'petID' that links it to a pet
+  //   const associatedClinics = clinic_data?.filter((clinic) => clinic.petID === pet.petID);
 
-    return {
-      ...pet,
-      clinics: associatedClinics,
-    };
-  });
+  //   return {
+  //     ...pet,
+  //     clinics: associatedClinics,
+  //   };
+  // });
 
-  const pet_data_with_clinics_and_treatments = pet_data_with_clinics?.map((pet) => {
-    // Assuming each treatment object has a 'petID' that links it to a pet
-    const associatedTreatments = treatment_data?.filter((treatment) => treatment.petID === pet.petID);
+  // const pet_data_with_clinics_and_treatments = pet_data_with_clinics?.map((pet) => {
+  //   // Assuming each treatment object has a 'petID' that links it to a pet
+  //   const associatedTreatments = treatment_data?.filter((treatment) => treatment.petID === pet.petID);
 
-    return {
-      ...pet,
-      treatment: associatedTreatments,
-    };
-  });
+  //   return {
+  //     ...pet,
+  //     treatment: associatedTreatments,
+  //   };
+  // });
 
-  //Checks intersection of the observer target and reassigns target element once true
-  useEffect(() => {
-    if (!observerTarget.current || !fetchNextPage) return;
+  // //Checks intersection of the observer target and reassigns target element once true
+  // useEffect(() => {
+  //   if (!observerTarget.current || !fetchNextPage) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-      },
-      { threshold: 1 },
-    );
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+  //     },
+  //     { threshold: 1 },
+  //   );
 
-    if (observerTarget.current) observer.observe(observerTarget.current);
+  //   if (observerTarget.current) observer.observe(observerTarget.current);
 
-    const currentTarget = observerTarget.current;
+  //   const currentTarget = observerTarget.current;
 
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
-    };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  //   return () => {
+  //     if (currentTarget) observer.unobserve(currentTarget);
+  //   };
+  // }, [fetchNextPage, hasNextPage, observerTarget]);
 
-  //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
-  useEffect(() => {
-    void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]);
+  // //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
+  // useEffect(() => {
+  //   void refetch();
+  // }, [isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]);
 
   //------------------------------------CREATE A NEW TREATMENT FOR PET--------------------------------------
   //When button is pressed the browser needs to go to the treatment's page. The treatment's page needs to know the pet's ID
@@ -1697,15 +1794,9 @@ const Pet: NextPage = () => {
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Pet Identification Data</b>
                   {isUpdate && (
-                    <div className={`absolute ${user.data?.pet_data?.image ? "right-12" : "right-8"} top-16`}>
-                      {user.data?.pet_data?.image ? (
-                        <Image
-                          src={user.data?.pet_data?.image}
-                          alt="Afripaw profile pic"
-                          className="ml-auto aspect-auto max-h-40 max-w-[7rem]"
-                          width={140}
-                          height={160}
-                        />
+                    <div className={`absolute ${user?.image ? "right-12" : "right-8"} top-16`}>
+                      {user?.image ? (
+                        <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-40 max-w-[7rem]" width={140} height={160} />
                       ) : (
                         <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
                       )}
@@ -1715,13 +1806,13 @@ const Pet: NextPage = () => {
                     <UploadButton
                       className="absolute right-8 top-60 ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
                       endpoint="imageUploader"
-                      input={{ userId: String(user.data?.pet_data?.petID) ?? "", user: "pet" }}
+                      input={{ userId: String(user?.petID) ?? "", user: "pet" }}
                       onUploadError={(error: Error) => {
                         // Do something with the error.
                         alert(`ERROR! ${error.message}`);
                       }}
                       onClientUploadComplete={() => {
-                        void user.refetch();
+                        // void user.refetch();
                       }}
                     />
                   )}
@@ -2360,21 +2451,15 @@ const Pet: NextPage = () => {
                     />
                   </div>
                   <div className="absolute right-4 top-20">
-                    {user.data?.pet_data?.image ? (
-                      <Image
-                        src={user.data?.pet_data?.image}
-                        alt="Afripaw profile pic"
-                        className="ml-auto aspect-auto max-h-52 max-w-[9rem]"
-                        width={150}
-                        height={200}
-                      />
+                    {user?.image ? (
+                      <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
                     ) : (
                       <UserCircle size={140} className="ml-auto aspect-auto" />
                     )}
                   </div>
                   <b className="mb-14 text-center text-xl">Pet Identification Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet ID:</b> {user?.data?.pet_data?.petID}
+                    <b className="mr-3">Pet ID:</b> {user?.petID}
                   </div>
 
                   <div className="mb-2 flex items-center">

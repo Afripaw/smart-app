@@ -71,6 +71,69 @@ const Clinic: NextPage = () => {
     void data.refetch();
   }, [isUpdate, isDeleted, isCreate]);*/
 
+  //-------------------------------ID-----------------------------------------
+  const [id, setID] = useState(0);
+
+  //-------------------------------ORDER-----------------------------------------
+  //Order fields
+  //sorts the table according to specific fields
+  const [order, setOrder] = useState("date");
+
+  //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
+  const observerTarget = useRef<HTMLDivElement | null>(null);
+
+  const [limit] = useState(12);
+  const {
+    data: queryData,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = api.petClinic.searchClinicsInfinite.useInfiniteQuery(
+    {
+      clinicID: id,
+      limit: limit,
+      searchQuery: query,
+      order: order,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        console.log("Next Cursor: " + lastPage.nextCursor);
+        return lastPage.nextCursor;
+      },
+      enabled: false,
+    },
+  );
+
+  //Flattens the pages array into one array
+  const user_data = queryData?.pages.flatMap((page) => page.user_data);
+
+  //Checks intersection of the observer target and reassigns target element once true
+  useEffect(() => {
+    if (!observerTarget.current || !fetchNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+      },
+      { threshold: 1 },
+    );
+
+    if (observerTarget.current) observer.observe(observerTarget.current);
+
+    const currentTarget = observerTarget.current;
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [fetchNextPage, hasNextPage, observerTarget]);
+
+  //Make it retrieve the data from tab;e again when the user is updated, deleted or created
+  useEffect(() => {
+    void refetch();
+  }, [isUpdate, isDeleted, isCreate, query, order]);
+
+  const clinic = user_data?.find((clinic) => clinic.clinicID === id);
+
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
   /*const deleteAllUsers = api.user.deleteAll.useMutation();
@@ -89,14 +152,14 @@ const Clinic: NextPage = () => {
 
   //userID
   //const [userID, setUserID] = useState("");
-  const [id, setID] = useState(0);
+  // const [id, setID] = useState(0);
 
   //-------------------------------UPDATE USER-----------------------------------------
-  const clinic = api.petClinic.getClinicByID.useQuery({ clinicID: id });
+  // const clinic = api.petClinic.getClinicByID.useQuery({ clinicID: id });
 
   //Order fields
   //sorts the table according to specific fields
-  const [order, setOrder] = useState("date");
+  //const [order, setOrder] = useState("date");
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
@@ -217,9 +280,10 @@ const Clinic: NextPage = () => {
   const handleUpdateUserProfile = async (id: number) => {
     setID(id);
 
-    if (clinic.data) {
+    const clinic = user_data?.find((clinic) => clinic.clinicID === id);
+    if (clinic) {
       // Assuming userQuery.data contains the user object
-      const userData = clinic.data;
+      const userData = clinic;
       setGreaterAreaOption(userData?.greaterArea ?? "Select one");
       setAreaOption(userData.area ?? "Select one");
       setStartingDate(userData?.date ?? new Date());
@@ -239,9 +303,9 @@ const Clinic: NextPage = () => {
   };
 
   useEffect(() => {
-    if (clinic.data) {
+    if (clinic) {
       // Assuming userQuery.data contains the user object
-      const userData = clinic.data;
+      const userData = clinic;
       setGreaterAreaOption(userData.greaterArea ?? "Select one");
       setAreaOption(userData.area ?? "");
       setStartingDate(userData.date ?? new Date());
@@ -253,7 +317,7 @@ const Clinic: NextPage = () => {
         setAreaOption("Select one");
       }
     }
-  }, [clinic.data, isUpdate, isCreate]); // Effect runs when userQuery.data changes
+  }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
     await updateClinic.mutateAsync({
@@ -308,10 +372,11 @@ const Clinic: NextPage = () => {
     setIsViewProfilePage(true);
     setID(id);
 
-    console.log("View profile page: ", JSON.stringify(clinic.data));
-    if (clinic.data) {
+    const clinic = user_data?.find((clinic) => clinic.clinicID === id);
+    // console.log("View profile page: ", JSON.stringify(clinic.data));
+    if (clinic) {
       // Assuming userQuery.data contains the user object
-      const userData = clinic.data;
+      const userData = clinic;
       setGreaterAreaOption(userData.greaterArea ?? "");
       setAreaOption(userData.area ?? "");
       setStartingDate(userData.date ?? new Date());
@@ -333,10 +398,10 @@ const Clinic: NextPage = () => {
   useEffect(() => {
     //console.log("View profile page: ", JSON.stringify(user.data));
     if (isViewProfilePage) {
-      void clinic.refetch();
+      //void clinic.refetch();
     }
-    if (clinic.data) {
-      const userData = clinic.data;
+    if (clinic) {
+      const userData = clinic;
       setGreaterAreaOption(userData.greaterArea ?? "");
       setAreaOption(userData.area ?? "");
       setStartingDate(userData.date ?? new Date());
@@ -350,7 +415,7 @@ const Clinic: NextPage = () => {
         setAreaOption("Select one");
       }
     }
-  }, [isViewProfilePage, clinic.data]); // Effect runs when userQuery.data changes
+  }, [isViewProfilePage]); // Effect runs when userQuery.data changes
 
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {
@@ -419,58 +484,58 @@ const Clinic: NextPage = () => {
     setOrder(field);
   };
 
-  //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  const observerTarget = useRef<HTMLDivElement | null>(null);
+  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
+  // const observerTarget = useRef<HTMLDivElement | null>(null);
 
-  const [limit] = useState(12);
-  const {
-    data: queryData,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-  } = api.petClinic.searchClinicsInfinite.useInfiniteQuery(
-    {
-      clinicID: id,
-      limit: limit,
-      searchQuery: query,
-      order: order,
-    },
-    {
-      getNextPageParam: (lastPage) => {
-        console.log("Next Cursor: " + lastPage.nextCursor);
-        return lastPage.nextCursor;
-      },
-      enabled: false,
-    },
-  );
+  // const [limit] = useState(12);
+  // const {
+  //   data: queryData,
+  //   fetchNextPage,
+  //   hasNextPage,
+  //   refetch,
+  // } = api.petClinic.searchClinicsInfinite.useInfiniteQuery(
+  //   {
+  //     clinicID: id,
+  //     limit: limit,
+  //     searchQuery: query,
+  //     order: order,
+  //   },
+  //   {
+  //     getNextPageParam: (lastPage) => {
+  //       console.log("Next Cursor: " + lastPage.nextCursor);
+  //       return lastPage.nextCursor;
+  //     },
+  //     enabled: false,
+  //   },
+  // );
 
-  //Flattens the pages array into one array
-  const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  // //Flattens the pages array into one array
+  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
 
-  //Checks intersection of the observer target and reassigns target element once true
-  useEffect(() => {
-    if (!observerTarget.current || !fetchNextPage) return;
+  // //Checks intersection of the observer target and reassigns target element once true
+  // useEffect(() => {
+  //   if (!observerTarget.current || !fetchNextPage) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-      },
-      { threshold: 1 },
-    );
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+  //     },
+  //     { threshold: 1 },
+  //   );
 
-    if (observerTarget.current) observer.observe(observerTarget.current);
+  //   if (observerTarget.current) observer.observe(observerTarget.current);
 
-    const currentTarget = observerTarget.current;
+  //   const currentTarget = observerTarget.current;
 
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
-    };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  //   return () => {
+  //     if (currentTarget) observer.unobserve(currentTarget);
+  //   };
+  // }, [fetchNextPage, hasNextPage, observerTarget]);
 
-  //Make it retrieve the data from tab;e again when the user is updated, deleted or created
-  useEffect(() => {
-    void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order]);
+  // //Make it retrieve the data from tab;e again when the user is updated, deleted or created
+  // useEffect(() => {
+  //   void refetch();
+  // }, [isUpdate, isDeleted, isCreate, query, order]);
 
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
@@ -796,28 +861,28 @@ const Clinic: NextPage = () => {
 
                   <b className="mb-14 text-center text-xl">Pet Clinic Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Clinic ID:</b> {clinic?.data?.clinicID}
+                    <b className="mr-3">Clinic ID:</b> {clinic?.clinicID}
                   </div>
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Date:</b>{" "}
-                    {clinic?.data?.date?.getDate() + "/" + ((clinic?.data?.date?.getMonth() ?? 0) + 1) + "/" + clinic?.data?.date?.getFullYear() ?? ""}
+                    {clinic?.date?.getDate() + "/" + ((clinic?.date?.getMonth() ?? 0) + 1) + "/" + clinic?.date?.getFullYear() ?? ""}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {clinic?.data?.greaterArea}
+                    <b className="mr-3">Greater Area:</b> {clinic?.greaterArea}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {clinic?.data?.area}
+                    <b className="mr-3">Area:</b> {clinic?.area}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Conditions:</b> {clinic?.data?.conditions}
+                    <b className="mr-3">Conditions:</b> {clinic?.conditions}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Comments:</b> {clinic?.data?.comments}
+                    <b className="mr-3">Comments:</b> {clinic?.comments}
                   </div>
                 </div>
               </div>

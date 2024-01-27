@@ -56,6 +56,14 @@ const Treatment: NextPage = () => {
     return phrase;
   };
 
+  //-------------------------------ID-----------------------------------------
+  const [id, setID] = useState(0);
+
+  //-------------------------------ORDER-----------------------------------------
+  //Order fields
+  //sorts the table according to specific fields
+  const [order, setOrder] = useState("date");
+
   //-------------------------------TABLE-----------------------------------------
   //const data = api.user.searchUsers.useQuery({ searchQuery: query });
   //delete specific row
@@ -70,6 +78,74 @@ const Treatment: NextPage = () => {
   /* useEffect(() => {
     void data.refetch();
   }, [isUpdate, isDeleted, isCreate]);*/
+
+  //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
+  const observerTarget = useRef<HTMLDivElement | null>(null);
+
+  const [limit] = useState(12);
+  const {
+    data: queryData,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = api.petTreatment.searchTreatmentsInfinite.useInfiniteQuery(
+    {
+      treatmentID: id,
+      limit: limit,
+      searchQuery: query,
+      order: order,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        console.log("Next Cursor: " + lastPage.nextCursor);
+        return lastPage.nextCursor;
+      },
+      enabled: false,
+    },
+  );
+
+  //Flattens the pages array into one array
+  const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  const pet_data = queryData?.pages.flatMap((page) => page.pet_data);
+  const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
+
+  //combine the following two objects into one object
+  const treatment_data = user_data?.map((user, index) => ({ ...user, ...pet_data?.[index] }));
+
+  // Assuming each user object contains an ownerId or similar property to relate to the owner
+  const pet_treatment_data = treatment_data?.map((pet) => {
+    // Find the owner that matches the user's ownerId
+    const owner = owner_data?.find((o) => (o.ownerID ?? 0) === pet.ownerID);
+    // Combine the user data with the found owner data
+    return { ...pet, ...owner };
+  });
+
+  const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
+
+  //Checks intersection of the observer target and reassigns target element once true
+  useEffect(() => {
+    if (!observerTarget.current || !fetchNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+      },
+      { threshold: 1 },
+    );
+
+    if (observerTarget.current) observer.observe(observerTarget.current);
+
+    const currentTarget = observerTarget.current;
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [fetchNextPage, hasNextPage, observerTarget]);
+
+  //Make it retrieve the data from tab;e again when the user is updated, deleted or created
+  useEffect(() => {
+    void refetch();
+  }, [isUpdate, isDeleted, isCreate, query, order]);
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
@@ -90,9 +166,9 @@ const Treatment: NextPage = () => {
 
   //userID
   //const [userID, setUserID] = useState("");
-  const [id, setID] = useState(0);
+  // const [id, setID] = useState(0);
 
-  //---------------------------------NAVIGATION OF OWNER TO PET----------------------------------
+  //---------------------------------NAVIGATION OF PET TO TREATMENT----------------------------------
   useEffect(() => {
     if (router.asPath.includes("petID")) {
       setPetID(Number(router.asPath.split("=")[1]));
@@ -125,7 +201,7 @@ const Treatment: NextPage = () => {
   //-------------------------------NAVIGATING BY CLICKING ON THE TAB---------------------
   useEffect(() => {
     if (!isCreate) {
-      setPetID(Number(treatment.data?.petID ?? 0));
+      setPetID(Number(treatment?.petID ?? 0));
     }
   }, [router.asPath]);
 
@@ -136,11 +212,7 @@ const Treatment: NextPage = () => {
   // }, []);
 
   //-------------------------------UPDATE USER-----------------------------------------
-  const treatment = api.petTreatment.getTreatmentByID.useQuery({ treatmentID: id });
-
-  //Order fields
-  //sorts the table according to specific fields
-  const [order, setOrder] = useState("date");
+  //const treatment = api.petTreatment.getTreatmentByID.useQuery({ treatmentID: id });
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
@@ -255,9 +327,9 @@ const Treatment: NextPage = () => {
   const handleUpdateUserProfile = async (id: number) => {
     setID(id);
 
-    if (treatment.data) {
+    if (treatment) {
       // Assuming userQuery.data contains the user object
-      const userData = treatment.data;
+      const userData = treatment;
       setCategoryOption(userData.category ?? "Select one");
       setTypeOption(userData.type ?? "Select one");
       setStartingDate(userData?.date ?? new Date());
@@ -276,9 +348,9 @@ const Treatment: NextPage = () => {
   };
 
   useEffect(() => {
-    if (treatment.data) {
+    if (treatment) {
       // Assuming userQuery.data contains the user object
-      const userData = treatment.data;
+      const userData = treatment;
       setCategoryOption(userData.category ?? "Select one");
       setTypeOption(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
@@ -289,7 +361,7 @@ const Treatment: NextPage = () => {
       //   setAreaOption("Select one");
       // }
     }
-  }, [treatment.data, isUpdate, isCreate]); // Effect runs when userQuery.data changes
+  }, [treatment, isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
     await updateTreatment.mutateAsync({
@@ -342,9 +414,9 @@ const Treatment: NextPage = () => {
     setID(id);
 
     //console.log("View profile page: ", JSON.stringify(clinic.data));
-    if (treatment.data) {
+    if (treatment) {
       // Assuming userQuery.data contains the user object
-      const userData = treatment.data;
+      const userData = treatment;
       setCategoryOption(userData.category ?? "");
       setTypeOption(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
@@ -365,10 +437,10 @@ const Treatment: NextPage = () => {
   useEffect(() => {
     //console.log("View profile page: ", JSON.stringify(user.data));
     if (isViewProfilePage) {
-      void treatment.refetch();
+      //void treatment.refetch();
     }
-    if (treatment.data) {
-      const userData = treatment.data;
+    if (treatment) {
+      const userData = treatment;
       setCategoryOption(userData.category ?? "");
       setTypeOption(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
@@ -382,7 +454,7 @@ const Treatment: NextPage = () => {
       //   setAreaOption("Select one");
       // }
     }
-  }, [isViewProfilePage, treatment.data]); // Effect runs when userQuery.data changes
+  }, [isViewProfilePage, treatment]); // Effect runs when userQuery.data changes
 
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {
@@ -453,61 +525,71 @@ const Treatment: NextPage = () => {
     setOrder(field);
   };
 
-  //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  const observerTarget = useRef<HTMLDivElement | null>(null);
+  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
+  // const observerTarget = useRef<HTMLDivElement | null>(null);
 
-  const [limit] = useState(12);
-  const {
-    data: queryData,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-  } = api.petTreatment.searchTreatmentsInfinite.useInfiniteQuery(
-    {
-      treatmentID: id,
-      limit: limit,
-      searchQuery: query,
-      order: order,
-    },
-    {
-      getNextPageParam: (lastPage) => {
-        console.log("Next Cursor: " + lastPage.nextCursor);
-        return lastPage.nextCursor;
-      },
-      enabled: false,
-    },
-  );
+  // const [limit] = useState(12);
+  // const {
+  //   data: queryData,
+  //   fetchNextPage,
+  //   hasNextPage,
+  //   refetch,
+  // } = api.petTreatment.searchTreatmentsInfinite.useInfiniteQuery(
+  //   {
+  //     treatmentID: id,
+  //     limit: limit,
+  //     searchQuery: query,
+  //     order: order,
+  //   },
+  //   {
+  //     getNextPageParam: (lastPage) => {
+  //       console.log("Next Cursor: " + lastPage.nextCursor);
+  //       return lastPage.nextCursor;
+  //     },
+  //     enabled: false,
+  //   },
+  // );
 
-  //Flattens the pages array into one array
-  const user_data = queryData?.pages.flatMap((page) => page.user_data);
-  const pet_data = queryData?.pages.flatMap((page) => page.pet_data);
-  //combine the following two objects into one object
-  const treatment_data = user_data?.map((user, index) => ({ ...user, ...pet_data?.[index] }));
+  // //Flattens the pages array into one array
+  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  // const pet_data = queryData?.pages.flatMap((page) => page.pet_data);
+  // const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
 
-  //Checks intersection of the observer target and reassigns target element once true
-  useEffect(() => {
-    if (!observerTarget.current || !fetchNextPage) return;
+  // //combine the following two objects into one object
+  // const treatment_data = user_data?.map((user, index) => ({ ...user, ...pet_data?.[index] }));
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-      },
-      { threshold: 1 },
-    );
+  // // Assuming each user object contains an ownerId or similar property to relate to the owner
+  // const pet_treatment_data = treatment_data?.map((pet) => {
+  //   // Find the owner that matches the user's ownerId
+  //   const owner = owner_data?.find((o) => (o.ownerID ?? 0) === pet.ownerID);
+  //   // Combine the user data with the found owner data
+  //   return { ...pet, ...owner };
+  // });
 
-    if (observerTarget.current) observer.observe(observerTarget.current);
+  // //Checks intersection of the observer target and reassigns target element once true
+  // useEffect(() => {
+  //   if (!observerTarget.current || !fetchNextPage) return;
 
-    const currentTarget = observerTarget.current;
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+  //     },
+  //     { threshold: 1 },
+  //   );
 
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
-    };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  //   if (observerTarget.current) observer.observe(observerTarget.current);
 
-  //Make it retrieve the data from tab;e again when the user is updated, deleted or created
-  useEffect(() => {
-    void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order]);
+  //   const currentTarget = observerTarget.current;
+
+  //   return () => {
+  //     if (currentTarget) observer.unobserve(currentTarget);
+  //   };
+  // }, [fetchNextPage, hasNextPage, observerTarget]);
+
+  // //Make it retrieve the data from tab;e again when the user is updated, deleted or created
+  // useEffect(() => {
+  //   void refetch();
+  // }, [isUpdate, isDeleted, isCreate, query, order]);
 
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
@@ -573,7 +655,11 @@ const Treatment: NextPage = () => {
                           Date
                         </button>
                       </th>
+                      <th className="px-4 py-2">Pet ID</th>
                       <th className="px-4 py-2">Pet</th>
+                      <th className="px-4 py-2">Owner</th>
+                      <th className="px-4 py-2">Greater Area</th>
+                      <th className="px-4 py-2">Area</th>
                       <th className="px-4 py-2">Category</th>
                       <th className="px-4 py-2">
                         Type
@@ -589,7 +675,7 @@ const Treatment: NextPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {treatment_data?.map((treatment, index) => {
+                    {pet_treatment_data?.map((treatment, index) => {
                       return (
                         <tr className="items-center">
                           <div className="px-4 py-2">{index + 1}</div>
@@ -600,6 +686,13 @@ const Treatment: NextPage = () => {
                             {"/"}
                             {treatment?.date?.getFullYear()?.toString() ?? ""}
                           </td>
+                          <td className="border px-4 py-2">{treatment.petID}</td>
+                          <td className="border px-4 py-2">{treatment.petName}</td>
+                          <td className="border px-4 py-2">
+                            {treatment.firstName} {treatment.surname} ({treatment.ownerID})
+                          </td>
+                          <td className="border px-4 py-2">{treatment.addressGreaterArea}</td>
+                          <td className="border px-4 py-2">{treatment.addressArea}</td>
                           <td className="border px-4 py-2">{treatment.category}</td>
                           <td className="border px-4 py-2">{treatment.type}</td>
                           <td className=" border px-4 py-2">
@@ -688,6 +781,15 @@ const Treatment: NextPage = () => {
                       className="form-input rounded-md border py-2"
                     />
                   </div>
+
+                  {/*PET ID do not make it editable*/}
+                  <div className="py-2">Pet ID: {treatment?.petID}</div>
+                  <div className="py-2">Pet Name: {treatment?.petName}</div>
+                  <div className="py-2">
+                    Owner: {treatment?.firstName} {treatment?.surname} ({treatment?.ownerID})
+                  </div>
+                  <div className="py-2">Greater Area: {treatment?.addressGreaterArea}</div>
+                  <div className="py-2">Area: {treatment?.addressArea}</div>
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
@@ -799,24 +901,44 @@ const Treatment: NextPage = () => {
 
                   <b className="mb-14 text-center text-xl">Pet Treatment Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Treatment ID:</b> {treatment?.data?.treatmentID}
+                    <b className="mr-3">Treatment ID:</b> {treatment?.treatmentID}
                   </div>
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Date:</b>{" "}
-                    {treatment?.data?.date?.getDate() + "/" + ((treatment?.data?.date?.getMonth() ?? 0) + 1) + "/" + treatment?.data?.date?.getFullYear() ?? ""}
+                    {treatment?.date?.getDate() + "/" + ((treatment?.date?.getMonth() ?? 0) + 1) + "/" + treatment?.date?.getFullYear() ?? ""}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Category:</b> {treatment?.data?.category}
+                    <b className="mr-3">Pet ID:</b> {treatment?.petID}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Type:</b> {treatment?.data?.type}
+                    <b className="mr-3">Pet Name:</b> {treatment?.petName}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Comments:</b> {treatment?.data?.comments}
+                    <b className="mr-3">Owner:</b> {treatment?.firstName} {treatment?.surname} ({treatment?.ownerID})
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Greater Area:</b> {treatment?.addressGreaterArea}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Area:</b> {treatment?.addressArea}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Category:</b> {treatment?.category}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Type:</b> {treatment?.type}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Comments:</b> {treatment?.comments}
                   </div>
                 </div>
               </div>

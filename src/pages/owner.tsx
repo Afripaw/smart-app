@@ -74,6 +74,69 @@ const Owner: NextPage = () => {
     void data.refetch();
   }, [isUpdate, isDeleted, isCreate]);*/
 
+  //-------------------------------ID-----------------------------------------
+  const [id, setID] = useState(0);
+
+  //-------------------------------ORDER-----------------------------------------
+  //Order fields
+  //sorts the table according to specific fields
+  const [order, setOrder] = useState("surname");
+
+  //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
+  const observerTarget = useRef<HTMLDivElement | null>(null);
+
+  const [limit] = useState(12);
+  const {
+    data: queryData,
+    fetchNextPage,
+    hasNextPage,
+    refetch,
+  } = api.petOwner.searchOwnersInfinite.useInfiniteQuery(
+    {
+      ownerID: id,
+      limit: limit,
+      searchQuery: query,
+      order: order,
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        console.log("Next Cursor: " + lastPage.nextCursor);
+        return lastPage.nextCursor;
+      },
+      enabled: false,
+    },
+  );
+
+  //Flattens the pages array into one array
+  const user_data = queryData?.pages.flatMap((page) => page.user_data);
+
+  //Checks intersection of the observer target and reassigns target element once true
+  useEffect(() => {
+    if (!observerTarget.current || !fetchNextPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+      },
+      { threshold: 1 },
+    );
+
+    if (observerTarget.current) observer.observe(observerTarget.current);
+
+    const currentTarget = observerTarget.current;
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [fetchNextPage, hasNextPage, observerTarget]);
+
+  //Make it retrieve the data from tab;e again when the user is updated, deleted or created
+  useEffect(() => {
+    void refetch();
+  }, [isUpdate, isDeleted, isCreate, query, order]);
+
+  const user = user_data?.find((user) => user.ownerID === id);
+
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
   /*const deleteAllUsers = api.user.deleteAll.useMutation();
@@ -101,14 +164,14 @@ const Owner: NextPage = () => {
 
   //userID
   //const [userID, setUserID] = useState("");
-  const [id, setID] = useState(0);
+  //const [id, setID] = useState(0);
 
   //-------------------------------UPDATE USER-----------------------------------------
-  const user = api.petOwner.getOwnerByID.useQuery({ petOwnerID: id });
+  //const user = api.petOwner.getOwnerByID.useQuery({ petOwnerID: id });
 
   //Order fields
   //sorts the table according to specific fields
-  const [order, setOrder] = useState("surname");
+  //const [order, setOrder] = useState("surname");
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
@@ -303,9 +366,10 @@ const Owner: NextPage = () => {
   const handleUpdateUserProfile = async (id: number) => {
     setID(id);
 
-    if (user.data) {
+    const user = user_data?.find((user) => user.ownerID === id);
+    if (user) {
       // Assuming userQuery.data contains the user object
-      const userData = user.data;
+      const userData = user;
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -339,9 +403,9 @@ const Owner: NextPage = () => {
   };
 
   useEffect(() => {
-    if (user.data) {
+    if (user) {
       // Assuming userQuery.data contains the user object
-      const userData = user.data;
+      const userData = user;
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -369,7 +433,7 @@ const Owner: NextPage = () => {
         setStreetOption("Select one");
       }
     }
-  }, [user.data, isUpdate, isCreate]); // Effect runs when userQuery.data changes
+  }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
     await updateOwner.mutateAsync({
@@ -477,11 +541,11 @@ const Owner: NextPage = () => {
   const handleViewProfilePage = async (id: number) => {
     setIsViewProfilePage(true);
     setID(id);
-
-    console.log("View profile page: ", JSON.stringify(user.data));
-    if (user.data) {
+    const user = user_data?.find((user) => user.ownerID === id);
+    console.log("View profile page: ", JSON.stringify(user));
+    if (user) {
       // Assuming userQuery.data contains the user object
-      const userData = user.data;
+      const userData = user;
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -519,10 +583,10 @@ const Owner: NextPage = () => {
   useEffect(() => {
     //console.log("View profile page: ", JSON.stringify(user.data));
     if (isViewProfilePage) {
-      void user.refetch();
+      //void user.refetch();
     }
-    if (user.data) {
-      const userData = user.data;
+    if (user) {
+      const userData = user;
 
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
@@ -555,7 +619,7 @@ const Owner: NextPage = () => {
         setStreetOption("Select one");
       }
     }
-  }, [isViewProfilePage, user.data]); // Effect runs when userQuery.data changes
+  }, [isViewProfilePage]); // Effect runs when userQuery.data changes
 
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {
@@ -698,7 +762,7 @@ const Owner: NextPage = () => {
   //refetch the image so that it updates
   useEffect(() => {
     if (isUploadModalOpen) {
-      void user.refetch();
+      //void user.refetch();
     }
   }, [isUploadModalOpen]);
 
@@ -716,58 +780,58 @@ const Owner: NextPage = () => {
     setOrder(field);
   };
 
-  //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  const observerTarget = useRef<HTMLDivElement | null>(null);
+  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
+  // const observerTarget = useRef<HTMLDivElement | null>(null);
 
-  const [limit] = useState(12);
-  const {
-    data: queryData,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-  } = api.petOwner.searchOwnersInfinite.useInfiniteQuery(
-    {
-      ownerID: id,
-      limit: limit,
-      searchQuery: query,
-      order: order,
-    },
-    {
-      getNextPageParam: (lastPage) => {
-        console.log("Next Cursor: " + lastPage.nextCursor);
-        return lastPage.nextCursor;
-      },
-      enabled: false,
-    },
-  );
+  // const [limit] = useState(12);
+  // const {
+  //   data: queryData,
+  //   fetchNextPage,
+  //   hasNextPage,
+  //   refetch,
+  // } = api.petOwner.searchOwnersInfinite.useInfiniteQuery(
+  //   {
+  //     ownerID: id,
+  //     limit: limit,
+  //     searchQuery: query,
+  //     order: order,
+  //   },
+  //   {
+  //     getNextPageParam: (lastPage) => {
+  //       console.log("Next Cursor: " + lastPage.nextCursor);
+  //       return lastPage.nextCursor;
+  //     },
+  //     enabled: false,
+  //   },
+  // );
 
-  //Flattens the pages array into one array
-  const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  // //Flattens the pages array into one array
+  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
 
-  //Checks intersection of the observer target and reassigns target element once true
-  useEffect(() => {
-    if (!observerTarget.current || !fetchNextPage) return;
+  // //Checks intersection of the observer target and reassigns target element once true
+  // useEffect(() => {
+  //   if (!observerTarget.current || !fetchNextPage) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-      },
-      { threshold: 1 },
-    );
+  //   const observer = new IntersectionObserver(
+  //     (entries) => {
+  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+  //     },
+  //     { threshold: 1 },
+  //   );
 
-    if (observerTarget.current) observer.observe(observerTarget.current);
+  //   if (observerTarget.current) observer.observe(observerTarget.current);
 
-    const currentTarget = observerTarget.current;
+  //   const currentTarget = observerTarget.current;
 
-    return () => {
-      if (currentTarget) observer.unobserve(currentTarget);
-    };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  //   return () => {
+  //     if (currentTarget) observer.unobserve(currentTarget);
+  //   };
+  // }, [fetchNextPage, hasNextPage, observerTarget]);
 
-  //Make it retrieve the data from tab;e again when the user is updated, deleted or created
-  useEffect(() => {
-    void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order]);
+  // //Make it retrieve the data from tab;e again when the user is updated, deleted or created
+  // useEffect(() => {
+  //   void refetch();
+  // }, [isUpdate, isDeleted, isCreate, query, order]);
 
   //------------------------------------CREATE A NEW PET FOR OWNER--------------------------------------
   //When button is pressed the browser needs to go to the pet's page. The pet's page needs to know the owner's ID
@@ -934,15 +998,9 @@ const Owner: NextPage = () => {
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
                   {isUpdate && (
-                    <div className={`absolute ${user.data?.image ? "right-12" : "right-8"} top-16`}>
-                      {user.data?.image ? (
-                        <Image
-                          src={user.data?.image}
-                          alt="Afripaw profile pic"
-                          className="ml-auto aspect-auto max-h-40 max-w-[7rem]"
-                          width={140}
-                          height={100}
-                        />
+                    <div className={`absolute ${user?.image ? "right-12" : "right-8"} top-16`}>
+                      {user?.image ? (
+                        <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-40 max-w-[7rem]" width={140} height={100} />
                       ) : (
                         <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
                       )}
@@ -952,13 +1010,13 @@ const Owner: NextPage = () => {
                     <UploadButton
                       className="absolute right-8 top-60 ut-button:bg-main-orange ut-button:focus:bg-orange-500 ut-button:active:bg-orange-500 ut-button:disabled:bg-orange-500 ut-label:hover:bg-orange-500"
                       endpoint="imageUploader"
-                      input={{ userId: String(user.data?.ownerID) ?? "", user: "owner" }}
+                      input={{ userId: String(user?.ownerID) ?? "", user: "owner" }}
                       onUploadError={(error: Error) => {
                         // Do something with the error.
                         alert(`ERROR! ${error.message}`);
                       }}
                       onClientUploadComplete={() => {
-                        void user.refetch();
+                        // void user.refetch();
                       }}
                     />
                   )}
@@ -1246,15 +1304,15 @@ const Owner: NextPage = () => {
                     />
                   </div>
                   <div className="absolute right-4 top-20">
-                    {user.data?.image ? (
-                      <Image src={user.data?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
+                    {user?.image ? (
+                      <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
                     ) : (
                       <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem]" />
                     )}
                   </div>
                   <b className="mb-14 text-center text-xl">Personal & Contact Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Owner ID:</b> {user?.data?.ownerID}
+                    <b className="mr-3">Owner ID:</b> {user?.ownerID}
                   </div>
 
                   <div className="mb-2 flex items-center">

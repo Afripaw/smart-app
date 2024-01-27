@@ -27,7 +27,7 @@ export const petRouter = createTRPCRouter({
         lastDeWorming: z.date(),
         membership: z.string(),
         cardStatus: z.string(),
-        kennelReceived: z.string(),
+        kennelReceived: z.string().array(),
         comments: z.string(),
       }),
     )
@@ -129,7 +129,7 @@ export const petRouter = createTRPCRouter({
         lastDeWorming: z.date(),
         membership: z.string(),
         cardStatus: z.string(),
-        kennelReceived: z.string(),
+        kennelReceived: z.string().array(),
         comments: z.string(),
       }),
     )
@@ -233,7 +233,6 @@ export const petRouter = createTRPCRouter({
             { treatments: { contains: term } },
             { membership: { contains: term } },
             { cardStatus: { contains: term } },
-            { kennelReceived: { contains: term } },
             { comments: { contains: term } },
             dateCondition,
           ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
@@ -351,11 +350,27 @@ export const petRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      return await ctx.db.pet.delete({
+      //delete all the relationships with the treatment
+      await ctx.db.petTreatment.deleteMany({
         where: {
           petID: input.petID,
         },
       });
+
+      //delete all the relationships with the clinic
+      await ctx.db.petOnPetClinic.deleteMany({
+        where: {
+          petID: input.petID,
+        },
+      });
+
+      const pet = await ctx.db.pet.delete({
+        where: {
+          petID: input.petID,
+        },
+      });
+
+      return pet;
     }),
 
   //get one pet
@@ -366,11 +381,21 @@ export const petRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      if (input.petID === 0) {
+        // Return some default response or error
+        throw new Error("Invalid pet ID");
+      }
+
       const pet = await ctx.db.pet.findUnique({
         where: {
           petID: input.petID,
         },
       });
+
+      if (!pet) {
+        // Handle the case where pet is not found
+        throw new Error("Pet not found");
+      }
 
       const owner = await ctx.db.petOwner.findUnique({
         where: {
@@ -453,14 +478,14 @@ export const petRouter = createTRPCRouter({
   }),
 
   //get all the pets that have kennels
-  getAllPetsKennel: protectedProcedure.query(async ({ ctx }) => {
-    const pet = await ctx.db.pet.findMany({
-      where: {
-        kennelReceived: {
-          not: "",
-        },
-      },
-    });
-    return pet;
-  }),
+  // getAllPetsKennel: protectedProcedure.query(async ({ ctx }) => {
+  //   const pet = await ctx.db.pet.findMany({
+  //     where: {
+  //       kennelReceived: {
+  //         not: "",
+  //       },
+  //     },
+  //   });
+  //   return pet;
+  // }),
 });

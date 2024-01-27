@@ -50,6 +50,7 @@ const NavbarLinks = [
 
 const Navbar = () => {
   const router = useRouter();
+
   const handleLogout = () => {
     void router.push("/");
     //void signOut();

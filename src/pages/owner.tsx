@@ -557,6 +557,13 @@ const Owner: NextPage = () => {
     }
   }, [isViewProfilePage, user.data]); // Effect runs when userQuery.data changes
 
+  //Go to update page from the view profile page
+  const handleUpdateFromViewProfilePage = async () => {
+    setIsUpdate(true);
+    setIsViewProfilePage(false);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
   //-------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = () => {
     //console.log("Back button pressed");
@@ -956,17 +963,16 @@ const Owner: NextPage = () => {
                     />
                   )}
 
-                  <Input label="1. First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
-                  <Input label="2. Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
-                  <Input label="3. Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />
-                  <Input label="4. Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} required />
+                  <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
+                  <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
+                  <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />
+                  <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} required />
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        <span className="text-gray-200">1</span>
-                        5. Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
+                        Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1001,8 +1007,7 @@ const Owner: NextPage = () => {
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-4">
                         <div className="flex">
-                          <span className="text-gray-200">1</span>
-                          6. Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
+                          Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
                         </div>
                       </div>
                       <div className="flex flex-col">
@@ -1035,9 +1040,7 @@ const Owner: NextPage = () => {
                       <div className="flex flex-col pr-2">
                         <div className="flex items-start">
                           <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">
-                              <span className="text-gray-200">1</span>7. Area:{" "}
-                            </div>
+                            <div className=" flex">Area: </div>
                           </div>
                           <div className="flex flex-col">
                             <button
@@ -1067,9 +1070,7 @@ const Owner: NextPage = () => {
 
                         <div className="flex items-start">
                           <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">
-                              <span className="text-gray-200">1</span>8. Street:{" "}
-                            </div>
+                            <div className=" flex">Street: </div>
                           </div>
                           <div className="flex flex-col">
                             <button
@@ -1097,10 +1098,10 @@ const Owner: NextPage = () => {
                           </div>
                         </div>
 
-                        <Input label="9. Street Code" placeholder="Type here: e.g. C3" value={addressStreetCode} onChange={setAddressStreetCode} />
+                        <Input label="Street Code" placeholder="Type here: e.g. C3" value={addressStreetCode} onChange={setAddressStreetCode} />
 
                         <div className="flex items-center">
-                          <div className="">10. Street Number: </div>
+                          <div className="">Street Number: </div>
                           <input
                             className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                             placeholder="Type here: e.g. 14"
@@ -1154,7 +1155,7 @@ const Owner: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        14. Status<div className="text-lg text-main-orange">*</div>:{" "}
+                        Status<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1186,7 +1187,7 @@ const Owner: NextPage = () => {
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
                     <div className=" flex">
-                      15. Starting Date<div className="text-lg text-main-orange">*</div>:{" "}
+                      Starting Date<div className="text-lg text-main-orange">*</div>:{" "}
                     </div>
                     <div className="p-4">
                       <DatePicker
@@ -1200,7 +1201,7 @@ const Owner: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-32 pt-3">16. Comments: </div>
+                    <div className="w-32 pt-3">Comments: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                       placeholder="Type here: e.g. Notes on commitment, engagement, etc."
@@ -1338,6 +1339,12 @@ const Owner: NextPage = () => {
               </div>
             </div>
             <div className="my-6 flex justify-center">
+              <button
+                className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
+                onClick={() => void handleUpdateFromViewProfilePage()}
+              >
+                Update profile
+              </button>
               <ReactToPrint
                 trigger={() => (
                   <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">

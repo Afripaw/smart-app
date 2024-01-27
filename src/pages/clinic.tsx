@@ -352,6 +352,13 @@ const Clinic: NextPage = () => {
     }
   }, [isViewProfilePage, clinic.data]); // Effect runs when userQuery.data changes
 
+  //Go to update page from the view profile page
+  const handleUpdateFromViewProfilePage = async () => {
+    setIsUpdate(true);
+    setIsViewProfilePage(false);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
   //-------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = () => {
     //console.log("Back button pressed");
@@ -634,7 +641,7 @@ const Clinic: NextPage = () => {
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
                     <div className=" flex">
-                      1. Date<div className="text-lg text-main-orange">*</div>:{" "}
+                      Date<div className="text-lg text-main-orange">*</div>:{" "}
                     </div>
 
                     <DatePicker
@@ -649,7 +656,7 @@ const Clinic: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
                       <div className="flex">
-                        2. Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
+                        Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -680,7 +687,7 @@ const Clinic: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">3. Area: </div>
+                      <div className=" flex">Area: </div>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -712,7 +719,7 @@ const Clinic: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        4. Conditions<div className="text-lg text-main-orange">*</div>:{" "}
+                        Conditions<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -742,10 +749,10 @@ const Clinic: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-32 pt-3">5. Comments: </div>
+                    <div className="w-32 pt-3">Comments: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                      placeholder="Type here: e.g. Notes on succesfulness, problem areas etc."
+                      placeholder="Type here: e.g. Notes on clinic success, attendance and noteworthy events"
                       onChange={(e) => setComments(e.target.value)}
                       value={comments}
                     />
@@ -766,7 +773,7 @@ const Clinic: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">Clinic Profile</div>
+                <div className=" text-2xl">Pet Clinic Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -787,7 +794,7 @@ const Clinic: NextPage = () => {
                     />
                   </div>
 
-                  <b className="mb-14 text-center text-xl">Clinic Data</b>
+                  <b className="mb-14 text-center text-xl">Pet Clinic Data</b>
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Clinic ID:</b> {clinic?.data?.clinicID}
                   </div>
@@ -806,16 +813,22 @@ const Clinic: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Comments:</b> {clinic?.data?.comments}
+                    <b className="mr-3">Conditions:</b> {clinic?.data?.conditions}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Conditions:</b> {clinic?.data?.conditions}
+                    <b className="mr-3">Comments:</b> {clinic?.data?.comments}
                   </div>
                 </div>
               </div>
             </div>
             <div className="my-6 flex justify-center">
+              <button
+                className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
+                onClick={() => void handleUpdateFromViewProfilePage()}
+              >
+                Update profile
+              </button>
               <ReactToPrint
                 trigger={() => (
                   <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">

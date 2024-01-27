@@ -142,8 +142,8 @@ model pet {
     clinicsAttended         petOnPetClinic[]
     lastDeworming           DateTime?
     membership              String
-    cardStatus              String
-    kennelReceived          String? //year kennel was received
+    cardStatus              String?
+    kennelReceived          String[]
     comments                String?
     createdAt               DateTime         @default(now())
     updatedAt               DateTime         @updatedAt

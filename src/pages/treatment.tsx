@@ -384,8 +384,18 @@ const Treatment: NextPage = () => {
     }
   }, [isViewProfilePage, treatment.data]); // Effect runs when userQuery.data changes
 
+  //Go to update page from the view profile page
+  const handleUpdateFromViewProfilePage = async () => {
+    setIsUpdate(true);
+    setIsViewProfilePage(false);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
   //-------------------------------BACK BUTTON-----------------------------------------
-  const handleBackButton = () => {
+  const handleBackButton = async () => {
+    if (Number(router.asPath.split("=")[1]) != 0 && !isViewProfilePage && !isUpdate) {
+      await router.push(`/pet`);
+    }
     //console.log("Back button pressed");
     setIsUpdate(false);
     setIsCreate(false);
@@ -667,7 +677,7 @@ const Treatment: NextPage = () => {
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
                     <div className=" flex">
-                      1. Date<div className="text-lg text-main-orange">*</div>:{" "}
+                      Date<div className="text-lg text-main-orange">*</div>:{" "}
                     </div>
 
                     <DatePicker
@@ -682,7 +692,7 @@ const Treatment: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
                       <div className="flex">
-                        2. Category<div className="text-lg text-main-orange">*</div>:{" "}
+                        Category<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -713,7 +723,7 @@ const Treatment: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">3. Type: </div>
+                      <div className=" flex">Type: </div>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -742,7 +752,7 @@ const Treatment: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-32 pt-3">5. Comments: </div>
+                    <div className="w-32 pt-3">Comments: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                       placeholder="Type here: e.g. Notes on succesfulness, problem areas etc."
@@ -812,6 +822,12 @@ const Treatment: NextPage = () => {
               </div>
             </div>
             <div className="my-6 flex justify-center">
+              <button
+                className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
+                onClick={() => void handleUpdateFromViewProfilePage()}
+              >
+                Update profile
+              </button>
               <ReactToPrint
                 trigger={() => (
                   <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">

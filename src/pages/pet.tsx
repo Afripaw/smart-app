@@ -148,6 +148,12 @@ const Pet: NextPage = () => {
     void owner.refetch();
   }, []);
 
+  // const handleNavbarLinkClick = () => {
+  //   setIsUpdate(false);
+  //   setIsCreate(false);
+  //   setIsViewProfilePage(false);
+  // };
+
   //-------------------------------UPDATE USER-----------------------------------------
   const user = api.pet.getPetByID.useQuery({ petID: id });
 
@@ -534,7 +540,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const sterilisationStatusOptions = ["Sterilised", "Not Sterilised", "Unknown"];
+  const sterilisationStatusOptions = ["Yes", "No", "Unknown"];
 
   //STERILISATION REQUESTED
   const handleToggleSterilisationRequested = () => {
@@ -598,16 +604,15 @@ const Pet: NextPage = () => {
   const [sterilisationRequestSignedOptions, setSterilisationRequestSignedOptions] = useState([""]);
 
   useEffect(() => {
-    if (sterilisationRequestedOption == "No") {
+    if (sterilisationRequestedOption === "No") {
       setSterilisationRequestSignedOption("Not Applicable");
       setSterilisationRequestSignedOptions(["Not Applicable"]);
-      //sterilisationRequestedOption must contain Calendar entry or a number
-    } else if (sterilisationRequestedOption == "Yes" || sterilisationRequestedOption.match("0123456789")) {
+    } else if (sterilisationRequestedOption === "Yes") {
       setSterilisationRequestSignedOption("Select one");
       setSterilisationRequestSignedOptions(sterilisationRequestConfirmedSignedOptions);
     }
-  }),
-    [sterilisationRequestedOption];
+    // other code if needed
+  }, []); // Add dependencies here
 
   //STERILISATION OUTCOME
   const handleToggleSterilisationOutcome = () => {
@@ -667,7 +672,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const vaccinationShot1Options = ["Not yet", "Calender Entry"];
+  const vaccinationShot1Options = ["Yes", "Not yet"];
 
   //VACCINATION SHOT 2
   const handleToggleVaccinationShot2 = () => {
@@ -697,7 +702,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const vaccinationShot2Options = ["Not yet", "Calender Entry"];
+  const vaccinationShot2Options = ["Yes", "Not yet"];
 
   //VACCINATION SHOT 3
   const handleToggleVaccinationShot3 = () => {
@@ -727,7 +732,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const vaccinationShot3Options = ["Not yet", "Calender Entry"];
+  const vaccinationShot3Options = ["Yes", "Not yet"];
 
   //MEMBERSHIP TYPE
   const handleToggleMembershipType = () => {
@@ -791,6 +796,10 @@ const Pet: NextPage = () => {
     membershipTypeOption == "Non-card holder" ? ["Not applicable"] : ["Not applicable", "Collect", "Issued", "Re-print", "Lapsed card holder"];
 
   //KENNELS RECEIVED
+  const [kennelList, setKennelList] = useState<string[]>([]);
+  //show all available options
+  const kennelsReceivedOptions = ["2018", "2019", "2020", "2021", "2022", "2023", "2024"];
+
   const handleToggleKennelsReceived = () => {
     setKennelsReceived(!kennelsReceived);
   };
@@ -798,6 +807,9 @@ const Pet: NextPage = () => {
   const handleKennelsReceivedOption = (option: SetStateAction<string>) => {
     setKennelsReceivedOption(option);
     setKennelsReceived(false);
+    if (!kennelList.includes(String(option))) {
+      setKennelList([...kennelList, String(option)]);
+    }
   };
 
   useEffect(() => {
@@ -818,7 +830,16 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const kennelsReceivedOptions = ["None", "2018", "2019", "2020", "2021", "2022", "2023", "2024"];
+  //show all the clinics that the volunteer attended
+  const [showKennelsReceived, setShowKennelsReceived] = useState(false);
+  const handleShowKennelsReceived = () => {
+    setShowKennelsReceived(!showKennelsReceived);
+  };
+
+  useEffect(() => {
+    const sortedYears = [...kennelList].sort((a, b) => parseInt(a) - parseInt(b));
+    setKennelList(sortedYears);
+  }, [kennelsReceived]);
 
   //CLINICSATTENDED
   //All clinics in petClinic table
@@ -850,11 +871,13 @@ const Pet: NextPage = () => {
   };
 
   const handleClinicsAttendedOption = (option: SetStateAction<string>, optionID: number) => {
-    setClinicsAttendedOption(option);
     setClinicsAttended(false);
     setShowClinicsAttended(false);
-    setClinicList([...clinicList, String(option)]);
-    setClinicIDList([...clinicIDList, optionID]);
+    setClinicsAttendedOption(option);
+    if (!clinicList.includes(String(option))) {
+      setClinicList([...clinicList, String(option)]);
+      setClinicIDList([...clinicIDList, optionID]);
+    }
   };
 
   // useEffect(() => {
@@ -995,7 +1018,7 @@ const Pet: NextPage = () => {
       setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
       setMembershipTypeOption(userData?.membership ?? "Select one");
       setCardStatusOption(userData?.cardStatus ?? "Select one");
-      setKennelsReceivedOption(userData?.kennelReceived ?? "Select one");
+      setKennelList(userData?.kennelReceived ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
       setClinicIDList(clinicIDs ?? []);
       setClinicList(clinicDates ?? []);
@@ -1041,7 +1064,7 @@ const Pet: NextPage = () => {
       setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
       setMembershipTypeOption(userData?.membership ?? "Select one");
       setCardStatusOption(userData?.cardStatus ?? "Select one");
-      setKennelsReceivedOption(userData?.kennelReceived ?? "Select one");
+      setKennelList(userData?.kennelReceived ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
       setStatusOption(userData?.status ?? "Select one");
       setComments(userData?.comments ?? "");
@@ -1071,7 +1094,7 @@ const Pet: NextPage = () => {
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
-      kennelReceived: kennelsReceivedOption === "Select one" ? "" : kennelsReceivedOption,
+      kennelReceived: kennelList,
       clinicsAttended: clinicIDList,
       comments: comments,
       treatments: "",
@@ -1154,7 +1177,7 @@ const Pet: NextPage = () => {
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
-      kennelReceived: kennelsReceivedOption === "Select one" ? "" : kennelsReceivedOption,
+      kennelReceived: kennelList,
       clinicsAttended: clinicIDList,
       comments: comments,
       treatments: "",
@@ -1208,7 +1231,7 @@ const Pet: NextPage = () => {
       setVaccinationShot3Option(userData?.vaccinationShot3 ?? "");
       setMembershipTypeOption(userData?.membership ?? "");
       setCardStatusOption(userData?.cardStatus ?? "");
-      setKennelsReceivedOption(userData?.kennelReceived ?? "");
+      setKennelList(userData?.kennelReceived ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
       setComments(userData?.comments ?? "");
       setClinicList(clinicDates ?? []);
@@ -1252,18 +1275,25 @@ const Pet: NextPage = () => {
       setVaccinationShot3Option(userData?.vaccinationShot3 ?? "");
       setMembershipTypeOption(userData?.membership ?? "");
       setCardStatusOption(userData?.cardStatus ?? "");
-      setKennelsReceivedOption(userData?.kennelReceived ?? "");
+      setKennelList(userData?.kennelReceived ?? []);
       setComments(userData?.comments ?? "");
       setClinicList(clinicDates ?? []);
       setClinicIDList(clinicIDs ?? []);
     }
   }, [isViewProfilePage, user.data]); // Effect runs when userQuery.data changes
 
+  //Go to update page from the view profile page
+  const handleUpdateFromViewProfilePage = async () => {
+    setIsUpdate(true);
+    setIsViewProfilePage(false);
+    window.scrollTo({ top: 0, behavior: "instant" });
+  };
+
   //-------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = async () => {
     //console.log("Back button pressed");
     //if owner id in query then go back to owner page
-    if (Number(router.asPath.split("=")[1]) != 0 && !isViewProfilePage && !isUpdate) {
+    if (Number(router.asPath.split("=")[1]) != 0 && isCreate) {
       await router.push(`/owner`);
     }
 
@@ -1320,7 +1350,6 @@ const Pet: NextPage = () => {
     //if (vaccinationShot2Option === "Select one") mandatoryFields.push("Vaccination Shot 2");
     //if (vaccinationShot3Option === "Select one") mandatoryFields.push("Vaccination Shot 3");
     if (membershipTypeOption === "Select one") mandatoryFields.push("Membership Type");
-    if (cardStatusOption === "Select one") mandatoryFields.push("Card Status");
     // if (kennelsReceivedOption === "Select one") mandatoryFields.push("Kennels Received");
 
     setMandatoryFields(mandatoryFields);
@@ -1472,7 +1501,7 @@ const Pet: NextPage = () => {
   //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order]);
+  }, [isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]);
 
   //------------------------------------CREATE A NEW TREATMENT FOR PET--------------------------------------
   //When button is pressed the browser needs to go to the treatment's page. The treatment's page needs to know the pet's ID
@@ -1489,18 +1518,24 @@ const Pet: NextPage = () => {
     //get today's date
     const today = new Date();
     //add to the clinic list and ID list and then add it to the table
-    const option = clinicsAttendedOptions.find((clinic) => clinic.date === today);
-
+    //check if the clinic date is today's date
+    const option = clinicsAttendedOptions.find(
+      (clinic) => clinic.date.getDate() === today.getDate() && clinic.date.getMonth() === today.getMonth() && clinic.date.getFullYear() === today.getFullYear(),
+    );
+    console.log("Option for clinic exists: ", option);
     const optionDate = option?.date.getDate().toString() + "/" + option?.date.getMonth().toString() + "/" + option?.date.getFullYear().toString();
     const optionID = option?.clinicID ?? 0;
-    setClinicList([...clinicList, String(optionDate)]);
-    setClinicIDList([...clinicIDList, optionID]);
 
-    //update the pet table to add the clinic to the pet
-    await addClinic.mutateAsync({
-      petID: id,
-      clinicID: optionID,
-    });
+    if (!clinicIDList.includes(optionID) && optionID != 0) {
+      setClinicList([...clinicList, String(optionDate)]);
+      setClinicIDList([...clinicIDList, optionID]);
+
+      //update the pet table to add the clinic to the pet
+      await addClinic.mutateAsync({
+        petID: id,
+        clinicID: optionID,
+      });
+    }
   };
 
   return (
@@ -1550,9 +1585,10 @@ const Pet: NextPage = () => {
                         </button>
                       </th>
                       <th className="px-4 py-2">Owner</th>
-                      <th className="px-4 py-2">Address</th>
-                      <th className="px-4 py-2">Area</th>
+
                       <th className="px-4 py-2">Greater Area</th>
+                      <th className="px-4 py-2">Area</th>
+                      <th className="px-4 py-2">Address</th>
                       <th className="px-4 py-2">Sterilised</th>
                       <th className="px-4 py-2">Last Treatment</th>
                       <th className="px-4 py-2">Last Clinic</th>
@@ -1575,11 +1611,12 @@ const Pet: NextPage = () => {
                           <td className="border px-4 py-2">
                             {pet.firstName} {pet.surname} ({pet.ownerID})
                           </td>
+
+                          <td className="border px-4 py-2">{pet.addressGreaterArea}</td>
+                          <td className="border px-4 py-2">{pet.addressArea}</td>
                           <td className="border px-4 py-2">
                             {pet.addressStreetNumber} {pet.addressStreet}
                           </td>
-                          <td className="border px-4 py-2">{pet.addressArea}</td>
-                          <td className="border px-4 py-2">{pet.addressGreaterArea}</td>
                           <td className="border px-4 py-2">{pet.sterilisedStatus}</td>
                           <td className="border px-4 py-2">
                             {pet.treatment && pet.treatment.length > 0 ? (
@@ -1589,16 +1626,20 @@ const Pet: NextPage = () => {
                                 {pet?.treatment?.[pet?.treatment.length - 1]?.date.getFullYear().toString()}
                               </>
                             ) : (
-                              "No treatment"
+                              "None"
                             )}
                           </td>
 
                           <td className="border px-4 py-2">
-                            {pet.clinics?.[pet.clinics?.length - 1]?.clinic.date.getDate()?.toString() ?? ""}
-                            {"/"}
-                            {((pet.clinics?.[pet.clinics?.length - 1]?.clinic.date.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                            {"/"}
-                            {pet.clinics?.[pet.clinics?.length - 1]?.clinic.date.getFullYear()?.toString() ?? ""}
+                            {pet.clinics && pet.clinics.length > 0 ? (
+                              <>
+                                {pet?.clinics?.[pet?.clinics.length - 1]?.clinic?.date.getDate().toString()}/
+                                {((pet?.clinics?.[pet?.clinics.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
+                                {pet?.clinics?.[pet?.clinics.length - 1]?.clinic?.date.getFullYear().toString()}
+                              </>
+                            ) : (
+                              "None"
+                            )}
                           </td>
 
                           <td className="border px-4 py-2">
@@ -1633,7 +1674,7 @@ const Pet: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <b className=" text-2xl">{isUpdate ? "Update Pet Data" : "Create New Pet"}</b>
+                <b className=" text-2xl">{isUpdate ? "Update Pet Data" : "Add New Pet"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -1685,13 +1726,12 @@ const Pet: NextPage = () => {
                     />
                   )}
 
-                  <Input label="1. Pet Name" placeholder="Type here: e.g. Sally" value={petName} onChange={setPetName} required />
+                  <Input label="Pet Name" placeholder="Type here: e.g. Sally" value={petName} onChange={setPetName} required />
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        <span className="text-gray-200">1</span>
-                        2. Species<div className="text-lg text-main-orange">*</div>:{" "}
+                        Species<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1723,8 +1763,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        <span className="text-gray-200">1</span>
-                        3. Sex<div className="text-lg text-main-orange">*</div>:{" "}
+                        Sex<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1756,8 +1795,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        <span className="text-gray-200">1</span>
-                        4. Age Category<div className="text-lg text-main-orange">*</div>:{" "}
+                        Age Category<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1789,8 +1827,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        <span className="text-gray-200">1</span>
-                        5. Breed<div className="text-lg text-main-orange">*</div>:{" "}
+                        Breed<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1821,10 +1858,7 @@ const Pet: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        <span className="text-gray-200">1</span>
-                        6. Colour:{" "}
-                      </div>
+                      <div className=" flex">Colour: </div>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1853,9 +1887,7 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="w-36 pt-3">
-                      <span className="text-gray-200">1</span>7. Markings:{" "}
-                    </div>
+                    <div className="w-36 pt-3">Markings: </div>
 
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
@@ -1872,7 +1904,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        <span className="text-gray-200">1</span>8. Pet Status<div className="text-lg text-main-orange">*</div>:{" "}
+                        Pet Status<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1904,7 +1936,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        <span className="text-gray-200">1</span> 9. Sterilisation Status<div className="text-lg text-main-orange">*</div>:{" "}
+                        Sterilisation Status<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -1933,10 +1965,10 @@ const Pet: NextPage = () => {
                     </div>
                   </div>
 
-                  {sterilisationStatusOption === "Not Sterilised" && (
+                  {sterilisationStatusOption === "No" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
-                        <div className=" flex">10. Sterilisation Requested?: </div>
+                        <div className=" flex">Sterilisation Requested?: </div>
                       </div>
                       <div className="flex flex-col">
                         <button
@@ -1968,7 +2000,7 @@ const Pet: NextPage = () => {
                   {sterilisationRequestedOption === "Yes" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
-                        <div className=" flex">11. Sterilisation Request Signed: </div>
+                        <div className=" flex">Sterilisation Request Signed: </div>
                       </div>
                       <div className="flex flex-col">
                         <button
@@ -1997,35 +2029,37 @@ const Pet: NextPage = () => {
                     </div>
                   )}
 
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">12. Sterilisation Outcome: </div>
+                  {sterilisationStatusOption === "Yes" && sterilisationRequestSignedOption === "No" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">Sterilisation Outcome: </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnSterilisationOutcomeRef}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleToggleSterilisationOutcome}
+                        >
+                          {sterilisationOutcomeOption + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {sterilisationOutcome && (
+                          <div ref={sterilisationOutcomeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {sterilisationOutcomeOptions.map((option) => (
+                                <li key={option} onClick={() => handleSterilisationOutcomeOption(option)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnSterilisationOutcomeRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleToggleSterilisationOutcome}
-                      >
-                        {sterilisationOutcomeOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {sterilisationOutcome && (
-                        <div ref={sterilisationOutcomeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {sterilisationOutcomeOptions.map((option) => (
-                              <li key={option} onClick={() => handleSterilisationOutcomeOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -2034,7 +2068,7 @@ const Pet: NextPage = () => {
                   {/*Clinics attended*/}
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">13. Clinics Attended ({clinicList.length}): </div>
+                      <div className=" flex">Clinics Attended: ({clinicList.length}) </div>
                     </div>
                     {/*Show list of all the clinics attended */}
                     <div className="flex flex-col items-center">
@@ -2108,7 +2142,7 @@ const Pet: NextPage = () => {
                   {/*LAST DEWORMING*/}
                   <div className="flex items-center">
                     <div className=" flex">
-                      14. Last Deworming<div className="text-lg text-main-orange">*</div>:{" "}
+                      Last Deworming<div className="text-lg text-main-orange">*</div>:{" "}
                     </div>
                     <div className="p-4">
                       <DatePicker
@@ -2154,7 +2188,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        15. Membership Type<div className="text-lg text-main-orange">*</div>:{" "}
+                        Membership Type<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -2183,42 +2217,61 @@ const Pet: NextPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        16. Card Status<div className="text-lg text-main-orange">*</div>:{" "}
+                  {membershipTypeOption != "Non-card holder" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">Card Status: </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnCardStatusRef}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleToggleCardStatus}
+                        >
+                          {cardStatusOption + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {cardStatus && (
+                          <div ref={cardStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {cardStatusOptions.map((option) => (
+                                <li key={option} onClick={() => handleCardStatusOption(option)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnCardStatusRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleToggleCardStatus}
-                      >
-                        {cardStatusOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {cardStatus && (
-                        <div ref={cardStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {cardStatusOptions.map((option) => (
-                              <li key={option} onClick={() => handleCardStatusOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  )}
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">17. Kennel Received: </div>
+                      <div className=" flex">Kennels Received: ({kennelList.length}) </div>
                     </div>
+
+                    <div className="flex flex-col items-center">
+                      <button
+                        onClick={handleShowKennelsReceived}
+                        className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      >
+                        Show all kennels received
+                      </button>
+                      {showKennelsReceived && (
+                        <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                          {kennelList.map((kennel) => (
+                            <li key={kennel} className=" py-2">
+                              {kennel}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+
                     <div className="flex flex-col">
                       <button
                         ref={btnKennelsReceivedRef}
@@ -2262,7 +2315,7 @@ const Pet: NextPage = () => {
                             </div>*/}
 
                   <div className="flex items-start">
-                    <div className="w-36 pt-3">18. Comments: </div>
+                    <div className="w-36 pt-3">Comments: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                       placeholder="Type here: e.g. Notes on pet condition, pet behaviour, etc."
@@ -2393,7 +2446,7 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Kennels Received:</b> {kennelsReceivedOption}
+                    <b className="mr-3">Kennels Received:</b> {kennelList.map((kennel, index) => (kennelList.length - 1 == index ? kennel : kennel + ", "))}
                   </div>
 
                   <div className="mb-2 flex items-start">
@@ -2404,6 +2457,12 @@ const Pet: NextPage = () => {
               </div>
             </div>
             <div className="my-6 flex justify-center">
+              <button
+                className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
+                onClick={() => void handleUpdateFromViewProfilePage()}
+              >
+                Update profile
+              </button>
               <ReactToPrint
                 trigger={() => (
                   <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">

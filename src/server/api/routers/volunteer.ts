@@ -20,7 +20,7 @@ export const volunteerRouter = createTRPCRouter({
         preferredCommunication: z.string(),
         status: z.string(),
         startingDate: z.date(),
-        clinicAttended: z.string().array(),
+        clinicAttended: z.number().array(),
         comments: z.string(),
       }),
     )
@@ -42,11 +42,30 @@ export const volunteerRouter = createTRPCRouter({
           preferredCommunication: input.preferredCommunication,
           status: input.status,
           startingDate: input.startingDate,
-          clinicsAttended: input.clinicAttended,
           comments: input.comments,
           createdAt: new Date(),
         },
       });
+
+      // Create relationships with clinics
+      const clinicRelationships = input.clinicAttended.map(async (clinicID) => {
+        await ctx.db.volunteerOnPetClinic.create({
+          data: {
+            volunteer: {
+              connect: {
+                volunteerID: volunteer.volunteerID,
+              },
+            },
+            clinic: {
+              connect: {
+                clinicID: clinicID,
+              },
+            },
+          },
+        });
+      });
+
+      await Promise.all(clinicRelationships);
 
       return volunteer;
     }),
@@ -70,7 +89,7 @@ export const volunteerRouter = createTRPCRouter({
         preferredCommunication: z.string(),
         status: z.string(),
         startingDate: z.date(),
-        clinicAttended: z.string().array(),
+        clinicAttended: z.number().array(),
         comments: z.string(),
       }),
     )
@@ -95,10 +114,37 @@ export const volunteerRouter = createTRPCRouter({
           preferredCommunication: input.preferredCommunication,
           startingDate: input.startingDate,
           status: input.status,
-          clinicsAttended: input.clinicAttended,
           comments: input.comments,
         },
       });
+
+      // Handle clinicsAttended
+      // First, remove existing relationships
+      await ctx.db.volunteerOnPetClinic.deleteMany({
+        where: {
+          volunteerID: input.volunteerID,
+        },
+      });
+
+      // Then, create new relationships with clinics
+      const clinicRelationships = input.clinicAttended.map(async (clinicID) => {
+        await ctx.db.volunteerOnPetClinic.create({
+          data: {
+            volunteer: {
+              connect: {
+                volunteerID: volunteer.volunteerID,
+              },
+            },
+            clinic: {
+              connect: {
+                clinicID: clinicID,
+              },
+            },
+          },
+        });
+      });
+
+      await Promise.all(clinicRelationships);
 
       return volunteer;
     }),
@@ -168,8 +214,27 @@ export const volunteerRouter = createTRPCRouter({
         newNextCursor = nextRow?.volunteerID;
       }
 
+      //fetch the clinics
+      const clinics = await ctx.db.volunteerOnPetClinic.findMany({
+        where: {
+          volunteerID: {
+            in: user.map((volunteer) => volunteer.volunteerID),
+          },
+        },
+        select: {
+          clinicID: true,
+          volunteerID: true,
+          clinic: {
+            select: {
+              date: true,
+            },
+          },
+        },
+      });
+
       return {
         user_data: user,
+        clinics_data: clinics,
         nextCursor: newNextCursor,
       };
     }),

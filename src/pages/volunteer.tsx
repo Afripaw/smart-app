@@ -213,6 +213,9 @@ const Volunteer: NextPage = () => {
   const statusOptions = ["Active", "Passive"];
 
   //CLINICSATTENDED
+  //All clinics in petClinic table
+  const clinicsAttendedOptions = api.petClinic.getAllClinics.useQuery().data ?? [];
+
   // const clinicsAttendedOptions = ["Clinic 1", "Clinic 2", "Clinic 3"];
   const [clinicsAttended, setClinicsAttended] = useState(false);
   const [clinicsAttendedOption, setClinicsAttendedOption] = useState("Select here");
@@ -221,6 +224,7 @@ const Volunteer: NextPage = () => {
 
   //The list of clinics that the user has attended
   const [clinicList, setClinicList] = useState<string[]>([]);
+  const [clinicIDList, setClinicIDList] = useState<number[]>([]);
 
   const handleToggleClinicsAttended = () => {
     setClinicsAttended(!clinicsAttended);
@@ -237,22 +241,45 @@ const Volunteer: NextPage = () => {
     return (dayA ?? 0) - (dayB ?? 0);
   };
 
-  const handleClinicsAttendedOption = (option: SetStateAction<string>) => {
+  const handleClinicsAttendedOption = (option: SetStateAction<string>, optionID: number) => {
     setClinicsAttendedOption(option);
     setClinicsAttended(false);
     setShowClinicsAttended(false);
     setClinicList([...clinicList, String(option)]);
+    setClinicIDList([...clinicIDList, optionID]);
   };
 
+  // useEffect(() => {
+  //   //order the clinicList so that it is from the first date to the last date
+
+  //   // Sort the list in ascending order (from first date to last date)
+  //   const updatedClinicList = [...clinicList].sort(compareDates);
+
+  //   console.log("Updated list", updatedClinicList);
+  //   // Update the clinicList state
+  //   setClinicList(updatedClinicList);
+  // }, [clinicsAttended]);
+
   useEffect(() => {
-    //order the clinicList so that it is from the first date to the last date
+    // Combine clinic names and their IDs into a single array
+    const combinedClinicList = clinicList.map((clinic, index) => ({
+      name: clinic,
+      id: clinicIDList[index],
+    }));
 
-    // Sort the list in ascending order (from first date to last date)
-    const updatedClinicList = [...clinicList].sort(compareDates);
+    // Sort the combined array based on the clinic names (dates)
+    combinedClinicList.sort((a, b) => compareDates(a.name, b.name));
 
-    console.log("Updated list", updatedClinicList);
-    // Update the clinicList state
-    setClinicList(updatedClinicList);
+    // Separate the sorted clinic names and IDs back into their respective arrays
+    const sortedClinicList = combinedClinicList.map((item) => item.name);
+    const sortedClinicIDList = combinedClinicList.map((item) => item.id);
+
+    // Update the states
+    setClinicList(sortedClinicList);
+    setClinicIDList(sortedClinicIDList.filter((id) => id !== undefined) as number[]);
+
+    console.log("Sorted clinic list", sortedClinicList);
+    console.log("Sorted clinic ID list", sortedClinicIDList);
   }, [clinicsAttended]);
 
   useEffect(() => {
@@ -332,7 +359,7 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
-      setClinicList(userData.clinicsAttended ?? []);
+      // setClinicList(userData.clinicsAttended ?? []);
     }
   }, [user.data, isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
@@ -353,7 +380,7 @@ const Volunteer: NextPage = () => {
       preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
       startingDate: startingDate,
       status: statusOption === "Select one" ? "" : statusOption,
-      clinicAttended: clinicList,
+      clinicAttended: clinicIDList,
       comments: comments,
     });
     //After the newUser has been created make sure to set the fields back to empty
@@ -417,13 +444,13 @@ const Volunteer: NextPage = () => {
       preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
       startingDate: startingDate,
       status: statusOption === "Select one" ? "" : statusOption,
-      clinicAttended: clinicList,
+      clinicAttended: clinicIDList,
       comments: comments,
     });
 
     //Image upload
     //console.log("ID: ", newUser_?.volunteerID, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
-    console.log("Clinics attended: ", newUser_.clinicsAttended);
+    //console.log("Clinics attended: ", newUser_.clinicsAttended);
     handleUploadModal(newUser_.volunteerID, firstName, newUser_?.image ?? "");
     setIsCreate(false);
     setIsUpdate(false);
@@ -457,7 +484,7 @@ const Volunteer: NextPage = () => {
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
       console.log("Select one");
-      setClinicList(userData.clinicsAttended ?? []);
+      //setClinicList(userData. ?? []);
     }
 
     setIsUpdate(false);
@@ -488,7 +515,7 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
-      setClinicList(userData.clinicsAttended ?? []);
+      //setClinicList(userData.clinicsAttended ?? []);
     }
   }, [isViewProfilePage, user.data]); // Effect runs when userQuery.data changes
 
@@ -671,6 +698,16 @@ const Volunteer: NextPage = () => {
 
   //Flattens the pages array into one array
   const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  const clinics_data = queryData?.pages.flatMap((page) => page.clinics_data);
+  const volunteer_data_with_clinics = user_data?.map((volunteer) => {
+    // Assuming each clinic object has a 'petID' that links it to a pet
+    const associatedClinics = clinics_data?.filter((clinic) => clinic.volunteerID === volunteer.volunteerID);
+
+    return {
+      ...volunteer,
+      clinics: associatedClinics,
+    };
+  });
 
   //Checks intersection of the observer target and reassigns target element once true
   useEffect(() => {
@@ -782,7 +819,7 @@ const Volunteer: NextPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {user_data?.map((user, index) => {
+                    {volunteer_data_with_clinics?.map((user, index) => {
                       return (
                         <tr className="items-center">
                           <div className="px-4 py-2">{index + 1}</div>
@@ -1082,9 +1119,19 @@ const Volunteer: NextPage = () => {
                       {clinicsAttended && (
                         <div ref={clinicsAttendedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {clinicDates.map((option) => (
-                              <li key={option} onClick={() => handleClinicsAttendedOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                            {clinicsAttendedOptions.map((option) => (
+                              <li
+                                key={option.date.getDate().toString() + "/" + option.date.getMonth().toString() + "/" + option.date.getFullYear().toString()}
+                                onClick={() =>
+                                  handleClinicsAttendedOption(
+                                    option.date.getDate().toString() + "/" + option.date.getMonth().toString() + "/" + option.date.getFullYear().toString(),
+                                    option.clinicID,
+                                  )
+                                }
+                              >
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                  {option.date.getDate().toString() + "/" + option.date.getMonth().toString() + "/" + option.date.getFullYear().toString()}
+                                </button>
                               </li>
                             ))}
                           </ul>
@@ -1143,7 +1190,7 @@ const Volunteer: NextPage = () => {
               </div>
             </div>
             <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex min-w-[38rem] max-w-xl flex-col items-start">
+              <div className="mt-6 flex w-[40%] min-w-[38rem] max-w-xl flex-col items-start">
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <div className="absolute left-0 top-0">
                     <Image
@@ -1237,7 +1284,7 @@ const Volunteer: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Starting Date:</b> {startingDate?.toLocaleDateString()}
+                    <b className="mr-3">Starting Date:</b> {startingDate?.getDate() + "/" + (startingDate?.getMonth() + 1) + "/" + startingDate?.getFullYear()}
                   </div>
 
                   <div className="mb-2 flex items-start">

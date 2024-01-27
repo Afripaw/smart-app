@@ -107,6 +107,7 @@ const Owner: NextPage = () => {
   const user = api.petOwner.getOwnerByID.useQuery({ petOwnerID: id });
 
   //Order fields
+  //sorts the table according to specific fields
   const [order, setOrder] = useState("surname");
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
@@ -1232,7 +1233,7 @@ const Owner: NextPage = () => {
               </div>
             </div>
             <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex max-w-xl flex-col items-start">
+              <div className="mt-6 flex w-[40%] max-w-xl flex-col items-start">
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <div className="absolute left-0 top-0">
                     <Image

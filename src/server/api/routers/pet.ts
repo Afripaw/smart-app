@@ -23,8 +23,8 @@ export const petRouter = createTRPCRouter({
         vaccinationShot2: z.string(),
         vaccinationShot3: z.string(),
         treatments: z.string(),
-        clinicsAttended: z.string().array(),
-        lastDeWorming: z.string(),
+        clinicsAttended: z.number().array(),
+        lastDeWorming: z.date(),
         membership: z.string(),
         cardStatus: z.string(),
         kennelReceived: z.string(),
@@ -32,13 +32,12 @@ export const petRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      //create pet
+      // Create pet
       const pet = await ctx.db.pet.create({
         data: {
           petName: input.petName,
           owner: {
             connect: {
-              //ownerID: ctx.db.petOwner.fields.ownerID as unknown as number,
               ownerID: input.ownerID,
             },
           },
@@ -57,7 +56,6 @@ export const petRouter = createTRPCRouter({
           vaccinationShot2: input.vaccinationShot2,
           vaccinationShot3: input.vaccinationShot3,
           treatments: input.treatments,
-          clinicsAttended: input.clinicsAttended,
           lastDeworming: input.lastDeWorming,
           membership: input.membership,
           cardStatus: input.cardStatus,
@@ -66,6 +64,26 @@ export const petRouter = createTRPCRouter({
           createdAt: new Date(),
         },
       });
+
+      // Create relationships with clinics
+      const clinicRelationships = input.clinicsAttended.map(async (clinicID) => {
+        await ctx.db.petOnPetClinic.create({
+          data: {
+            pet: {
+              connect: {
+                petID: pet.petID,
+              },
+            },
+            clinic: {
+              connect: {
+                clinicID: clinicID,
+              },
+            },
+          },
+        });
+      });
+
+      await Promise.all(clinicRelationships);
 
       return pet;
     }),
@@ -107,8 +125,8 @@ export const petRouter = createTRPCRouter({
         vaccinationShot2: z.string(),
         vaccinationShot3: z.string(),
         treatments: z.string(),
-        clinicsAttended: z.string().array(),
-        lastDeWorming: z.string(),
+        clinicsAttended: z.number().array(),
+        lastDeWorming: z.date(),
         membership: z.string(),
         cardStatus: z.string(),
         kennelReceived: z.string(),
@@ -137,7 +155,6 @@ export const petRouter = createTRPCRouter({
           vaccinationShot2: input.vaccinationShot2,
           vaccinationShot3: input.vaccinationShot3,
           treatments: input.treatments,
-          clinicsAttended: input.clinicsAttended,
           lastDeworming: input.lastDeWorming,
           membership: input.membership,
           cardStatus: input.cardStatus,
@@ -146,6 +163,35 @@ export const petRouter = createTRPCRouter({
           updatedAt: new Date(),
         },
       });
+
+      // Handle clinicsAttended
+      // First, remove existing relationships
+      await ctx.db.petOnPetClinic.deleteMany({
+        where: {
+          petID: input.petID,
+        },
+      });
+
+      // Then, create new relationships with clinics
+      const clinicRelationships = input.clinicsAttended.map(async (clinicID) => {
+        await ctx.db.petOnPetClinic.create({
+          data: {
+            pet: {
+              connect: {
+                petID: pet.petID,
+              },
+            },
+            clinic: {
+              connect: {
+                clinicID: clinicID,
+              },
+            },
+          },
+        });
+      });
+
+      await Promise.all(clinicRelationships);
+
       return pet;
     }),
 
@@ -185,7 +231,6 @@ export const petRouter = createTRPCRouter({
             { sterilisedRequestSigned: { contains: term } },
             { vaccinatedStatus: { contains: term } },
             { treatments: { contains: term } },
-            { lastDeworming: { contains: term } },
             { membership: { contains: term } },
             { cardStatus: { contains: term } },
             { kennelReceived: { contains: term } },
@@ -218,10 +263,84 @@ export const petRouter = createTRPCRouter({
         newNextCursor = nextRow?.petID;
       }
 
+      //fetch the pet owners
+      const petOwner = await ctx.db.petOwner.findMany({
+        where: {
+          ownerID: {
+            in: user.map((pet) => pet.ownerID),
+          },
+        },
+        select: {
+          ownerID: true,
+          firstName: true,
+          surname: true,
+          addressArea: true,
+          addressGreaterArea: true,
+          addressStreet: true,
+          addressStreetNumber: true,
+        },
+      });
+
+      //fetch the clinics
+      const clinics = await ctx.db.petOnPetClinic.findMany({
+        where: {
+          petID: {
+            in: user.map((pet) => pet.petID),
+          },
+        },
+        select: {
+          clinicID: true,
+          petID: true,
+          clinic: {
+            select: {
+              date: true,
+            },
+          },
+        },
+      });
+
+      //fetch all the treatments
+      const treatments = await ctx.db.petTreatment.findMany({
+        where: {
+          petID: {
+            in: user.map((pet) => pet.petID),
+          },
+        },
+      });
+
       return {
+        owner_data: petOwner,
+        treatment_data: treatments,
+        clinic_data: clinics,
         user_data: user,
         nextCursor: newNextCursor,
       };
+    }),
+
+  //Add clinic to pet
+  addClinicToPet: protectedProcedure
+    .input(
+      z.object({
+        petID: z.number(),
+        clinicID: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const pet = await ctx.db.petOnPetClinic.create({
+        data: {
+          pet: {
+            connect: {
+              petID: input.petID,
+            },
+          },
+          clinic: {
+            connect: {
+              clinicID: input.clinicID,
+            },
+          },
+        },
+      });
+      return pet;
     }),
 
   //delete pet
@@ -252,24 +371,72 @@ export const petRouter = createTRPCRouter({
           petID: input.petID,
         },
       });
-      return pet;
+
+      const owner = await ctx.db.petOwner.findUnique({
+        where: {
+          ownerID: pet?.ownerID,
+        },
+        select: {
+          ownerID: true,
+          firstName: true,
+          surname: true,
+          addressArea: true,
+          addressGreaterArea: true,
+          addressStreet: true,
+          addressStreetNumber: true,
+        },
+      });
+
+      const clinics = await ctx.db.petOnPetClinic.findMany({
+        where: {
+          petID: input.petID,
+        },
+        select: {
+          clinicID: true,
+          petID: true,
+          clinic: {
+            select: {
+              date: true,
+            },
+          },
+        },
+      });
+
+      const treatments = await ctx.db.petTreatment.findMany({
+        where: {
+          petID: input.petID,
+        },
+      });
+
+      return {
+        pet_data: pet,
+        clinic_data: clinics,
+        treatment_data: treatments,
+        owner_data: owner,
+      };
+
+      // //Also get the owner of the pet
+      // const owner = await ctx.db.petOwner.findUnique({
+      //   where: {
+      //     ownerID: pet?.ownerID,
+      //   },
+      //   select: {
+      //     ownerID: true,
+      //     firstName: true,
+      //     surname: true,
+      //     addressArea: true,
+      //     addressGreaterArea: true,
+      //     addressStreet: true,
+      //     addressStreetNumber: true,
+      //   },
+      // });
+
+      //combine the pet and owner data
     }),
 
   //get all pets
   getAllPets: protectedProcedure.query(async ({ ctx }) => {
     const pet = await ctx.db.pet.findMany();
-    return pet;
-  }),
-
-  //get all the pets who visited any pet clinic
-  getAllPetsClinic: protectedProcedure.query(async ({ ctx }) => {
-    const pet = await ctx.db.pet.findMany({
-      where: {
-        clinicsAttended: {
-          isEmpty: false,
-        },
-      },
-    });
     return pet;
   }),
 

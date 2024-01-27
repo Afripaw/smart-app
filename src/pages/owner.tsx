@@ -840,7 +840,7 @@ const Owner: NextPage = () => {
                   Delete all users
         </button>*/}
               </div>
-              <article className="my-6 flex max-h-[80rem] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+              <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
                 <table className="table-auto">
                   <thead>
                     <tr>

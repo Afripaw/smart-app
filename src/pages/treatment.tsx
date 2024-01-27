@@ -129,11 +129,11 @@ const Treatment: NextPage = () => {
     }
   }, [router.asPath]);
 
-  const pet = api.pet.getPetByID.useQuery({ petID: petID });
+  // const pet = api.pet.getPetByID.useQuery({ petID: petID });
 
-  useEffect(() => {
-    void pet.refetch();
-  }, []);
+  // useEffect(() => {
+  //   void pet.refetch();
+  // }, []);
 
   //-------------------------------UPDATE USER-----------------------------------------
   const treatment = api.petTreatment.getTreatmentByID.useQuery({ treatmentID: id });
@@ -563,9 +563,9 @@ const Treatment: NextPage = () => {
                   Delete all users
         </button>*/}
               </div>
-              <article className="my-6 flex max-h-[80rem] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+              <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
                 <table className="table-auto">
-                  <thead>
+                  <thead className="">
                     <tr>
                       <th className="px-4 py-2"></th>
                       <th className="px-4 py-2">
@@ -651,7 +651,7 @@ const Treatment: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <b className=" text-2xl">{isUpdate ? "Update Pet Clinic Data" : "Create New Pet Clinic"}</b>
+                <b className=" text-2xl">{isUpdate ? "Update Pet Treatment Data" : "Add Pet Treatment"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -755,7 +755,7 @@ const Treatment: NextPage = () => {
                     <div className="w-32 pt-3">Comments: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                      placeholder="Type here: e.g. Notes on succesfulness, problem areas etc."
+                      placeholder="Type here: e.g. Notes on treatment success, problem areas, and follow-up actions"
                       onChange={(e) => setComments(e.target.value)}
                       value={comments}
                     />
@@ -776,7 +776,7 @@ const Treatment: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">Treatment Profile</div>
+                <div className=" text-2xl">Pet Treatment Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -797,7 +797,7 @@ const Treatment: NextPage = () => {
                     />
                   </div>
 
-                  <b className="mb-14 text-center text-xl">Treatment Data</b>
+                  <b className="mb-14 text-center text-xl">Pet Treatment Data</b>
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Treatment ID:</b> {treatment?.data?.treatmentID}
                   </div>

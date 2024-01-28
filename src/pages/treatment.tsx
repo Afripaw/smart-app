@@ -162,6 +162,13 @@ const Treatment: NextPage = () => {
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
   const [petID, setPetID] = useState(0);
+  const [petName, setPetName] = useState("");
+  const [ownerID, setOwnerID] = useState(0);
+  const [firstName, setFirstName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [area, setArea] = useState("");
+  const [greaterArea, setGreaterArea] = useState("");
+
   //const [image, setImage] = useState("");
 
   //userID
@@ -171,24 +178,29 @@ const Treatment: NextPage = () => {
   //---------------------------------NAVIGATION OF PET TO TREATMENT----------------------------------
   useEffect(() => {
     if (router.asPath.includes("petID")) {
-      setPetID(Number(router.asPath.split("=")[1]));
-      /*const query = router.asPath.split("?")[1] ?? "";
+      // setPetID(Number(router.asPath.split("=")[1]));
 
-    console.log("Owner ID: ", query?.split("&")[0]?.split("=")[1] ?? "");
-    console.log("Owner first name: ", query?.split("&")[1]?.split("=")[1] ?? "");
-    console.log("Owner surname: ", query?.split("&")[2]?.split("=")[1] ?? "");
-    console.log("Owner street number: ", query?.split("&")[3]?.split("=")[1] ?? "");
-    console.log("Owner street: ", query?.split("&")[4]?.split("=")[1] ?? "");
-    console.log("Owner area: ", query?.split("&")[5]?.split("=")[1] ?? "");
-    console.log("Owner greater area: ", query?.split("&")[6]?.split("=")[1] ?? "");
+      const query = router.asPath.split("?")[1] ?? "";
 
-    setOwnerID(Number(query?.split("&")[0]?.split("=")[1]));*/
-      // setFirstName(query?.split("&")[1]?.split("=")[1]);
-      // setSurname(query?.split("&")[2]?.split("=")[1]);
-      // setStreetNumber(query?.split("&")[3]?.split("=")[1]);
-      // setStreet(query?.split("&")[4]?.split("=")[1]);
-      // setArea(query?.split("&")[5]?.split("=")[1]);
-      // setGreaterArea(query?.split("&")[6]?.split("=")[1]);
+      // console.log("Owner ID: ", query?.split("&")[0]?.split("=")[1] ?? "");
+      // console.log("Owner first name: ", query?.split("&")[1]?.split("=")[1] ?? "");
+      // console.log("Owner surname: ", query?.split("&")[2]?.split("=")[1] ?? "");
+      // console.log("Owner street number: ", query?.split("&")[3]?.split("=")[1] ?? "");
+      // console.log("Owner street: ", query?.split("&")[4]?.split("=")[1] ?? "");
+      // console.log("Owner area: ", query?.split("&")[5]?.split("=")[1] ?? "");
+      // console.log("Owner greater area: ", query?.split("&")[6]?.split("=")[1] ?? "");
+
+      //Check for any plus signs in the query and replace them with spaces
+
+      setPetID(Number(query?.split("&")[0]?.split("=")[1]));
+      console.log("Pet ID: ", Number(query?.split("&")[0]?.split("=")[1]));
+      console.log("Pet ID: ", petID);
+      setPetName(String(query?.split("&")[1]?.split("=")[1]?.replaceAll("+", " ")));
+      setOwnerID(Number(query?.split("&")[2]?.split("=")[1]));
+      setFirstName(String(query?.split("&")[3]?.split("=")[1]?.replaceAll("+", " ")));
+      setSurname(String(query?.split("&")[4]?.split("=")[1]?.replaceAll("+", " ")));
+      setArea(String(query?.split("&")[6]?.split("=")[1]?.replaceAll("+", " ")));
+      setGreaterArea(String(query?.split("&")[5]?.split("=")[1]?.replaceAll("+", " ")));
       //console.log("Query: ", router.query);
       //console.log("Route: ", router.route);
       //console.log("as path: ", router.asPath);
@@ -412,11 +424,18 @@ const Treatment: NextPage = () => {
   const handleViewProfilePage = async (id: number) => {
     setIsViewProfilePage(true);
     setID(id);
-
+    const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
     //console.log("View profile page: ", JSON.stringify(clinic.data));
     if (treatment) {
       // Assuming userQuery.data contains the user object
       const userData = treatment;
+      setPetID(userData.petID ?? 0);
+      setPetName(userData.petName ?? "");
+      setFirstName(userData.firstName ?? "");
+      setSurname(userData.surname ?? "");
+      setOwnerID(userData.ownerID ?? 0);
+      setArea(userData.addressArea ?? "");
+      setGreaterArea(userData.addressGreaterArea ?? "");
       setCategoryOption(userData.category ?? "");
       setTypeOption(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
@@ -783,13 +802,13 @@ const Treatment: NextPage = () => {
                   </div>
 
                   {/*PET ID do not make it editable*/}
-                  <div className="py-2">Pet ID: {treatment?.petID}</div>
-                  <div className="py-2">Pet Name: {treatment?.petName}</div>
+                  <div className="py-2">Pet ID: {petID ? petID : treatment?.petID}</div>
+                  <div className="py-2">Pet Name: {petName ? petName : treatment?.petName}</div>
                   <div className="py-2">
-                    Owner: {treatment?.firstName} {treatment?.surname} ({treatment?.ownerID})
+                    Owner: {firstName ? firstName : treatment?.firstName} {surname ? surname : treatment?.surname} ({ownerID ? ownerID : treatment?.ownerID})
                   </div>
-                  <div className="py-2">Greater Area: {treatment?.addressGreaterArea}</div>
-                  <div className="py-2">Area: {treatment?.addressArea}</div>
+                  <div className="py-2">Greater Area: {greaterArea ? greaterArea : treatment?.addressGreaterArea}</div>
+                  <div className="py-2">Area: {area ? area : treatment?.addressArea}</div>
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
@@ -901,44 +920,44 @@ const Treatment: NextPage = () => {
 
                   <b className="mb-14 text-center text-xl">Pet Treatment Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Treatment ID:</b> {treatment?.treatmentID}
+                    <b className="mr-3">Treatment ID:</b> {id}
                   </div>
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Date:</b>{" "}
-                    {treatment?.date?.getDate() + "/" + ((treatment?.date?.getMonth() ?? 0) + 1) + "/" + treatment?.date?.getFullYear() ?? ""}
+                    {startingDate?.getDate() + "/" + ((startingDate?.getMonth() ?? 0) + 1) + "/" + startingDate?.getFullYear() ?? ""}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet ID:</b> {treatment?.petID}
+                    <b className="mr-3">Pet ID:</b> {petID}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet Name:</b> {treatment?.petName}
+                    <b className="mr-3">Pet Name:</b> {petName}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Owner:</b> {treatment?.firstName} {treatment?.surname} ({treatment?.ownerID})
+                    <b className="mr-3">Owner:</b> {firstName} {surname} ({ownerID})
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {treatment?.addressGreaterArea}
+                    <b className="mr-3">Greater Area:</b> {greaterArea}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {treatment?.addressArea}
+                    <b className="mr-3">Area:</b> {area}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Category:</b> {treatment?.category}
+                    <b className="mr-3">Category:</b> {categoryOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Type:</b> {treatment?.type}
+                    <b className="mr-3">Type:</b> {typeOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Comments:</b> {treatment?.comments}
+                    <b className="mr-3">Comments:</b> {comments}
                   </div>
                 </div>
               </div>

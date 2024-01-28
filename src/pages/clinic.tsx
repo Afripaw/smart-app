@@ -373,6 +373,7 @@ const Clinic: NextPage = () => {
     setID(id);
 
     const clinic = user_data?.find((clinic) => clinic.clinicID === id);
+    console.log("Clinic view profile button has this value for clinic: ", clinic);
     // console.log("View profile page: ", JSON.stringify(clinic.data));
     if (clinic) {
       // Assuming userQuery.data contains the user object
@@ -861,28 +862,28 @@ const Clinic: NextPage = () => {
 
                   <b className="mb-14 text-center text-xl">Pet Clinic Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Clinic ID:</b> {clinic?.clinicID}
+                    <b className="mr-3">Clinic ID:</b> {id}
                   </div>
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Date:</b>{" "}
-                    {clinic?.date?.getDate() + "/" + ((clinic?.date?.getMonth() ?? 0) + 1) + "/" + clinic?.date?.getFullYear() ?? ""}
+                    {startingDate?.getDate() + "/" + ((startingDate?.getMonth() ?? 0) + 1) + "/" + startingDate?.getFullYear() ?? ""}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {clinic?.greaterArea}
+                    <b className="mr-3">Greater Area:</b> {greaterAreaOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {clinic?.area}
+                    <b className="mr-3">Area:</b> {areaOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Conditions:</b> {clinic?.conditions}
+                    <b className="mr-3">Conditions:</b> {conditionOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Comments:</b> {clinic?.comments}
+                    <b className="mr-3">Comments:</b> {comments}
                   </div>
                 </div>
               </div>

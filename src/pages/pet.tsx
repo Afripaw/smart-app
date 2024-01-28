@@ -189,6 +189,10 @@ const Pet: NextPage = () => {
   //---------------------------------EDIT BOXES----------------------------------
   const [petName, setPetName] = useState("");
   const [ownerID, setOwnerID] = useState(0);
+  const [firstName, setFirstName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [greaterArea, setGreaterArea] = useState("");
+  const [area, setArea] = useState("");
 
   const [markings, setMarkings] = useState("");
   const [comments, setComments] = useState("");
@@ -1120,6 +1124,11 @@ const Pet: NextPage = () => {
       setClinicIDList(clinicIDs ?? []);
       setClinicList(clinicDates ?? []);
       setComments(userData?.comments ?? "");
+
+      setFirstName(userData?.firstName ?? "");
+      setSurname(userData?.surname ?? "");
+      setGreaterArea(userData?.addressGreaterArea ?? "");
+      setArea(userData?.addressArea ?? "");
     }
 
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
@@ -1167,6 +1176,11 @@ const Pet: NextPage = () => {
       setComments(userData?.comments ?? "");
       setClinicList(clinicDates ?? []);
       setClinicIDList(clinicIDs ?? []);
+
+      setFirstName(userData?.firstName ?? "");
+      setSurname(userData?.surname ?? "");
+      setGreaterArea(userData?.addressGreaterArea ?? "");
+      setArea(userData?.addressArea ?? "");
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
   //[user, isUpdate, isCreate];
@@ -1295,8 +1309,8 @@ const Pet: NextPage = () => {
   const handleViewProfilePage = async (id: number) => {
     setIsViewProfilePage(true);
     setID(id);
-
-    console.log("View profile page: ", JSON.stringify(user));
+    const user = pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
+    //console.log("View profile page: ", JSON.stringify(user));
     if (user) {
       // Assuming userQuery.data contains the user object
       const userData = user;
@@ -1333,6 +1347,11 @@ const Pet: NextPage = () => {
       setComments(userData?.comments ?? "");
       setClinicList(clinicDates ?? []);
       setClinicIDList(clinicIDs ?? []);
+
+      setFirstName(userData?.firstName ?? "");
+      setSurname(userData?.surname ?? "");
+      setGreaterArea(userData?.addressGreaterArea ?? "");
+      setArea(userData?.addressArea ?? "");
     }
 
     setIsUpdate(false);
@@ -1376,6 +1395,11 @@ const Pet: NextPage = () => {
       setComments(userData?.comments ?? "");
       setClinicList(clinicDates ?? []);
       setClinicIDList(clinicIDs ?? []);
+
+      setFirstName(userData?.firstName ?? "");
+      setSurname(userData?.surname ?? "");
+      setGreaterArea(userData?.addressGreaterArea ?? "");
+      setArea(userData?.addressArea ?? "");
     }
   }, [isViewProfilePage, isUpdate]); // Effect runs when userQuery.data changes
   //[isViewProfilePage, user]
@@ -1605,7 +1629,15 @@ const Pet: NextPage = () => {
   const handleCreateNewTreatment = async (id: number) => {
     await router.push({
       pathname: "/treatment",
-      query: { petID: id },
+      query: {
+        petID: id,
+        petName: petName ? petName : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.petName,
+        ownerID: ownerID ? ownerID : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.ownerID,
+        firstName: firstName ? firstName : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.firstName,
+        surname: surname ? surname : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.surname,
+        greaterArea: greaterArea ? greaterArea : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.addressGreaterArea,
+        area: area ? area : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.addressArea,
+      },
     });
   };
 
@@ -2459,7 +2491,7 @@ const Pet: NextPage = () => {
                   </div>
                   <b className="mb-14 text-center text-xl">Pet Identification Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet ID:</b> {user?.petID}
+                    <b className="mr-3">Pet ID:</b> {id}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -2467,23 +2499,23 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Species:</b> {speciesOption}
+                    <b className="mr-3">Species:</b> {speciesOption === "Select one" ? user?.species : speciesOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sex:</b> {sexOption}
+                    <b className="mr-3">Sex:</b> {sexOption === "Select one" ? user?.sex : sexOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Age:</b> {ageOption}
+                    <b className="mr-3">Age:</b> {ageOption === "Select one" ? user?.age : ageOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Breed:</b> {breedOption}
+                    <b className="mr-3">Breed:</b> {breedOption === "Select one" ? user?.breed : breedOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Colour:</b> {colourOption}
+                    <b className="mr-3">Colour:</b> {colourOption === "Select one" ? user?.colour : colourOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -2495,23 +2527,27 @@ const Pet: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Pet Health Data</b>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet Status:</b> {statusOption}
+                    <b className="mr-3">Pet Status:</b> {statusOption === "Select one" ? user?.status : statusOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sterilisation Status:</b> {sterilisationStatusOption}
+                    <b className="mr-3">Sterilisation Status:</b>{" "}
+                    {sterilisationStatusOption === "Select one" ? user?.sterilisedStatus : sterilisationStatusOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sterilisation Requested:</b> {sterilisationRequestedOption}
+                    <b className="mr-3">Sterilisation Requested:</b>{" "}
+                    {sterilisationRequestedOption === "Select one" ? user?.sterilisedRequested : sterilisationRequestedOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sterilisation Request Signed:</b> {sterilisationRequestSignedOption}
+                    <b className="mr-3">Sterilisation Request Signed:</b>{" "}
+                    {sterilisationRequestSignedOption === "Select one" ? user?.sterilisedRequestSigned : sterilisationRequestSignedOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sterilisation Outcome:</b> {sterilisationOutcomeOption}
+                    <b className="mr-3">Sterilisation Outcome:</b>{" "}
+                    {sterilisationOutcomeOption === "Select one" ? user?.sterilisationOutcome : sterilisationOutcomeOption}
                   </div>
                 </div>
 
@@ -2523,11 +2559,11 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Membership Type:</b> {membershipTypeOption}
+                    <b className="mr-3">Membership Type:</b> {membershipTypeOption === "Select one" ? user?.membership : membershipTypeOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Card Status:</b> {cardStatusOption}
+                    <b className="mr-3">Card Status:</b> {cardStatusOption === "Select one" ? user?.cardStatus : cardStatusOption}
                   </div>
 
                   <div className="mb-2 flex items-center">

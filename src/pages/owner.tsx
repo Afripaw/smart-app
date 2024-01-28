@@ -562,6 +562,7 @@ const Owner: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+      setImage(userData.image ?? "");
       console.log("Select one");
 
       //Make sure thet area and street options have a value
@@ -1305,14 +1306,14 @@ const Owner: NextPage = () => {
                   </div>
                   <div className="absolute right-4 top-20">
                     {user?.image ? (
-                      <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
+                      <Image src={image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
                     ) : (
                       <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem]" />
                     )}
                   </div>
                   <b className="mb-14 text-center text-xl">Personal & Contact Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Owner ID:</b> {user?.ownerID}
+                    <b className="mr-3">Owner ID:</b> {id}
                   </div>
 
                   <div className="mb-2 flex items-center">

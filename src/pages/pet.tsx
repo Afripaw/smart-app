@@ -37,6 +37,7 @@ const Pet: NextPage = () => {
   const updatePet = api.pet.update.useMutation();
   const [isUpdate, setIsUpdate] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
+  const [isViewProfilePage, setIsViewProfilePage] = useState(false);
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
 
@@ -231,11 +232,16 @@ const Pet: NextPage = () => {
       // console.log("Owner ID: ", ownerID);
       setIsCreate(true);
     }
+    if (router.asPath.includes("petID")) {
+      setIsViewProfilePage(true);
+      setID(Number(router.asPath.split("=")[1]));
+      void handleViewProfilePage(Number(router.asPath.split("=")[1]));
+    }
   }, [router.asPath]);
 
   //make sure the ownerID is not 0
   useEffect(() => {
-    if (ownerID != 0) {
+    if (ownerID != 0 && isCreate) {
       setOwnerID(Number(router.asPath.split("=")[1]));
     }
   }, [isCreate]);
@@ -762,7 +768,7 @@ const Pet: NextPage = () => {
 
   //VACCINATION SHOT 1
   const handleToggleVaccinationShot1 = () => {
-    setVaccinationShot1(!status);
+    setVaccinationShot1(!vaccinationShot1);
   };
 
   const handleVaccinationShot1Option = (option: SetStateAction<string>) => {
@@ -790,9 +796,25 @@ const Pet: NextPage = () => {
 
   const vaccinationShot1Options = ["Yes", "Not yet"];
 
+  useEffect(() => {
+    if (vaccinationShot1Option == "") {
+      console.log("Hellooooo, Vaccination shot 1: ", vaccinationShot1Option);
+      setVaccinationShot1Option("Select one");
+    }
+    if (vaccinationShot2Option == "") {
+      setVaccinationShot2Option("Select one");
+    }
+    if (vaccinationShot3Option == "") {
+      setVaccinationShot3Option("Select one");
+    }
+    console.log("Vaccination shot 1: ", vaccinationShot1Option);
+    console.log("Vaccination shot 2: ", vaccinationShot2Option);
+    console.log("Vaccination shot 3: ", vaccinationShot3Option);
+  }, [isUpdate, isCreate, isViewProfilePage]);
+
   //VACCINATION SHOT 2
   const handleToggleVaccinationShot2 = () => {
-    setVaccinationShot2(!status);
+    setVaccinationShot2(!vaccinationShot2);
   };
 
   const handleVaccinationShot2Option = (option: SetStateAction<string>) => {
@@ -822,7 +844,7 @@ const Pet: NextPage = () => {
 
   //VACCINATION SHOT 3
   const handleToggleVaccinationShot3 = () => {
-    setVaccinationShot3(!status);
+    setVaccinationShot3(!vaccinationShot3);
   };
 
   const handleVaccinationShot3Option = (option: SetStateAction<string>) => {
@@ -950,6 +972,12 @@ const Pet: NextPage = () => {
 
   const cardStatusOptions =
     membershipTypeOption == "Non-card holder" ? ["Not applicable"] : ["Not applicable", "Collect", "Issued", "Re-print", "Lapsed card holder"];
+
+  useEffect(() => {
+    if (membershipTypeOption != "Select one" && cardStatusOption == "") {
+      setCardStatusOption("Select one");
+    }
+  }, [membershipTypeOption]);
 
   //KENNELS RECEIVED
   const [kennelList, setKennelList] = useState<string[]>([]);
@@ -1122,8 +1150,14 @@ const Pet: NextPage = () => {
   }
 
   const formatDate = (dateStr: string) => {
+    // const day = dateStr.split("/")[1];
+    // const month = dateStr.split("/")[0];
+    // const year = dateStr.split("/")[2];
+    // return `${day}/${month}/${year}`;
+
     const date = new Date(dateStr);
-    return `${date.getDate().toString()}/${(date.getMonth() + 1).toString()}/${date.getFullYear()}`;
+    console.log(date);
+    return `${date.getDate().toString()}/${(date.getMonth() ?? 0 + 1).toString()}/${date.getFullYear()}`;
   };
 
   // CustomInput component with explicit types for the props
@@ -1139,7 +1173,7 @@ const Pet: NextPage = () => {
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? formatDate(lastDeworming?.toLocaleDateString()) : value}
+      {isUpdate ? lastDeworming.getDate().toString() + "/" + (lastDeworming.getMonth() + 1).toString() + "/" + lastDeworming.getFullYear().toString() : value}
     </button>
   );
 
@@ -1369,7 +1403,6 @@ const Pet: NextPage = () => {
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
-  const [isViewProfilePage, setIsViewProfilePage] = useState(false);
   const handleViewProfilePage = async (id: number) => {
     setIsViewProfilePage(true);
     setID(id);
@@ -1478,7 +1511,7 @@ const Pet: NextPage = () => {
   const handleBackButton = async () => {
     //console.log("Back button pressed");
     //if owner id in query then go back to owner page
-    if (Number(router.asPath.split("=")[1]) != 0 && isCreate) {
+    if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate) {
       await router.push(`/owner`);
     }
 
@@ -1688,6 +1721,14 @@ const Pet: NextPage = () => {
   //   void refetch();
   // }, [isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]);
 
+  //------------------------------------GO TO OWNER PROFILE--------------------------------------
+  const handleGoToOwnerProfile = async (ownerID: number) => {
+    await router.push({
+      pathname: "/owner",
+      query: { ownerID: ownerID },
+    });
+  };
+
   //------------------------------------CREATE A NEW TREATMENT FOR PET--------------------------------------
   //When button is pressed the browser needs to go to the treatment's page. The treatment's page needs to know the pet's ID
   const handleCreateNewTreatment = async (id: number) => {
@@ -1776,9 +1817,14 @@ const Pet: NextPage = () => {
                       <th className="px-4 py-2"></th>
                       <th className="px-4 py-2">ID</th>
                       <th className="px-4 py-2">
-                        <button className={`${order == "petName" ? "underline" : ""}`} onClick={() => handleOrderFields("petName")}>
-                          Name
-                        </button>
+                        <span className="group relative inline-block">
+                          <button className={`${order === "petName" ? "underline" : ""}`} onClick={() => handleOrderFields("petName")}>
+                            Name
+                          </button>
+                          <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort alphabetically
+                          </span>
+                        </span>
                       </th>
                       <th className="px-4 py-2">Owner</th>
 
@@ -1790,9 +1836,14 @@ const Pet: NextPage = () => {
                       <th className="w-[35px] px-4 py-2">Last Clinic</th>
                       {/* <th className="px-4 py-2">Last Treatment</th> */}
                       <th className="w-[35px] px-4 py-2">
-                        <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                          Last update
-                        </button>
+                        <span className="group relative inline-block">
+                          <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                            Last Update
+                          </button>
+                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort reverse chronologically
+                          </span>
+                        </span>
                       </th>
                     </tr>
                   </thead>
@@ -1800,13 +1851,17 @@ const Pet: NextPage = () => {
                     {pet_data_with_clinics_and_treatments?.map((pet, index) => {
                       return (
                         <tr className="items-center">
-                          <div className="px-4 py-2">{index + 1}</div>
+                          <td className=" border px-4 py-2">
+                            <div className="px-4 py-2">{index + 1}</div>
+                          </td>
                           <td className="border px-4 py-2">P{pet.petID}</td>
                           <td className="border px-4 py-2">
                             {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed})
                           </td>
                           <td className="border px-4 py-2">
-                            {pet.firstName} {pet.surname} (N{pet.ownerID})
+                            <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(pet.ownerID)}>
+                              {pet.firstName} {pet.surname} (N{pet.ownerID})
+                            </button>
                           </td>
 
                           <td className="border px-4 py-2">{pet.addressGreaterArea}</td>
@@ -1847,39 +1902,49 @@ const Pet: NextPage = () => {
                             {pet?.updatedAt?.getFullYear()?.toString() ?? ""}
                           </td>
                           <div className="flex">
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Deletes pet
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Trash size={24} className="block" onClick={() => handleDeleteModal(pet.petID, String(pet.petID), pet.petName ?? "")} />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Delete pet
+                                </span>
                               </span>
-                              <Trash
-                                size={24}
-                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                                onClick={() => handleDeleteModal(pet.petID, String(pet.petID), pet.petName ?? "")}
-                              />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Updates pet
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(pet.petID)} />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Update pet
+                                </span>
                               </span>
-                              <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(pet.petID)} />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Views pet profile
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(pet.petID)} />
+                                <span className="absolute bottom-full hidden w-[70px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  View pet profile
+                                </span>
                               </span>
-                              <AddressBook size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleViewProfilePage(pet.petID)} />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Creates new treatment
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <FirstAidKit size={24} className="block" onClick={() => handleCreateNewTreatment(pet.petID)} />
+                                <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Create new treatment
+                                </span>
                               </span>
-                              <FirstAidKit size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleCreateNewTreatment(pet.petID)} />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Adds today's clinic to pet
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Bed size={24} className="block" onClick={() => handleAddClinic(pet.petID)} />
+                                <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Add today's clinic to pet
+                                </span>
                               </span>
-                              <Bed size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleAddClinic(pet.petID)} />
                             </div>
                           </div>
                         </tr>
@@ -2277,6 +2342,148 @@ const Pet: NextPage = () => {
                       </div>
                     </div>
                   )}
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">Vaccination Shot 1: </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnVaccinationShot1Ref}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleVaccinationShot1}
+                      >
+                        {vaccinationShot1Option == "" ? "Select one" : vaccinationShot1Option + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {vaccinationShot1 && (
+                        <div ref={vaccinationShot1Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {vaccinationShot1Options.map((option) => (
+                              <li key={option} onClick={() => handleVaccinationShot1Option(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    {/* {vaccinationShot1Option === "Yes" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">Vaccination Shot 1 Date: </div>
+                      </div>
+                      <div className="py-4">
+                        <DatePicker
+                          selected={vaccinationShot1Date}
+                          onChange={(date) => setVaccinationShot1Date(date!)}
+                          dateFormat="dd/MM/yyyy"
+                          customInput={<CustomInput />}
+                          className="form-input rounded-md border px-3 py-2"
+                        />
+                      </div>
+                    </div>
+                  )} */}
+                  </div>
+
+                  {vaccinationShot1Option === "Yes" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">Vaccination Shot 2: </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnVaccinationShot2Ref}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleToggleVaccinationShot2}
+                        >
+                          {vaccinationShot2Option == "" ? "Select one" : vaccinationShot2Option + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {vaccinationShot2 && (
+                          <div ref={vaccinationShot2Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {vaccinationShot2Options.map((option) => (
+                                <li key={option} onClick={() => handleVaccinationShot2Option(option)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                      {/* {vaccinationShot2Option === "Yes" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">Vaccination Shot 2 Date: </div>
+                      </div>
+                      <div className="py-4">
+                        <DatePicker
+                          selected={vaccinationShot2Date}
+                          onChange={(date) => setVaccinationShot2Date(date!)}
+                          dateFormat="dd/MM/yyyy"
+                          customInput={<CustomInput />}
+                          className="form-input rounded-md border px-3 py-2"
+                        />
+                      </div>
+                    </div>
+                  )} */}
+                    </div>
+                  )}
+
+                  {vaccinationShot2Option === "Yes" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">Vaccination Shot 3: </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnVaccinationShot3Ref}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleToggleVaccinationShot3}
+                        >
+                          {vaccinationShot3Option == "" ? "Select one" : vaccinationShot3Option + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {vaccinationShot3 && (
+                          <div ref={vaccinationShot3Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {vaccinationShot3Options.map((option) => (
+                                <li key={option} onClick={() => handleVaccinationShot3Option(option)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                      {/* {vaccinationShot3Option === "Yes" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">Vaccination Shot 3 Date: </div>
+                      </div>
+                      <div className="py-4">
+                        <DatePicker
+                          selected={vaccinationShot3Date}
+                          onChange={(date) => setVaccinationShot3Date(date!)}
+                          dateFormat="dd/MM/yyyy"
+                          customInput={<CustomInput />}
+                          className="form-input rounded-md border px-3 py-2"
+                        />
+                      </div>
+                    </div>
+                  )} */}
+                    </div>
+                  )}
                 </div>
 
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -2366,7 +2573,7 @@ const Pet: NextPage = () => {
                       <DatePicker
                         selected={lastDeworming}
                         onChange={(date) => setLastDeworming(date!)}
-                        dateFormat="dd/mm/yyyy"
+                        dateFormat="dd/MM/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-3 py-2"
                       />
@@ -2654,12 +2861,13 @@ const Pet: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Clinics Attended:</b> {clinicList.length} in Total (
-                    {clinicList.map((clinic, index) => (clinicList.length - 1 == index ? clinic : clinic + ", "))})
+                    <b className="mr-3">Clinics Attended:</b> {clinicList.length} in Total{" "}
+                    {clinicList.length > 0 && <>({clinicList.map((clinic, index) => (clinicList.length - 1 === index ? clinic : clinic + ", "))})</>}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Last Deworming:</b> {formatDate(lastDeworming?.toLocaleDateString())}
+                    <b className="mr-3">Last Deworming:</b>{" "}
+                    {lastDeworming?.getDate() + "/" + (lastDeworming.getMonth() + 1) + "/" + lastDeworming.getFullYear()}
                     {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && <div className="ml-3 text-red-600">(Due for deworming)</div>}
                   </div>
 
@@ -2675,8 +2883,8 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Kennels Received:</b> {kennelList.length} in Total (
-                    {kennelList.map((kennel, index) => (kennelList.length - 1 == index ? kennel : kennel + ", "))})
+                    <b className="mr-3">Kennels Received:</b> {kennelList.length} in Total{" "}
+                    {kennelList.length > 0 && <>({kennelList.map((kennel, index) => (kennelList.length - 1 === index ? kennel : kennel + ", "))})</>}
                   </div>
 
                   <div className="mb-2 flex items-start">

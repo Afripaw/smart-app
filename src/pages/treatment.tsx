@@ -639,7 +639,7 @@ const Treatment: NextPage = () => {
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? startingDate?.toLocaleDateString() : value}
+      {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
     </button>
   );
 
@@ -682,9 +682,14 @@ const Treatment: NextPage = () => {
                       <th className="px-4 py-2"></th>
                       <th className="px-4 py-2">ID</th>
                       <th className="w-[35px] px-4 py-2">
-                        <button className={`${order == "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
-                          Treatment Date
-                        </button>
+                        <span className="group relative inline-block">
+                          <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
+                            Treatment Date
+                          </button>
+                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort reverse chronologically
+                          </span>
+                        </span>
                       </th>
                       <th className="px-4 py-2">Pet ID</th>
                       <th className="px-4 py-2">Pet</th>
@@ -699,9 +704,14 @@ const Treatment: NextPage = () => {
                         </button> */}
                       </th>
                       <th className="w-[35px] px-4 py-2">
-                        <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                          Last update
-                        </button>
+                        <span className="group relative inline-block">
+                          <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                            Last Update
+                          </button>
+                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort reverse chronologically
+                          </span>
+                        </span>
                       </th>
                     </tr>
                   </thead>
@@ -709,7 +719,9 @@ const Treatment: NextPage = () => {
                     {pet_treatment_data?.map((treatment, index) => {
                       return (
                         <tr className="items-center">
-                          <div className="px-4 py-2">{index + 1}</div>
+                          <td className=" border px-4 py-2">
+                            <div className="px-4 py-2">{index + 1}</div>
+                          </td>
                           <td className="border px-4 py-2">T{treatment.treatmentID}</td>
                           <td className="border px-4 py-2">
                             {treatment?.date?.getDate()?.toString() ?? ""}
@@ -738,45 +750,45 @@ const Treatment: NextPage = () => {
                           </td>
 
                           <div className="flex">
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Deletes treatment
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Trash
+                                  size={24}
+                                  className="block"
+                                  onClick={() =>
+                                    handleDeleteModal(
+                                      treatment.treatmentID ?? 0,
+                                      String(treatment.treatmentID ?? 0),
+                                      treatment.date?.getDate()?.toString() +
+                                        "/" +
+                                        ((treatment.date?.getMonth() ?? 0) + 1)?.toString() +
+                                        "/" +
+                                        treatment.date?.getFullYear()?.toString() ?? "",
+                                    )
+                                  }
+                                />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Delete treatment
+                                </span>
                               </span>
-                              <Trash
-                                size={24}
-                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                                onClick={() =>
-                                  handleDeleteModal(
-                                    treatment.treatmentID ?? 0,
-                                    String(treatment.treatmentID ?? 0),
-                                    treatment.date?.getDate()?.toString() +
-                                      "/" +
-                                      ((treatment.date?.getMonth() ?? 0) + 1)?.toString() +
-                                      "/" +
-                                      treatment.date?.getFullYear()?.toString() ?? "",
-                                  )
-                                }
-                              />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Updates treatment
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)} />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Update treatment
+                                </span>
                               </span>
-                              <Pencil
-                                size={24}
-                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                                onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)}
-                              />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden w-[120px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Views treatment profile
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)} />
+                                <span className="absolute bottom-full hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  View treatment profile
+                                </span>
                               </span>
-                              <AddressBook
-                                size={24}
-                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                                onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)}
-                              />
                             </div>
                           </div>
                         </tr>

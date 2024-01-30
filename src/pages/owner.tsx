@@ -26,6 +26,7 @@ import Input from "~/components/Base/Input";
 import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 import { router } from "@trpc/server";
+import Link from "next/link";
 
 const Owner: NextPage = () => {
   useSession({ required: true });
@@ -172,6 +173,37 @@ const Owner: NextPage = () => {
   //userID
   //const [userID, setUserID] = useState("");
   //const [id, setID] = useState(0);
+
+  //---------------------------------NAVIGATION OF OWNER TO PET----------------------------------
+  useEffect(() => {
+    if (router.asPath.includes("ownerID")) {
+      setID(Number(router.asPath.split("=")[1]));
+      /*const query = router.asPath.split("?")[1] ?? "";
+
+      console.log("Owner ID: ", query?.split("&")[0]?.split("=")[1] ?? "");
+      console.log("Owner first name: ", query?.split("&")[1]?.split("=")[1] ?? "");
+      console.log("Owner surname: ", query?.split("&")[2]?.split("=")[1] ?? "");
+      console.log("Owner street number: ", query?.split("&")[3]?.split("=")[1] ?? "");
+      console.log("Owner street: ", query?.split("&")[4]?.split("=")[1] ?? "");
+      console.log("Owner area: ", query?.split("&")[5]?.split("=")[1] ?? "");
+      console.log("Owner greater area: ", query?.split("&")[6]?.split("=")[1] ?? "");
+
+      setOwnerID(Number(query?.split("&")[0]?.split("=")[1]));*/
+      // setFirstName(query?.split("&")[1]?.split("=")[1]);
+      // setSurname(query?.split("&")[2]?.split("=")[1]);
+      // setStreetNumber(query?.split("&")[3]?.split("=")[1]);
+      // setStreet(query?.split("&")[4]?.split("=")[1]);
+      // setArea(query?.split("&")[5]?.split("=")[1]);
+      // setGreaterArea(query?.split("&")[6]?.split("=")[1]);
+      //console.log("Query: ", router.query);
+      //console.log("Route: ", router.route);
+      //console.log("as path: ", router.asPath);
+      //console.log("base path: ", router.basePath);
+      // console.log("Owner ID: ", ownerID);
+      setIsViewProfilePage(true);
+      void handleViewProfilePage(Number(router.asPath.split("=")[1]));
+    }
+  }, [router.asPath]);
 
   //-------------------------------UPDATE USER-----------------------------------------
   //const user = api.petOwner.getOwnerByID.useQuery({ petOwnerID: id });
@@ -644,8 +676,13 @@ const Owner: NextPage = () => {
   };
 
   //-------------------------------BACK BUTTON-----------------------------------------
-  const handleBackButton = () => {
+  const handleBackButton = async () => {
     //console.log("Back button pressed");
+
+    if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate) {
+      await router.push(`/pet`);
+    }
+
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);
@@ -857,6 +894,14 @@ const Owner: NextPage = () => {
     });
   };
 
+  //------------------------------------GO TO PET PROFILE--------------------------------------
+  const handleGoToPetProfile = async (petID: number) => {
+    await router.push({
+      pathname: "/pet",
+      query: { petID: petID },
+    });
+  };
+
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
   interface CustomInputProps {
@@ -877,7 +922,7 @@ const Owner: NextPage = () => {
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? startingDate?.toLocaleDateString() : value}
+      {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
     </button>
   );
 
@@ -932,10 +977,16 @@ const Owner: NextPage = () => {
                       <th className="px-4 py-2">ID</th>
                       <th className="px-4 py-2">Name</th>
                       <th className="px-4 py-2">
-                        <button className={`${order == "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
-                          Surname
-                        </button>
+                        <span className="group relative inline-block">
+                          <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
+                            Surname
+                          </button>
+                          <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort alphabetically
+                          </span>
+                        </span>
                       </th>
+
                       <th className="px-4 py-2">Email</th>
                       <th className="px-4 py-2">Mobile</th>
                       <th className="px-4 py-2">Greater Area</th>
@@ -944,9 +995,14 @@ const Owner: NextPage = () => {
                       <th className="px-4 py-2">Status</th>
                       <th className="px-4 py-2">Pets</th>
                       <th className="w-[35px] px-4 py-2">
-                        <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                          Last update
-                        </button>
+                        <span className="group relative inline-block">
+                          <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                            Last Update
+                          </button>
+                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort reverse chronologically
+                          </span>
+                        </span>
                       </th>
                     </tr>
                   </thead>
@@ -954,7 +1010,9 @@ const Owner: NextPage = () => {
                     {owner_data?.map((user, index) => {
                       return (
                         <tr className="items-center">
-                          <div className="px-4 py-2">{index + 1}</div>
+                          <td className=" border px-4 py-2">
+                            <div className="">{index + 1}</div>
+                          </td>
                           <td className="border px-4 py-2">N{user.ownerID}</td>
                           <td className="border px-4 py-2">{user.firstName}</td>
                           <td className="border px-4 py-2">{user.surname}</td>
@@ -970,11 +1028,13 @@ const Owner: NextPage = () => {
                             {user.pets?.map((pet) => {
                               return (
                                 <div className="flex flex-col">
-                                  <div>
-                                    {pet.map((pet_) => {
-                                      return <div>{pet_.petName}</div>;
-                                    })}
-                                  </div>
+                                  {pet.map((pet_) => {
+                                    return (
+                                      <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet_.petID)}>
+                                        {pet_.petName}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               );
                             })}
@@ -987,33 +1047,44 @@ const Owner: NextPage = () => {
                             {user?.updatedAt?.getFullYear()?.toString() ?? ""}
                           </td>
                           <div className="flex">
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Deletes owner
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Trash
+                                  size={24}
+                                  className="block"
+                                  onClick={() => handleDeleteModal(user.ownerID, String(user.ownerID), user.firstName ?? "")}
+                                />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Delete owner
+                                </span>
                               </span>
-                              <Trash
-                                size={24}
-                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                                onClick={() => handleDeleteModal(user.ownerID, String(user.ownerID), user.firstName ?? "")}
-                              />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Updates owner
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.ownerID)} />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Update owner
+                                </span>
                               </span>
-                              <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(user.ownerID)} />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Views owner profile
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.ownerID)} />
+                                <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  View owner profile
+                                </span>
                               </span>
-                              <AddressBook size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleViewProfilePage(user.ownerID)} />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Adds new pet to owner
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Dog size={24} className="block" onClick={() => handleCreateNewPet(user.ownerID)} />
+                                <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Add new pet to owner
+                                </span>
                               </span>
-                              <Dog size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleCreateNewPet(user.ownerID)} />
                             </div>
                           </div>
                         </tr>

@@ -261,6 +261,7 @@ const Clinic: NextPage = () => {
   }, []);
 
   const conditionOptions = [
+    "Unknown",
     "Fair",
     "Light wind",
     "Strong wind",
@@ -558,7 +559,7 @@ const Clinic: NextPage = () => {
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? startingDate?.toLocaleDateString() : value}
+      {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
     </button>
   );
 
@@ -602,12 +603,18 @@ const Clinic: NextPage = () => {
                   <thead>
                     <tr>
                       <th className="px-4 py-2"></th>
-                      <th className=" px-4 py-2">Clinic ID</th>
+                      <th className=" px-4 py-2">ID</th>
                       <th className="w-[35px] px-4 py-2">
-                        <button className={`${order == "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
-                          Clinic Date
-                        </button>
+                        <span className="group relative inline-block">
+                          <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
+                            Clinic Date
+                          </button>
+                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort reverse chronologically
+                          </span>
+                        </span>
                       </th>
+
                       <th className="px-4 py-2">Greater Area</th>
                       <th className="px-4 py-2">Area</th>
                       <th className="px-4 py-2">
@@ -617,9 +624,14 @@ const Clinic: NextPage = () => {
                         </button> */}
                       </th>
                       <th className="w-[35px] px-4 py-2">
-                        <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                          Last update
-                        </button>
+                        <span className="group relative inline-block">
+                          <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                            Last Update
+                          </button>
+                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort reverse chronologically
+                          </span>
+                        </span>
                       </th>
                     </tr>
                   </thead>
@@ -627,7 +639,9 @@ const Clinic: NextPage = () => {
                     {user_data?.map((user, index) => {
                       return (
                         <tr className="items-center">
-                          <div className="px-4 py-2">{index + 1}</div>
+                          <td className=" border px-4 py-2">
+                            <div className="px-4 py-2">{index + 1}</div>
+                          </td>
                           <td className="border px-4 py-2">C{user.clinicID}</td>
                           <td className="border px-4 py-2">
                             {user?.date?.getDate()?.toString() ?? ""}
@@ -648,45 +662,45 @@ const Clinic: NextPage = () => {
                           </td>
 
                           <div className="flex">
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Deletes clinic
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Trash
+                                  size={24}
+                                  className="block"
+                                  onClick={() =>
+                                    handleDeleteModal(
+                                      user.clinicID ?? 0,
+                                      String(user.clinicID),
+                                      user.date?.getDate()?.toString() +
+                                        "/" +
+                                        ((user.date?.getMonth() ?? 0) + 1)?.toString() +
+                                        "/" +
+                                        user.date?.getFullYear()?.toString() ?? "",
+                                    )
+                                  }
+                                />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Delete clinic
+                                </span>
                               </span>
-                              <Trash
-                                size={24}
-                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                                onClick={() =>
-                                  handleDeleteModal(
-                                    user.clinicID ?? 0,
-                                    String(user.clinicID),
-                                    user.date?.getDate()?.toString() +
-                                      "/" +
-                                      ((user.date?.getMonth() ?? 0) + 1)?.toString() +
-                                      "/" +
-                                      user.date?.getFullYear()?.toString() ?? "",
-                                  )
-                                }
-                              />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Updates clinic
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.clinicID ?? 0)} />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Update clinic
+                                </span>
                               </span>
-                              <Pencil
-                                size={24}
-                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                                onClick={() => handleUpdateUserProfile(user.clinicID ?? 0)}
-                              />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Views clinic profile
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.clinicID ?? 0)} />
+                                <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  View clinic profile
+                                </span>
                               </span>
-                              <AddressBook
-                                size={24}
-                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                                onClick={() => handleViewProfilePage(user.clinicID ?? 0)}
-                              />
                             </div>
                           </div>
                         </tr>

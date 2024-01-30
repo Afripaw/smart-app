@@ -998,7 +998,7 @@ const User: NextPage = () => {
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? startingDate?.toLocaleDateString() : value}
+      {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
     </button>
   );
 
@@ -1054,9 +1054,14 @@ const User: NextPage = () => {
                       <th className="px-4 py-2">Name</th>
 
                       <th className="px-4 py-2">
-                        <button className={`${order == "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
-                          Surname
-                        </button>
+                        <span className="group relative inline-block">
+                          <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
+                            Surname
+                          </button>
+                          <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort alphabetically
+                          </span>
+                        </span>
                       </th>
                       <th className="px-4 py-2">Email</th>
                       <th className="px-4 py-2">Mobile</th>
@@ -1064,10 +1069,15 @@ const User: NextPage = () => {
                       <th className="px-4 py-2">Area</th>
                       <th className="px-4 py-2">Role</th>
                       <th className="px-4 py-2">Status</th>
-                      <th className="[35px] px-4 py-2">
-                        <button className={`w-[35px] ${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                          Last update
-                        </button>
+                      <th className="w-[35px] px-4 py-2">
+                        <span className="group relative inline-block">
+                          <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                            Last Update
+                          </button>
+                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            Sort reverse chronologically
+                          </span>
+                        </span>
                       </th>
                     </tr>
                   </thead>
@@ -1075,7 +1085,9 @@ const User: NextPage = () => {
                     {user_data?.map((user, index) => {
                       return (
                         <tr className="items-center">
-                          <div className="px-4 py-2">{index + 1}</div>
+                          <td className=" border px-4 py-2">
+                            <div className="px-4 py-2">{index + 1}</div>
+                          </td>
                           <td className="border px-4 py-2">U{user.userID}</td>
                           <td className="border px-4 py-2">{user.name}</td>
                           <td className="border px-4 py-2">{user.surname}</td>
@@ -1094,31 +1106,41 @@ const User: NextPage = () => {
                             {user?.updatedAt?.getFullYear()?.toString() ?? ""}
                           </td>
                           <div className="flex">
-                            <div className="group relative flex items-center justify-center">
+                            {/* <div className="group relative flex items-center justify-center">
                               <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                 Deletes user
                               </span>
                               <Trash
                                 size={24}
-                                className=" mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200"
                                 onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")}
                               />
-                            </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Updates user
+                            </div> */}
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Trash size={24} className="block" onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")} />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Delete user
+                                </span>
                               </span>
-                              <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(String(user.id))} />
                             </div>
-                            <div className="group relative flex items-center justify-center">
-                              <span className="absolute bottom-full hidden w-[80px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                Views user profile
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(String(user.id))} />
+                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  Update user
+                                </span>
                               </span>
-                              <AddressBook
-                                size={24}
-                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                                onClick={() => handleViewProfilePage(String(user.id))}
-                              />
+                            </div>
+
+                            <div className="relative flex items-center justify-center">
+                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(String(user.id))} />
+                                <span className="absolute bottom-full hidden w-[75px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                  View user profile
+                                </span>
+                              </span>
                             </div>
                           </div>
                         </tr>
@@ -1634,7 +1656,7 @@ const User: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Starting Date:</b> {startingDate?.toLocaleDateString()}
+                    <b className="mr-3">Starting Date:</b> {startingDate?.getDate() + "/" + (startingDate?.getMonth() + 1) + "/" + startingDate?.getFullYear()}
                   </div>
 
                   <div className="mb-2 flex items-start">

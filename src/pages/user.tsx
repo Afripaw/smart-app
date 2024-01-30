@@ -26,7 +26,7 @@ import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 
 const User: NextPage = () => {
-  useSession({ required: true });
+  //useSession({ required: true });
 
   const newUser = api.user.create.useMutation();
   const updateUser = api.user.update.useMutation();
@@ -580,40 +580,56 @@ const User: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
-    const newUser_ = await newUser.mutateAsync({
-      firstName: firstName,
-      email: email,
-      surname: surname,
-      password: password,
-      mobile: mobile,
-      addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      addressArea: areaOption === "Select one" ? "" : areaOption,
-      addressStreet: streetOption === "Select one" ? "" : streetOption,
-      addressStreetCode: addressStreetCode,
-      addressStreetNumber: addressStreetNumber,
-      addressSuburb: addressSuburb,
-      addressPostalCode: addressPostalCode,
-      addressFreeForm: addressFreeForm,
-      preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
-      startingDate: startingDate,
-      role: roleOption === "Select one" ? "" : roleOption,
-      status: statusOption === "Select one" ? "" : statusOption,
-      comments: comments,
-    });
+    try {
+      const newUser_ = await newUser.mutateAsync({
+        firstName: firstName,
+        email: email,
+        surname: surname,
+        password: password,
+        mobile: mobile,
+        addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
+        addressArea: areaOption === "Select one" ? "" : areaOption,
+        addressStreet: streetOption === "Select one" ? "" : streetOption,
+        addressStreetCode: addressStreetCode,
+        addressStreetNumber: addressStreetNumber,
+        addressSuburb: addressSuburb,
+        addressPostalCode: addressPostalCode,
+        addressFreeForm: addressFreeForm,
+        preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
+        startingDate: startingDate,
+        role: roleOption === "Select one" ? "" : roleOption,
+        status: statusOption === "Select one" ? "" : statusOption,
+        comments: comments,
+      });
 
-    //Send user details
-    //Email
-    if (preferredOption === "Email" && sendUserDetails) {
-      await sendUserCredentialsEmail(email);
+      console.log("This is the new user: " + JSON.stringify(newUser_));
+      //Send user details
+      //Email
+      if (preferredOption === "Email" && sendUserDetails) {
+        await sendUserCredentialsEmail(email);
+      }
+
+      //Image upload
+      console.log("ID: ", newUser_?.id, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
+
+      handleUploadModal(newUser_?.id ?? "", firstName, newUser_?.image ?? "");
+      setIsCreate(false);
+      setIsUpdate(false);
+      setIsUpdatePassword(false);
+    } catch (error) {
+      console.log("Mobile number is already in database");
+      const mandatoryFields: string[] = [];
+      const errorFields: { field: string; message: string }[] = [];
+
+      errorFields.push({ field: "Mobile", message: "This mobile number is already in the database: " + mobile });
+
+      setMandatoryFields(mandatoryFields);
+      setErrorFields(errorFields);
+
+      if (mandatoryFields.length > 0 || errorFields.length > 0) {
+        setIsCreateButtonModalOpen(true);
+      }
     }
-
-    //Image upload
-    console.log("ID: ", newUser_?.id, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
-
-    handleUploadModal(newUser_?.id ?? "", firstName, newUser_?.image ?? "");
-    setIsCreate(false);
-    setIsUpdate(false);
-    setIsUpdatePassword(false);
 
     // return newUser_;
   };
@@ -1011,7 +1027,7 @@ const User: NextPage = () => {
                 userName={uploadUserName}
                 userImage={uploadUserImage}
               />
-              <div className="sticky top-20 z-20 bg-white py-4">
+              <div className="sticky top-20 z-10 bg-white py-4">
                 <div className="relative flex justify-center">
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
@@ -1049,7 +1065,7 @@ const User: NextPage = () => {
                       <th className="px-4 py-2">Role</th>
                       <th className="px-4 py-2">Status</th>
                       <th className="[35px] px-4 py-2">
-                        <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                        <button className={`w-[35px] ${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
                           Last update
                         </button>
                       </th>
@@ -1078,17 +1094,32 @@ const User: NextPage = () => {
                             {user?.updatedAt?.getFullYear()?.toString() ?? ""}
                           </td>
                           <div className="flex">
-                            <Trash
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")}
-                            />
-                            <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(String(user.id))} />
-                            <AddressBook
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleViewProfilePage(String(user.id))}
-                            />
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Deletes user
+                              </span>
+                              <Trash
+                                size={24}
+                                className=" mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")}
+                              />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Updates user
+                              </span>
+                              <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(String(user.id))} />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[80px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Views user profile
+                              </span>
+                              <AddressBook
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleViewProfilePage(String(user.id))}
+                              />
+                            </div>
                           </div>
                         </tr>
                       );

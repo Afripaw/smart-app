@@ -180,8 +180,20 @@ export const petOwnerRouter = createTRPCRouter({
         newNextCursor = nextRow?.ownerID;
       }
 
+      //get all the pets of each owner
+      const pets = [];
+      for (const owner of user) {
+        const pet = await ctx.db.pet.findMany({
+          where: {
+            ownerID: owner.ownerID,
+          },
+        });
+        pets.push(pet);
+      }
+
       return {
         user_data: user,
+        pets_data: pets,
         nextCursor: newNextCursor,
       };
     }),
@@ -194,6 +206,31 @@ export const petOwnerRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      //delete all pet to petTreatment
+      await ctx.db.petTreatment.deleteMany({
+        where: {
+          pet: {
+            ownerID: input.userID,
+          },
+        },
+      });
+
+      //delete all pet to petClinic
+      await ctx.db.petOnPetClinic.deleteMany({
+        where: {
+          pet: {
+            ownerID: input.userID,
+          },
+        },
+      });
+
+      //delete all pets
+      await ctx.db.pet.deleteMany({
+        where: {
+          ownerID: input.userID,
+        },
+      });
+
       return await ctx.db.petOwner.delete({
         where: {
           ownerID: input.userID,

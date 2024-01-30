@@ -435,10 +435,8 @@ const Pet: NextPage = () => {
 
   useEffect(() => {
     if (speciesOption == "Cat") {
-      // setAgeOption("Select one");
       setAgeOptions(ageCatOptions);
     } else if (speciesOption == "Dog") {
-      // setAgeOption("Select one");
       setAgeOptions(ageDogOptions);
     }
   }, [speciesOption]);
@@ -677,6 +675,13 @@ const Pet: NextPage = () => {
 
   const sterilisationRequestedOptions = ["Yes", "No"];
 
+  //if sterilisation status is No
+  useEffect(() => {
+    if (sterilisationStatusOption === "No" && sterilisationRequestedOption === "") {
+      setSterilisationRequestedOption("Select one");
+    }
+  }, [sterilisationStatusOption]);
+
   //STERILISATION REQUEST SIGNED
   const handleToggleSterilisationRequestSigned = () => {
     setSterilisationRequestSigned(!sterilisationRequestSigned);
@@ -747,6 +752,13 @@ const Pet: NextPage = () => {
   }, []);
 
   const sterilisationOutcomeOptions = ["Actioned", "No show"];
+
+  //if sterilisation requested option is Yes and sterilisationRequestSigned != ""
+  useEffect(() => {
+    if (sterilisationRequestedOption === "Yes" && sterilisationRequestSignedOption != "" && sterilisationOutcomeOption === "") {
+      setSterilisationOutcomeOption("Select one");
+    }
+  }, [sterilisationRequestedOption, sterilisationRequestSignedOption]);
 
   //VACCINATION SHOT 1
   const handleToggleVaccinationShot1 = () => {
@@ -1794,7 +1806,7 @@ const Pet: NextPage = () => {
                             {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed})
                           </td>
                           <td className="border px-4 py-2">
-                            {pet.firstName} {pet.surname} ({pet.ownerID})
+                            {pet.firstName} {pet.surname} (N{pet.ownerID})
                           </td>
 
                           <td className="border px-4 py-2">{pet.addressGreaterArea}</td>
@@ -1835,15 +1847,40 @@ const Pet: NextPage = () => {
                             {pet?.updatedAt?.getFullYear()?.toString() ?? ""}
                           </td>
                           <div className="flex">
-                            <Trash
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleDeleteModal(pet.petID, String(pet.petID), pet.petName ?? "")}
-                            />
-                            <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(pet.petID)} />
-                            <AddressBook size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleViewProfilePage(pet.petID)} />
-                            <FirstAidKit size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleCreateNewTreatment(pet.petID)} />
-                            <Bed size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleAddClinic(pet.petID)} />
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Deletes pet
+                              </span>
+                              <Trash
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleDeleteModal(pet.petID, String(pet.petID), pet.petName ?? "")}
+                              />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Updates pet
+                              </span>
+                              <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(pet.petID)} />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Views pet profile
+                              </span>
+                              <AddressBook size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleViewProfilePage(pet.petID)} />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Creates new treatment
+                              </span>
+                              <FirstAidKit size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleCreateNewTreatment(pet.petID)} />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Adds today's clinic to pet
+                              </span>
+                              <Bed size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleAddClinic(pet.petID)} />
+                            </div>
                           </div>
                         </tr>
                       );
@@ -1984,7 +2021,8 @@ const Pet: NextPage = () => {
                         type="button"
                         onClick={handleToggleAge}
                       >
-                        {ageOption === "Select one" ? user?.age : ageOption + " "}
+                        {/* {ageOption === "Select one" ? user?.age : ageOption + " "} */}
+                        {ageOption + " "}
                         <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                         </svg>

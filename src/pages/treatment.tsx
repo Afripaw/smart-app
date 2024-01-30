@@ -110,10 +110,16 @@ const Treatment: NextPage = () => {
   const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
 
   //combine the following two objects into one object
-  const treatment_data = user_data?.map((user, index) => ({ ...user, ...pet_data?.[index] }));
+  // const treatment_data = user_data?.map((user, index) => ({ ...user, ...pet_data?.[index] }));
 
-  // Assuming each user object contains an ownerId or similar property to relate to the owner
-  const pet_treatment_data = treatment_data?.map((pet) => {
+  const treatment_pet_data = user_data?.map((treatment) => {
+    // Find the owner that matches the user's ownerId
+    const pet = pet_data?.find((p) => (p.petID ?? 0) === treatment.petID);
+    // Combine the user data with the found owner data
+    return { ...treatment, ...pet };
+  });
+
+  const pet_treatment_data = treatment_pet_data?.map((pet) => {
     // Find the owner that matches the user's ownerId
     const owner = owner_data?.find((o) => (o.ownerID ?? 0) === pet.ownerID);
     // Combine the user data with the found owner data
@@ -196,6 +202,8 @@ const Treatment: NextPage = () => {
       console.log("Pet ID: ", Number(query?.split("&")[0]?.split("=")[1]));
       console.log("Pet ID: ", petID);
       setPetName(String(query?.split("&")[1]?.split("=")[1]?.replaceAll("+", " ")));
+      console.log("Pet name: ", String(query?.split("&")[1]?.split("=")[1]?.replaceAll("+", " ")));
+      console.log("Pet name: ", petName);
       setOwnerID(Number(query?.split("&")[2]?.split("=")[1]));
       setFirstName(String(query?.split("&")[3]?.split("=")[1]?.replaceAll("+", " ")));
       setSurname(String(query?.split("&")[4]?.split("=")[1]?.replaceAll("+", " ")));
@@ -212,7 +220,7 @@ const Treatment: NextPage = () => {
 
   //-------------------------------NAVIGATING BY CLICKING ON THE TAB---------------------
   useEffect(() => {
-    if (!isCreate) {
+    if (!isCreate && !router.asPath.includes("petID")) {
       setPetID(Number(treatment?.petID ?? 0));
     }
   }, [router.asPath]);
@@ -510,9 +518,9 @@ const Treatment: NextPage = () => {
     const mandatoryFields: string[] = [];
     const errorFields: { field: string; message: string }[] = [];
 
-    if (categoryOption === "Select one") mandatoryFields.push("Greater Area");
+    if (categoryOption === "Select one") mandatoryFields.push("Category");
     if (startingDate === null) mandatoryFields.push("Date");
-    if (typeOption === "Select one") mandatoryFields.push("Area");
+    if (typeOption === "Select one") mandatoryFields.push("Type");
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -673,9 +681,9 @@ const Treatment: NextPage = () => {
                     <tr>
                       <th className="px-4 py-2"></th>
                       <th className="px-4 py-2">ID</th>
-                      <th className="px-4 py-2">
+                      <th className="w-[35px] px-4 py-2">
                         <button className={`${order == "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
-                          Date
+                          Treatment Date
                         </button>
                       </th>
                       <th className="px-4 py-2">Pet ID</th>
@@ -710,12 +718,12 @@ const Treatment: NextPage = () => {
                             {"/"}
                             {treatment?.date?.getFullYear()?.toString() ?? ""}
                           </td>
-                          <td className="border px-4 py-2">{treatment.petID}</td>
+                          <td className="border px-4 py-2">P{treatment.petID}</td>
                           <td className="border px-4 py-2">
                             {treatment.petName} ({treatment.species})
                           </td>
                           <td className="border px-4 py-2">
-                            {treatment.firstName} {treatment.surname} ({treatment.ownerID})
+                            {treatment.firstName} {treatment.surname} (N{treatment.ownerID})
                           </td>
                           <td className="border px-4 py-2">{treatment.addressGreaterArea}</td>
                           <td className="border px-4 py-2">{treatment.addressArea}</td>
@@ -730,31 +738,46 @@ const Treatment: NextPage = () => {
                           </td>
 
                           <div className="flex">
-                            <Trash
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() =>
-                                handleDeleteModal(
-                                  treatment.treatmentID ?? 0,
-                                  String(treatment.treatmentID ?? 0),
-                                  treatment.date?.getDate()?.toString() +
-                                    "/" +
-                                    ((treatment.date?.getMonth() ?? 0) + 1)?.toString() +
-                                    "/" +
-                                    treatment.date?.getFullYear()?.toString() ?? "",
-                                )
-                              }
-                            />
-                            <Pencil
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)}
-                            />
-                            <AddressBook
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)}
-                            />
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Deletes treatment
+                              </span>
+                              <Trash
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() =>
+                                  handleDeleteModal(
+                                    treatment.treatmentID ?? 0,
+                                    String(treatment.treatmentID ?? 0),
+                                    treatment.date?.getDate()?.toString() +
+                                      "/" +
+                                      ((treatment.date?.getMonth() ?? 0) + 1)?.toString() +
+                                      "/" +
+                                      treatment.date?.getFullYear()?.toString() ?? "",
+                                  )
+                                }
+                              />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Updates treatment
+                              </span>
+                              <Pencil
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)}
+                              />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[120px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Views treatment profile
+                              </span>
+                              <AddressBook
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)}
+                              />
+                            </div>
                           </div>
                         </tr>
                       );
@@ -809,10 +832,10 @@ const Treatment: NextPage = () => {
                   </div>
 
                   {/*PET ID do not make it editable*/}
-                  <div className="py-2">Pet ID: {petID ? petID : treatment?.petID}</div>
+                  <div className="py-2">Pet ID: P{petID ? petID : treatment?.petID}</div>
                   <div className="py-2">Pet Name: {petName ? petName : treatment?.petName}</div>
                   <div className="py-2">
-                    Owner: {firstName ? firstName : treatment?.firstName} {surname ? surname : treatment?.surname} ({ownerID ? ownerID : treatment?.ownerID})
+                    Owner: {firstName ? firstName : treatment?.firstName} {surname ? surname : treatment?.surname} (N{ownerID ? ownerID : treatment?.ownerID})
                   </div>
                   <div className="py-2">Greater Area: {greaterArea ? greaterArea : treatment?.addressGreaterArea}</div>
                   <div className="py-2">Area: {area ? area : treatment?.addressArea}</div>

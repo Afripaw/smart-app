@@ -109,6 +109,13 @@ const Owner: NextPage = () => {
 
   //Flattens the pages array into one array
   const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  const pet_data = queryData?.pages.flatMap((page) => page.pets_data);
+
+  //map all the users to pets and put in one array object called owner_data
+  const owner_data = user_data?.map((user) => {
+    const pets = pet_data?.filter((pet) => pet[0]?.ownerID === user.ownerID);
+    return { ...user, pets };
+  });
 
   //Checks intersection of the observer target and reassigns target element once true
   useEffect(() => {
@@ -935,6 +942,7 @@ const Owner: NextPage = () => {
                       <th className="px-4 py-2">Area</th>
                       <th className="px-4 py-2">Address</th>
                       <th className="px-4 py-2">Status</th>
+                      <th className="px-4 py-2">Pets</th>
                       <th className="w-[35px] px-4 py-2">
                         <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
                           Last update
@@ -943,7 +951,7 @@ const Owner: NextPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {user_data?.map((user, index) => {
+                    {owner_data?.map((user, index) => {
                       return (
                         <tr className="items-center">
                           <div className="px-4 py-2">{index + 1}</div>
@@ -958,7 +966,19 @@ const Owner: NextPage = () => {
                             {user.addressStreetNumber} {user.addressStreet}
                           </td>
                           <td className="border px-4 py-2">{user.status}</td>
-
+                          <td className="border px-4 py-2">
+                            {user.pets?.map((pet) => {
+                              return (
+                                <div className="flex flex-col">
+                                  <div>
+                                    {pet.map((pet_) => {
+                                      return <div>{pet_.petName}</div>;
+                                    })}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </td>
                           <td className=" border px-4 py-2">
                             {user?.updatedAt?.getDate()?.toString() ?? ""}
                             {"/"}
@@ -967,14 +987,34 @@ const Owner: NextPage = () => {
                             {user?.updatedAt?.getFullYear()?.toString() ?? ""}
                           </td>
                           <div className="flex">
-                            <Trash
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleDeleteModal(user.ownerID, String(user.ownerID), user.firstName ?? "")}
-                            />
-                            <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(user.ownerID)} />
-                            <AddressBook size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleViewProfilePage(user.ownerID)} />
-                            <Dog size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleCreateNewPet(user.ownerID)} />
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Deletes owner
+                              </span>
+                              <Trash
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleDeleteModal(user.ownerID, String(user.ownerID), user.firstName ?? "")}
+                              />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Updates owner
+                              </span>
+                              <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(user.ownerID)} />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Views owner profile
+                              </span>
+                              <AddressBook size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleViewProfilePage(user.ownerID)} />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Adds new pet to owner
+                              </span>
+                              <Dog size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleCreateNewPet(user.ownerID)} />
+                            </div>
                           </div>
                         </tr>
                       );

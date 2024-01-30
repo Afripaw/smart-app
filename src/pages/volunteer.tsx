@@ -1032,18 +1032,43 @@ const Volunteer: NextPage = () => {
                             {user?.updatedAt?.getFullYear()?.toString() ?? ""}
                           </td>
                           <div className="flex">
-                            <Trash
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleDeleteModal(user.volunteerID, String(user.volunteerID), user.firstName ?? "")}
-                            />
-                            <Pencil size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleUpdateUserProfile(user.volunteerID)} />
-                            <AddressBook
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleViewProfilePage(user.volunteerID)}
-                            />
-                            <Bed size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleAddClinic(user.volunteerID)} />
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Deletes volunteer
+                              </span>
+                              <Trash
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleDeleteModal(user.volunteerID, String(user.volunteerID), user.firstName ?? "")}
+                              />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Updates volunteer
+                              </span>
+                              <Pencil
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleUpdateUserProfile(user.volunteerID)}
+                              />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[120px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Views volunteer profile
+                              </span>
+                              <AddressBook
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleViewProfilePage(user.volunteerID)}
+                              />
+                            </div>
+
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[120px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Adds today's clinic to volunteer
+                              </span>
+                              <Bed size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleAddClinic(user.volunteerID)} />
+                            </div>
                           </div>
                         </tr>
                       );

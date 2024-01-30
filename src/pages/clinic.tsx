@@ -592,9 +592,9 @@ const Clinic: NextPage = () => {
                   >
                     Create new Clinic
                   </button>
-                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
-                  </button>
+                  </button> */}
                 </div>
               </div>
               <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
@@ -602,6 +602,7 @@ const Clinic: NextPage = () => {
                   <thead>
                     <tr>
                       <th className="px-4 py-2"></th>
+                      <th className=" px-4 py-2">Clinic ID</th>
                       <th className="w-[35px] px-4 py-2">
                         <button className={`${order == "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
                           Clinic Date
@@ -627,6 +628,7 @@ const Clinic: NextPage = () => {
                       return (
                         <tr className="items-center">
                           <div className="px-4 py-2">{index + 1}</div>
+                          <td className="border px-4 py-2">C{user.clinicID}</td>
                           <td className="border px-4 py-2">
                             {user?.date?.getDate()?.toString() ?? ""}
                             {"/"}
@@ -646,31 +648,46 @@ const Clinic: NextPage = () => {
                           </td>
 
                           <div className="flex">
-                            <Trash
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() =>
-                                handleDeleteModal(
-                                  user.clinicID ?? 0,
-                                  String(user.clinicID),
-                                  user.date?.getDate()?.toString() +
-                                    "/" +
-                                    ((user.date?.getMonth() ?? 0) + 1)?.toString() +
-                                    "/" +
-                                    user.date?.getFullYear()?.toString() ?? "",
-                                )
-                              }
-                            />
-                            <Pencil
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleUpdateUserProfile(user.clinicID ?? 0)}
-                            />
-                            <AddressBook
-                              size={24}
-                              className="mx-2 my-3 rounded-lg hover:bg-orange-200"
-                              onClick={() => handleViewProfilePage(user.clinicID ?? 0)}
-                            />
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Deletes clinic
+                              </span>
+                              <Trash
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() =>
+                                  handleDeleteModal(
+                                    user.clinicID ?? 0,
+                                    String(user.clinicID),
+                                    user.date?.getDate()?.toString() +
+                                      "/" +
+                                      ((user.date?.getMonth() ?? 0) + 1)?.toString() +
+                                      "/" +
+                                      user.date?.getFullYear()?.toString() ?? "",
+                                  )
+                                }
+                              />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Updates clinic
+                              </span>
+                              <Pencil
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleUpdateUserProfile(user.clinicID ?? 0)}
+                              />
+                            </div>
+                            <div className="group relative flex items-center justify-center">
+                              <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Views clinic profile
+                              </span>
+                              <AddressBook
+                                size={24}
+                                className="mx-2 my-3 rounded-lg hover:bg-orange-200"
+                                onClick={() => handleViewProfilePage(user.clinicID ?? 0)}
+                              />
+                            </div>
                           </div>
                         </tr>
                       );

@@ -7,7 +7,7 @@ export const petOwnerRouter = createTRPCRouter({
     .input(
       z.object({
         firstName: z.string(),
-        email: z.string().email(),
+        email: z.string(),
         surname: z.string(),
         mobile: z.string(),
         addressGreaterArea: z.string(),
@@ -43,6 +43,7 @@ export const petOwnerRouter = createTRPCRouter({
           startingDate: input.startingDate,
           comments: input.comments,
           createdAt: new Date(),
+          updatedAt: new Date(),
         },
       });
 
@@ -55,7 +56,7 @@ export const petOwnerRouter = createTRPCRouter({
       z.object({
         petOwnerID: z.number(),
         firstName: z.string(),
-        email: z.string().email(),
+        email: z.string(),
         surname: z.string(),
         mobile: z.string(),
         addressGreaterArea: z.string(),
@@ -204,5 +205,16 @@ export const petOwnerRouter = createTRPCRouter({
   getAllOwners: protectedProcedure.query(async ({ ctx }) => {
     const petOwners = await ctx.db.petOwner.findMany();
     return petOwners;
+  }),
+
+  //delete all pet owners
+  deleteAllOwners: protectedProcedure.mutation(async ({ ctx }) => {
+    //delete all pet to petTreatment
+    await ctx.db.petTreatment.deleteMany();
+    //delete all pet to petClinic
+    await ctx.db.petOnPetClinic.deleteMany();
+    //delete all pets
+    await ctx.db.pet.deleteMany();
+    return await ctx.db.petOwner.deleteMany();
   }),
 });

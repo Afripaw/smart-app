@@ -7,7 +7,7 @@ export const volunteerRouter = createTRPCRouter({
     .input(
       z.object({
         firstName: z.string(),
-        email: z.string().email(),
+        email: z.string(),
         surname: z.string(),
         mobile: z.string(),
         addressGreaterArea: z.string(),
@@ -44,6 +44,7 @@ export const volunteerRouter = createTRPCRouter({
           startingDate: input.startingDate,
           comments: input.comments,
           createdAt: new Date(),
+          updatedAt: new Date(),
         },
       });
 
@@ -76,7 +77,7 @@ export const volunteerRouter = createTRPCRouter({
       z.object({
         volunteerID: z.number(),
         firstName: z.string(),
-        email: z.string().email(),
+        email: z.string(),
         surname: z.string(),
         mobile: z.string(),
         addressGreaterArea: z.string(),
@@ -115,6 +116,7 @@ export const volunteerRouter = createTRPCRouter({
           startingDate: input.startingDate,
           status: input.status,
           comments: input.comments,
+          updatedAt: new Date(),
         },
       });
 
@@ -239,6 +241,41 @@ export const volunteerRouter = createTRPCRouter({
       };
     }),
 
+  //Add clinic to volunteer
+  addClinicToVolunteer: protectedProcedure
+    .input(
+      z.object({
+        volunteerID: z.number(),
+        clinicID: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.volunteer.update({
+        where: {
+          volunteerID: input.volunteerID,
+        },
+        data: {
+          updatedAt: new Date(),
+        },
+      });
+
+      const volunteer = await ctx.db.volunteerOnPetClinic.create({
+        data: {
+          volunteer: {
+            connect: {
+              volunteerID: input.volunteerID,
+            },
+          },
+          clinic: {
+            connect: {
+              clinicID: input.clinicID,
+            },
+          },
+        },
+      });
+      return volunteer;
+    }),
+
   //delete volunteer
   deleteVolunteer: publicProcedure
     .input(
@@ -307,5 +344,12 @@ export const volunteerRouter = createTRPCRouter({
     });
 
     return volunteers;
+  }),
+
+  //delete all volunteers
+  deleteAllVolunteers: publicProcedure.mutation(async ({ ctx }) => {
+    //delete all volunteer clinic
+    await ctx.db.volunteerOnPetClinic.deleteMany({});
+    return await ctx.db.volunteer.deleteMany({});
   }),
 });

@@ -136,11 +136,11 @@ const Clinic: NextPage = () => {
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
-  /*const deleteAllUsers = api.user.deleteAll.useMutation();
+  const deleteAllUsers = api.petClinic.deleteAllClinics.useMutation();
   const handleDeleteAllUsers = async () => {
     await deleteAllUsers.mutateAsync();
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
-  };*/
+  };
 
   //---------------------------------PRINTING----------------------------------
   const printComponentRef = useRef(null);
@@ -571,7 +571,7 @@ const Clinic: NextPage = () => {
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
-            <div className="mb-2 mt-9 flex flex-col text-black">
+            <div className="flex flex-col text-black">
               <DeleteButtonModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -579,27 +579,32 @@ const Clinic: NextPage = () => {
                 userName={deleteModalName}
                 onDelete={() => handleDeleteRow(deleteUserID)}
               />
-              <div className="relative flex justify-center">
-                <input
-                  className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
-                  placeholder="Search..."
-                  onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
-                />
-                <button className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleCreateNewUser}>
-                  Create new Clinic
-                </button>
-                {/*<button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
-                  Delete all users
-        </button>*/}
+              <div className="sticky top-20 z-20 bg-white py-4">
+                <div className="relative flex justify-center">
+                  <input
+                    className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
+                    placeholder="Search..."
+                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                  />
+                  <button
+                    className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                    onClick={handleCreateNewUser}
+                  >
+                    Create new Clinic
+                  </button>
+                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                    Delete all users
+                  </button>
+                </div>
               </div>
               <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
                 <table className="table-auto">
                   <thead>
                     <tr>
                       <th className="px-4 py-2"></th>
-                      <th className="px-4 py-2">
+                      <th className="w-[35px] px-4 py-2">
                         <button className={`${order == "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
-                          Date
+                          Clinic Date
                         </button>
                       </th>
                       <th className="px-4 py-2">Greater Area</th>
@@ -610,7 +615,7 @@ const Clinic: NextPage = () => {
                           Conditions
                         </button> */}
                       </th>
-                      <th className="px-4 py-2">
+                      <th className="w-[35px] px-4 py-2">
                         <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
                           Last update
                         </button>
@@ -753,7 +758,9 @@ const Clinic: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Area: </div>
+                      <div className=" flex">
+                        Area<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -862,7 +869,7 @@ const Clinic: NextPage = () => {
 
                   <b className="mb-14 text-center text-xl">Pet Clinic Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Clinic ID:</b> {id}
+                    <b className="mr-3">Clinic ID:</b> C{id}
                   </div>
 
                   <div className="mb-2 flex items-center">

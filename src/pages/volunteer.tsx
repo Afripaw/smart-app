@@ -14,7 +14,7 @@ import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { clinicDates } from "~/components/clinicsAttended";
 
 //Icons
-import { AddressBook, Pencil, Printer, Trash, UserCircle, Users } from "phosphor-react";
+import { AddressBook, Pencil, Printer, Trash, UserCircle, Users, Bed } from "phosphor-react";
 
 //Date picker
 import DatePicker from "react-datepicker";
@@ -77,6 +77,11 @@ const Volunteer: NextPage = () => {
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
   const [isViewProfilePage, setIsViewProfilePage] = useState(false);
 
+  //-------------------------------CLINICS ATTENDED-----------------------------------------
+  //The list of clinics that the user has attended
+  const [clinicList, setClinicList] = useState<string[]>([]);
+  const [clinicIDList, setClinicIDList] = useState<number[]>([]);
+
   //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
   const observerTarget = useRef<HTMLDivElement | null>(null);
 
@@ -138,17 +143,17 @@ const Volunteer: NextPage = () => {
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order, isViewProfilePage]);
+  }, [isUpdate, isDeleted, isCreate, query, order, isViewProfilePage, clinicList, clinicIDList]);
 
   const user = volunteer_data_with_clinics?.find((volunteer) => volunteer.volunteerID === id);
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
-  /*const deleteAllUsers = api.user.deleteAll.useMutation();
+  const deleteAllUsers = api.volunteer.deleteAllVolunteers.useMutation();
   const handleDeleteAllUsers = async () => {
     await deleteAllUsers.mutateAsync();
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
-  };*/
+  };
 
   //---------------------------------PRINTING----------------------------------
   const printComponentRef = useRef(null);
@@ -177,6 +182,8 @@ const Volunteer: NextPage = () => {
 
   //Order fields
   // const [order, setOrder] = useState("surname");
+  //Add clinic to pet
+  const addClinic = api.volunteer.addClinicToVolunteer.useMutation();
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
@@ -253,7 +260,14 @@ const Volunteer: NextPage = () => {
     };
   }, []);
 
-  const preferredCommunicationOptions = ["Email", "SMS"];
+  const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState(["SMS"]);
+  useEffect(() => {
+    if (email === "") {
+      setPreferredCommunicationOptions(["SMS"]);
+    } else if (email != "") {
+      setPreferredCommunicationOptions(["Email", "SMS"]);
+    }
+  }, [email]);
 
   //STATUS
   const handleToggleStatus = () => {
@@ -295,10 +309,6 @@ const Volunteer: NextPage = () => {
   const clinicsAttendedRef = useRef<HTMLDivElement>(null);
   const btnClinicsAttendedRef = useRef<HTMLButtonElement>(null);
 
-  //The list of clinics that the user has attended
-  const [clinicList, setClinicList] = useState<string[]>([]);
-  const [clinicIDList, setClinicIDList] = useState<number[]>([]);
-
   const handleToggleClinicsAttended = () => {
     setClinicsAttended(!clinicsAttended);
   };
@@ -318,8 +328,10 @@ const Volunteer: NextPage = () => {
     setClinicsAttendedOption(option);
     setClinicsAttended(false);
     setShowClinicsAttended(false);
-    setClinicList([...clinicList, String(option)]);
-    setClinicIDList([...clinicIDList, optionID]);
+    if (!clinicList.includes(String(option))) {
+      setClinicList([...clinicList, String(option)]);
+      setClinicIDList([...clinicIDList, optionID]);
+    }
   };
 
   // useEffect(() => {
@@ -391,6 +403,20 @@ const Volunteer: NextPage = () => {
     if (user) {
       // Assuming userQuery.data contains the user object
       const userData = user;
+
+      //Get all the clinic dates and put in a string array
+      const clinicData = user?.clinics;
+      const clinicDates =
+        clinicData?.map(
+          (clinic) =>
+            clinic.clinic.date.getDate().toString() +
+            "/" +
+            ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+            "/" +
+            clinic.clinic.date.getFullYear().toString(),
+        ) ?? [];
+      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -405,6 +431,8 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+      setClinicList(clinicDates);
+      setClinicIDList(clinicIDs);
     }
 
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
@@ -417,6 +445,18 @@ const Volunteer: NextPage = () => {
     if (user) {
       // Assuming userQuery.data contains the user object
       const userData = user;
+      //Get all the clinic dates and put in a string array
+      const clinicData = user?.clinics;
+      const clinicDates =
+        clinicData?.map(
+          (clinic) =>
+            clinic.clinic.date.getDate().toString() +
+            "/" +
+            ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+            "/" +
+            clinic.clinic.date.getFullYear().toString(),
+        ) ?? [];
+      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -432,6 +472,8 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+      setClinicList(clinicDates);
+      setClinicIDList(clinicIDs);
       // setClinicList(userData.clinicsAttended ?? []);
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
@@ -496,6 +538,7 @@ const Volunteer: NextPage = () => {
     setAddressFreeForm("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
+    setClinicIDList([]);
     setIsCreate(true);
     setIsUpdate(false);
   };
@@ -541,6 +584,18 @@ const Volunteer: NextPage = () => {
     if (user) {
       // Assuming userQuery.data contains the user object
       const userData = user;
+      //Get all the clinic dates and put in a string array
+      const clinicData = user?.clinics;
+      const clinicDates =
+        clinicData?.map(
+          (clinic) =>
+            clinic.clinic.date.getDate().toString() +
+            "/" +
+            ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+            "/" +
+            clinic.clinic.date.getFullYear().toString(),
+        ) ?? [];
+      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -557,6 +612,8 @@ const Volunteer: NextPage = () => {
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
       console.log("Select one");
+      setClinicList(clinicDates);
+      setClinicIDList(clinicIDs);
       //setClinicList(userData. ?? []);
     }
 
@@ -573,7 +630,18 @@ const Volunteer: NextPage = () => {
     //console.log("View profile page: ", JSON.stringify(user.data));
     if (user) {
       const userData = user;
-
+      //Get all the clinic dates and put in a string array
+      const clinicData = user?.clinics;
+      const clinicDates =
+        clinicData?.map(
+          (clinic) =>
+            clinic.clinic.date.getDate().toString() +
+            "/" +
+            ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+            "/" +
+            clinic.clinic.date.getFullYear().toString(),
+        ) ?? [];
+      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -588,6 +656,8 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+      setClinicList(clinicDates);
+      setClinicIDList(clinicIDs);
       //setClinicList(userData.clinicsAttended ?? []);
     }
   }, [isViewProfilePage]); // Effect runs when userQuery.data changes
@@ -838,6 +908,32 @@ const Volunteer: NextPage = () => {
     </button>
   );
 
+  //------------------------------------ADD AN EXISTING CLINIC FOR VOLUNTEER--------------------------------------
+  //Search for a clinic date and clinic ID given today's date. Todays date needs to match up with the clinic date for the clinic to be added to the volunteer
+  const handleAddClinic = async (id: number) => {
+    //get today's date
+    const today = new Date();
+    //add to the clinic list and ID list and then add it to the table
+    //check if the clinic date is today's date
+    const option = clinicsAttendedOptions.find(
+      (clinic) => clinic.date.getDate() === today.getDate() && clinic.date.getMonth() === today.getMonth() && clinic.date.getFullYear() === today.getFullYear(),
+    );
+    console.log("Option for clinic exists: ", option);
+    const optionDate = option?.date.getDate().toString() + "/" + option?.date.getMonth().toString() + "/" + option?.date.getFullYear().toString();
+    const optionID = option?.clinicID ?? 0;
+
+    if (!clinicIDList.includes(optionID) && optionID != 0) {
+      setClinicList([...clinicList, String(optionDate)]);
+      setClinicIDList([...clinicIDList, optionID]);
+
+      //update the pet table to add the clinic to the pet
+      await addClinic.mutateAsync({
+        volunteerID: id,
+        clinicID: optionID,
+      });
+    }
+  };
+
   return (
     <>
       <Head>
@@ -847,7 +943,7 @@ const Volunteer: NextPage = () => {
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
-            <div className="mb-2 mt-9 flex flex-col text-black">
+            <div className=" flex flex-col text-black">
               <DeleteButtonModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -863,25 +959,31 @@ const Volunteer: NextPage = () => {
                 userName={uploadUserName}
                 userImage={uploadUserImage}
               />
-              <div className="relative flex justify-center">
-                <input
-                  className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
-                  placeholder="Search..."
-                  onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
-                />
-                <button className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleCreateNewUser}>
-                  Create new Volunteer
-                </button>
-                {/*<button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
-                  Delete all users
-        </button>*/}
+              <div className="sticky top-20 z-20 bg-white py-4">
+                <div className="relative flex justify-center">
+                  <input
+                    className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
+                    placeholder="Search..."
+                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                  />
+                  <button
+                    className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                    onClick={handleCreateNewUser}
+                  >
+                    Create new Volunteer
+                  </button>
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                    Delete all users
+                  </button> */}
+                </div>
               </div>
               <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
                 <table className="table-auto">
                   <thead className="">
                     <tr>
                       <th className="px-4 py-2"></th>
-                      <th className="px-4 py-2">First Name</th>
+                      <th className="px-4 py-2">ID</th>
+                      <th className="px-4 py-2">Name</th>
                       <th className="px-4 py-2">
                         <button className={`${order == "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
                           Surname
@@ -891,7 +993,8 @@ const Volunteer: NextPage = () => {
                       <th className="px-4 py-2">Mobile</th>
                       <th className="px-4 py-2">Greater Area</th>
                       <th className="px-4 py-2">Status</th>
-                      <th className="px-4 py-2">
+                      <th className="w-[35px] px-4 py-2">Last Clinic</th>
+                      <th className="w-[35px] px-4 py-2">
                         <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
                           Last update
                         </button>
@@ -903,13 +1006,24 @@ const Volunteer: NextPage = () => {
                       return (
                         <tr className="items-center">
                           <div className="px-4 py-2">{index + 1}</div>
+                          <td className="border px-4 py-2">V{user.volunteerID}</td>
                           <td className="border px-4 py-2">{user.firstName}</td>
                           <td className="border px-4 py-2">{user.surname}</td>
                           <td className="border px-4 py-2">{user.email}</td>
                           <td className="border px-4 py-2">{user.mobile}</td>
                           <td className="border px-4 py-2">{user.addressGreaterArea}</td>
                           <td className="border px-4 py-2">{user.status}</td>
-
+                          <td className="border px-4 py-2">
+                            {user.clinics && user.clinics.length > 0 ? (
+                              <>
+                                {user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getDate().toString()}/
+                                {((user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
+                                {user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getFullYear().toString()}
+                              </>
+                            ) : (
+                              "None"
+                            )}
+                          </td>
                           <td className="border px-4 py-2">
                             {user?.updatedAt?.getDate()?.toString() ?? ""}
                             {"/"}
@@ -929,6 +1043,7 @@ const Volunteer: NextPage = () => {
                               className="mx-2 my-3 rounded-lg hover:bg-orange-200"
                               onClick={() => handleViewProfilePage(user.volunteerID)}
                             />
+                            <Bed size={24} className="mx-2 my-3 rounded-lg hover:bg-orange-200" onClick={() => handleAddClinic(user.volunteerID)} />
                           </div>
                         </tr>
                       );
@@ -1155,7 +1270,7 @@ const Volunteer: NextPage = () => {
                   {/*Clinics attended*/}
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Clinics Attended: </div>
+                      <div className=" flex">Clinics Attended: {clinicList.length} in Total</div>
                     </div>
                     {/*Show list of all the clinics attended */}
                     <div className="flex flex-col items-center">
@@ -1193,16 +1308,30 @@ const Volunteer: NextPage = () => {
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {clinicsAttendedOptions.map((option) => (
                               <li
-                                key={option.date.getDate().toString() + "/" + option.date.getMonth().toString() + "/" + option.date.getFullYear().toString()}
+                                key={
+                                  option.date.getDate().toString() +
+                                  "/" +
+                                  ((option.date.getMonth() ?? 0) + 1).toString() +
+                                  "/" +
+                                  option.date.getFullYear().toString()
+                                }
                                 onClick={() =>
                                   handleClinicsAttendedOption(
-                                    option.date.getDate().toString() + "/" + option.date.getMonth().toString() + "/" + option.date.getFullYear().toString(),
+                                    option.date.getDate().toString() +
+                                      "/" +
+                                      ((option.date.getMonth() ?? 0) + 1).toString() +
+                                      "/" +
+                                      option.date.getFullYear().toString(),
                                     option.clinicID,
                                   )
                                 }
                               >
                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                  {option.date.getDate().toString() + "/" + option.date.getMonth().toString() + "/" + option.date.getFullYear().toString()}
+                                  {option.date.getDate().toString() +
+                                    "/" +
+                                    ((option.date.getMonth() ?? 0) + 1).toString() +
+                                    "/" +
+                                    option.date.getFullYear().toString()}
                                 </button>
                               </li>
                             ))}
@@ -1282,11 +1411,11 @@ const Volunteer: NextPage = () => {
                   </div>
                   <b className="mb-14 text-center text-xl">Personal & Contact Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Volunteer ID:</b> {user?.volunteerID}
+                    <b className="mr-3">Volunteer ID:</b> V{user?.volunteerID}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">First name:</b> {firstName}
+                    <b className="mr-3">Name:</b> {firstName}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -1352,11 +1481,13 @@ const Volunteer: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Clinics Attended:</b> {clinicList.map((clinic, index) => (clinicList.length - 1 == index ? clinic : clinic + ", "))}
+                    <b className="mr-3">Clinics Attended:</b> {clinicList.length} in Total (
+                    {clinicList.map((clinic, index) => (clinicList.length - 1 == index ? clinic : clinic + ", "))})
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Starting Date:</b> {startingDate?.getDate() + "/" + (startingDate?.getMonth() + 1) + "/" + startingDate?.getFullYear()}
+                    <b className="mr-3">Starting Date:</b>{" "}
+                    {startingDate?.getDate() + "/" + ((startingDate?.getMonth() ?? 0) + 1) + "/" + startingDate?.getFullYear()}
                   </div>
 
                   <div className="mb-2 flex items-start">

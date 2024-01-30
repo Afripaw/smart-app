@@ -170,4 +170,9 @@ export const petClinicRouter = createTRPCRouter({
     const petClinic = await ctx.db.petClinic.findMany();
     return petClinic;
   }),
+
+  //delete all clinics
+  deleteAllClinics: publicProcedure.mutation(async ({ ctx }) => {
+    return await ctx.db.petClinic.deleteMany({});
+  }),
 });

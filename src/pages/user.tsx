@@ -132,16 +132,17 @@ const User: NextPage = () => {
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
-  /*const deleteAllUsers = api.user.deleteAll.useMutation();
+  const deleteAllUsers = api.user.deleteAll.useMutation();
   const handleDeleteAllUsers = async () => {
     await deleteAllUsers.mutateAsync();
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
-  };*/
+  };
 
   //---------------------------------PRINTING----------------------------------
   const printComponentRef = useRef(null);
 
   //---------------------------------EDIT BOXES----------------------------------
+  const [userID, setUserID] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
   const [email, setEmail] = useState("");
@@ -355,7 +356,14 @@ const User: NextPage = () => {
     };
   }, []);
 
-  const preferredCommunicationOptions = ["Email", "SMS"];
+  const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState(["SMS"]);
+  useEffect(() => {
+    if (email === "") {
+      setPreferredCommunicationOptions(["SMS"]);
+    } else if (email != "") {
+      setPreferredCommunicationOptions(["Email", "SMS"]);
+    }
+  }, [email]);
 
   //ROLE
   const handleToggleRole = () => {
@@ -424,6 +432,7 @@ const User: NextPage = () => {
     if (user) {
       // Assuming userQuery.data contains the user object
       const userData = user;
+      setUserID(userData.userID ?? 0);
       setFirstName(userData.name ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -462,6 +471,7 @@ const User: NextPage = () => {
     if (user) {
       // Assuming userQuery.data contains the user object
       const userData = user;
+      setUserID(userData.userID ?? 0);
       setFirstName(userData.name ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -515,6 +525,7 @@ const User: NextPage = () => {
       password: password,
     });
     //After the newUser has been created make sure to set the fields back to empty
+    setUserID(0);
     setFirstName("");
     setEmail("");
     setSurname("");
@@ -549,6 +560,7 @@ const User: NextPage = () => {
     setStatusOption("Select one");
     setStartingDate(new Date());
     setComments("");
+    setUserID(0);
     setFirstName("");
     setEmail("");
     setSurname("");
@@ -618,6 +630,7 @@ const User: NextPage = () => {
     if (user) {
       // Assuming userQuery.data contains the user object
       const userData = user;
+      setUserID(userData.userID ?? 0);
       setFirstName(userData.name ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -660,7 +673,7 @@ const User: NextPage = () => {
     }
     if (user) {
       const userData = user;
-
+      setUserID(userData.userID ?? 0);
       setFirstName(userData.name ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -711,6 +724,7 @@ const User: NextPage = () => {
     setIsUpdatePassword(false);
     setIsUploadModalOpen(false);
     setID("");
+    setUserID(0);
     setFirstName("");
     setEmail("");
     setSurname("");
@@ -1010,9 +1024,9 @@ const User: NextPage = () => {
                   >
                     Create new User
                   </button>
-                  {/*<button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
-                  Delete all users
-        </button>*/}
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                    Delete all users
+                  </button> */}
                 </div>
               </div>
               <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
@@ -1020,7 +1034,9 @@ const User: NextPage = () => {
                   <thead className="">
                     <tr>
                       <th className="px-4 py-2"></th>
-                      <th className="px-4 py-2">First Name</th>
+                      <th className="px-4 py-2">ID</th>
+                      <th className="px-4 py-2">Name</th>
+
                       <th className="px-4 py-2">
                         <button className={`${order == "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
                           Surname
@@ -1032,7 +1048,7 @@ const User: NextPage = () => {
                       <th className="px-4 py-2">Area</th>
                       <th className="px-4 py-2">Role</th>
                       <th className="px-4 py-2">Status</th>
-                      <th className="px-4 py-2">
+                      <th className="[35px] px-4 py-2">
                         <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
                           Last update
                         </button>
@@ -1044,6 +1060,7 @@ const User: NextPage = () => {
                       return (
                         <tr className="items-center">
                           <div className="px-4 py-2">{index + 1}</div>
+                          <td className="border px-4 py-2">U{user.userID}</td>
                           <td className="border px-4 py-2">{user.name}</td>
                           <td className="border px-4 py-2">{user.surname}</td>
                           <td className="border px-4 py-2">{user.email}</td>
@@ -1509,11 +1526,11 @@ const User: NextPage = () => {
                   </div>
                   <b className="mb-14 text-center text-xl">Personal & Contact Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">User ID:</b> {user?.userID}
+                    <b className="mr-3">User ID:</b> U{userID}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">First name:</b> {firstName}
+                    <b className="mr-3">Name:</b> {firstName}
                   </div>
 
                   <div className="mb-2 flex items-center">

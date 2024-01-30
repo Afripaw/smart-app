@@ -66,7 +66,7 @@ const Navbar = () => {
             <Link
               key={link.name}
               href={link.href}
-              className={`flex rounded-lg px-6 py-2 text-black hover:bg-gray-200/30 ${router.pathname === link.href ? "bg-white" : ""}`}
+              className={`flex rounded-lg px-6 py-2  hover:bg-gray-200/30 ${router.pathname === link.href ? "bg-white text-black" : "text-white"}`}
             >
               <div className="mr-2">{link.icon}</div>
               {link.name}
@@ -74,7 +74,7 @@ const Navbar = () => {
           </div>
         ))}
       </div>
-      <Link className="flex rounded-lg px-6 py-2 text-black hover:bg-gray-200/30" href="/" onClick={handleLogout}>
+      <Link className="flex rounded-lg px-6 py-2 text-white hover:bg-gray-200/30" href="/" onClick={handleLogout}>
         <SignOut size={24} />
         Logout
       </Link>

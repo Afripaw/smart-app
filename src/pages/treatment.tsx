@@ -149,11 +149,11 @@ const Treatment: NextPage = () => {
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
-  /*const deleteAllUsers = api.user.deleteAll.useMutation();
+  const deleteAllUsers = api.petTreatment.deleteAllTreatments.useMutation();
   const handleDeleteAllUsers = async () => {
     await deleteAllUsers.mutateAsync();
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
-  };*/
+  };
 
   //---------------------------------PRINTING----------------------------------
   const printComponentRef = useRef(null);
@@ -373,7 +373,7 @@ const Treatment: NextPage = () => {
       //   setAreaOption("Select one");
       // }
     }
-  }, [treatment, isUpdate, isCreate]); // Effect runs when userQuery.data changes
+  }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
     await updateTreatment.mutateAsync({
@@ -405,8 +405,9 @@ const Treatment: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
+    const query = router.asPath.split("?")[1] ?? "";
     await newTreatment.mutateAsync({
-      petID: Number(router.asPath.split("=")[1]),
+      petID: petID === 0 ? Number(query?.split("&")[0]?.split("=")[1]) : petID,
       category: categoryOption === "Select one" ? "" : categoryOption,
       type: typeOption === "Select one" ? "" : typeOption,
       date: startingDate,
@@ -473,7 +474,7 @@ const Treatment: NextPage = () => {
       //   setAreaOption("Select one");
       // }
     }
-  }, [isViewProfilePage, treatment]); // Effect runs when userQuery.data changes
+  }, [isViewProfilePage]); // Effect runs when userQuery.data changes
 
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {
@@ -643,7 +644,7 @@ const Treatment: NextPage = () => {
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
-            <div className="mb-2 mt-9 flex flex-col text-black">
+            <div className=" flex flex-col text-black">
               <DeleteButtonModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -651,24 +652,27 @@ const Treatment: NextPage = () => {
                 userName={deleteModalName}
                 onDelete={() => handleDeleteRow(deleteUserID)}
               />
-              <div className="relative flex justify-center">
-                <input
-                  className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
-                  placeholder="Search..."
-                  onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
-                />
-                {/* <button className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleCreateNewUser}>
+              <div className="sticky top-20 z-20 bg-white py-4">
+                <div className="relative flex justify-center">
+                  <input
+                    className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
+                    placeholder="Search..."
+                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                  />
+                  {/* <button className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleCreateNewUser}>
                   Create new Clinic
                 </button> */}
-                {/*<button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
-                  Delete all users
-        </button>*/}
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                    Delete all users
+                  </button> */}
+                </div>
               </div>
               <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
                 <table className="table-auto">
                   <thead className="">
                     <tr>
                       <th className="px-4 py-2"></th>
+                      <th className="px-4 py-2">ID</th>
                       <th className="px-4 py-2">
                         <button className={`${order == "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
                           Date
@@ -686,7 +690,7 @@ const Treatment: NextPage = () => {
                           Conditions
                         </button> */}
                       </th>
-                      <th className="px-4 py-2">
+                      <th className="w-[35px] px-4 py-2">
                         <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
                           Last update
                         </button>
@@ -698,6 +702,7 @@ const Treatment: NextPage = () => {
                       return (
                         <tr className="items-center">
                           <div className="px-4 py-2">{index + 1}</div>
+                          <td className="border px-4 py-2">T{treatment.treatmentID}</td>
                           <td className="border px-4 py-2">
                             {treatment?.date?.getDate()?.toString() ?? ""}
                             {"/"}
@@ -706,7 +711,9 @@ const Treatment: NextPage = () => {
                             {treatment?.date?.getFullYear()?.toString() ?? ""}
                           </td>
                           <td className="border px-4 py-2">{treatment.petID}</td>
-                          <td className="border px-4 py-2">{treatment.petName}</td>
+                          <td className="border px-4 py-2">
+                            {treatment.petName} ({treatment.species})
+                          </td>
                           <td className="border px-4 py-2">
                             {treatment.firstName} {treatment.surname} ({treatment.ownerID})
                           </td>
@@ -929,7 +936,7 @@ const Treatment: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet ID:</b> {petID}
+                    <b className="mr-3">Pet ID:</b> P{petID}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -937,7 +944,7 @@ const Treatment: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Owner:</b> {firstName} {surname} ({ownerID})
+                    <b className="mr-3">Owner:</b> {firstName} {surname} (N{ownerID})
                   </div>
 
                   <div className="mb-2 flex items-center">

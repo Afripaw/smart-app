@@ -7,7 +7,7 @@ export const UserRouter = createTRPCRouter({
     .input(
       z.object({
         firstName: z.string(),
-        email: z.string().email(),
+        email: z.string(),
         password: z.string().min(3),
         surname: z.string(),
         mobile: z.string().max(10),
@@ -58,7 +58,7 @@ export const UserRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         firstName: z.string(),
-        email: z.string().email(),
+        email: z.string(),
         password: z.string(),
         surname: z.string(),
         mobile: z.string().max(10),

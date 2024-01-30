@@ -62,6 +62,7 @@ export const petRouter = createTRPCRouter({
           kennelReceived: input.kennelReceived,
           comments: input.comments,
           createdAt: new Date(),
+          updatedAt: new Date(),
         },
       });
 
@@ -325,6 +326,15 @@ export const petRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.pet.update({
+        where: {
+          petID: input.petID,
+        },
+        data: {
+          updatedAt: new Date(),
+        },
+      });
+
       const pet = await ctx.db.petOnPetClinic.create({
         data: {
           pet: {
@@ -488,4 +498,9 @@ export const petRouter = createTRPCRouter({
   //   });
   //   return pet;
   // }),
+
+  //Delete all pets
+  deleteAllPets: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.pet.deleteMany();
+  }),
 });

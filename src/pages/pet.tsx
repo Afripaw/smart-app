@@ -177,11 +177,11 @@ const Pet: NextPage = () => {
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
-  /*const deleteAllUsers = api.user.deleteAll.useMutation();
-  const handleDeleteAllUsers = async () => {
-    await deleteAllUsers.mutateAsync();
-    isDeleted ? setIsDeleted(false) : setIsDeleted(true);
-  };*/
+  // const deleteAllUsers = api.pet.deleteAllPets.useMutation();
+  // const handleDeleteAllUsers = async () => {
+  //   await deleteAllUsers.mutateAsync();
+  //   isDeleted ? setIsDeleted(false) : setIsDeleted(true);
+  // };
 
   //---------------------------------PRINTING----------------------------------
   const printComponentRef = useRef(null);
@@ -435,10 +435,10 @@ const Pet: NextPage = () => {
 
   useEffect(() => {
     if (speciesOption == "Cat") {
-      setAgeOption("Select one");
+      // setAgeOption("Select one");
       setAgeOptions(ageCatOptions);
     } else if (speciesOption == "Dog") {
-      setAgeOption("Select one");
+      // setAgeOption("Select one");
       setAgeOptions(ageDogOptions);
     }
   }, [speciesOption]);
@@ -509,7 +509,7 @@ const Pet: NextPage = () => {
       setBreedOption("Not Applicable");
       setBreedOptions(["Not Applicable"]);
     } else if (speciesOption == "Dog") {
-      setBreedOption("Select one");
+      //setBreedOption("Select one");
       setBreedOptions(breedDogOptions);
     }
   }, [speciesOption]);
@@ -563,10 +563,10 @@ const Pet: NextPage = () => {
 
   useEffect(() => {
     if (speciesOption == "Cat") {
-      setColourOption("Select one");
+      //setColourOption("Select one");
       setColourOptions(colourCatOptions);
     } else if (speciesOption == "Dog") {
-      setColourOption("Select one");
+      //setColourOption("Select one");
       setColourOptions(colourDogOptions);
     }
   }, [speciesOption]);
@@ -716,8 +716,7 @@ const Pet: NextPage = () => {
       setSterilisationRequestSignedOption("Select one");
       setSterilisationRequestSignedOptions(sterilisationRequestConfirmedSignedOptions);
     }
-    // other code if needed
-  }, []); // Add dependencies here
+  }, [sterilisationRequestedOption]); // Add dependencies here
 
   //STERILISATION OUTCOME
   const handleToggleSterilisationOutcome = () => {
@@ -868,6 +867,46 @@ const Pet: NextPage = () => {
   }, []);
 
   const membershipTypeOptions = ["Non-card holder", "Standard card holder", "Gold card holder"];
+
+  const qualifiesWithAttendance = (time: number): boolean => {
+    const currentDate = new Date();
+
+    // Convert clinicList dates to Date objects
+    const clinicDates = clinicList.map((clinicDate) => {
+      const [day, month, year] = clinicDate.split("/").map(Number);
+      return new Date(year ?? 0, (month ?? 0) - 1, day);
+    });
+
+    // Filter clinics within the last 'time' months
+    const filteredClinics = clinicDates.filter((clinicDate) => {
+      const pastDate = new Date(currentDate);
+      pastDate.setMonth(currentDate.getMonth() - time);
+      return clinicDate >= pastDate;
+    });
+
+    if (time === 6) {
+      return filteredClinics.length >= 5;
+    } else if (time === 24) {
+      return filteredClinics.length >= 18;
+    } else {
+      return false;
+    }
+  };
+
+  // Example Usage
+  console.log(qualifiesWithAttendance(6)); // Check for standard card
+  console.log(qualifiesWithAttendance(24)); // Check for gold card
+
+  //checks to see what membership message should be displayed
+  const membershipMessage = (membership: string): string => {
+    if ((membership == "Non-card holder" || cardStatusOption == "Lapsed card holder") && sterilisationStatusOption === "Yes" && qualifiesWithAttendance(6)) {
+      return "Qualifies For Standard Card";
+    } else if (membership == "Standard card holder" && sterilisationStatusOption === "Yes" && qualifiesWithAttendance(24)) {
+      return "Qualifies For Gold Card";
+    } else {
+      return "";
+    }
+  };
 
   //CARD STATUS
   const handleToggleCardStatus = () => {
@@ -1057,10 +1096,23 @@ const Pet: NextPage = () => {
     }
   }, []);
 
+  //checks if deworming was more than 6 months ago
+  const isMoreThanSixMonthsAgo = (date: Date): boolean => {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    return date < sixMonthsAgo;
+  };
+
   interface CustomInputProps {
     value?: string;
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   }
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return `${date.getDate().toString()}/${(date.getMonth() + 1).toString()}/${date.getFullYear()}`;
+  };
 
   // CustomInput component with explicit types for the props
   const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
@@ -1075,7 +1127,7 @@ const Pet: NextPage = () => {
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? lastDeworming?.toLocaleDateString() : value}
+      {isUpdate ? formatDate(lastDeworming?.toLocaleDateString()) : value}
     </button>
   );
 
@@ -1676,7 +1728,7 @@ const Pet: NextPage = () => {
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
-            <div className="mb-2 mt-9 flex flex-col text-black">
+            <div className="flex flex-col text-black">
               <DeleteButtonModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
@@ -1692,25 +1744,28 @@ const Pet: NextPage = () => {
                 userName={uploadUserName}
                 userImage={uploadUserImage}
               />
-              <div className="relative flex justify-center">
-                <input
-                  className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
-                  placeholder="Search..."
-                  onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
-                />
+              <div className="sticky top-20 z-20 bg-white py-4">
+                <div className="relative flex justify-center">
+                  <input
+                    className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
+                    placeholder="Search..."
+                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                  />
 
-                {/*<button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  {/*<button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                   Delete all users
         </button>*/}
+                </div>
               </div>
               <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
                 <table className="table-auto">
                   <thead>
                     <tr>
                       <th className="px-4 py-2"></th>
+                      <th className="px-4 py-2">ID</th>
                       <th className="px-4 py-2">
                         <button className={`${order == "petName" ? "underline" : ""}`} onClick={() => handleOrderFields("petName")}>
-                          Pet Name
+                          Name
                         </button>
                       </th>
                       <th className="px-4 py-2">Owner</th>
@@ -1718,11 +1773,11 @@ const Pet: NextPage = () => {
                       <th className="px-4 py-2">Greater Area</th>
                       <th className="px-4 py-2">Area</th>
                       <th className="px-4 py-2">Address</th>
-                      <th className="px-4 py-2">Sterilised</th>
-                      <th className="px-4 py-2">Last Treatment</th>
-                      <th className="px-4 py-2">Last Clinic</th>
+                      <th className="px-4 py-2">Sterilised?</th>
+                      <th className="w-[35px] px-4 py-2">Last Treatment</th>
+                      <th className="w-[35px] px-4 py-2">Last Clinic</th>
                       {/* <th className="px-4 py-2">Last Treatment</th> */}
-                      <th className="px-4 py-2">
+                      <th className="w-[35px] px-4 py-2">
                         <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
                           Last update
                         </button>
@@ -1734,6 +1789,7 @@ const Pet: NextPage = () => {
                       return (
                         <tr className="items-center">
                           <div className="px-4 py-2">{index + 1}</div>
+                          <td className="border px-4 py-2">P{pet.petID}</td>
                           <td className="border px-4 py-2">
                             {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed})
                           </td>
@@ -1928,7 +1984,7 @@ const Pet: NextPage = () => {
                         type="button"
                         onClick={handleToggleAge}
                       >
-                        {ageOption + " "}
+                        {ageOption === "Select one" ? user?.age : ageOption + " "}
                         <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                         </svg>
@@ -2059,7 +2115,7 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
-                        Sterilisation Status<div className="text-lg text-main-orange">*</div>:{" "}
+                        Sterilised?<div className="text-lg text-main-orange">*</div>:{" "}
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -2120,7 +2176,7 @@ const Pet: NextPage = () => {
                     </div>
                   )}
 
-                  {sterilisationRequestedOption === "Yes" && (
+                  {sterilisationRequestedOption === "Yes" && sterilisationStatusOption === "No" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
                         <div className=" flex">Sterilisation Request Signed: </div>
@@ -2152,7 +2208,7 @@ const Pet: NextPage = () => {
                     </div>
                   )}
 
-                  {sterilisationStatusOption === "Yes" && sterilisationRequestSignedOption === "No" && (
+                  {sterilisationRequestedOption === "Yes" && sterilisationRequestSignedOption != "Select one" && sterilisationStatusOption === "No" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
                         <div className=" flex">Sterilisation Outcome: </div>
@@ -2191,7 +2247,7 @@ const Pet: NextPage = () => {
                   {/*Clinics attended*/}
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Clinics Attended: ({clinicList.length}) </div>
+                      <div className=" flex">Clinics Attended: {clinicList.length} in Total </div>
                     </div>
                     {/*Show list of all the clinics attended */}
                     <div className="flex flex-col items-center">
@@ -2263,19 +2319,22 @@ const Pet: NextPage = () => {
                   </div>
 
                   {/*LAST DEWORMING*/}
+
                   <div className="flex items-center">
                     <div className=" flex">
                       Last Deworming<div className="text-lg text-main-orange">*</div>:{" "}
                     </div>
-                    <div className="p-4">
+                    <div className="py-4">
                       <DatePicker
                         selected={lastDeworming}
                         onChange={(date) => setLastDeworming(date!)}
-                        dateFormat="dd/MM/yyyy"
+                        dateFormat="dd/mm/yyyy"
                         customInput={<CustomInput />}
-                        className="form-input rounded-md border px-4 py-2"
+                        className="form-input rounded-md border px-3 py-2"
                       />
                     </div>
+
+                    {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && <div className="text-red-600">(Due for deworming)</div>}
                   </div>
 
                   {/* <div className="flex items-start">
@@ -2338,9 +2397,12 @@ const Pet: NextPage = () => {
                         </div>
                       )}
                     </div>
+                    {membershipTypeOption && membershipMessage(membershipTypeOption) && (
+                      <div className="pl-4 pt-5 text-red-600">({membershipMessage(membershipTypeOption)})</div>
+                    )}
                   </div>
 
-                  {membershipTypeOption != "Non-card holder" && (
+                  {membershipTypeOption !== "Non-card holder" && membershipTypeOption !== "Select one" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
                         <div className=" flex">Card Status: </div>
@@ -2374,7 +2436,7 @@ const Pet: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Kennels Received: ({kennelList.length}) </div>
+                      <div className=" flex">Kennels Received: {kennelList.length} in Total</div>
                     </div>
 
                     <div className="flex flex-col items-center">
@@ -2382,7 +2444,7 @@ const Pet: NextPage = () => {
                         onClick={handleShowKennelsReceived}
                         className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                       >
-                        Show all kennels received
+                        Show years of kennel receipt
                       </button>
                       {showKennelsReceived && (
                         <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
@@ -2491,7 +2553,7 @@ const Pet: NextPage = () => {
                   </div>
                   <b className="mb-14 text-center text-xl">Pet Identification Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet ID:</b> {id}
+                    <b className="mr-3">Pet ID:</b> P{id}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -2531,8 +2593,7 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sterilisation Status:</b>{" "}
-                    {sterilisationStatusOption === "Select one" ? user?.sterilisedStatus : sterilisationStatusOption}
+                    <b className="mr-3">Sterilised?:</b> {sterilisationStatusOption === "Select one" ? user?.sterilisedStatus : sterilisationStatusOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -2555,11 +2616,20 @@ const Pet: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Clinics Attended:</b> {clinicList.map((clinic, index) => (clinicList.length - 1 == index ? clinic : clinic + ", "))}
+                    <b className="mr-3">Clinics Attended:</b> {clinicList.length} in Total (
+                    {clinicList.map((clinic, index) => (clinicList.length - 1 == index ? clinic : clinic + ", "))})
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Last Deworming:</b> {formatDate(lastDeworming?.toLocaleDateString())}
+                    {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && <div className="ml-3 text-red-600">(Due for deworming)</div>}
                   </div>
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Membership Type:</b> {membershipTypeOption === "Select one" ? user?.membership : membershipTypeOption}
+                    {membershipTypeOption && membershipMessage(membershipTypeOption) && (
+                      <div className="ml-3 text-red-600">({membershipMessage(membershipTypeOption)})</div>
+                    )}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -2567,7 +2637,8 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Kennels Received:</b> {kennelList.map((kennel, index) => (kennelList.length - 1 == index ? kennel : kennel + ", "))}
+                    <b className="mr-3">Kennels Received:</b> {kennelList.length} in Total (
+                    {kennelList.map((kennel, index) => (kennelList.length - 1 == index ? kennel : kennel + ", "))})
                   </div>
 
                   <div className="mb-2 flex items-start">

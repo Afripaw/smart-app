@@ -57,13 +57,13 @@ model Session {
 model User {
     id                     String    @id @default(cuid())
     name                   String
-    email                  String?   @unique
     emailVerified          DateTime?
+    email                  String?   @unique
     image                  String?
     userID                 Int       @default(autoincrement())
     password               String
     surname                String
-    mobile                 String
+    mobile                 String    @unique
     addressGreaterArea     String
     addressArea            String?
     addressStreet          String?
@@ -97,8 +97,8 @@ model petOwner {
     firstName              String
     surname                String
     image                  String?
-    email                  String?
-    mobile                 String?
+    email                  String?  @unique
+    mobile                 String?  @unique
     addressGreaterArea     String
     addressArea            String
     addressStreet          String
@@ -199,8 +199,8 @@ model volunteer {
     firstName              String
     surname                String
     image                  String?
-    email                  String?
-    mobile                 String?
+    email                  String?                @unique
+    mobile                 String?                @unique
     addressGreaterArea     String
     addressStreet          String?
     addressStreetCode      String?

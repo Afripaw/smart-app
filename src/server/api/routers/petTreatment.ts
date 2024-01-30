@@ -119,6 +119,8 @@ export const petTreatmentRouter = createTRPCRouter({
           petID: true,
           petName: true,
           ownerID: true,
+          species: true,
+          breed: true,
         },
       });
 
@@ -189,5 +191,10 @@ export const petTreatmentRouter = createTRPCRouter({
   getAllTreatments: protectedProcedure.query(async ({ ctx }) => {
     const petTreatment = await ctx.db.petTreatment.findMany();
     return petTreatment;
+  }),
+
+  //delete all treatments
+  deleteAllTreatments: publicProcedure.mutation(async ({ ctx }) => {
+    return await ctx.db.petTreatment.deleteMany({});
   }),
 });

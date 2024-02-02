@@ -82,6 +82,9 @@ const Volunteer: NextPage = () => {
   const [clinicList, setClinicList] = useState<string[]>([]);
   const [clinicIDList, setClinicIDList] = useState<number[]>([]);
 
+  //Done uploading
+  const [isDoneUploading, setIsDoneUploading] = useState(false);
+
   //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
   const observerTarget = useRef<HTMLDivElement | null>(null);
 
@@ -143,7 +146,7 @@ const Volunteer: NextPage = () => {
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order, isViewProfilePage, clinicList, clinicIDList]);
+  }, [isUpdate, isDeleted, isCreate, query, order, isViewProfilePage, clinicList, clinicIDList, isDoneUploading]);
 
   const user = volunteer_data_with_clinics?.find((volunteer) => volunteer.volunteerID === id);
 
@@ -545,31 +548,46 @@ const Volunteer: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
-    const newUser_ = await newVolunteer.mutateAsync({
-      firstName: firstName,
-      email: email,
-      surname: surname,
-      mobile: mobile,
-      addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      addressStreet: street,
-      addressStreetCode: addressStreetCode,
-      addressStreetNumber: addressStreetNumber,
-      addressSuburb: addressSuburb,
-      addressPostalCode: addressPostalCode,
-      addressFreeForm: addressFreeForm,
-      preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
-      startingDate: startingDate,
-      status: statusOption === "Select one" ? "" : statusOption,
-      clinicAttended: clinicIDList,
-      comments: comments,
-    });
+    try {
+      const newUser_ = await newVolunteer.mutateAsync({
+        firstName: firstName,
+        email: email,
+        surname: surname,
+        mobile: mobile,
+        addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
+        addressStreet: street,
+        addressStreetCode: addressStreetCode,
+        addressStreetNumber: addressStreetNumber,
+        addressSuburb: addressSuburb,
+        addressPostalCode: addressPostalCode,
+        addressFreeForm: addressFreeForm,
+        preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
+        startingDate: startingDate,
+        status: statusOption === "Select one" ? "" : statusOption,
+        clinicAttended: clinicIDList,
+        comments: comments,
+      });
 
-    //Image upload
-    //console.log("ID: ", newUser_?.volunteerID, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
-    //console.log("Clinics attended: ", newUser_.clinicsAttended);
-    handleUploadModal(newUser_.volunteerID, firstName, newUser_?.image ?? "");
-    setIsCreate(false);
-    setIsUpdate(false);
+      //Image upload
+      //console.log("ID: ", newUser_?.volunteerID, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
+      //console.log("Clinics attended: ", newUser_.clinicsAttended);
+      handleUploadModal(newUser_.volunteerID, firstName, newUser_?.image ?? "");
+      setIsCreate(false);
+      setIsUpdate(false);
+    } catch (error) {
+      console.log("Mobile number is already in database");
+      const mandatoryFields: string[] = [];
+      const errorFields: { field: string; message: string }[] = [];
+
+      errorFields.push({ field: "Mobile", message: "This mobile number is already in the database: " + mobile });
+
+      setMandatoryFields(mandatoryFields);
+      setErrorFields(errorFields);
+
+      if (mandatoryFields.length > 0 || errorFields.length > 0) {
+        setIsCreateButtonModalOpen(true);
+      }
+    }
 
     // return newUser_;
   };
@@ -934,6 +952,13 @@ const Volunteer: NextPage = () => {
     }
   };
 
+  // ----------------------------------------Uploading Image----------------------------------------
+  useEffect(() => {
+    if (user?.image != "" && isDoneUploading) {
+      setIsDoneUploading(false);
+    }
+  }, [user, isCreate, isUpdate, isViewProfilePage]);
+
   return (
     <>
       <Head>
@@ -1130,7 +1155,10 @@ const Volunteer: NextPage = () => {
                       {user?.image ? (
                         <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-40 max-w-[7rem]" width={140} height={160} />
                       ) : (
-                        <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
+                        <>
+                          <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
+                          {isDoneUploading && <div className="absolute top-32 z-10 text-sm text-green-600">(Done uploading. Image will appear soon)</div>}
+                        </>
                       )}
                     </div>
                   )}
@@ -1144,6 +1172,7 @@ const Volunteer: NextPage = () => {
                         alert(`ERROR! ${error.message}`);
                       }}
                       onClientUploadComplete={() => {
+                        setIsDoneUploading(true);
                         //void user.refetch();
                       }}
                     />

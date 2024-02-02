@@ -38,6 +38,7 @@ const Pet: NextPage = () => {
   const [isUpdate, setIsUpdate] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
   const [isViewProfilePage, setIsViewProfilePage] = useState(false);
+  const [isDoneUploading, setIsDoneUploading] = useState(false);
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
 
@@ -171,7 +172,7 @@ const Pet: NextPage = () => {
   //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]);
+  }, [isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList, isDoneUploading]);
   //[isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]
 
   const user = pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
@@ -982,7 +983,16 @@ const Pet: NextPage = () => {
   //KENNELS RECEIVED
   const [kennelList, setKennelList] = useState<string[]>([]);
   //show all available options
-  const kennelsReceivedOptions = ["2018", "2019", "2020", "2021", "2022", "2023", "2024"];
+  const kennelsReceivedOptions = [
+    "No kennels received",
+    "Kennel Received in 2018",
+    "Kennel received in 2019",
+    "Kennel received in 2020",
+    "Kennel received in 2021",
+    "Kennel received in 2022",
+    "Kennel received in 2023",
+    "Kennel received in 2024",
+  ];
 
   const handleToggleKennelsReceived = () => {
     setKennelsReceived(!kennelsReceived);
@@ -1024,6 +1034,15 @@ const Pet: NextPage = () => {
     const sortedYears = [...kennelList].sort((a, b) => parseInt(a) - parseInt(b));
     setKennelList(sortedYears);
   }, [kennelsReceived]);
+
+  //qualifies for a kennel message
+  const kennelMessage = (kennels: string[]): string => {
+    if (kennels[0] == "No kennels received" && membershipTypeOption == "Gold card holder") {
+      return "(Qualifies for kennel)";
+    } else {
+      return "";
+    }
+  };
 
   //CLINICSATTENDED
   //All clinics in petClinic table
@@ -1772,6 +1791,14 @@ const Pet: NextPage = () => {
     }
   };
 
+
+   // ----------------------------------------Uploading Image----------------------------------------
+   useEffect(() => {
+    if (user?.image != "" && isDoneUploading) {
+      setIsDoneUploading(false);
+    }
+  }, [user, isCreate, isUpdate, isViewProfilePage]);
+
   return (
     <>
       <Head>
@@ -1979,7 +2006,7 @@ const Pet: NextPage = () => {
               <div className="flex">
                 {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
               </div>
-              <div className="flex w-[46%] flex-col items-start">
+              <div className="flex w-[47%] flex-col items-start">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Pet Identification Data</b>
@@ -1988,7 +2015,10 @@ const Pet: NextPage = () => {
                       {user?.image ? (
                         <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-40 max-w-[7rem]" width={140} height={160} />
                       ) : (
-                        <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
+                        <>
+                          <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
+                          {isDoneUploading && <div className="absolute top-32 z-10 text-sm text-green-600">(Done uploading. Image will appear soon)</div>}
+                        </>
                       )}
                     </div>
                   )}
@@ -2002,6 +2032,7 @@ const Pet: NextPage = () => {
                         alert(`ERROR! ${error.message}`);
                       }}
                       onClientUploadComplete={() => {
+                        setIsDoneUploading(true);
                         // void user.refetch();
                       }}
                     />
@@ -2282,7 +2313,7 @@ const Pet: NextPage = () => {
                   {sterilisationRequestedOption === "Yes" && sterilisationStatusOption === "No" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
-                        <div className=" flex">Sterilisation Request Signed: </div>
+                        <div className=" flex">Sterilisation Request Signed At: </div>
                       </div>
                       <div className="flex flex-col">
                         <button
@@ -2726,6 +2757,8 @@ const Pet: NextPage = () => {
                         </div>
                       )}
                     </div>
+
+                    <div className="pl-2 pt-5 text-base text-red-600">{kennelMessage(kennelList)}</div>
                   </div>
 
                   {/*DATEPICKER*/}

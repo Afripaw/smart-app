@@ -35,6 +35,7 @@ const Owner: NextPage = () => {
   const updateOwner = api.petOwner.update.useMutation();
   const [isUpdate, setIsUpdate] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
+  const [isDoneUploading, setIsDoneUploading] = useState(false);
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
 
@@ -141,7 +142,7 @@ const Owner: NextPage = () => {
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order]);
+  }, [isUpdate, isDeleted, isCreate, query, order, isDoneUploading]);
 
   const user = user_data?.find((user) => user.ownerID === id);
 
@@ -547,37 +548,52 @@ const Owner: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
-    const newUser_ = await newOwner.mutateAsync({
-      firstName: firstName,
-      email: email,
-      surname: surname,
-      mobile: mobile,
-      addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      addressArea: areaOption === "Select one" ? "" : areaOption,
-      addressStreet: streetOption === "Select one" ? "" : streetOption,
-      addressStreetCode: addressStreetCode,
-      addressStreetNumber: addressStreetNumber,
-      addressSuburb: addressSuburb,
-      // addressPostalCode: addressPostalCode,
-      addressFreeForm: addressFreeForm,
-      preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
-      startingDate: startingDate,
-      status: statusOption === "Select one" ? "" : statusOption,
-      comments: comments,
-    });
+    try {
+      const newUser_ = await newOwner.mutateAsync({
+        firstName: firstName,
+        email: email,
+        surname: surname,
+        mobile: mobile,
+        addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
+        addressArea: areaOption === "Select one" ? "" : areaOption,
+        addressStreet: streetOption === "Select one" ? "" : streetOption,
+        addressStreetCode: addressStreetCode,
+        addressStreetNumber: addressStreetNumber,
+        addressSuburb: addressSuburb,
+        // addressPostalCode: addressPostalCode,
+        addressFreeForm: addressFreeForm,
+        preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
+        startingDate: startingDate,
+        status: statusOption === "Select one" ? "" : statusOption,
+        comments: comments,
+      });
 
-    //Send user details
-    //Email
-    /* if (preferredOption === "Email" && sendUserDetails) {
+      //Send user details
+      //Email
+      /* if (preferredOption === "Email" && sendUserDetails) {
       await sendUserCredentialsEmail(email);
     }*/
 
-    //Image upload
-    console.log("ID: ", newUser_?.ownerID, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
+      //Image upload
+      console.log("ID: ", newUser_?.ownerID, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
 
-    handleUploadModal(newUser_?.ownerID ?? "", firstName, newUser_?.image ?? "");
-    setIsCreate(false);
-    setIsUpdate(false);
+      handleUploadModal(newUser_?.ownerID ?? "", firstName, newUser_?.image ?? "");
+      setIsCreate(false);
+      setIsUpdate(false);
+    } catch (error) {
+      console.log("Mobile number is already in database");
+      const mandatoryFields: string[] = [];
+      const errorFields: { field: string; message: string }[] = [];
+
+      errorFields.push({ field: "Mobile", message: "This mobile number is already in the database: " + mobile });
+
+      setMandatoryFields(mandatoryFields);
+      setErrorFields(errorFields);
+
+      if (mandatoryFields.length > 0 || errorFields.length > 0) {
+        setIsCreateButtonModalOpen(true);
+      }
+    }
 
     // return newUser_;
   };
@@ -679,7 +695,7 @@ const Owner: NextPage = () => {
   const handleBackButton = async () => {
     //console.log("Back button pressed");
 
-    if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate) {
+    if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate && !isViewProfilePage) {
       await router.push(`/pet`);
     }
 
@@ -909,6 +925,13 @@ const Owner: NextPage = () => {
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   }
 
+  // ----------------------------------------Uploading Image----------------------------------------
+  useEffect(() => {
+    if (user?.image != "" && isDoneUploading) {
+      setIsDoneUploading(false);
+    }
+  }, [user, isCreate, isUpdate, isViewProfilePage]);
+
   // CustomInput component with explicit types for the props
   const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
     <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
@@ -1128,7 +1151,10 @@ const Owner: NextPage = () => {
                       {user?.image ? (
                         <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-40 max-w-[7rem]" width={140} height={100} />
                       ) : (
-                        <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
+                        <>
+                          <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
+                          {isDoneUploading && <div className="absolute top-32 z-10 text-sm text-green-600">(Done uploading. Image will appear soon)</div>}
+                        </>
                       )}
                     </div>
                   )}
@@ -1142,6 +1168,7 @@ const Owner: NextPage = () => {
                         alert(`ERROR! ${error.message}`);
                       }}
                       onClientUploadComplete={() => {
+                        setIsDoneUploading(true);
                         // void user.refetch();
                       }}
                     />

@@ -75,6 +75,12 @@ const User: NextPage = () => {
   //Order fields
   const [order, setOrder] = useState("surname");
 
+  //view profile page
+  const [isViewProfilePage, setIsViewProfilePage] = useState(false);
+
+  //Done uploading images
+  const [isDoneUploading, setIsDoneUploading] = useState(false);
+
   //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
   const observerTarget = useRef<HTMLDivElement | null>(null);
 
@@ -126,7 +132,7 @@ const User: NextPage = () => {
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order]);
+  }, [isUpdate, isDeleted, isCreate, query, order, isViewProfilePage, isDoneUploading]);
 
   const user = user_data?.find((user) => user.id === id);
 
@@ -450,6 +456,7 @@ const User: NextPage = () => {
       setRoleOption(userData.role ?? "Select one");
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+      setImage(userData.image ?? "");
 
       //Make sure thet area and street options have a value
       if (userData.addressArea === "") {
@@ -489,6 +496,7 @@ const User: NextPage = () => {
       setRoleOption(userData.role ?? "Select one");
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+      setImage(userData.image ?? "");
 
       //Make sure thet area and street options have a value
       console.log("Helllooo address area: " + userData.addressArea);
@@ -635,7 +643,6 @@ const User: NextPage = () => {
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
-  const [isViewProfilePage, setIsViewProfilePage] = useState(false);
   const handleViewProfilePage = async (id: string) => {
     setIsViewProfilePage(true);
     setID(id);
@@ -664,7 +671,9 @@ const User: NextPage = () => {
       setRoleOption(userData.role ?? "");
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
-      console.log("Select one");
+      setImage(userData.image ?? "");
+      console.log("Image: ", userData.image);
+      console.log("Image: ", image);
 
       //Make sure thet area and street options have a value
       if (userData.addressArea === "Select one") {
@@ -707,6 +716,9 @@ const User: NextPage = () => {
       setRoleOption(userData.role ?? "");
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+      setImage(userData.image ?? "");
+      console.log("Image: ", userData.image);
+      console.log("Image: ", image);
       //console.log("Select one");
       //Make sure thet area and street options have a value
       if (userData.addressArea === "Select one" && !isUpdate) {
@@ -722,7 +734,21 @@ const User: NextPage = () => {
         setStreetOption("Select one");
       }
     }
-  }, [isViewProfilePage]); // Effect runs when userQuery.data changes
+  }, [isViewProfilePage, isCreate, isUpdate]); // Effect runs when userQuery.data changes
+
+  //Retrieve image from the database
+  const handleImage = async (id: string) => {
+    setIsDoneUploading(true);
+    const user = user_data?.find((user) => user.id === id);
+    if (user) {
+      // Assuming userQuery.data contains the user object
+      const userData = user;
+      setImage(userData.image ?? "");
+      if (user.image) {
+        setIsDoneUploading(false);
+      }
+    }
+  };
 
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {
@@ -758,6 +784,7 @@ const User: NextPage = () => {
     setRoleOption("Select one");
     setStatusOption("Select one");
     setComments("");
+    setImage("");
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -1002,6 +1029,13 @@ const User: NextPage = () => {
     </button>
   );
 
+  // ----------------------------------------Uploading Image----------------------------------------
+  useEffect(() => {
+    if (user?.image != "" && isDoneUploading) {
+      setIsDoneUploading(false);
+    }
+  }, [user, isCreate, isUpdate, isViewProfilePage]);
+
   return (
     <>
       <Head>
@@ -1182,9 +1216,18 @@ const User: NextPage = () => {
                   {isUpdate && (
                     <div className={`absolute ${user?.image ? "right-12" : "right-8"} top-16`}>
                       {user?.image ? (
-                        <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-40 max-w-[7rem]" width={140} height={100} />
+                        <Image
+                          src={image ? image : user?.image}
+                          alt="Afripaw profile pic"
+                          className="ml-auto aspect-auto max-h-40 max-w-[7rem]"
+                          width={140}
+                          height={100}
+                        />
                       ) : (
-                        <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
+                        <>
+                          <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem] border-2" />
+                          {isDoneUploading && <div className="absolute top-32 z-10 text-sm text-green-600">(Done uploading. Image will appear soon)</div>}
+                        </>
                       )}
                     </div>
                   )}
@@ -1198,6 +1241,10 @@ const User: NextPage = () => {
                         alert(`ERROR! ${error.message}`);
                       }}
                       onClientUploadComplete={() => {
+                        //retrieve the image from the server
+                        setIsDoneUploading(true);
+                        void handleImage(user?.id ?? "");
+
                         //void user.refetch();
                       }}
                     />
@@ -1571,8 +1618,14 @@ const User: NextPage = () => {
                     />
                   </div>
                   <div className="absolute right-4 top-20">
-                    {user?.image ? (
-                      <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
+                    {user?.image ?? image ? (
+                      <Image
+                        src={image ?? user?.image ?? ""}
+                        alt="Afripaw profile pic"
+                        className="ml-auto aspect-auto max-h-52 max-w-[9rem]"
+                        width={150}
+                        height={150}
+                      />
                     ) : (
                       <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem]" />
                     )}

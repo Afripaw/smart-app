@@ -69,6 +69,68 @@ const User: NextPage = () => {
     void data.refetch();
   }, [isUpdate, isDeleted, isCreate]);*/
 
+  //-------------------------------EMAILS-----------------------------------------
+  // Example of a function in your Next.js application to call the send API
+  // async function sendEmail(firstName: string, email: string) {
+  //   const response = await fetch("/api/send", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ firstName, email }),
+  //   });
+  //   console.log("response: ", response);
+
+  //   if (!response.ok) {
+  //     console.error("Failed to send email");
+  //     // Handle response errors
+  //     const errorData = (await response.json()) as { message?: string };
+  //     throw new Error(errorData.message ?? "Failed to send email");
+  //   }
+
+  //   // Safely parse the successful response
+  //   const responseData: unknown = await response.json(); // Use `unknown` instead of `any` for safer type checking
+  //   console.log("responseData: ", responseData);
+  //   // You need to cast this `unknown` to a more specific type based on what you expect from the response
+  //   return responseData; // Or handle the successful response as needed
+  // }
+  // Example of a function in your Next.js application to call the send API
+  async function sendEmail(firstName: string, email: string, id: string, password: string): Promise<void> {
+    const response = await fetch("/api/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ firstName, email, id, password }),
+    });
+    console.log("response: ", response);
+
+    if (!response.ok) {
+      console.error("Failed to send email");
+      // Attempt to parse the response to get the error message
+      try {
+        const errorData = (await response.json()) as { message?: string };
+        throw new Error(errorData.message ?? "Failed to send email");
+      } catch (error) {
+        // If parsing fails, throw a generic error
+        throw new Error("Failed to send email");
+      }
+    }
+
+    // Attempt to parse the successful response
+    try {
+      const responseData = (await response.json()) as { message: string; data?: unknown };
+      console.log("responseData: ", responseData);
+      // Handle the successful response as needed. For example, log the message or use the data.
+      console.log(responseData.message); // Log the success message
+      // Optionally, you can do something with responseData.data if your API returns additional data
+    } catch (error) {
+      // If parsing fails or the response structure isn't as expected, handle or log the error
+      console.error("Error parsing response data", error);
+      throw new Error("Error processing the server response");
+    }
+  }
+
   //-------------------------------ID-----------------------------------------
   const [id, setID] = useState("");
 
@@ -613,8 +675,8 @@ const User: NextPage = () => {
       console.log("This is the new user: " + JSON.stringify(newUser_));
       //Send user details
       //Email
-      if (preferredOption === "Email" && sendUserDetails) {
-        await sendUserCredentialsEmail(email);
+      if (preferredOption === "Email" && sendUserDetails && newUser_?.userID) {
+        await sendEmail(firstName, email, String(newUser_.userID), password);
       }
 
       //Image upload
@@ -951,59 +1013,6 @@ const User: NextPage = () => {
   const handleOrderFields = (field: string) => {
     setOrder(field);
   };
-
-  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  // const observerTarget = useRef<HTMLDivElement | null>(null);
-
-  // const [limit] = useState(12);
-  // const {
-  //   data: queryData,
-  //   fetchNextPage,
-  //   hasNextPage,
-  //   refetch,
-  // } = api.user.searchUsersInfinite.useInfiniteQuery(
-  //   {
-  //     id: id,
-  //     limit: limit,
-  //     searchQuery: query,
-  //     order: order,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => {
-  //       console.log("Next Cursor: " + lastPage.nextCursor);
-  //       return lastPage.nextCursor;
-  //     },
-  //     enabled: false,
-  //   },
-  // );
-
-  // //Flattens the pages array into one array
-  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
-
-  // //Checks intersection of the observer target and reassigns target element once true
-  // useEffect(() => {
-  //   if (!observerTarget.current || !fetchNextPage) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-  //     },
-  //     { threshold: 1 },
-  //   );
-
-  //   if (observerTarget.current) observer.observe(observerTarget.current);
-
-  //   const currentTarget = observerTarget.current;
-
-  //   return () => {
-  //     if (currentTarget) observer.unobserve(currentTarget);
-  //   };
-  // }, [fetchNextPage, hasNextPage, observerTarget]);
-
-  // //Make it retrieve the data from tab;e again when the user is updated, deleted or created
-  // useEffect(() => {
-  //   void refetch();
-  // }, [isUpdate, isDeleted, isCreate, query, order]);
 
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component

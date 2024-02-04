@@ -695,7 +695,7 @@ const Owner: NextPage = () => {
   const handleBackButton = async () => {
     //console.log("Back button pressed");
 
-    if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate && !isViewProfilePage) {
+    if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate && !isViewProfilePage && !isCreate) {
       await router.push(`/pet`);
     }
 

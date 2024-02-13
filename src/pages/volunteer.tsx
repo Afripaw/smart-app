@@ -13,8 +13,14 @@ import { areaOptions } from "~/components/GeoLocation/areaOptions";
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { clinicDates } from "~/components/clinicsAttended";
 
+//Upload excel
+import * as XLSX from "xlsx";
+
 //Icons
 import { AddressBook, Pencil, Printer, Trash, UserCircle, Users, Bed } from "phosphor-react";
+
+//Communication
+import { sendSMS } from "~/pages/api/smsPortal";
 
 //Date picker
 import DatePicker from "react-datepicker";
@@ -34,6 +40,149 @@ const Volunteer: NextPage = () => {
   const [isCreate, setIsCreate] = useState(false);
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
+
+  //-------------------------------COMMUNICATION OF VOLUNTEER DETAILS-----------------------------------------
+  const [sendVolunteerDetails, setSendVolunteerDetails] = useState(false);
+
+  /*
+  //Excel upload
+  const insertExcelData = api.volunteer.insertExcelData.useMutation();
+
+  //---------------------------------BULK UPLOAD----------------------------------
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const bstr = event.target?.result;
+      const wb = XLSX.read(bstr, { type: "binary" });
+      const wsname = wb.SheetNames[1];
+      console.log("Sheet name: ", wsname);
+      const ws: XLSX.WorkSheet | undefined = wb.Sheets[wsname as keyof typeof wb.Sheets];
+      const data = ws ? XLSX.utils.sheet_to_json(ws) : [];
+      console.log("Data: ", data);
+
+      //This is the format that the insertExcelData mutation expects
+
+      type volunteerData = {
+        firstName: string;
+        email: string;
+        surname: string;
+        mobile: string;
+        addressGreaterArea: string[]; // Array of strings
+        addressStreet: string;
+        addressStreetCode: string;
+        addressStreetNumber: string;
+        addressSuburb: string;
+        addressPostalCode: string;
+        addressFreeForm: string;
+        preferredCommunication: string;
+        role: string[]; // Array of strings
+        status: string;
+        startingDate: Date; // Or string if you are handling date as a string before conversion.
+        //clinicAttended: number[]; // Array of numbers
+        comments: string;
+      };
+
+      //change the data so that it gives me the correct format for each column as in the petOwnerData type
+      for (const obj of data as volunteerData[]) {
+        //Change the format of the date
+        obj.startingDate = new Date(obj.startingDate);
+        //change the format of the mobile number
+        obj.mobile = obj.mobile.toString();
+
+        obj.addressStreetNumber = "";
+
+        obj.addressStreetCode = "";
+
+        obj.addressSuburb = "";
+
+        obj.addressPostalCode = "";
+
+        obj.addressStreet = "";
+
+        //add an addressFreeForm column
+        obj.addressFreeForm = "";
+
+        //add a comments column
+        obj.comments = "";
+
+        //make addressGreaterArea an array
+        obj.addressGreaterArea = [String(obj.addressGreaterArea)];
+
+        //check if email is empty
+        if (obj.email === undefined || obj.email === null) {
+          obj.email = "";
+        }
+
+        //check all the roles. They are a list seperated by commas. Get all the roles and put them in an array
+        const roles = String(obj.role).split(",");
+        obj.role = roles;
+      }
+
+      //Turn the data into this type of object: {firstName: "John", surname: "Doe", email: "xxxxxxx@xxxxx", mobile: "0712345678", address: "1 Main Road, Observatory, Cape Town, 7925", comments: "None"}
+
+      insertExcelData.mutate(data as volunteerData[], {
+        onSuccess: () => {
+          console.log("Data successfully inserted");
+        },
+        onError: (error) => {
+          console.error("Error inserting data", error);
+        },
+      });
+
+      // Now data is an array of objects, each object representing a row in the Excel sheet.
+      // The keys of each object are the column headers from your Excel sheet.
+      // You can directly pass this data to convert_to_json without needing to splice or adjust.
+      void convert_to_json(data as Record<string, unknown>[]);
+    };
+    if (file) {
+      reader.readAsBinaryString(file);
+    }
+  };
+
+  const convert_to_json = async (data: Array<Record<string, unknown>>) => {
+    const rows: string[] = data.map((row) => JSON.stringify(row));
+    console.log("Rows: ", rows);
+  };
+  */
+
+  //-------------------------------EMAIL-----------------------------------------
+  async function sendEmail(firstName: string, email: string, id: string, password: string, typeOfUser: string): Promise<void> {
+    const response = await fetch("/api/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ firstName, email, id, password, typeOfUser }),
+    });
+    console.log("response: ", response);
+
+    if (!response.ok) {
+      console.error("Failed to send email");
+      // Attempt to parse the response to get the error message
+      try {
+        const errorData = (await response.json()) as { message?: string };
+        throw new Error(errorData.message ?? "Failed to send email");
+      } catch (error) {
+        // If parsing fails, throw a generic error
+        throw new Error("Failed to send email");
+      }
+    }
+
+    // Attempt to parse the successful response
+    try {
+      const responseData = (await response.json()) as { message: string; data?: unknown };
+      console.log("responseData: ", responseData);
+      // Handle the successful response as needed. For example, log the message or use the data.
+      console.log(responseData.message); // Log the success message
+      // Optionally, you can do something with responseData.data if your API returns additional data
+    } catch (error) {
+      // If parsing fails or the response structure isn't as expected, handle or log the error
+      console.error("Error parsing response data", error);
+      throw new Error("Error processing the server response");
+    }
+  }
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -195,6 +344,11 @@ const Volunteer: NextPage = () => {
   const greaterAreaRef = useRef<HTMLDivElement>(null);
   const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
 
+  const [isRoleOpen, setIsRoleOpen] = useState(false);
+  const [roleOption, setRoleOption] = useState("Select one");
+  const roleRef = useRef<HTMLDivElement>(null);
+  const btnRoleRef = useRef<HTMLButtonElement>(null);
+
   const [preferredCommunication, setPreferredCommunication] = useState(false);
   const [preferredOption, setPreferredCommunicationOption] = useState("Select one");
   const preferredCommunicationRef = useRef<HTMLDivElement>(null);
@@ -206,6 +360,8 @@ const Volunteer: NextPage = () => {
   const btnStatusRef = useRef<HTMLButtonElement>(null);
 
   //GREATER AREA
+  //to select multiple areas
+  const [greaterAreaList, setGreaterAreaList] = useState<string[]>([]);
   const handleToggleGreaterArea = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
   };
@@ -213,6 +369,9 @@ const Volunteer: NextPage = () => {
   const handleGreaterAreaOption = (option: SetStateAction<string>) => {
     setGreaterAreaOption(option);
     setIsGreaterAreaOpen(false);
+    if (!greaterAreaList.includes(String(option))) {
+      setGreaterAreaList([...greaterAreaList, String(option)]);
+    }
   };
 
   useEffect(() => {
@@ -234,6 +393,48 @@ const Volunteer: NextPage = () => {
   }, []);
 
   const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+
+  //show all the clinics that the volunteer attended
+  const [showGreaterArea, setShowGreaterArea] = useState(false);
+  const handleShowGreaterArea = () => {
+    setShowGreaterArea(!showGreaterArea);
+  };
+
+  //ROLE
+  //to select multiple areas
+  const [roleList, setRoleList] = useState<string[]>([]);
+  const handleToggleRole = () => {
+    setIsRoleOpen(!isRoleOpen);
+  };
+
+  const handleRoleOption = (option: SetStateAction<string>) => {
+    setRoleOption(option);
+    setIsRoleOpen(false);
+    if (!roleList.includes(String(option))) {
+      setRoleList([...roleList, String(option)]);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (roleRef.current && !roleRef.current.contains(event.target as Node) && btnRoleRef.current && !btnRoleRef.current.contains(event.target as Node)) {
+        setIsRoleOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const roleOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+
+  //show all the clinics that the volunteer attended
+  const [showRole, setShowRole] = useState(false);
+  const handleShowRole = () => {
+    setShowRole(!showRole);
+  };
 
   //PREFERRED COMMUNICATION
   const handleTogglePreferredCommunication = () => {
@@ -424,7 +625,7 @@ const Volunteer: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "Select one");
+      setGreaterAreaList(userData.addressGreaterArea ?? "Select one");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
@@ -464,7 +665,7 @@ const Volunteer: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "Select one");
+      setGreaterAreaList(userData.addressGreaterArea ?? "Select one");
       setStreet(userData.addressStreet ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
@@ -482,25 +683,54 @@ const Volunteer: NextPage = () => {
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
-    await updateVolunteer.mutateAsync({
+    const volunteer = await updateVolunteer.mutateAsync({
       volunteerID: id,
       firstName: firstName,
       email: email,
       surname: surname,
       mobile: mobile,
-      addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
+      addressGreaterArea: greaterAreaList,
       addressStreet: street,
       addressStreetCode: addressStreetCode,
       addressStreetNumber: addressStreetNumber,
       addressSuburb: addressSuburb,
       addressPostalCode: addressPostalCode,
       addressFreeForm: addressFreeForm,
+      role: roleList,
       preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
       startingDate: startingDate,
       status: statusOption === "Select one" ? "" : statusOption,
       clinicAttended: clinicIDList,
       comments: comments,
     });
+
+    if (preferredOption === "Email" && sendVolunteerDetails && volunteer?.volunteerID) {
+      await sendEmail(firstName, email, String(volunteer.volunteerID), "", "volunteer");
+    }
+
+    if (preferredOption === "SMS" && sendVolunteerDetails && volunteer?.volunteerID) {
+      const messageContent =
+        "Dear " +
+        firstName +
+        ",\n" +
+        "You have been registered as a volunteer on the AfriPaw Smart App." +
+        "\nYour volunteer ID is: " +
+        "V" +
+        id +
+        "\n" +
+        // "You indicated that your preferred means of communication is: SMS" +
+        // "\n" +
+        "Regards, Afripaw Team";
+      //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
+      const destinationNumber = mobile;
+      try {
+        await sendSMS(messageContent, destinationNumber);
+        console.log("SMS sent successfully");
+      } catch (error) {
+        console.error("Failed to send SMS", error);
+      }
+    }
+
     //After the newUser has been created make sure to set the fields back to empty
     setFirstName("");
     setEmail("");
@@ -554,19 +784,47 @@ const Volunteer: NextPage = () => {
         email: email,
         surname: surname,
         mobile: mobile,
-        addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
+        addressGreaterArea: greaterAreaList,
         addressStreet: street,
         addressStreetCode: addressStreetCode,
         addressStreetNumber: addressStreetNumber,
         addressSuburb: addressSuburb,
         addressPostalCode: addressPostalCode,
         addressFreeForm: addressFreeForm,
+        role: roleList,
         preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
         startingDate: startingDate,
         status: statusOption === "Select one" ? "" : statusOption,
         clinicAttended: clinicIDList,
         comments: comments,
       });
+
+      if (preferredOption === "Email" && sendVolunteerDetails && newUser_?.volunteerID) {
+        await sendEmail(firstName, email, String(newUser_.volunteerID), "", "volunteer");
+      }
+
+      if (preferredOption === "SMS" && sendVolunteerDetails && newUser_?.volunteerID) {
+        const messageContent =
+          "Dear " +
+          firstName +
+          ",\n" +
+          "You have been registered as a volunteer on the AfriPaw Smart App." +
+          "\nYour volunteer ID is: " +
+          "V" +
+          id +
+          "\n" +
+          // "You indicated that your preferred means of communication is: SMS" +
+          // "\n" +
+          "Regards, Afripaw Team";
+        //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
+        const destinationNumber = mobile;
+        try {
+          await sendSMS(messageContent, destinationNumber);
+          console.log("SMS sent successfully");
+        } catch (error) {
+          console.error("Failed to send SMS", error);
+        }
+      }
 
       //Image upload
       //console.log("ID: ", newUser_?.volunteerID, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
@@ -618,7 +876,7 @@ const Volunteer: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "");
+      setGreaterAreaList(userData.addressGreaterArea ?? "");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
@@ -664,7 +922,7 @@ const Volunteer: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "");
+      setGreaterAreaList(userData.addressGreaterArea ?? "");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
@@ -997,7 +1255,11 @@ const Volunteer: NextPage = () => {
                   >
                     Create new Volunteer
                   </button>
-                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
+                    Upload
+                    <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
+                  </div>
+                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
                 </div>
@@ -1185,6 +1447,55 @@ const Volunteer: NextPage = () => {
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-4">
+                      <div className="flex">Role: </div>
+                    </div>
+
+                    <div className="flex flex-col items-center">
+                      <button
+                        onClick={handleShowRole}
+                        className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      >
+                        Show all roles
+                      </button>
+                      {showRole && (
+                        <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                          {roleList.map((role) => (
+                            <li key={role} className=" py-2">
+                              {role}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnRoleRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleRole}
+                      >
+                        {isUpdate ? roleOption : roleOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isRoleOpen && (
+                        <div ref={roleRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {roleOptions.map((option) => (
+                              <li key={option} onClick={() => handleRoleOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
                         Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
@@ -1225,6 +1536,25 @@ const Volunteer: NextPage = () => {
                           Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
                         </div>
                       </div>
+
+                      <div className="flex flex-col items-center">
+                        <button
+                          onClick={handleShowGreaterArea}
+                          className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        >
+                          Show all greater areas attended
+                        </button>
+                        {showGreaterArea && (
+                          <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                            {greaterAreaList.map((greaterArea) => (
+                              <li key={greaterArea} className=" py-2">
+                                {greaterArea}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
                       <div className="flex flex-col">
                         <button
                           ref={btnGreaterAreaRef}
@@ -1438,6 +1768,18 @@ const Volunteer: NextPage = () => {
                       onChange={(e) => setComments(e.target.value)}
                       value={comments}
                     />
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      id="checked-checkbox"
+                      type="checkbox"
+                      onChange={(e) => setSendVolunteerDetails(e.target.checked)}
+                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                    />
+                    <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
+                      Welcome volunteer via preferred communication channel
+                    </label>
                   </div>
                 </div>
               </div>

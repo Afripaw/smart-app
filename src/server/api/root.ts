@@ -5,6 +5,7 @@ import { petClinicRouter } from "~/server/api/routers/petClinic";
 import { petTreatmentRouter } from "~/server/api/routers/petTreatment";
 import { UserRouter } from "./routers/user";
 import { volunteerRouter } from "./routers/volunteer";
+import { welcomePageRouter } from "./routers/welcomePage";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
   petTreatment: petTreatmentRouter,
   user: UserRouter,
   volunteer: volunteerRouter,
+  welcomePage: welcomePageRouter,
 });
 
 // export type definition of API

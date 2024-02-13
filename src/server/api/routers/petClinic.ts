@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  //protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
 export const petClinicRouter = createTRPCRouter({
   create: publicProcedure
@@ -175,4 +171,24 @@ export const petClinicRouter = createTRPCRouter({
   deleteAllClinics: publicProcedure.mutation(async ({ ctx }) => {
     return await ctx.db.petClinic.deleteMany({});
   }),
+
+  //Bulk upload of all the clinics
+  insertExcelData: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          greaterArea: z.string(),
+          area: z.string(),
+          conditions: z.string(),
+          comments: z.string(),
+          date: z.date(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.db.petClinic.createMany({
+        data: input,
+      });
+      return result;
+    }),
 });

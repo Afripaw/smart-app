@@ -12,6 +12,7 @@ import ImageUploadModal from "~/components/imageUploadModal";
 import { areaOptions } from "~/components/GeoLocation/areaOptions";
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { sendUserCredentialsEmail } from "~/components/CommunicationPortals/email";
+import { sendSMS } from "~/pages/api/smsPortal";
 
 //Icons
 import { AddressBook, Pencil, Printer, Trash, UserCircle, Users } from "phosphor-react";
@@ -94,14 +95,14 @@ const User: NextPage = () => {
   //   // You need to cast this `unknown` to a more specific type based on what you expect from the response
   //   return responseData; // Or handle the successful response as needed
   // }
-  // Example of a function in your Next.js application to call the send API
-  async function sendEmail(firstName: string, email: string, id: string, password: string): Promise<void> {
+
+  async function sendEmail(firstName: string, email: string, id: string, password: string, typeOfUser: string): Promise<void> {
     const response = await fetch("/api/send", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ firstName, email, id, password }),
+      body: JSON.stringify({ firstName, email, id, password, typeOfUser }),
     });
     console.log("response: ", response);
 
@@ -573,7 +574,7 @@ const User: NextPage = () => {
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
-    await updateUser.mutateAsync({
+    const user = await updateUser.mutateAsync({
       id: id,
       firstName: firstName,
       email: email,
@@ -594,6 +595,38 @@ const User: NextPage = () => {
       comments: comments,
       password: password,
     });
+
+    //Send user details
+    //Email
+    if (preferredOption === "Email" && sendUserDetails && user?.userID) {
+      await sendEmail(firstName, email, String(user.userID), password, "user");
+    }
+
+    if (preferredOption === "SMS" && sendUserDetails && user?.userID) {
+      const messageContent =
+        "Dear " +
+        firstName +
+        ",\n" +
+        "Your AfriPaw Smart App (afripaw.app) user ID is: " +
+        "U" +
+        id +
+        "\n" +
+        "Your username is: " +
+        id +
+        "\n" +
+        "Your password is: " +
+        password +
+        "\n" +
+        "Regards, Afripaw Team";
+      //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
+      const destinationNumber = mobile;
+      try {
+        await sendSMS(messageContent, destinationNumber);
+        console.log("SMS sent successfully");
+      } catch (error) {
+        console.error("Failed to send SMS", error);
+      }
+    }
     //After the newUser has been created make sure to set the fields back to empty
     setUserID(0);
     setFirstName("");
@@ -676,7 +709,33 @@ const User: NextPage = () => {
       //Send user details
       //Email
       if (preferredOption === "Email" && sendUserDetails && newUser_?.userID) {
-        await sendEmail(firstName, email, String(newUser_.userID), password);
+        await sendEmail(firstName, email, String(newUser_.userID), password, "user");
+      }
+
+      if (preferredOption === "SMS" && sendUserDetails && newUser_?.userID) {
+        const messageContent =
+          "Dear " +
+          firstName +
+          ",\n" +
+          "Your AfriPaw Smart App (afripaw.app) user ID is: " +
+          "U" +
+          id +
+          "\n" +
+          "Your username is: " +
+          id +
+          "\n" +
+          "Your password is: " +
+          password +
+          "\n" +
+          "Regards, Afripaw Team";
+        //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
+        const destinationNumber = mobile;
+        try {
+          await sendSMS(messageContent, destinationNumber);
+          console.log("SMS sent successfully");
+        } catch (error) {
+          console.error("Failed to send SMS", error);
+        }
       }
 
       //Image upload

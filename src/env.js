@@ -26,6 +26,8 @@ export const env = createEnv({
     UPLOADTHING_SECRET: z.string(),
     UPLOADTHING_APP_ID: z.string(),
     RESEND_API_KEY: z.string(),
+    SMS_API_KEY: z.string(),
+    SMS_API_SECRET: z.string(),
   },
 
   /**
@@ -51,6 +53,8 @@ export const env = createEnv({
     UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
     UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    SMS_API_KEY: process.env.SMS_API_KEY,
+    SMS_API_SECRET: process.env.SMS_API_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

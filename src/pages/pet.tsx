@@ -14,6 +14,9 @@ import { areaOptions } from "~/components/GeoLocation/areaOptions";
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { clinicDates } from "~/components/clinicsAttended";
 
+//Upload excel
+import * as XLSX from "xlsx";
+
 //Icons
 import { AddressBook, FirstAidKit, Pencil, Printer, Trash, UserCircle, Users, Bed } from "phosphor-react";
 
@@ -28,7 +31,7 @@ import { set } from "date-fns";
 import { string } from "zod";
 
 const Pet: NextPage = () => {
-  useSession({ required: true });
+  //useSession({ required: true });
 
   //For moving between different pages
   const router = useRouter();
@@ -41,6 +44,191 @@ const Pet: NextPage = () => {
   const [isDoneUploading, setIsDoneUploading] = useState(false);
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
+
+  /*
+  //Excel upload
+  const insertExcelData = api.pet.insertExcelData.useMutation();
+
+  //---------------------------------BULK UPLOAD----------------------------------
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const bstr = event.target?.result;
+      const wb = XLSX.read(bstr, { type: "binary" });
+      const wsname = wb.SheetNames[3]; // Assuming you're interested in the third sheet
+      console.log("Sheet name: ", wsname);
+      const ws: XLSX.WorkSheet | undefined = wb.Sheets[wsname as keyof typeof wb.Sheets];
+      const data = ws ? XLSX.utils.sheet_to_json(ws) : [];
+      console.log("Data: ", data);
+
+      //This is the format that the insertExcelData mutation expects
+
+      type petData = {
+        ownerID: number;
+        petName: string;
+        species: string;
+        sex: string;
+        age: string;
+        breed: string;
+        colour: string[];
+        markings: string;
+        status: string;
+        sterilisedStatus: string;
+        sterilisedRequested: string;
+        sterilisedRequestSigned: string;
+        sterilisationOutcome: string;
+        vaccinationShot1: Date;
+        vaccinationShot2: Date;
+        vaccinationShot3: Date;
+        // clinicsAttended: number[];
+        lastDeworming: Date; // Or string if you are handling date as a string before conversion.
+        membership: string;
+        cardStatus: string;
+        kennelReceived: string[];
+        comments: string;
+      };
+
+      //change the data so that it gives me the correct format for each column as in the petOwnerData type
+      for (const obj of data as petData[]) {
+        console.log("Object: ", obj);
+        //Object.keys(obj).forEach((key) => {
+        //  console.log("Key: ", key);
+        //}
+        //take the first character away from the ownerID
+        obj.ownerID = Number(obj.ownerID.toString().slice(1));
+        console.log("Owner ID: ", obj.ownerID);
+        //last dewroming
+        console.log("Last deworming from data: ", obj.lastDeworming);
+        //if (obj.lastDeWorming !== ) {
+        //  obj.lastDeWorming = new Date();
+        //} else {
+        //obj.lastDeworming = obj.lastDeworming !== undefined ? new Date(obj.lastDeworming) : new Date(0);
+        if (Number(obj.lastDeworming) >= 35000) {
+          obj.lastDeworming = ExcelDateToJSDate(Number(obj.lastDeworming));
+        }
+        if (obj.lastDeworming === undefined) {
+          obj.lastDeworming = new Date(0);
+        } else if (String(obj.lastDeworming) === "None") {
+          obj.lastDeworming = new Date(0);
+        } else if (String(obj.lastDeworming) === "") {
+          obj.lastDeworming = new Date(0);
+        } else {
+          obj.lastDeworming = new Date(obj.lastDeworming);
+        }
+        console.log("Last deworming after manipulation: ", obj.lastDeworming);
+
+        //comments
+        obj.comments = "";
+
+        //clinicsAttended.  Make array of numbers
+        //obj.clinicsAttended = [];
+
+        //kennelReceived
+        obj.kennelReceived = [""];
+
+        //vaccinationShot1
+        console.log("Vaccination shot 1 from data: ", obj.vaccinationShot1);
+        if (Number(obj.vaccinationShot1) >= 35000) {
+          obj.vaccinationShot1 = ExcelDateToJSDate(Number(obj.vaccinationShot1));
+        }
+        if (obj.vaccinationShot1 === undefined) {
+          obj.vaccinationShot1 = new Date(0);
+        } else if (String(obj.vaccinationShot1) === "None") {
+          obj.vaccinationShot1 = new Date(0);
+        } else if (String(obj.vaccinationShot1) === "") {
+          obj.vaccinationShot1 = new Date(0);
+        } else {
+          obj.vaccinationShot1 = new Date(obj.vaccinationShot1);
+        }
+        // if (String(obj.vaccinationShot1) !== "None") {
+        //   obj.vaccinationShot1 = obj.vaccinationShot1 !== undefined ? new Date(obj.vaccinationShot1) : new Date(0);
+        // } else if (String(obj.vaccinationShot1) === "None") {
+        //   obj.vaccinationShot1 = new Date(0);
+        // }
+        console.log("Vaccination shot 1 after manipulation: ", obj.vaccinationShot1);
+
+        //vaccinationShot2
+        console.log("Vaccination shot 2 from data: ", obj.vaccinationShot2);
+        if (Number(obj.vaccinationShot2) >= 35000) {
+          obj.vaccinationShot2 = ExcelDateToJSDate(Number(obj.vaccinationShot2));
+        }
+        if (obj.vaccinationShot2 === undefined) {
+          obj.vaccinationShot2 = new Date(0);
+        } else if (String(obj.vaccinationShot2) === "None") {
+          obj.vaccinationShot2 = new Date(0);
+        } else if (String(obj.vaccinationShot2) === "") {
+          obj.vaccinationShot2 = new Date(0);
+        } else {
+          obj.vaccinationShot2 = new Date(obj.vaccinationShot2);
+        }
+        //obj.vaccinationShot2 = obj.vaccinationShot2 !== undefined || String(obj.vaccinationShot2) !== "None" ? new Date(obj.vaccinationShot2) : new Date(0);
+        console.log("Vaccination shot 2 after manipulation: ", obj.vaccinationShot2);
+
+        //vaccinationShot3
+        console.log("Vaccination shot 3 from data: ", obj.vaccinationShot3);
+        if (Number(obj.vaccinationShot3) >= 35000) {
+          obj.vaccinationShot3 = ExcelDateToJSDate(Number(obj.vaccinationShot3));
+        }
+        if (obj.vaccinationShot3 === undefined) {
+          obj.vaccinationShot3 = new Date(0);
+        } else if (String(obj.vaccinationShot3) === "None") {
+          obj.vaccinationShot3 = new Date(0);
+        } else if (String(obj.vaccinationShot3) === "") {
+          obj.vaccinationShot3 = new Date(0);
+        } else {
+          obj.vaccinationShot3 = new Date(obj.vaccinationShot3);
+        }
+        //obj.vaccinationShot3 = obj.vaccinationShot3 !== undefined || String(obj.vaccinationShot3) !== "None" ? new Date(obj.vaccinationShot3) : new Date(0);
+        console.log("Vaccination shot 3 after manipulation: ", obj.vaccinationShot3);
+
+        //markinbgs
+        obj.markings = "";
+
+        //make colour an array
+        obj.colour = [String(obj.colour)];
+      }
+
+      //Turn the data into this type of object: {firstName: "John", surname: "Doe", email: "xxxxxxx@xxxxx", mobile: "0712345678", address: "1 Main Road, Observatory, Cape Town, 7925", comments: "None"}
+
+      insertExcelData.mutate(data as petData[], {
+        onSuccess: () => {
+          console.log("Data successfully inserted");
+        },
+        onError: (error) => {
+          console.error("Error inserting data", error);
+        },
+      });
+
+      // Now data is an array of objects, each object representing a row in the Excel sheet.
+      // The keys of each object are the column headers from your Excel sheet.
+      // You can directly pass this data to convert_to_json without needing to splice or adjust.
+      void convert_to_json(data as Record<string, unknown>[]);
+    };
+    if (file) {
+      reader.readAsBinaryString(file);
+    }
+  };
+
+  const ExcelDateToJSDate = (serialDate: number): Date => {
+    // Excel's epoch starts on January 1, 1900. JavaScript's epoch starts on January 1, 1970.
+    // Add the number of days from Excel's epoch to 1/1/1970, which is 25569 days.
+    // Adjust for Excel's leap year bug; Excel believes 1900 was a leap year, but it wasn't.
+    const daysSinceEpoch = serialDate - 25569 + (serialDate > 59 ? -1 : 0);
+
+    // Convert days to milliseconds
+    const msSinceEpoch = daysSinceEpoch * 24 * 60 * 60 * 1000;
+
+    return new Date(msSinceEpoch);
+  };
+
+  const convert_to_json = async (data: Array<Record<string, unknown>>) => {
+    const rows: string[] = data.map((row) => JSON.stringify(row));
+    console.log("Rows: ", rows);
+  };
+
+  */
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -179,11 +367,11 @@ const Pet: NextPage = () => {
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
-  // const deleteAllUsers = api.pet.deleteAllPets.useMutation();
-  // const handleDeleteAllUsers = async () => {
-  //   await deleteAllUsers.mutateAsync();
-  //   isDeleted ? setIsDeleted(false) : setIsDeleted(true);
-  // };
+  const deleteAllUsers = api.pet.deleteAllPets.useMutation();
+  const handleDeleteAllUsers = async () => {
+    await deleteAllUsers.mutateAsync();
+    isDeleted ? setIsDeleted(false) : setIsDeleted(true);
+  };
 
   //---------------------------------PRINTING----------------------------------
   const printComponentRef = useRef(null);
@@ -331,16 +519,19 @@ const Pet: NextPage = () => {
   const [vaccinationShot1Option, setVaccinationShot1Option] = useState("Select one");
   const vaccinationShot1Ref = useRef<HTMLDivElement>(null);
   const btnVaccinationShot1Ref = useRef<HTMLButtonElement>(null);
+  const [vaccinationShot1Date, setVaccinationShot1Date] = useState(new Date());
 
   const [vaccinationShot2, setVaccinationShot2] = useState(false);
   const [vaccinationShot2Option, setVaccinationShot2Option] = useState("Select one");
   const vaccinationShot2Ref = useRef<HTMLDivElement>(null);
   const btnVaccinationShot2Ref = useRef<HTMLButtonElement>(null);
+  const [vaccinationShot2Date, setVaccinationShot2Date] = useState(new Date());
 
   const [vaccinationShot3, setVaccinationShot3] = useState(false);
   const [vaccinationShot3Option, setVaccinationShot3Option] = useState("Select one");
   const vaccinationShot3Ref = useRef<HTMLDivElement>(null);
   const btnVaccinationShot3Ref = useRef<HTMLButtonElement>(null);
+  const [vaccinationShot3Date, setVaccinationShot3Date] = useState(new Date());
 
   const [membershipType, setMembershipType] = useState(false);
   const [membershipTypeOption, setMembershipTypeOption] = useState("Select one");
@@ -520,6 +711,7 @@ const Pet: NextPage = () => {
   }, [speciesOption]);
 
   //COLOUR
+  const [colourList, setColourList] = useState<string[]>([]);
   const handleToggleColour = () => {
     setIsColourOpen(!isColourOpen);
   };
@@ -527,6 +719,9 @@ const Pet: NextPage = () => {
   const handleColourOption = (option: SetStateAction<string>) => {
     setColourOption(option);
     setIsColourOpen(false);
+    if (!colourList.includes(String(option))) {
+      setColourList([...colourList, String(option)]);
+    }
   };
 
   useEffect(() => {
@@ -575,6 +770,12 @@ const Pet: NextPage = () => {
       setColourOptions(colourDogOptions);
     }
   }, [speciesOption]);
+
+  //show all the clinics that the volunteer attended
+  const [showColour, setShowColour] = useState(false);
+  const handleShowColour = () => {
+    setShowColour(!showColour);
+  };
 
   //STATUS
   const handleToggleStatus = () => {
@@ -797,6 +998,34 @@ const Pet: NextPage = () => {
 
   const vaccinationShot1Options = ["Yes", "Not yet"];
 
+  interface CustomInputProps {
+    value?: string;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  }
+
+  // CustomInput component with explicit types for the props
+  const CustomVaccine1Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
+    <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
+      <svg
+        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+      </svg>
+      <div className="m-1 mr-2">(Select here): </div>
+      {isUpdate
+        ? vaccinationShot1Date.getDate().toString() +
+          "/" +
+          (vaccinationShot1Date.getMonth() + 1).toString() +
+          "/" +
+          vaccinationShot1Date.getFullYear().toString()
+        : value}
+    </button>
+  );
+
   useEffect(() => {
     if (vaccinationShot1Option == "") {
       console.log("Hellooooo, Vaccination shot 1: ", vaccinationShot1Option);
@@ -843,6 +1072,34 @@ const Pet: NextPage = () => {
 
   const vaccinationShot2Options = ["Yes", "Not yet"];
 
+  interface CustomInputProps {
+    value?: string;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  }
+
+  // CustomInput component with explicit types for the props
+  const CustomVaccine2Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
+    <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
+      <svg
+        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+      </svg>
+      <div className="m-1 mr-2">(Select here): </div>
+      {isUpdate
+        ? vaccinationShot2Date.getDate().toString() +
+          "/" +
+          (vaccinationShot2Date.getMonth() + 1).toString() +
+          "/" +
+          vaccinationShot2Date.getFullYear().toString()
+        : value}
+    </button>
+  );
+
   //VACCINATION SHOT 3
   const handleToggleVaccinationShot3 = () => {
     setVaccinationShot3(!vaccinationShot3);
@@ -872,6 +1129,34 @@ const Pet: NextPage = () => {
   }, []);
 
   const vaccinationShot3Options = ["Yes", "Not yet"];
+
+  interface CustomInputProps {
+    value?: string;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  }
+
+  // CustomInput component with explicit types for the props
+  const CustomVaccine3Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
+    <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
+      <svg
+        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+      </svg>
+      <div className="m-1 mr-2">(Select here): </div>
+      {isUpdate
+        ? vaccinationShot3Date.getDate().toString() +
+          "/" +
+          (vaccinationShot3Date.getMonth() + 1).toString() +
+          "/" +
+          vaccinationShot3Date.getFullYear().toString()
+        : value}
+    </button>
+  );
 
   //MEMBERSHIP TYPE
   const handleToggleMembershipType = () => {
@@ -1225,15 +1510,18 @@ const Pet: NextPage = () => {
       setSexOption(userData?.sex ?? "Select one");
       setAgeOption(userData?.age ?? "Select one");
       setBreedOption(userData?.breed ?? "Select one");
-      setColourOption(userData?.colour ?? "Select one");
+      setColourList(userData?.colour ?? []);
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
       setSterilisationStatusOption(userData?.sterilisedStatus ?? "Select one");
       setSterilisationRequestedOption(userData?.sterilisedRequested ?? "Select one");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
-      setVaccinationShot1Option(userData?.vaccinationShot1 ?? "Select one");
-      setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
-      setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
+      vaccinationShot1Option === "Yes" ? setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date()) : setVaccinationShot1Date(new Date());
+      vaccinationShot2Option === "Yes" ? setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date()) : setVaccinationShot2Date(new Date());
+      vaccinationShot3Option === "Yes" ? setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date()) : setVaccinationShot3Date(new Date());
+      // setVaccinationShot1Option(userData?.vaccinationShot1 ?? "Select one");
+      // setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
+      // setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
       setMembershipTypeOption(userData?.membership ?? "Select one");
       setCardStatusOption(userData?.cardStatus ?? "Select one");
       setKennelList(userData?.kennelReceived ?? []);
@@ -1275,16 +1563,22 @@ const Pet: NextPage = () => {
       setSexOption(userData?.sex ?? "Select one");
       setAgeOption(userData?.age ?? "Select one");
       setBreedOption(userData?.breed ?? "Select one");
-      setColourOption(userData?.colour ?? "Select one");
+      setColourList(userData?.colour ?? []);
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
       setSterilisationStatusOption(userData?.sterilisedStatus ?? "Select one");
       setSterilisationRequestedOption(userData?.sterilisedRequested ?? "Select one");
       setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
-      setVaccinationShot1Option(userData?.vaccinationShot1 ?? "Select one");
-      setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
-      setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
+
+      setVaccinationShot1Option(userData?.vaccinationShot1 ? "Yes" : "Not yet");
+      setVaccinationShot2Option(userData?.vaccinationShot2 ? "Yes" : "Not yet");
+      setVaccinationShot3Option(userData?.vaccinationShot3 ? "Yes" : "Not yet");
+      setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
+      setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
+      setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
+      //setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
+      //setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
       setMembershipTypeOption(userData?.membership ?? "Select one");
       setCardStatusOption(userData?.cardStatus ?? "Select one");
       setKennelList(userData?.kennelReceived ?? []);
@@ -1309,16 +1603,16 @@ const Pet: NextPage = () => {
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
       breed: breedOption === "Select one" ? "" : breedOption,
-      colour: colourOption === "Select one" ? "" : colourOption,
+      colour: colourList,
       markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
       sterilisedStatus: sterilisationStatusOption === "Select one" ? "" : sterilisationStatusOption,
       sterilisedRequested: sterilisationRequestedOption === "Select one" ? "" : sterilisationRequestedOption,
       sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisedOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
-      vaccinationShot1: vaccinationShot1Option === "Select one" ? "" : vaccinationShot1Option,
-      vaccinationShot2: vaccinationShot2Option === "Select one" ? "" : vaccinationShot2Option,
-      vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
+      vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
+      vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
+      vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
@@ -1342,6 +1636,9 @@ const Pet: NextPage = () => {
     setVaccinationShot1Option("Select one");
     setVaccinationShot2Option("Select one");
     setVaccinationShot3Option("Select one");
+    setVaccinationShot1Date(new Date());
+    setVaccinationShot2Date(new Date());
+    setVaccinationShot3Date(new Date());
     setMembershipTypeOption("Select one");
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select one");
@@ -1369,6 +1666,9 @@ const Pet: NextPage = () => {
     setVaccinationShot1Option("Select one");
     setVaccinationShot2Option("Select one");
     setVaccinationShot3Option("Select one");
+    setVaccinationShot1Date(new Date());
+    setVaccinationShot2Date(new Date());
+    setVaccinationShot3Date(new Date());
     setMembershipTypeOption("Select one");
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select one");
@@ -1392,16 +1692,19 @@ const Pet: NextPage = () => {
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
       breed: breedOption === "Select one" ? "" : breedOption,
-      colour: colourOption === "Select one" ? "" : colourOption,
+      colour: colourList,
       markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
       sterilisedStatus: sterilisationStatusOption === "Select one" ? "" : sterilisationStatusOption,
       sterilisedRequested: sterilisationRequestedOption === "Select one" ? "" : sterilisationRequestedOption,
       sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisationOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
-      vaccinationShot1: vaccinationShot1Option === "Select one" ? "" : vaccinationShot1Option,
-      vaccinationShot2: vaccinationShot2Option === "Select one" ? "" : vaccinationShot2Option,
-      vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
+      vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
+      vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
+      vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
+      // vaccinationShot1: vaccinationShot1Option === "Select one" ? "" : vaccinationShot1Option,
+      // vaccinationShot2: vaccinationShot2Option === "Select one" ? "" : vaccinationShot2Option,
+      // vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
@@ -1447,15 +1750,18 @@ const Pet: NextPage = () => {
       setSexOption(userData?.sex ?? "");
       setAgeOption(userData?.age ?? "");
       setBreedOption(userData?.breed ?? "");
-      setColourOption(userData?.colour ?? "");
+      setColourList(userData?.colour ?? "");
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "");
       setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
       setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
-      setVaccinationShot1Option(userData?.vaccinationShot1 ?? "");
-      setVaccinationShot2Option(userData?.vaccinationShot2 ?? "");
-      setVaccinationShot3Option(userData?.vaccinationShot3 ?? "");
+      setVaccinationShot1Option(userData?.vaccinationShot1 ? "Yes" : "Not yet");
+      setVaccinationShot2Option(userData?.vaccinationShot2 ? "Yes" : "Not yet");
+      setVaccinationShot3Option(userData?.vaccinationShot3 ? "Yes" : "Not yet");
+      setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
+      setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
+      setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
       setMembershipTypeOption(userData?.membership ?? "");
       setCardStatusOption(userData?.cardStatus ?? "");
       setKennelList(userData?.kennelReceived ?? []);
@@ -1496,15 +1802,18 @@ const Pet: NextPage = () => {
       setSexOption(userData?.sex ?? "");
       setAgeOption(userData?.age ?? "");
       setBreedOption(userData?.breed ?? "");
-      setColourOption(userData?.colour ?? "");
+      setColourList(userData?.colour ?? "");
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "");
       setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
       setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
-      setVaccinationShot1Option(userData?.vaccinationShot1 ?? "");
-      setVaccinationShot2Option(userData?.vaccinationShot2 ?? "");
-      setVaccinationShot3Option(userData?.vaccinationShot3 ?? "");
+      setVaccinationShot1Option(userData?.vaccinationShot1 ? "Yes" : "Not yet");
+      setVaccinationShot2Option(userData?.vaccinationShot2 ? "Yes" : "Not yet");
+      setVaccinationShot3Option(userData?.vaccinationShot3 ? "Yes" : "Not yet");
+      setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
+      setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
+      setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
       setMembershipTypeOption(userData?.membership ?? "");
       setCardStatusOption(userData?.cardStatus ?? "");
       setKennelList(userData?.kennelReceived ?? []);
@@ -1553,6 +1862,9 @@ const Pet: NextPage = () => {
     setVaccinationShot1Option("Select one");
     setVaccinationShot2Option("Select one");
     setVaccinationShot3Option("Select one");
+    setVaccinationShot1Date(new Date());
+    setVaccinationShot2Date(new Date());
+    setVaccinationShot3Date(new Date());
     setMembershipTypeOption("Select one");
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select one");
@@ -1583,7 +1895,7 @@ const Pet: NextPage = () => {
     if (sterilisationStatusOption === "Select one") mandatoryFields.push("Sterilisation Status");
     //  if (sterilisationRequestedOption === "Select one") mandatoryFields.push("Sterilisation Requested");
     // if (sterilisationOutcomeOption === "Select one") mandatoryFields.push("Sterilisation Outcome");
-    //if (vaccinationShot1Option === "Select one") mandatoryFields.push("Vaccination Shot 1");
+    if (vaccinationShot1Option === "Select one") mandatoryFields.push("Vaccination Shot 1");
     //if (vaccinationShot2Option === "Select one") mandatoryFields.push("Vaccination Shot 2");
     //if (vaccinationShot3Option === "Select one") mandatoryFields.push("Vaccination Shot 3");
     if (membershipTypeOption === "Select one") mandatoryFields.push("Membership Type");
@@ -1654,92 +1966,6 @@ const Pet: NextPage = () => {
     setOrder(field);
   };
 
-  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  // const observerTarget = useRef<HTMLDivElement | null>(null);
-
-  // const [limit] = useState(12);
-  // const {
-  //   data: queryData,
-  //   fetchNextPage,
-  //   hasNextPage,
-  //   refetch,
-  // } = api.pet.searchPetsInfinite.useInfiniteQuery(
-  //   {
-  //     petID: id,
-  //     limit: limit,
-  //     searchQuery: query,
-  //     order: order,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => {
-  //       console.log("Next Cursor: " + lastPage.nextCursor);
-  //       return lastPage.nextCursor;
-  //     },
-  //     enabled: false,
-  //   },
-  // );
-
-  // //Flattens the pages array into one array
-  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
-  // const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
-  // const clinic_data = queryData?.pages.flatMap((page) => page.clinic_data);
-  // const treatment_data = queryData?.pages.flatMap((page) => page.treatment_data);
-  // //combine the following two objects into one object
-  // //const pet_data = user_data?.map((user, index) => ({ ...user, ...owner_data?.[index] }));
-
-  // // Assuming each user object contains an ownerId or similar property to relate to the owner
-  // const pet_data = user_data?.map((user) => {
-  //   // Find the owner that matches the user's ownerId
-  //   const owner = owner_data?.find((o) => o.ownerID === user.ownerID);
-  //   // Combine the user data with the found owner data
-  //   return { ...user, ...owner };
-  // });
-
-  // const pet_data_with_clinics = pet_data?.map((pet) => {
-  //   // Assuming each clinic object has a 'petID' that links it to a pet
-  //   const associatedClinics = clinic_data?.filter((clinic) => clinic.petID === pet.petID);
-
-  //   return {
-  //     ...pet,
-  //     clinics: associatedClinics,
-  //   };
-  // });
-
-  // const pet_data_with_clinics_and_treatments = pet_data_with_clinics?.map((pet) => {
-  //   // Assuming each treatment object has a 'petID' that links it to a pet
-  //   const associatedTreatments = treatment_data?.filter((treatment) => treatment.petID === pet.petID);
-
-  //   return {
-  //     ...pet,
-  //     treatment: associatedTreatments,
-  //   };
-  // });
-
-  // //Checks intersection of the observer target and reassigns target element once true
-  // useEffect(() => {
-  //   if (!observerTarget.current || !fetchNextPage) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-  //     },
-  //     { threshold: 1 },
-  //   );
-
-  //   if (observerTarget.current) observer.observe(observerTarget.current);
-
-  //   const currentTarget = observerTarget.current;
-
-  //   return () => {
-  //     if (currentTarget) observer.unobserve(currentTarget);
-  //   };
-  // }, [fetchNextPage, hasNextPage, observerTarget]);
-
-  // //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
-  // useEffect(() => {
-  //   void refetch();
-  // }, [isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]);
-
   //------------------------------------GO TO OWNER PROFILE--------------------------------------
   const handleGoToOwnerProfile = async (ownerID: number) => {
     await router.push({
@@ -1791,9 +2017,8 @@ const Pet: NextPage = () => {
     }
   };
 
-
-   // ----------------------------------------Uploading Image----------------------------------------
-   useEffect(() => {
+  // ----------------------------------------Uploading Image----------------------------------------
+  useEffect(() => {
     if (user?.image != "" && isDoneUploading) {
       setIsDoneUploading(false);
     }
@@ -1824,6 +2049,7 @@ const Pet: NextPage = () => {
                 userName={uploadUserName}
                 userImage={uploadUserImage}
               />
+
               <div className="sticky top-20 z-20 bg-white py-4">
                 <div className="relative flex justify-center">
                   <input
@@ -1832,9 +2058,14 @@ const Pet: NextPage = () => {
                     onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
                   />
 
-                  {/*<button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
-                  Delete all users
-        </button>*/}
+                  {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
+                    Upload
+                    <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
+                  </div>
+
+                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                    Delete all users
+                  </button> */}
                 </div>
               </div>
               <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
@@ -2402,22 +2633,22 @@ const Pet: NextPage = () => {
                         </div>
                       )}
                     </div>
-                    {/* {vaccinationShot1Option === "Yes" && (
-                    <div className="flex items-start">
-                      <div className="mr-3 flex items-center pt-5">
-                        <div className=" flex">Vaccination Shot 1 Date: </div>
+                    {vaccinationShot1Option === "Yes" && (
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-5">
+                          <div className=" flex">Vaccination Shot 1 Date: </div>
+                        </div>
+                        <div className="py-4">
+                          <DatePicker
+                            selected={vaccinationShot1Date}
+                            onChange={(date) => setVaccinationShot1Date(date!)}
+                            dateFormat="dd/MM/yyyy"
+                            customInput={<CustomVaccine1Input />}
+                            className="form-input rounded-md border px-3 py-2"
+                          />
+                        </div>
                       </div>
-                      <div className="py-4">
-                        <DatePicker
-                          selected={vaccinationShot1Date}
-                          onChange={(date) => setVaccinationShot1Date(date!)}
-                          dateFormat="dd/MM/yyyy"
-                          customInput={<CustomInput />}
-                          className="form-input rounded-md border px-3 py-2"
-                        />
-                      </div>
-                    </div>
-                  )} */}
+                    )}
                   </div>
 
                   {vaccinationShot1Option === "Yes" && (
@@ -2449,22 +2680,22 @@ const Pet: NextPage = () => {
                           </div>
                         )}
                       </div>
-                      {/* {vaccinationShot2Option === "Yes" && (
-                    <div className="flex items-start">
-                      <div className="mr-3 flex items-center pt-5">
-                        <div className=" flex">Vaccination Shot 2 Date: </div>
-                      </div>
-                      <div className="py-4">
-                        <DatePicker
-                          selected={vaccinationShot2Date}
-                          onChange={(date) => setVaccinationShot2Date(date!)}
-                          dateFormat="dd/MM/yyyy"
-                          customInput={<CustomInput />}
-                          className="form-input rounded-md border px-3 py-2"
-                        />
-                      </div>
-                    </div>
-                  )} */}
+                      {vaccinationShot2Option === "Yes" && (
+                        <div className="flex items-start">
+                          <div className="mr-3 flex items-center pt-5">
+                            <div className=" flex">Vaccination Shot 2 Date: </div>
+                          </div>
+                          <div className="py-4">
+                            <DatePicker
+                              selected={vaccinationShot2Date}
+                              onChange={(date) => setVaccinationShot2Date(date!)}
+                              dateFormat="dd/MM/yyyy"
+                              customInput={<CustomVaccine2Input />}
+                              className="form-input rounded-md border px-3 py-2"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -2497,22 +2728,22 @@ const Pet: NextPage = () => {
                           </div>
                         )}
                       </div>
-                      {/* {vaccinationShot3Option === "Yes" && (
-                    <div className="flex items-start">
-                      <div className="mr-3 flex items-center pt-5">
-                        <div className=" flex">Vaccination Shot 3 Date: </div>
-                      </div>
-                      <div className="py-4">
-                        <DatePicker
-                          selected={vaccinationShot3Date}
-                          onChange={(date) => setVaccinationShot3Date(date!)}
-                          dateFormat="dd/MM/yyyy"
-                          customInput={<CustomInput />}
-                          className="form-input rounded-md border px-3 py-2"
-                        />
-                      </div>
-                    </div>
-                  )} */}
+                      {vaccinationShot3Option === "Yes" && (
+                        <div className="flex items-start">
+                          <div className="mr-3 flex items-center pt-5">
+                            <div className=" flex">Vaccination Shot 3 Date: </div>
+                          </div>
+                          <div className="py-4">
+                            <DatePicker
+                              selected={vaccinationShot3Date}
+                              onChange={(date) => setVaccinationShot3Date(date!)}
+                              dateFormat="dd/MM/yyyy"
+                              customInput={<CustomVaccine3Input />}
+                              className="form-input rounded-md border px-3 py-2"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

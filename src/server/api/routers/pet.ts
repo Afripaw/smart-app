@@ -12,16 +12,16 @@ export const petRouter = createTRPCRouter({
         sex: z.string(),
         age: z.string(),
         breed: z.string(),
-        colour: z.string(),
+        colour: z.string().array(),
         markings: z.string(),
         status: z.string(),
         sterilisedStatus: z.string(),
         sterilisedRequested: z.string(),
         sterilisedRequestSigned: z.string(),
         sterilisationOutcome: z.string(),
-        vaccinationShot1: z.string(),
-        vaccinationShot2: z.string(),
-        vaccinationShot3: z.string(),
+        vaccinationShot1: z.date(),
+        vaccinationShot2: z.date(),
+        vaccinationShot3: z.date(),
         treatments: z.string(),
         clinicsAttended: z.number().array(),
         lastDeWorming: z.date(),
@@ -55,7 +55,6 @@ export const petRouter = createTRPCRouter({
           vaccinationShot1: input.vaccinationShot1,
           vaccinationShot2: input.vaccinationShot2,
           vaccinationShot3: input.vaccinationShot3,
-          treatments: input.treatments,
           lastDeworming: input.lastDeWorming,
           membership: input.membership,
           cardStatus: input.cardStatus,
@@ -115,16 +114,16 @@ export const petRouter = createTRPCRouter({
         sex: z.string(),
         age: z.string(),
         breed: z.string(),
-        colour: z.string(),
+        colour: z.string().array(),
         markings: z.string(),
         status: z.string(),
         sterilisedStatus: z.string(),
         sterilisedRequested: z.string(),
         sterilisedRequestSigned: z.string(),
         sterilisedOutcome: z.string(),
-        vaccinationShot1: z.string(),
-        vaccinationShot2: z.string(),
-        vaccinationShot3: z.string(),
+        vaccinationShot1: z.date(),
+        vaccinationShot2: z.date(),
+        vaccinationShot3: z.date(),
         treatments: z.string(),
         clinicsAttended: z.number().array(),
         lastDeWorming: z.date(),
@@ -155,7 +154,6 @@ export const petRouter = createTRPCRouter({
           vaccinationShot1: input.vaccinationShot1,
           vaccinationShot2: input.vaccinationShot2,
           vaccinationShot3: input.vaccinationShot3,
-          treatments: input.treatments,
           lastDeworming: input.lastDeWorming,
           membership: input.membership,
           cardStatus: input.cardStatus,
@@ -224,7 +222,7 @@ export const petRouter = createTRPCRouter({
             { sex: { contains: term } },
             { age: { contains: term } },
             { breed: { contains: term } },
-            { colour: { contains: term } },
+            //{ colour: { contains: term } },
             { markings: { contains: term } },
             { status: { contains: term } },
             { sterilisedStatus: { contains: term } },
@@ -500,7 +498,45 @@ export const petRouter = createTRPCRouter({
   // }),
 
   //Delete all pets
-  deleteAllPets: protectedProcedure.query(async ({ ctx }) => {
+  deleteAllPets: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.db.petTreatment.deleteMany();
+    await ctx.db.petOnPetClinic.deleteMany();
     return await ctx.db.pet.deleteMany();
   }),
+
+  //Bulk upload of all the owners
+  insertExcelData: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          ownerID: z.number(),
+          petName: z.string(),
+          species: z.string(),
+          sex: z.string(),
+          age: z.string(),
+          breed: z.string(),
+          colour: z.string().array(),
+          markings: z.string(),
+          status: z.string(),
+          sterilisedStatus: z.string(),
+          sterilisedRequested: z.string(),
+          sterilisedRequestSigned: z.string(),
+          sterilisationOutcome: z.string(),
+          vaccinationShot1: z.date(),
+          vaccinationShot2: z.date(),
+          vaccinationShot3: z.date(),
+          lastDeworming: z.date(),
+          membership: z.string(),
+          cardStatus: z.string(),
+          kennelReceived: z.string().array(),
+          comments: z.string(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.db.pet.createMany({
+        data: input,
+      });
+      return result;
+    }),
 });

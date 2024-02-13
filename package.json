@@ -25,10 +25,13 @@
     "@trpc/react-query": "^10.43.6",
     "@trpc/server": "^10.43.6",
     "@uploadthing/react": "^6.1.0",
+    "axios": "^1.6.7",
     "date-fns": "^3.0.5",
     "mui": "^0.0.1",
+    "multer": "1.4.5-lts.1",
     "next": "^14.0.3",
     "next-auth": "^4.24.5",
+    "next-connect": "^1.0.0",
     "phosphor-react": "^1.4.1",
     "react": "18.2.0",
     "react-circular-progressbar": "^2.1.0",
@@ -40,11 +43,13 @@
     "superjson": "^2.2.1",
     "tw-elements": "^1.1.0",
     "uploadthing": "^6.1.1",
+    "xlsx": "^0.18.5",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.0.3",
     "@types/eslint": "^8.44.7",
+    "@types/multer": "^1.4.11",
     "@types/node": "^18.17.0",
     "@types/react": "^18.2.37",
     "@types/react-datepicker": "^4.19.4",
@@ -58,7 +63,7 @@
     "prettier-plugin-tailwindcss": "^0.5.7",
     "prisma": "^5.6.0",
     "tailwindcss": "^3.3.5",
-    "typescript": "^5.1.6"
+    "typescript": "^5.3.3"
   },
   "ct3aMetadata": {
     "initVersion": "7.24.2"

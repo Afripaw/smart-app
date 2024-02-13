@@ -2,9 +2,9 @@ import { signIn } from "next-auth/react";
 import Head from "next/head";
 //import Link from "next/link";
 
-//import { api } from "~/utils/api";
+import { api } from "~/utils/api";
 import { useRouter } from "next/router";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 //import { CircularProgress } from "@mui/material";
 //import CircularProgress from "@mui/joy/CircularProgress";
@@ -18,6 +18,21 @@ export default function Home() {
 
   //For moving between different pages
   const router = useRouter();
+
+  //-----------------------------QUERIES----------------------------------------
+  const activeVolunteers = api.welcomePage.getVolunteers.useQuery();
+  const sterilisedPets = api.welcomePage.getSterilisedPets.useQuery();
+  const clinicVisits = api.welcomePage.getAllClinicVisits.useQuery();
+  const kennels = api.welcomePage.getAllKennels.useQuery();
+
+  console.log("Clinics: ", clinicVisits.data);
+
+  useEffect(() => {
+    void activeVolunteers.refetch();
+    void sterilisedPets.refetch();
+    void clinicVisits.refetch();
+    void kennels.refetch();
+  }, []);
 
   //passwords
   const [passwordError, setPasswordError] = useState(false);
@@ -102,19 +117,19 @@ export default function Home() {
               <div className="flex grow flex-col items-center justify-center">
                 <div className="relative my-5 flex items-center p-28 text-black">
                   <div className="absolute left-0 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-6 text-white">
-                    <div className="text-2xl">6505</div>
+                    <div className="text-2xl">{/*clinicVisits?.data ?? 0*/ 0}</div>
                     <div>Pet Clinic visits</div>
                   </div>
                   <div className="absolute right-0 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-8 text-white">
-                    <div className="text-2xl">752</div>
+                    <div className="text-2xl">{sterilisedPets?.data?.length ?? 0}</div>
                     <div>Pets Sterilised</div>
                   </div>
                   <div className="absolute bottom-0 left-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-4 text-white">
-                    <div className="text-2xl">68</div>
+                    <div className="text-2xl">{kennels?.data ?? 0}</div>
                     <div>Kennels Provided</div>
                   </div>
                   <div className="absolute bottom-0 right-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-5 text-white">
-                    <div className="text-2xl">90</div>
+                    <div className="text-2xl">{activeVolunteers?.data?.length ?? 0}</div>
                     <div>Active Volunteers</div>
                   </div>
                   <p className="w-52 border-2 border-black bg-white p-3">

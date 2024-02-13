@@ -15,7 +15,6 @@ export const petOwnerRouter = createTRPCRouter({
         addressStreet: z.string(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
-        addressSuburb: z.string(),
         addressFreeForm: z.string(),
         preferredCommunication: z.string(),
         status: z.string(),
@@ -35,6 +34,7 @@ export const petOwnerRouter = createTRPCRouter({
           addressStreet: input.addressStreet,
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
+          addressFreeForm: input.addressFreeForm,
           preferredCommunication: input.preferredCommunication,
           status: input.status,
           pets: {
@@ -254,4 +254,33 @@ export const petOwnerRouter = createTRPCRouter({
     await ctx.db.pet.deleteMany();
     return await ctx.db.petOwner.deleteMany();
   }),
+
+  //Bulk upload of all the owners
+  insertExcelData: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          firstName: z.string(),
+          email: z.string(),
+          surname: z.string(),
+          mobile: z.string(),
+          addressGreaterArea: z.string(),
+          addressArea: z.string(),
+          addressStreet: z.string(),
+          addressStreetCode: z.string(),
+          addressStreetNumber: z.string(),
+          addressFreeForm: z.string(),
+          preferredCommunication: z.string(),
+          status: z.string(),
+          startingDate: z.date(),
+          comments: z.string(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.db.petOwner.createMany({
+        data: input,
+      });
+      return result;
+    }),
 });

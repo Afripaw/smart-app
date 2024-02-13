@@ -11,9 +11,6 @@ import CreateButtonModal from "../components/createButtonModal";
 import DeleteButtonModal from "~/components/deleteButtonModal";
 import { areaOptions } from "~/components/GeoLocation/areaOptions";
 
-//Upload excel
-import * as XLSX from "xlsx";
-
 //Icons
 import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "phosphor-react";
 
@@ -27,8 +24,8 @@ import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 import { router } from "@trpc/server";
 
-const Clinic: NextPage = () => {
-  //useSession({ required: true });
+const Communication: NextPage = () => {
+  useSession({ required: true });
 
   const newClinic = api.petClinic.create.useMutation();
   const updateClinic = api.petClinic.update.useMutation();
@@ -39,99 +36,6 @@ const Clinic: NextPage = () => {
 
   //For moving between different pages
   const router = useRouter();
-
-  /*
-
-  //Excel upload
-  const insertExcelData = api.petClinic.insertExcelData.useMutation();
-
-  //---------------------------------BULK UPLOAD----------------------------------
-
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const bstr = event.target?.result;
-      const wb = XLSX.read(bstr, { type: "binary" });
-      const wsname = wb.SheetNames[0]; // Assuming you're interested in the third sheet
-      console.log("Sheet name: ", wsname);
-      const ws: XLSX.WorkSheet | undefined = wb.Sheets[wsname as keyof typeof wb.Sheets];
-      const data = ws ? XLSX.utils.sheet_to_json(ws) : [];
-      console.log("Data: ", data);
-
-      //This is the format that the insertExcelData mutation expects
-
-      type petClinicData = {
-        greaterArea: string;
-        area: string;
-        conditions: string;
-        comments: string;
-        date: Date; // Or string if you are handling date as a string before conversion.
-      };
-
-      //change the data so that it gives me the correct format for each column as in the petOwnerData type
-      for (const obj of data as petClinicData[]) {
-        console.log("Object: ", obj);
-
-        //Change the format of the date
-        obj.date = new Date(obj.date);
-
-        if (Number(obj.date) >= 35000) {
-          obj.date = ExcelDateToJSDate(Number(obj.date));
-        }
-        if (obj.date === undefined) {
-          obj.date = new Date(0);
-        } else if (String(obj.date) === "None") {
-          obj.date = new Date(0);
-        } else if (String(obj.date) === "") {
-          obj.date = new Date(0);
-        } else {
-          obj.date = new Date(obj.date);
-        }
-
-        //add a comments column
-        obj.comments = "";
-      }
-
-      //Turn the data into this type of object: {firstName: "John", surname: "Doe", email: "xxxxxxx@xxxxx", mobile: "0712345678", address: "1 Main Road, Observatory, Cape Town, 7925", comments: "None"}
-
-      insertExcelData.mutate(data as petClinicData[], {
-        onSuccess: () => {
-          console.log("Data successfully inserted");
-        },
-        onError: (error) => {
-          console.error("Error inserting data", error);
-        },
-      });
-
-      // Now data is an array of objects, each object representing a row in the Excel sheet.
-      // The keys of each object are the column headers from your Excel sheet.
-      // You can directly pass this data to convert_to_json without needing to splice or adjust.
-      void convert_to_json(data as Record<string, unknown>[]);
-    };
-    if (file) {
-      reader.readAsBinaryString(file);
-    }
-  };
-
-  const ExcelDateToJSDate = (serialDate: number): Date => {
-    // Excel's epoch starts on January 1, 1900. JavaScript's epoch starts on January 1, 1970.
-    // Add the number of days from Excel's epoch to 1/1/1970, which is 25569 days.
-    // Adjust for Excel's leap year bug; Excel believes 1900 was a leap year, but it wasn't.
-    const daysSinceEpoch = serialDate - 25569 + (serialDate > 59 ? -1 : 0);
-
-    // Convert days to milliseconds
-    const msSinceEpoch = daysSinceEpoch * 24 * 60 * 60 * 1000;
-
-    return new Date(msSinceEpoch);
-  };
-
-  const convert_to_json = async (data: Array<Record<string, unknown>>) => {
-    const rows: string[] = data.map((row) => JSON.stringify(row));
-    console.log("Rows: ", rows);
-  };
-
-*/
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -689,11 +593,7 @@ const Clinic: NextPage = () => {
                   >
                     Create new Clinic
                   </button>
-                  {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
-                    Upload
-                    <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
-                  </div>
-                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
                 </div>
@@ -1050,4 +950,4 @@ const Clinic: NextPage = () => {
   );
 };
 
-export default Clinic;
+export default Communication;

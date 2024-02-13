@@ -10,7 +10,7 @@ export const volunteerRouter = createTRPCRouter({
         email: z.string(),
         surname: z.string(),
         mobile: z.string(),
-        addressGreaterArea: z.string(),
+        addressGreaterArea: z.string().array(),
         addressStreet: z.string(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
@@ -18,6 +18,7 @@ export const volunteerRouter = createTRPCRouter({
         addressPostalCode: z.string(),
         addressFreeForm: z.string(),
         preferredCommunication: z.string(),
+        role: z.string().array(),
         status: z.string(),
         startingDate: z.date(),
         clinicAttended: z.number().array(),
@@ -40,6 +41,7 @@ export const volunteerRouter = createTRPCRouter({
           addressPostalCode: input.addressPostalCode,
           addressFreeForm: input.addressFreeForm,
           preferredCommunication: input.preferredCommunication,
+          role: input.role,
           status: input.status,
           startingDate: input.startingDate,
           comments: input.comments,
@@ -80,7 +82,7 @@ export const volunteerRouter = createTRPCRouter({
         email: z.string(),
         surname: z.string(),
         mobile: z.string(),
-        addressGreaterArea: z.string(),
+        addressGreaterArea: z.string().array(),
         addressStreet: z.string(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
@@ -88,6 +90,7 @@ export const volunteerRouter = createTRPCRouter({
         addressPostalCode: z.string(),
         addressFreeForm: z.string(),
         preferredCommunication: z.string(),
+        role: z.string().array(),
         status: z.string(),
         startingDate: z.date(),
         clinicAttended: z.number().array(),
@@ -113,6 +116,7 @@ export const volunteerRouter = createTRPCRouter({
           addressPostalCode: input.addressPostalCode,
           addressFreeForm: input.addressFreeForm,
           preferredCommunication: input.preferredCommunication,
+          role: input.role,
           startingDate: input.startingDate,
           status: input.status,
           comments: input.comments,
@@ -179,7 +183,7 @@ export const volunteerRouter = createTRPCRouter({
             { email: { contains: term } },
             { status: { contains: term } },
             { mobile: { contains: term } },
-            { addressGreaterArea: { contains: term } },
+            //{ addressGreaterArea: { contains: term } },
             { addressStreet: { contains: term } },
             { addressStreetCode: { contains: term } },
             { addressStreetNumber: { contains: term } },
@@ -359,4 +363,36 @@ export const volunteerRouter = createTRPCRouter({
     await ctx.db.volunteerOnPetClinic.deleteMany({});
     return await ctx.db.volunteer.deleteMany({});
   }),
+
+  //Bulk upload of all the owners
+  insertExcelData: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          firstName: z.string(),
+          email: z.string(),
+          surname: z.string(),
+          mobile: z.string(),
+          addressGreaterArea: z.string().array(),
+          addressStreet: z.string(),
+          addressStreetCode: z.string(),
+          addressStreetNumber: z.string(),
+          addressSuburb: z.string(),
+          addressPostalCode: z.string(),
+          addressFreeForm: z.string(),
+          preferredCommunication: z.string(),
+          role: z.string().array(),
+          status: z.string(),
+          startingDate: z.date(),
+          //clinicAttended: z.number().array(),
+          comments: z.string(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.db.volunteer.createMany({
+        data: input,
+      });
+      return result;
+    }),
 });

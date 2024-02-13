@@ -197,4 +197,24 @@ export const petTreatmentRouter = createTRPCRouter({
   deleteAllTreatments: publicProcedure.mutation(async ({ ctx }) => {
     return await ctx.db.petTreatment.deleteMany({});
   }),
+
+  //Bulk upload of all the owners
+  insertExcelData: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          petID: z.number(),
+          category: z.string(),
+          date: z.date(),
+          type: z.string(),
+          comments: z.string(),
+        }),
+      ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const result = await ctx.db.petTreatment.createMany({
+        data: input,
+      });
+      return result;
+    }),
 });

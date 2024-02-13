@@ -14,8 +14,14 @@ import { areaOptions } from "~/components/GeoLocation/areaOptions";
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { sendUserCredentialsEmail } from "~/components/CommunicationPortals/email";
 
+//Upload excel
+import * as XLSX from "xlsx";
+
 //Icons
 import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "phosphor-react";
+
+//Communication
+import { sendSMS } from "~/pages/api/smsPortal";
 
 //Date picker
 import DatePicker from "react-datepicker";
@@ -29,7 +35,7 @@ import { router } from "@trpc/server";
 import Link from "next/link";
 
 const Owner: NextPage = () => {
-  useSession({ required: true });
+  // useSession({ required: true });
 
   const newOwner = api.petOwner.create.useMutation();
   const updateOwner = api.petOwner.update.useMutation();
@@ -41,6 +47,142 @@ const Owner: NextPage = () => {
 
   //For moving between different pages
   const router = useRouter();
+
+  /*
+  //Excel upload
+  const insertExcelData = api.petOwner.insertExcelData.useMutation();
+
+  //---------------------------------BULK UPLOAD----------------------------------
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const bstr = event.target?.result;
+      const wb = XLSX.read(bstr, { type: "binary" });
+      const wsname = wb.SheetNames[2]; // Assuming you're interested in the third sheet
+      console.log("Sheet name: ", wsname);
+      const ws: XLSX.WorkSheet | undefined = wb.Sheets[wsname as keyof typeof wb.Sheets];
+      const data = ws ? XLSX.utils.sheet_to_json(ws) : [];
+      console.log("Data: ", data);
+
+      //This is the format that the insertExcelData mutation expects
+
+      type petOwnerData = {
+        firstName: string;
+        email: string;
+        surname: string;
+        mobile: string;
+        addressGreaterArea: string;
+        addressArea: string;
+        addressStreet: string;
+        addressStreetCode: string;
+        addressStreetNumber: string;
+        addressFreeForm: string;
+        preferredCommunication: string;
+        status: string;
+        startingDate: Date; // Or string if you are handling date as a string before conversion.
+        comments: string;
+      };
+
+      //change the data so that it gives me the correct format for each column as in the petOwnerData type
+      for (const obj of data as petOwnerData[]) {
+        console.log("Object: ", obj);
+        //Object.keys(obj).forEach((key) => {
+        //  console.log("Key: ", key);
+        //}
+        //Change the format of the date
+        obj.startingDate = new Date(obj.startingDate);
+        //change the format of the mobile number
+        obj.mobile = obj.mobile.toString();
+        //change the format of the addressStreetNumber
+        obj.addressStreetNumber = obj.addressStreetNumber.toString();
+        //change the format of the addressStreetCode
+        //obj.addressStreetCode = obj.addressStreetCode.toString();
+        //change the  format of the addressPostalCode
+        // obj.addressPostalCode = obj.addressPostalCode.toString();
+
+        //add an addressFreeForm column
+        obj.addressFreeForm = "";
+
+        //add an addressPostalCode column
+        // obj.addressPostalCode = "";
+
+        //add a comments column
+        obj.comments = "";
+
+        //add addressStreetCode column
+        obj.addressStreetCode = "";
+      }
+
+      //Turn the data into this type of object: {firstName: "John", surname: "Doe", email: "xxxxxxx@xxxxx", mobile: "0712345678", address: "1 Main Road, Observatory, Cape Town, 7925", comments: "None"}
+
+      insertExcelData.mutate(data as petOwnerData[], {
+        onSuccess: () => {
+          console.log("Data successfully inserted");
+        },
+        onError: (error) => {
+          console.error("Error inserting data", error);
+        },
+      });
+
+      // Now data is an array of objects, each object representing a row in the Excel sheet.
+      // The keys of each object are the column headers from your Excel sheet.
+      // You can directly pass this data to convert_to_json without needing to splice or adjust.
+      void convert_to_json(data as Record<string, unknown>[]);
+    };
+    if (file) {
+      reader.readAsBinaryString(file);
+    }
+  };
+
+  const convert_to_json = async (data: Array<Record<string, unknown>>) => {
+    const rows: string[] = data.map((row) => JSON.stringify(row));
+    console.log("Rows: ", rows);
+  };
+
+  */
+
+  //---------------------------------EMAILS----------------------------------
+  async function sendEmail(firstName: string, email: string, id: string, password: string, typeOfUser: string): Promise<void> {
+    const response = await fetch("/api/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ firstName, email, id, password, typeOfUser }),
+    });
+    console.log("response: ", response);
+
+    if (!response.ok) {
+      console.error("Failed to send email");
+      // Attempt to parse the response to get the error message
+      try {
+        const errorData = (await response.json()) as { message?: string };
+        throw new Error(errorData.message ?? "Failed to send email");
+      } catch (error) {
+        // If parsing fails, throw a generic error
+        throw new Error("Failed to send email");
+      }
+    }
+
+    // Attempt to parse the successful response
+    try {
+      const responseData = (await response.json()) as { message: string; data?: unknown };
+      console.log("responseData: ", responseData);
+      // Handle the successful response as needed. For example, log the message or use the data.
+      console.log(responseData.message); // Log the success message
+      // Optionally, you can do something with responseData.data if your API returns additional data
+    } catch (error) {
+      // If parsing fails or the response structure isn't as expected, handle or log the error
+      console.error("Error parsing response data", error);
+      throw new Error("Error processing the server response");
+    }
+  }
+
+  //----------------------------COMMUNICATION OF USER DETAILS---------------------------
+  //Send user's details to user
+  const [sendOwnerDetails, setSendOwnerDetails] = useState(false);
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -483,7 +625,7 @@ const Owner: NextPage = () => {
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
-    await updateOwner.mutateAsync({
+    const owner = await updateOwner.mutateAsync({
       petOwnerID: id,
       firstName: firstName,
       email: email,
@@ -502,6 +644,40 @@ const Owner: NextPage = () => {
       status: statusOption === "Select one" ? "" : statusOption,
       comments: comments,
     });
+
+    //Send user details
+    //Email
+    /* if (preferredOption === "Email" && sendUserDetails) {
+      await sendUserCredentialsEmail(email);
+    }*/
+
+    if (preferredOption === "Email" && sendOwnerDetails && owner?.ownerID) {
+      await sendEmail(firstName, email, String(owner?.ownerID), "", "owner");
+    }
+
+    if (preferredOption === "SMS" && sendOwnerDetails && owner?.ownerID) {
+      const messageContent =
+        "Dear " +
+        firstName +
+        ",\n" +
+        "You have been registered as a owner on the AfriPaw Smart App." +
+        "\nYour owner ID is: " +
+        "U" +
+        id +
+        "\n" +
+        // "You indicated that your preferred means of communication is: SMS" +
+        "\n" +
+        "Regards, AfriPaw Team";
+      //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
+      const destinationNumber = mobile;
+      try {
+        await sendSMS(messageContent, destinationNumber);
+        console.log("SMS sent successfully");
+      } catch (error) {
+        console.error("Failed to send SMS", error);
+      }
+    }
+
     //After the newUser has been created make sure to set the fields back to empty
     setFirstName("");
     setEmail("");
@@ -559,7 +735,7 @@ const Owner: NextPage = () => {
         addressStreet: streetOption === "Select one" ? "" : streetOption,
         addressStreetCode: addressStreetCode,
         addressStreetNumber: addressStreetNumber,
-        addressSuburb: addressSuburb,
+        // addressSuburb: addressSuburb,
         // addressPostalCode: addressPostalCode,
         addressFreeForm: addressFreeForm,
         preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
@@ -573,6 +749,33 @@ const Owner: NextPage = () => {
       /* if (preferredOption === "Email" && sendUserDetails) {
       await sendUserCredentialsEmail(email);
     }*/
+
+      if (preferredOption === "Email" && sendOwnerDetails && newUser_?.ownerID) {
+        await sendEmail(firstName, email, String(newUser_.ownerID), "", "owner");
+      }
+
+      if (preferredOption === "SMS" && sendOwnerDetails && newUser_?.ownerID) {
+        const messageContent =
+          "Dear " +
+          firstName +
+          ",\n" +
+          "You have been registered as a owner on the AfriPaw Smart App." +
+          "\nYour owner ID is: " +
+          "U" +
+          id +
+          "\n" +
+          // "You indicated that your preferred means of communication is: SMS" +
+          "\n" +
+          "Regards, AfriPaw Team";
+        //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
+        const destinationNumber = mobile;
+        try {
+          await sendSMS(messageContent, destinationNumber);
+          console.log("SMS sent successfully");
+        } catch (error) {
+          console.error("Failed to send SMS", error);
+        }
+      }
 
       //Image upload
       console.log("ID: ", newUser_?.ownerID, "Image: ", newUser_?.image, "Name: ", firstName, "IsUploadModalOpen: ", isUploadModalOpen);
@@ -987,6 +1190,11 @@ const Owner: NextPage = () => {
                   >
                     Create new Owner
                   </button>
+                  {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
+                    Upload
+                    <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
+                  </div> */}
+
                   {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
@@ -1419,6 +1627,18 @@ const Owner: NextPage = () => {
                       onChange={(e) => setComments(e.target.value)}
                       value={comments}
                     />
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      id="checked-checkbox"
+                      type="checkbox"
+                      onChange={(e) => setSendOwnerDetails(e.target.checked)}
+                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                    />
+                    <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
+                      Welcome owner via preferred communication channel
+                    </label>
                   </div>
                 </div>
               </div>

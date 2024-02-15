@@ -17,6 +17,10 @@ import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "pho
 //Date picker
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+
+//Communication
+import { sendSMS } from "~/pages/api/smsPortal";
+
 import { UploadButton } from "~/utils/uploadthing";
 import { useSession } from "next-auth/react";
 import Input from "~/components/Base/Input";
@@ -25,17 +29,54 @@ import { set } from "date-fns";
 import { router } from "@trpc/server";
 
 const Communication: NextPage = () => {
-  useSession({ required: true });
+  //useSession({ required: true });
 
-  const newClinic = api.petClinic.create.useMutation();
-  const updateClinic = api.petClinic.update.useMutation();
-  const [isUpdate, setIsUpdate] = useState(false);
+  const newCommunication = api.communication.create.useMutation();
+  //const updateClinic = api.petClinic.update.useMutation();
+  //const [isUpdate, setIsUpdate] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
 
   //For moving between different pages
   const router = useRouter();
+
+  //-------------------------------EMAILS-----------------------------------------
+  async function sendEmail(message: string, email: string): Promise<void> {
+    const response = await fetch("/api/generalEmails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message, email }),
+    });
+    console.log("response: ", response);
+
+    if (!response.ok) {
+      console.error("Failed to send email");
+      // Attempt to parse the response to get the error message
+      try {
+        const errorData = (await response.json()) as { message?: string };
+        throw new Error(errorData.message ?? "Failed to send email");
+      } catch (error) {
+        // If parsing fails, throw a generic error
+        throw new Error("Failed to send email");
+      }
+    }
+
+    // Attempt to parse the successful response
+    try {
+      const responseData = (await response.json()) as { message: string; data?: unknown };
+      console.log("responseData: ", responseData);
+      // Handle the successful response as needed. For example, log the message or use the data.
+      console.log(responseData.message); // Log the success message
+      // Optionally, you can do something with responseData.data if your API returns additional data
+    } catch (error) {
+      // If parsing fails or the response structure isn't as expected, handle or log the error
+      console.error("Error parsing response data", error);
+      throw new Error("Error processing the server response");
+    }
+  }
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -59,10 +100,10 @@ const Communication: NextPage = () => {
   //-------------------------------TABLE-----------------------------------------
   //const data = api.user.searchUsers.useQuery({ searchQuery: query });
   //delete specific row
-  const deleteRow = api.petClinic.deleteClinic.useMutation();
+  const deleteRow = api.communication.deleteCommunication.useMutation();
   const handleDeleteRow = async (id: number) => {
     setIsDeleteModalOpen(false);
-    await deleteRow.mutateAsync({ clinicID: id });
+    await deleteRow.mutateAsync({ communicationID: id });
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
   };
 
@@ -74,10 +115,24 @@ const Communication: NextPage = () => {
   //-------------------------------ID-----------------------------------------
   const [id, setID] = useState(0);
 
+  //-----------------------------SUCCESS-----------------------------------------
+  //Success fields
+  const [success, setSuccess] = useState("No");
+
+  //----------------------------TYPE OF MESSAGE-----------------------------------------
+  //Type of message fields
+  //const [type, setType] = useState("Email");
+
   //-------------------------------ORDER-----------------------------------------
   //Order fields
   //sorts the table according to specific fields
   const [order, setOrder] = useState("date");
+
+  //-------------------------------ALL USERS, PET OWNERS AND VOLUNTEERS-----------------------------------------
+  //All users, pet owners and volunteers
+  // const allUsers = api.communication.getAllUsers.useQuery();
+  // const allPetOwners = api.communication.getAllPetOwners.useQuery();
+  // const allVolunteers = api.communication.getAllVolunteers.useQuery();
 
   //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
   const observerTarget = useRef<HTMLDivElement | null>(null);
@@ -88,9 +143,9 @@ const Communication: NextPage = () => {
     fetchNextPage,
     hasNextPage,
     refetch,
-  } = api.petClinic.searchClinicsInfinite.useInfiniteQuery(
+  } = api.communication.searchCommunicationsInfinite.useInfiniteQuery(
     {
-      clinicID: id,
+      communicationID: id,
       limit: limit,
       searchQuery: query,
       order: order,
@@ -130,13 +185,13 @@ const Communication: NextPage = () => {
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order]);
+  }, [isDeleted, isCreate, query, order]);
 
-  const clinic = user_data?.find((clinic) => clinic.clinicID === id);
+  const communication = user_data?.find((communication) => communication.communicationID === id);
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
-  const deleteAllUsers = api.petClinic.deleteAllClinics.useMutation();
+  const deleteAllUsers = api.communication.deleteAllCommunications.useMutation();
   const handleDeleteAllUsers = async () => {
     await deleteAllUsers.mutateAsync();
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
@@ -145,9 +200,15 @@ const Communication: NextPage = () => {
   //---------------------------------PRINTING----------------------------------
   const printComponentRef = useRef(null);
 
+  //---------------------------------UPDATE AT----------------------------------
+  const [updatedAt, setUpdatedAt] = useState(new Date());
+
   //---------------------------------EDIT BOXES----------------------------------
-  const [comments, setComments] = useState("");
-  const [startingDate, setStartingDate] = useState(new Date());
+  const [message, setMessage] = useState("");
+  const [includeUser, setIncludeUser] = useState(false);
+  const [includePetOwner, setIncludePetOwner] = useState(false);
+  const [includeVolunteer, setIncludeVolunteer] = useState(false);
+  //const [startingDate, setStartingDate] = useState(new Date());
   //const [image, setImage] = useState("");
 
   //userID
@@ -173,12 +234,14 @@ const Communication: NextPage = () => {
   const areaRef = useRef<HTMLDivElement>(null);
   const btnAreaRef = useRef<HTMLButtonElement>(null);
 
-  const [conditions, setConditions] = useState(false);
-  const [conditionOption, setConditionOption] = useState("Select one");
-  const conditionRef = useRef<HTMLDivElement>(null);
-  const btnConditionRef = useRef<HTMLButtonElement>(null);
+  const [preferredCommunication, setPreferredCommunication] = useState(false);
+  const [preferredOption, setPreferredCommunicationOption] = useState("Select one");
+  const preferredCommunicationRef = useRef<HTMLDivElement>(null);
+  const btnPreferredCommunicationRef = useRef<HTMLButtonElement>(null);
 
-  //GREATER AREA
+  //GREATER AREA USERS
+  //to select multiple areas
+  const [greaterAreaList, setGreaterAreaList] = useState<string[]>([]);
   const handleToggleGreaterArea = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
   };
@@ -186,6 +249,9 @@ const Communication: NextPage = () => {
   const handleGreaterAreaOption = (option: SetStateAction<string>) => {
     setGreaterAreaOption(option);
     setIsGreaterAreaOpen(false);
+    if (!greaterAreaList.includes(String(option))) {
+      setGreaterAreaList([...greaterAreaList, String(option)]);
+    }
   };
 
   useEffect(() => {
@@ -208,15 +274,25 @@ const Communication: NextPage = () => {
 
   const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
 
+  //show all the clinics that the volunteer attended
+  const [showGreaterArea, setShowGreaterArea] = useState(false);
+  const handleShowGreaterArea = () => {
+    setShowGreaterArea(!showGreaterArea);
+  };
+
   //AREA
+  //to select multiple areas
+  const [areaList, setAreaList] = useState<string[]>([]);
   const handleToggleArea = () => {
     setIsAreaOpen(!isAreaOpen);
   };
 
-  //SetStateAction<string>
-  const handleAreaOption = (option: string) => {
+  const handleAreaOption = (option: SetStateAction<string>) => {
     setAreaOption(option);
     setIsAreaOpen(false);
+    if (!areaList.includes(String(option))) {
+      setAreaList([...areaList, String(option)]);
+    }
   };
 
   useEffect(() => {
@@ -232,25 +308,31 @@ const Communication: NextPage = () => {
     };
   }, []);
 
-  //CONDITIONS
-  const handleToggleConditions = () => {
-    setConditions(!conditions);
+  //show all the clinics that the volunteer attended
+  const [showArea, setShowArea] = useState(false);
+  const handleShowArea = () => {
+    setShowArea(!showGreaterArea);
   };
 
-  const handleConditionOption = (option: SetStateAction<string>) => {
-    setConditionOption(option);
-    setConditions(false);
+  //PREFERRED COMMUNICATION
+  const handleTogglePreferredCommunication = () => {
+    setPreferredCommunication(!preferredCommunication);
+  };
+
+  const handlePreferredCommunicationOption = (option: SetStateAction<string>) => {
+    setPreferredCommunicationOption(option);
+    setPreferredCommunication(false);
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        conditionRef.current &&
-        !conditionRef.current.contains(event.target as Node) &&
-        btnConditionRef.current &&
-        !btnConditionRef.current.contains(event.target as Node)
+        preferredCommunicationRef.current &&
+        !preferredCommunicationRef.current.contains(event.target as Node) &&
+        btnPreferredCommunicationRef.current &&
+        !btnPreferredCommunicationRef.current.contains(event.target as Node)
       ) {
-        setConditions(false);
+        setPreferredCommunication(false);
       }
     };
 
@@ -260,109 +342,153 @@ const Communication: NextPage = () => {
     };
   }, []);
 
-  const conditionOptions = [
-    "Unknown",
-    "Fair",
-    "Light wind",
-    "Strong wind",
-    "Light rain",
-    "Heavy rain",
-    "Excessively hot",
-    "Excessively cold",
-    "Free food parcels",
-    "Incentive competition",
-    "External restrictions",
-  ];
-
-  // const [sendUserDetails, setSendUserDetails] = useState(false);
-
-  //-------------------------------UPDATE USER-----------------------------------------
-  //Update the user's details in fields
-  const handleUpdateUserProfile = async (id: number) => {
-    setID(id);
-
-    const clinic = user_data?.find((clinic) => clinic.clinicID === id);
-    if (clinic) {
-      // Assuming userQuery.data contains the user object
-      const userData = clinic;
-      setGreaterAreaOption(userData?.greaterArea ?? "Select one");
-      setAreaOption(userData.area ?? "Select one");
-      setStartingDate(userData?.date ?? new Date());
-      setComments(userData.comments ?? "");
-      setConditionOption(userData.conditions ?? "Select one");
-
-      //Make sure thet area and street options have a value
-      if (userData.area === "") {
-        setAreaOption("Select one");
-      }
-    }
-
-    //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
-    //isCreate ? setIsCreate(false) : setIsCreate(false);
-    setIsUpdate(true);
-    setIsCreate(false);
-  };
-
-  useEffect(() => {
-    if (clinic) {
-      // Assuming userQuery.data contains the user object
-      const userData = clinic;
-      setGreaterAreaOption(userData.greaterArea ?? "Select one");
-      setAreaOption(userData.area ?? "");
-      setStartingDate(userData.date ?? new Date());
-      setComments(userData.comments ?? "");
-      setConditionOption(userData.conditions ?? "Select one");
-
-      if (userData.area === "") {
-        console.log("Area option is select one");
-        setAreaOption("Select one");
-      }
-    }
-  }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
-
-  const handleUpdateUser = async () => {
-    await updateClinic.mutateAsync({
-      clinicID: id,
-      greaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      area: areaOption === "Select one" ? "" : areaOption,
-      date: startingDate,
-      conditions: conditionOption === "Select one" ? "" : conditionOption,
-      comments: comments,
-    });
-    //After the newUser has been created make sure to set the fields back to empty
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
-    setConditionOption("Select one");
-    setComments("");
-    setIsUpdate(false);
-    setIsCreate(false);
-  };
+  const preferredCommunicationOptions = ["Email", "SMS"];
 
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
     setGreaterAreaOption("Select one");
     setAreaOption("Select one");
-    setStartingDate(new Date());
-    setComments("");
-    setConditionOption("Select one");
+
+    // setStartingDate(new Date());
+    setMessage("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setIsCreate(true);
-    setIsUpdate(false);
   };
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
-    await newClinic.mutateAsync({
-      greaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      area: areaOption === "Select one" ? "" : areaOption,
-      date: startingDate,
-      comments: comments,
-      conditions: conditionOption === "Select one" ? "" : conditionOption,
+    //All users, pet owners and volunteers
+    const allUsers = api.communication.getAllUsers.useQuery({ greaterArea: greaterAreaList, area: areaList });
+    const allPetOwners = api.communication.getAllPetOwners.useQuery({ greaterArea: greaterAreaList, area: areaList });
+    const allVolunteers = api.communication.getAllVolunteers.useQuery({ greaterArea: greaterAreaList, area: areaList });
+
+    const [userSuccess, setUserSuccess] = useState("No");
+    const [petOwnerSuccess, setPetOwnerSuccess] = useState("No");
+    const [volunteerSuccess, setVolunteerSuccess] = useState("No");
+    //Send user details
+
+    //Email
+    if (preferredOption === "Email") {
+      //loop through all the users and send them an email
+      allUsers?.data?.map(async (user) => {
+        const email = user?.email ?? "";
+        //do a try catch statement here
+        try {
+          await sendEmail(message, email);
+          console.log("Email sent successfully");
+          setUserSuccess("Yes");
+        } catch (error) {
+          console.error("Failed to send email", error);
+          setUserSuccess("No");
+        }
+        //await sendEmail(message, email);
+      });
+
+      //loop through all the pet owners and send them an email
+      allPetOwners?.data?.map(async (petOwner) => {
+        const email = petOwner?.email ?? "";
+        //do a try statement here
+        try {
+          await sendEmail(message, email);
+          console.log("Email sent successfully");
+          setPetOwnerSuccess("Yes");
+        } catch (error) {
+          console.error("Failed to send email", error);
+          setPetOwnerSuccess("No");
+        }
+        // await sendEmail(message, email);
+      });
+
+      //loop through all the volunteers and send them an email
+      allVolunteers?.data?.map(async (volunteer) => {
+        const email = volunteer?.email ?? "";
+        //do a ttry statement here
+        try {
+          await sendEmail(message, email);
+          console.log("Email sent successfully");
+          setVolunteerSuccess("Yes");
+        } catch (error) {
+          console.error("Failed to send email", error);
+          setVolunteerSuccess("No");
+        }
+        //await sendEmail(message, email);
+      });
+      //await sendEmail(message, email);
+    }
+    //SMS
+    if (preferredOption === "SMS") {
+      //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
+      //loop through all the users
+      allUsers?.data?.map(async (user) => {
+        const mobile = user?.mobile ?? "";
+        const destinationNumber = mobile;
+        try {
+          await sendSMS(message, destinationNumber);
+          console.log("SMS sent successfully");
+          setUserSuccess("Yes");
+        } catch (error) {
+          console.error("Failed to send SMS", error);
+          setUserSuccess("No");
+        }
+      });
+
+      //loop through all the pet owners
+      allPetOwners?.data?.map(async (petOwner) => {
+        const mobile = petOwner?.mobile ?? "";
+        const destinationNumber = mobile;
+        try {
+          await sendSMS(message, destinationNumber);
+          console.log("SMS sent successfully");
+          setPetOwnerSuccess("Yes");
+        } catch (error) {
+          console.error("Failed to send SMS", error);
+          setPetOwnerSuccess("No");
+        }
+      });
+
+      //loop through all the volunteers
+      allVolunteers?.data?.map(async (volunteer) => {
+        const mobile = volunteer?.mobile ?? "";
+        const destinationNumber = mobile;
+        try {
+          await sendSMS(message, destinationNumber);
+          console.log("SMS sent successfully");
+          setVolunteerSuccess("Yes");
+        } catch (error) {
+          console.error("Failed to send SMS", error);
+          setVolunteerSuccess("No");
+        }
+      });
+    }
+
+    if (userSuccess === "Yes" && petOwnerSuccess === "Yes" && volunteerSuccess === "Yes") {
+      setSuccess("Yes");
+    } else {
+      setSuccess("No");
+    }
+
+    const recipients = [""];
+    if (includeUser) {
+      recipients.push("User");
+    }
+    if (includePetOwner) {
+      recipients.push("Pet Owner");
+    }
+    if (includeVolunteer) {
+      recipients.push("Volunteer");
+    }
+
+    await newCommunication.mutateAsync({
+      message: message,
+      recipients: recipients,
+      greaterArea: greaterAreaList,
+      area: areaList,
+      type: preferredOption,
+      success: success,
     });
 
     setIsCreate(false);
-    setIsUpdate(false);
 
     // return newUser_;
   };
@@ -373,26 +499,17 @@ const Communication: NextPage = () => {
     setIsViewProfilePage(true);
     setID(id);
 
-    const clinic = user_data?.find((clinic) => clinic.clinicID === id);
-    console.log("Clinic view profile button has this value for clinic: ", clinic);
+    const communication = user_data?.find((communication) => communication.communicationID === id);
+    console.log("Communication view profile button has this value for communication: ", communication);
     // console.log("View profile page: ", JSON.stringify(clinic.data));
-    if (clinic) {
+    if (communication) {
       // Assuming userQuery.data contains the user object
-      const userData = clinic;
-      setGreaterAreaOption(userData.greaterArea ?? "");
-      setAreaOption(userData.area ?? "");
-      setStartingDate(userData.date ?? new Date());
-      setComments(userData.comments ?? "");
-      setConditionOption(userData.conditions ?? "Select one");
-
-      //Make sure thet area and street options have a value
-      if (userData.area === "Select one") {
-        setAreaOption("");
-        console.log("Area option is select one");
-      }
+      const userData = communication;
+      setMessage(userData.message ?? "");
+      setPreferredCommunicationOption(userData.type ?? "");
+      //setType(userData.type ?? "");
+      setSuccess(userData.success ?? "No");
     }
-
-    setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(true);
   };
@@ -402,40 +519,25 @@ const Communication: NextPage = () => {
     if (isViewProfilePage) {
       //void clinic.refetch();
     }
-    if (clinic) {
-      const userData = clinic;
-      setGreaterAreaOption(userData.greaterArea ?? "");
-      setAreaOption(userData.area ?? "");
-      setStartingDate(userData.date ?? new Date());
-      setComments(userData.comments ?? "");
-      //console.log("Select one");
-      //Make sure thet area and street options have a value
-      if (userData.area === "Select one" && !isUpdate) {
-        setAreaOption("");
-      }
-      if (userData.area === "" && isUpdate) {
-        setAreaOption("Select one");
-      }
+    if (communication) {
+      const userData = communication;
+      setMessage(userData.message ?? "");
+      setPreferredCommunicationOption(userData.type ?? "");
+      setSuccess(userData.success ?? "No");
     }
   }, [isViewProfilePage]); // Effect runs when userQuery.data changes
-
-  //Go to update page from the view profile page
-  const handleUpdateFromViewProfilePage = async () => {
-    setIsUpdate(true);
-    setIsViewProfilePage(false);
-    window.scrollTo({ top: 0, behavior: "instant" });
-  };
 
   //-------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = () => {
     //console.log("Back button pressed");
-    setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);
     setID(0);
+    setMessage("");
     setGreaterAreaOption("Select one");
     setAreaOption("Select one");
-    setComments("");
+    setPreferredCommunicationOption("Select one");
+    setSuccess("No");
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -450,10 +552,16 @@ const Communication: NextPage = () => {
     const mandatoryFields: string[] = [];
     const errorFields: { field: string; message: string }[] = [];
 
-    if (greaterAreaOption === "Select one") mandatoryFields.push("Greater Area");
-    if (startingDate === null) mandatoryFields.push("Date");
-    if (areaOption === "Select one") mandatoryFields.push("Area");
-    if (conditionOption === "Select one") mandatoryFields.push("Condition");
+    if (message === "") mandatoryFields.push("Message");
+
+    //select atleast one recipient
+    if (!includeUser && !includePetOwner && !includeVolunteer) mandatoryFields.push("Select atleast one recipient");
+
+    //select preferred communication
+    if (preferredOption === "Select one") mandatoryFields.push("Select type of communication");
+
+    //select atleast one field
+    if (greaterAreaList.length === 0 && areaList.length === 0) mandatoryFields.push("Select atleast one field");
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -461,11 +569,7 @@ const Communication: NextPage = () => {
     if (mandatoryFields.length > 0 || errorFields.length > 0) {
       setIsCreateButtonModalOpen(true);
     } else {
-      if (isUpdate) {
-        void handleUpdateUser();
-      } else {
-        void handleNewUser();
-      }
+      void handleNewUser();
     }
   };
 
@@ -486,91 +590,14 @@ const Communication: NextPage = () => {
     setOrder(field);
   };
 
-  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  // const observerTarget = useRef<HTMLDivElement | null>(null);
-
-  // const [limit] = useState(12);
-  // const {
-  //   data: queryData,
-  //   fetchNextPage,
-  //   hasNextPage,
-  //   refetch,
-  // } = api.petClinic.searchClinicsInfinite.useInfiniteQuery(
-  //   {
-  //     clinicID: id,
-  //     limit: limit,
-  //     searchQuery: query,
-  //     order: order,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => {
-  //       console.log("Next Cursor: " + lastPage.nextCursor);
-  //       return lastPage.nextCursor;
-  //     },
-  //     enabled: false,
-  //   },
-  // );
-
-  // //Flattens the pages array into one array
-  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
-
-  // //Checks intersection of the observer target and reassigns target element once true
-  // useEffect(() => {
-  //   if (!observerTarget.current || !fetchNextPage) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-  //     },
-  //     { threshold: 1 },
-  //   );
-
-  //   if (observerTarget.current) observer.observe(observerTarget.current);
-
-  //   const currentTarget = observerTarget.current;
-
-  //   return () => {
-  //     if (currentTarget) observer.unobserve(currentTarget);
-  //   };
-  // }, [fetchNextPage, hasNextPage, observerTarget]);
-
-  // //Make it retrieve the data from tab;e again when the user is updated, deleted or created
-  // useEffect(() => {
-  //   void refetch();
-  // }, [isUpdate, isDeleted, isCreate, query, order]);
-
-  //-------------------------------------DATEPICKER--------------------------------------
-  // Define the props for your custom input component
-  interface CustomInputProps {
-    value?: string;
-    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  }
-
-  // CustomInput component with explicit types for the props
-  const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-3 py-2" onClick={onClick}>
-      <svg
-        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-      </svg>
-      <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
-    </button>
-  );
-
   return (
     <>
       <Head>
-        <title>Clinic Profiles</title>
+        <title>Communication Profiles</title>
       </Head>
       <main className="flex flex-col">
         <Navbar />
-        {!isCreate && !isUpdate && !isViewProfilePage && (
+        {!isCreate && !isViewProfilePage && (
           <>
             <div className="flex flex-col text-black">
               <DeleteButtonModal
@@ -591,7 +618,7 @@ const Communication: NextPage = () => {
                     className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
                     onClick={handleCreateNewUser}
                   >
-                    Create new Clinic
+                    Create New Message
                   </button>
                   {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
@@ -604,29 +631,16 @@ const Communication: NextPage = () => {
                     <tr>
                       <th className="px-4 py-2"></th>
                       <th className=" px-4 py-2">ID</th>
-                      <th className="w-[35px] px-4 py-2">
-                        <span className="group relative inline-block">
-                          <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
-                            Clinic Date
-                          </button>
-                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                            Sort reverse chronologically
-                          </span>
-                        </span>
-                      </th>
-
+                      <th className="px-4 py-2">Message</th>
+                      <th className="px-4 py-2">Type</th>
+                      <th className="px-4 py-2">Recipients</th>
                       <th className="px-4 py-2">Greater Area</th>
                       <th className="px-4 py-2">Area</th>
-                      <th className="px-4 py-2">
-                        Conditions
-                        {/* <button className={`${order == "condition" ? "underline" : ""}`} onClick={() => handleOrderFields("condition")}>
-                          Conditions
-                        </button> */}
-                      </th>
+                      <th className="px-4 py-2">Success</th>
                       <th className="w-[35px] px-4 py-2">
                         <span className="group relative inline-block">
                           <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                            Last Update
+                            Date
                           </button>
                           <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                             Sort reverse chronologically
@@ -642,17 +656,19 @@ const Communication: NextPage = () => {
                           <td className=" border px-4 py-2">
                             <div className="px-4 py-2">{index + 1}</div>
                           </td>
-                          <td className="border px-4 py-2">C{user.clinicID}</td>
+                          <td className="border px-4 py-2">C{user.communicationID}</td>
+                          <td className="border px-4 py-2">{user.message}</td>
+                          <td className="border px-4 py-2">{user.type}</td>
                           <td className="border px-4 py-2">
-                            {user?.date?.getDate()?.toString() ?? ""}
-                            {"/"}
-                            {((user?.date?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                            {"/"}
-                            {user?.date?.getFullYear()?.toString() ?? ""}
+                            {
+                              //Show the list of all the recipients
+                              user.recipients
+                              //user.recipients?.map((user: string) => user).join(", ") ?? ""
+                            }
                           </td>
                           <td className="border px-4 py-2">{user.greaterArea}</td>
                           <td className="border px-4 py-2">{user.area}</td>
-                          <td className="border px-4 py-2">{user.conditions}</td>
+                          <td className="border px-4 py-2">{user.success}</td>
                           <td className=" border px-4 py-2">
                             {user?.updatedAt?.getDate()?.toString() ?? ""}
                             {"/"}
@@ -669,36 +685,33 @@ const Communication: NextPage = () => {
                                   className="block"
                                   onClick={() =>
                                     handleDeleteModal(
-                                      user.clinicID ?? 0,
-                                      String(user.clinicID),
-                                      user.date?.getDate()?.toString() +
-                                        "/" +
-                                        ((user.date?.getMonth() ?? 0) + 1)?.toString() +
-                                        "/" +
-                                        user.date?.getFullYear()?.toString() ?? "",
+                                      user.communicationID ?? 0,
+                                      String(user.communicationID),
+                                      //get the first 15 charactters of the message
+                                      user.message?.length ?? 0 > 15 ? user.message?.substring(0, 15) + "..." : user.message ?? "",
                                     )
                                   }
                                 />
                                 <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  Delete clinic
+                                  Delete communication
                                 </span>
                               </span>
                             </div>
 
-                            <div className="relative flex items-center justify-center">
+                            {/* <div className="relative flex items-center justify-center">
                               <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                 <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.clinicID ?? 0)} />
                                 <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                   Update clinic
                                 </span>
                               </span>
-                            </div>
+                            </div> */}
 
                             <div className="relative flex items-center justify-center">
                               <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.clinicID ?? 0)} />
+                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.communicationID ?? 0)} />
                                 <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  View clinic profile
+                                  View communication profile
                                 </span>
                               </span>
                             </div>
@@ -713,11 +726,11 @@ const Communication: NextPage = () => {
             </div>
           </>
         )}
-        {(isCreate || isUpdate) && (
+        {isCreate && (
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <b className=" text-2xl">{isUpdate ? "Update Pet Clinic Data" : "Create New Pet Clinic"}</b>
+                <b className=" text-2xl">{"Send Message"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -732,134 +745,202 @@ const Communication: NextPage = () => {
               </div>
             </div>
             <div className="flex grow flex-col items-center">
-              <div className="flex">
-                {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
-              </div>
               <div className="flex w-[46%] flex-col">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Pet Clinic Data</b>
-
-                  {/*DATEPICKER*/}
-                  <div className="flex items-center">
-                    <div className=" flex">
-                      Date<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
-
-                    <DatePicker
-                      selected={startingDate}
-                      onChange={(date) => setStartingDate(date!)}
-                      dateFormat="dd/MM/yyyy"
-                      customInput={<CustomInput />}
-                      className="form-input rounded-md border py-2"
-                    />
-                  </div>
+                  <b className="mb-3 text-center text-xl">Communication Data</b>
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-4">
-                      <div className="flex">
-                        Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
-                    </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnGreaterAreaRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleToggleGreaterArea}
-                      >
-                        {isUpdate ? greaterAreaOption : greaterAreaOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {isGreaterAreaOpen && (
-                        <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {greaterAreaOptions.map((option) => (
-                              <li key={option} onClick={() => handleGreaterAreaOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Area<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
-                    </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnAreaRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-2 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleToggleArea}
-                      >
-                        {areaOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {isAreaOpen && (
-                        <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {areaOptions.map((option) => (
-                              <li key={option} onClick={() => handleAreaOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/*CONDITIONS*/}
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Conditions<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
-                    </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnConditionRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleToggleConditions}
-                      >
-                        {isUpdate ? conditionOption : conditionOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {conditions && (
-                        <div ref={conditionRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {conditionOptions.map((option) => (
-                              <li key={option} onClick={() => handleConditionOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <div className="w-32 pt-3">Comments: </div>
+                    <div className="w-32 pt-3">Message: </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
-                      placeholder="Type here: e.g. Notes on clinic success, attendance and noteworthy events"
-                      onChange={(e) => setComments(e.target.value)}
-                      value={comments}
+                      placeholder="Type here..."
+                      onChange={(e) => setMessage(e.target.value)}
+                      value={message}
                     />
+                  </div>
+
+                  {/*Make checkboxes to select a user */}
+                  <div className="flex flex-col items-center">
+                    <span>Select recipient</span>
+                    <div className="flex items-center justify-around">
+                      <div className="flex flex-col">
+                        <div className="flex items-center p-3">
+                          <input
+                            id="checked-checkbox"
+                            type="checkbox"
+                            onChange={(e) => setIncludeUser(e.target.checked)}
+                            className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                          />
+                          <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
+                            User
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <div className="flex items-center p-3">
+                          <input
+                            id="checked-checkbox"
+                            type="checkbox"
+                            onChange={(e) => setIncludePetOwner(e.target.checked)}
+                            className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                          />
+                          <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
+                            Pet Owner
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center p-3">
+                        <input
+                          id="checked-checkbox"
+                          type="checkbox"
+                          onChange={(e) => setIncludeVolunteer(e.target.checked)}
+                          className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                        />
+                        <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
+                          Volunteer
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {(includeUser || includePetOwner || includeVolunteer) && (
+                    <>
+                      {/* Greater Area */}
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-4">
+                          <div className="flex">Greater Area: </div>
+                        </div>
+
+                        <div className="flex flex-col items-center">
+                          <button
+                            onClick={handleShowGreaterArea}
+                            className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          >
+                            Show all greater areas attended
+                          </button>
+                          {showGreaterArea && (
+                            <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                              {greaterAreaList.map((greaterArea) => (
+                                <li key={greaterArea} className=" py-2">
+                                  {greaterArea}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col">
+                          <button
+                            ref={btnGreaterAreaRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                            type="button"
+                            onClick={handleToggleGreaterArea}
+                          >
+                            {greaterAreaOption + " "}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {isGreaterAreaOpen && (
+                            <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                              <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                {greaterAreaOptions.map((option) => (
+                                  <li key={option} onClick={() => handleGreaterAreaOption(option)}>
+                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Area */}
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-4">
+                          <div className="flex">Area: </div>
+                        </div>
+
+                        <div className="flex flex-col items-center">
+                          <button
+                            onClick={handleShowArea}
+                            className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          >
+                            Show all areas attended
+                          </button>
+                          {showArea && (
+                            <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                              {areaList.map((area) => (
+                                <li key={area} className=" py-2">
+                                  {area}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col">
+                          <button
+                            ref={btnAreaRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                            type="button"
+                            onClick={handleToggleArea}
+                          >
+                            {areaOption + " "}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {isAreaOpen && (
+                            <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                              <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                {areaOptions.map((option) => (
+                                  <li key={option} onClick={() => handleAreaOption(option)}>
+                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/*PREFERRED  COMMUNICATION*/}
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">
+                        Type of Communication<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnPreferredCommunicationRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleTogglePreferredCommunication}
+                      >
+                        {preferredOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {preferredCommunication && (
+                        <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {preferredCommunicationOptions.map((option) => (
+                              <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -867,7 +948,7 @@ const Communication: NextPage = () => {
                 className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
                 onClick={() => void handleCreateButtonModal()}
               >
-                {isUpdate ? "Update" : "Create"}
+                {"Send Message"}
               </button>
             </div>
           </>
@@ -877,7 +958,7 @@ const Communication: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">Pet Clinic Profile</div>
+                <div className=" text-2xl">Communication Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -898,41 +979,53 @@ const Communication: NextPage = () => {
                     />
                   </div>
 
-                  <b className="mb-14 text-center text-xl">Pet Clinic Data</b>
+                  <b className="mb-14 text-center text-xl">Communication Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Clinic ID:</b> C{id}
+                    <b className="mr-3">Communication ID:</b> C{id}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Message:</b>{" "}
+                    {
+                      //Just get the first 15 characters of the message
+                      message?.length > 15 ? message?.substring(0, 15) + "..." : message
+                    }
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Type:</b> {preferredOption}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Recipients:</b> {}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea).join(", ")}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Area:</b> {areaList.map((area) => area).join(", ")}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Success:</b> {success}
                   </div>
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Date:</b>{" "}
-                    {startingDate?.getDate() + "/" + ((startingDate?.getMonth() ?? 0) + 1) + "/" + startingDate?.getFullYear() ?? ""}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {areaOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Conditions:</b> {conditionOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Comments:</b> {comments}
+                    {updatedAt?.getDate()?.toString() + "/" + ((updatedAt?.getMonth() ?? 0) + 1)?.toString() + "/" + updatedAt?.getFullYear()?.toString()}
                   </div>
                 </div>
               </div>
             </div>
             <div className="my-6 flex justify-center">
-              <button
+              {/* <button
                 className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
                 onClick={() => void handleUpdateFromViewProfilePage()}
               >
                 Update profile
-              </button>
+              </button> */}
               <ReactToPrint
                 trigger={() => (
                   <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">

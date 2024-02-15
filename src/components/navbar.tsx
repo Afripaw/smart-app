@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Gauge, Users, User, Dog, FirstAidKit, Bed, Info, SignOut, Person } from "phosphor-react";
+import { Gauge, Users, User, Dog, FirstAidKit, Bed, Info, SignOut, Person, Envelope } from "phosphor-react";
 import Image from "next/image";
 //import { signOut } from "next-auth/react";
 //import { router } from "@trpc/server";
@@ -45,6 +45,11 @@ const NavbarLinks = [
     name: "Database",
     href: "/info",
     icon: <Info size={24} />,
+  },
+  {
+    name: "Communication",
+    href: "/communication",
+    icon: <Envelope size={24} />,
   },
 ];
 

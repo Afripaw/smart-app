@@ -209,4 +209,15 @@ export const petClinicRouter = createTRPCRouter({
         },
       });
     }),
+
+  //get latest clinicID from identification
+  getLatestClinicID: publicProcedure.query(async ({ ctx }) => {
+    const identification = await ctx.db.identification.findUnique({
+      where: {
+        identificationID: 80,
+      },
+    });
+
+    return identification;
+  }),
 });

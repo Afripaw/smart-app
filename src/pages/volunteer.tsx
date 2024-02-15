@@ -47,6 +47,8 @@ const Volunteer: NextPage = () => {
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.volunteer.updateIdentification.useMutation();
 
+  //get latest volunteerID
+  const latestVolunteerID = api.volunteer.getLatestVolunteerID.useQuery();
   /*
   //Excel upload
   const insertExcelData = api.volunteer.insertExcelData.useMutation();
@@ -1263,7 +1265,7 @@ const Volunteer: NextPage = () => {
                     className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
                     onClick={handleCreateNewUser}
                   >
-                    Create new Volunteer
+                    Create New Volunteer
                   </button>
                   {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
                     Upload
@@ -1419,6 +1421,7 @@ const Volunteer: NextPage = () => {
                 {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
               </div>
               <div className="flex flex-col items-start">
+                {/* <div className="p-2">Volunteer ID: {(latestVolunteerID?.data?.volunteerID ?? 0) + 1}</div> */}
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
@@ -1449,7 +1452,9 @@ const Volunteer: NextPage = () => {
                       }}
                     />
                   )}
-
+                  <div className="flex py-2">
+                    Volunteer ID: <div className="px-3">V{latestVolunteerID?.data?.volunteerID ?? 0}</div>
+                  </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
                   <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />

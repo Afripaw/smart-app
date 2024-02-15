@@ -301,4 +301,15 @@ export const petOwnerRouter = createTRPCRouter({
         },
       });
     }),
+
+  //get latest ownerID from identification
+  getLatestOwnerID: publicProcedure.query(async ({ ctx }) => {
+    const identification = await ctx.db.identification.findUnique({
+      where: {
+        identificationID: 80,
+      },
+    });
+
+    return identification;
+  }),
 });

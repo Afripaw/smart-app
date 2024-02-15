@@ -84,6 +84,9 @@ const User: NextPage = () => {
     await deletAllIdentifications.mutateAsync();
   };
 
+  //get latest userID
+  const latestUserID = api.user.getLatestUserID.useQuery();
+
   //-------------------------------TABLE-----------------------------------------
   //const data = api.user.searchUsers.useQuery({ searchQuery: query });
   //delete specific row
@@ -1328,7 +1331,6 @@ const User: NextPage = () => {
                 {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
               </div>
               <div className="flex flex-col">
-                {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
                   {isUpdate && (
@@ -1367,7 +1369,9 @@ const User: NextPage = () => {
                       }}
                     />
                   )}
-
+                  <div className="flex py-2">
+                    User ID: <div className="px-3">U{latestUserID?.data?.userID ?? 0}</div>
+                  </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
                   <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />

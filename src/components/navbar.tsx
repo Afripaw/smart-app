@@ -47,7 +47,7 @@ const NavbarLinks = [
     icon: <Info size={24} />,
   },
   {
-    name: "Communication",
+    name: "Messages",
     href: "/communication",
     icon: <Envelope size={24} />,
   },
@@ -65,13 +65,13 @@ const Navbar = () => {
       <div className="justify-begin flex">
         <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="ml-auto aspect-square h-max rounded-full" width={56} height={56} />
       </div>
-      <div className="mx-auto flex items-center gap-4">
+      <div className="mx-auto flex items-center gap-2">
         {NavbarLinks.map((link) => (
           <div key={link.name}>
             <Link
               key={link.name}
               href={link.href}
-              className={`flex rounded-lg px-6 py-2  hover:bg-gray-200/30 ${router.pathname === link.href ? "bg-white text-black" : "text-white"}`}
+              className={`flex rounded-lg px-4 py-2  hover:bg-gray-200/30 ${router.pathname === link.href ? "bg-white text-black" : "text-white"}`}
             >
               <div className="mr-2">{link.icon}</div>
               {link.name}
@@ -79,7 +79,7 @@ const Navbar = () => {
           </div>
         ))}
       </div>
-      <Link className="flex rounded-lg px-6 py-2 text-white hover:bg-gray-200/30" href="/" onClick={handleLogout}>
+      <Link className="flex rounded-lg px-4 py-2 text-white hover:bg-gray-200/30" href="/" onClick={handleLogout}>
         <SignOut size={24} />
         Logout
       </Link>

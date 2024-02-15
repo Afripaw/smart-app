@@ -211,4 +211,15 @@ export const communicationRouter = createTRPCRouter({
         },
       });
     }),
+
+  //get latest communicationID from identification
+  getLatestCommunicationID: publicProcedure.query(async ({ ctx }) => {
+    const identification = await ctx.db.identification.findUnique({
+      where: {
+        identificationID: 80,
+      },
+    });
+
+    return identification;
+  }),
 });

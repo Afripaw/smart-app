@@ -413,4 +413,16 @@ export const volunteerRouter = createTRPCRouter({
         },
       });
     }),
+
+  //get latest volunteer
+  //get latest volunteerID from identification
+  getLatestVolunteerID: publicProcedure.query(async ({ ctx }) => {
+    const identification = await ctx.db.identification.findUnique({
+      where: {
+        identificationID: 80,
+      },
+    });
+
+    return identification;
+  }),
 });

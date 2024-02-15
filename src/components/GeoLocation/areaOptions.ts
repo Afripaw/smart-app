@@ -1,4 +1,5 @@
 export const areaOptions = [
+  "All areas",
   "Vrygrond",
   "Overcome Heights",
   "Xakabantu",

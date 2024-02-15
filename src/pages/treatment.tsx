@@ -43,6 +43,9 @@ const Treatment: NextPage = () => {
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.petTreatment.updateIdentification.useMutation();
 
+  //get latest treatmentID
+  const latestTreatmentID = api.petTreatment.getLatestTreatmentID.useQuery();
+
   /*
   //Excel upload
   const insertExcelData = api.petTreatment.insertExcelData.useMutation();
@@ -938,6 +941,9 @@ const Treatment: NextPage = () => {
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Pet Treatment Data</b>
 
+                  <div className="flex py-2">
+                    Treatment ID: <div className="px-3">T{latestTreatmentID?.data?.treatmentID ?? 0}</div>
+                  </div>
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
                     <div className=" flex">

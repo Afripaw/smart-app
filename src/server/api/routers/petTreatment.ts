@@ -235,4 +235,15 @@ export const petTreatmentRouter = createTRPCRouter({
         },
       });
     }),
+
+  //get latest treatmentID from identification
+  getLatestTreatmentID: publicProcedure.query(async ({ ctx }) => {
+    const identification = await ctx.db.identification.findUnique({
+      where: {
+        identificationID: 80,
+      },
+    });
+
+    return identification;
+  }),
 });

@@ -44,6 +44,9 @@ const Communication: NextPage = () => {
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.communication.updateIdentification.useMutation();
 
+  //get latest communicationID
+  const latestCommunicationID = api.communication.getLatestCommunicationID.useQuery();
+
   //-------------------------------EMAILS-----------------------------------------
   async function sendEmail(message: string, email: string): Promise<void> {
     const response = await fetch("/api/generalEmails", {
@@ -252,7 +255,12 @@ const Communication: NextPage = () => {
   const handleGreaterAreaOption = (option: SetStateAction<string>) => {
     setGreaterAreaOption(option);
     setIsGreaterAreaOpen(false);
-    if (!greaterAreaList.includes(String(option))) {
+    if (option === "All greater areas") {
+      //select all the greater areas except the first one
+      const greaterAreaOptionsSelected = greaterAreaOptions.slice(1);
+      setGreaterAreaList(greaterAreaOptionsSelected);
+      // setGreaterAreaList(greaterAreaOptions.map((option) => option);
+    } else if (!greaterAreaList.includes(String(option))) {
       setGreaterAreaList([...greaterAreaList, String(option)]);
     }
   };
@@ -275,7 +283,7 @@ const Communication: NextPage = () => {
     };
   }, []);
 
-  const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+  const greaterAreaOptions = ["All greater areas", "Flagship", "Replication area 1", "Replication area 2"];
 
   //show all the clinics that the volunteer attended
   const [showGreaterArea, setShowGreaterArea] = useState(false);
@@ -293,7 +301,12 @@ const Communication: NextPage = () => {
   const handleAreaOption = (option: SetStateAction<string>) => {
     setAreaOption(option);
     setIsAreaOpen(false);
-    if (!areaList.includes(String(option))) {
+    if (option === "All areas") {
+      //select all the greater areas except the first one
+      const areaOptionsSelected = areaOptions.slice(1);
+      setAreaList(areaOptionsSelected);
+      // setGreaterAreaList(greaterAreaOptions.map((option) => option);
+    } else if (!areaList.includes(String(option))) {
       setAreaList([...areaList, String(option)]);
     }
   };
@@ -576,16 +589,17 @@ const Communication: NextPage = () => {
     const mandatoryFields: string[] = [];
     const errorFields: { field: string; message: string }[] = [];
 
-    if (message === "") mandatoryFields.push("Message");
+    if (message === "") mandatoryFields.push("Message content required");
 
     //select atleast one recipient
-    if (!includeUser && !includePetOwner && !includeVolunteer) mandatoryFields.push("Select atleast one recipient");
+    if (!includeUser && !includePetOwner && !includeVolunteer) mandatoryFields.push("Select at least one recipient class");
 
     //select preferred communication
     if (preferredOption === "Select one") mandatoryFields.push("Select type of communication");
 
     //select atleast one field
-    if (greaterAreaList.length === 0 && areaList.length === 0) mandatoryFields.push("Select atleast one field");
+    if (greaterAreaList.length === 0) mandatoryFields.push("Select at least one recipient greater area");
+    if (areaList.length === 0) mandatoryFields.push("Select at least one recipient area");
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -680,7 +694,7 @@ const Communication: NextPage = () => {
                           <td className=" border px-4 py-2">
                             <div className="px-4 py-2">{index + 1}</div>
                           </td>
-                          <td className="border px-4 py-2">C{user.communicationID}</td>
+                          <td className="border px-4 py-2">M{user.communicationID}</td>
                           <td className="border px-4 py-2">{user.message}</td>
                           <td className="border px-4 py-2">{user.type}</td>
                           <td className="border px-4 py-2">
@@ -754,7 +768,7 @@ const Communication: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <b className=" text-2xl">{"Send Message"}</b>
+                <b className=" text-2xl">{"Create New Message"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -774,8 +788,13 @@ const Communication: NextPage = () => {
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Communication Data</b>
 
+                  <div className="flex py-2">
+                    Message ID: <div className="px-3">M{latestCommunicationID?.data?.communicationID ?? 0}</div>
+                  </div>
                   <div className="flex items-start">
-                    <div className="w-32 pt-3">Message: </div>
+                    <div className="flex w-32 pt-3">
+                      Message<div className="text-lg text-main-orange">*</div>:{" "}
+                    </div>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                       placeholder="Type here..."
@@ -786,7 +805,9 @@ const Communication: NextPage = () => {
 
                   {/*Make checkboxes to select a user */}
                   <div className="flex flex-col items-center">
-                    <span>Select recipient</span>
+                    <span className="flex">
+                      Select Recipients<div className="text-lg text-main-orange">*</div>
+                    </span>
                     <div className="flex items-center justify-around">
                       <div className="flex flex-col">
                         <div className="flex items-center p-3">
@@ -797,7 +818,7 @@ const Communication: NextPage = () => {
                             className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                           />
                           <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
-                            User
+                            Active Users
                           </label>
                         </div>
                       </div>
@@ -811,7 +832,7 @@ const Communication: NextPage = () => {
                             className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                           />
                           <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
-                            Pet Owner
+                            Active Pet Owners
                           </label>
                         </div>
                       </div>
@@ -824,7 +845,7 @@ const Communication: NextPage = () => {
                           className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                         />
                         <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
-                          Volunteer
+                          Active Volunteers
                         </label>
                       </div>
                     </div>
@@ -835,7 +856,9 @@ const Communication: NextPage = () => {
                       {/* Greater Area */}
                       <div className="flex items-start">
                         <div className="mr-3 flex items-center pt-4">
-                          <div className="flex">Greater Area: </div>
+                          <div className="flex">
+                            Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
+                          </div>
                         </div>
 
                         <div className="flex flex-col items-center">
@@ -843,7 +866,7 @@ const Communication: NextPage = () => {
                             onClick={handleShowGreaterArea}
                             className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                           >
-                            Show all greater areas attended
+                            Show all greater areas of recipients
                           </button>
                           {showGreaterArea && (
                             <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
@@ -885,7 +908,9 @@ const Communication: NextPage = () => {
                       {/* Area */}
                       <div className="flex items-start">
                         <div className="mr-3 flex items-center pt-4">
-                          <div className="flex">Area: </div>
+                          <div className="flex">
+                            Area<div className="text-lg text-main-orange">*</div>:{" "}
+                          </div>
                         </div>
 
                         <div className="flex flex-col items-center">
@@ -893,7 +918,7 @@ const Communication: NextPage = () => {
                             onClick={handleShowArea}
                             className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                           >
-                            Show all areas attended
+                            Show all areas of recipients
                           </button>
                           {showArea && (
                             <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">

@@ -50,7 +50,8 @@ const Owner: NextPage = () => {
 
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.petOwner.updateIdentification.useMutation();
-
+  //get latest ownerID
+  const latestOwnerID = api.petOwner.getLatestOwnerID.useQuery();
   /*
   //Excel upload
   const insertExcelData = api.petOwner.insertExcelData.useMutation();
@@ -1198,7 +1199,7 @@ const Owner: NextPage = () => {
                     className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
                     onClick={handleCreateNewUser}
                   >
-                    Create new Owner
+                    Create New Owner
                   </button>
                   {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
                     Upload
@@ -1391,7 +1392,9 @@ const Owner: NextPage = () => {
                       }}
                     />
                   )}
-
+                  <div className="flex py-2">
+                    Owner ID: <div className="px-3">N{latestOwnerID?.data?.petOwnerID ?? 0}</div>
+                  </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
                   <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />

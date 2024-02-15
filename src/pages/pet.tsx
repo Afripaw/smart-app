@@ -45,10 +45,11 @@ const Pet: NextPage = () => {
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
 
+  //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
+  const updateIdentification = api.pet.updateIdentification.useMutation();
 
-   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
-   const updateIdentification = api.pet.updateIdentification.useMutation();
-
+  //get latest petID
+  const latestPetID = api.pet.getLatestPetID.useQuery();
 
   /*
   //Excel upload
@@ -1010,7 +1011,7 @@ const Pet: NextPage = () => {
 
   // CustomInput component with explicit types for the props
   const CustomVaccine1Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
+    <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
       <svg
         className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
         aria-hidden="true"
@@ -1084,7 +1085,7 @@ const Pet: NextPage = () => {
 
   // CustomInput component with explicit types for the props
   const CustomVaccine2Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
+    <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
       <svg
         className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
         aria-hidden="true"
@@ -1142,7 +1143,7 @@ const Pet: NextPage = () => {
 
   // CustomInput component with explicit types for the props
   const CustomVaccine3Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
+    <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
       <svg
         className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
         aria-hidden="true"
@@ -2280,7 +2281,9 @@ const Pet: NextPage = () => {
                       }}
                     />
                   )}
-
+                  <div className="flex py-2">
+                    Pet ID: <div className="px-3">P{latestPetID?.data?.petID ?? 0}</div>
+                  </div>
                   <Input label="Pet Name" placeholder="Type here: e.g. Sally" value={petName} onChange={setPetName} required />
 
                   <div className="flex items-start">
@@ -2648,15 +2651,15 @@ const Pet: NextPage = () => {
                     {vaccinationShot1Option === "Yes" && (
                       <div className="flex items-start">
                         <div className="mr-3 flex items-center pt-5">
-                          <div className=" flex">Vaccination Shot 1 Date: </div>
+                          <div className=" flex pl-3">Vaccination Shot 1 Date: </div>
                         </div>
-                        <div className="py-4">
+                        <div className="pt-2">
                           <DatePicker
                             selected={vaccinationShot1Date}
                             onChange={(date) => setVaccinationShot1Date(date!)}
                             dateFormat="dd/MM/yyyy"
                             customInput={<CustomVaccine1Input />}
-                            className="form-input rounded-md border px-3 py-2"
+                            className="form-input rounded-md border py-2"
                           />
                         </div>
                       </div>
@@ -2695,15 +2698,15 @@ const Pet: NextPage = () => {
                       {vaccinationShot2Option === "Yes" && (
                         <div className="flex items-start">
                           <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">Vaccination Shot 2 Date: </div>
+                            <div className=" flex pl-3">Vaccination Shot 2 Date: </div>
                           </div>
-                          <div className="py-4">
+                          <div className="pt-2">
                             <DatePicker
                               selected={vaccinationShot2Date}
                               onChange={(date) => setVaccinationShot2Date(date!)}
                               dateFormat="dd/MM/yyyy"
                               customInput={<CustomVaccine2Input />}
-                              className="form-input rounded-md border px-3 py-2"
+                              className="form-input rounded-md border py-2"
                             />
                           </div>
                         </div>
@@ -2743,15 +2746,15 @@ const Pet: NextPage = () => {
                       {vaccinationShot3Option === "Yes" && (
                         <div className="flex items-start">
                           <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">Vaccination Shot 3 Date: </div>
+                            <div className=" flex pl-3">Vaccination Shot 3 Date: </div>
                           </div>
-                          <div className="py-4">
+                          <div className="pt-2">
                             <DatePicker
                               selected={vaccinationShot3Date}
                               onChange={(date) => setVaccinationShot3Date(date!)}
                               dateFormat="dd/MM/yyyy"
                               customInput={<CustomVaccine3Input />}
-                              className="form-input rounded-md border px-3 py-2"
+                              className="form-input rounded-md border py-2"
                             />
                           </div>
                         </div>

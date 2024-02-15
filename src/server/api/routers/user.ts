@@ -359,4 +359,15 @@ export const UserRouter = createTRPCRouter({
   deleteAllIdentification: publicProcedure.mutation(async ({ ctx }) => {
     return await ctx.db.identification.deleteMany({});
   }),
+
+  //get latest userID from identification
+  getLatestUserID: publicProcedure.query(async ({ ctx }) => {
+    const identification = await ctx.db.identification.findUnique({
+      where: {
+        identificationID: 80,
+      },
+    });
+
+    return identification;
+  }),
 });

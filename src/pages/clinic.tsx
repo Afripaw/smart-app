@@ -42,6 +42,9 @@ const Clinic: NextPage = () => {
 
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.petClinic.updateIdentification.useMutation();
+
+  //get latest volunteerID
+  const latestClinicID = api.petClinic.getLatestClinicID.useQuery();
   /*
 
   //Excel upload
@@ -696,7 +699,7 @@ const Clinic: NextPage = () => {
                     className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
                     onClick={handleCreateNewUser}
                   >
-                    Create new Clinic
+                    Create New Clinic
                   </button>
                   {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
                     Upload
@@ -849,6 +852,9 @@ const Clinic: NextPage = () => {
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Pet Clinic Data</b>
 
+                  <div className="flex py-2">
+                    Clinic ID: <div className="px-3">C{latestClinicID?.data?.clinicID ?? 0}</div>
+                  </div>
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
                     <div className=" flex">

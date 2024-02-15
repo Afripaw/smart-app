@@ -193,4 +193,22 @@ export const communicationRouter = createTRPCRouter({
 
       return volunteers;
     }),
+
+  //Update identification
+  updateIdentification: publicProcedure
+    .input(
+      z.object({
+        communicationID: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.identification.update({
+        where: {
+          identificationID: 80,
+        },
+        data: {
+          communicationID: input.communicationID,
+        },
+      });
+    }),
 });

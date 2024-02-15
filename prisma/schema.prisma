@@ -233,3 +233,16 @@ model communication {
     createdAt       DateTime @default(now())
     updatedAt       DateTime @updatedAt
 }
+
+model identification {
+    identificationID Int      @id @default(autoincrement())
+    userID           Int
+    volunteerID      Int
+    petID            Int
+    clinicID         Int
+    petOwnerID       Int
+    communicationID  Int
+    treatmentID      Int
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+}

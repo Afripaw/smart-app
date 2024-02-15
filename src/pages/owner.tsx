@@ -48,6 +48,9 @@ const Owner: NextPage = () => {
   //For moving between different pages
   const router = useRouter();
 
+  //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
+  const updateIdentification = api.petOwner.updateIdentification.useMutation();
+
   /*
   //Excel upload
   const insertExcelData = api.petOwner.insertExcelData.useMutation();
@@ -663,9 +666,9 @@ const Owner: NextPage = () => {
         "You have been registered as a owner on the AfriPaw Smart App." +
         "\nYour owner ID is: " +
         "U" +
-        id +
+        owner?.ownerID +
         "\n" +
-        // "You indicated that your preferred means of communication is: SMS" +
+        "You indicated that your preferred means of communication is: SMS" +
         "\n" +
         "Regards, AfriPaw Team";
       //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
@@ -676,6 +679,13 @@ const Owner: NextPage = () => {
       } catch (error) {
         console.error("Failed to send SMS", error);
       }
+    }
+
+    //update identification table
+    if (owner?.ownerID) {
+      await updateIdentification.mutateAsync({
+        ownerID: owner?.ownerID ?? 0,
+      });
     }
 
     //After the newUser has been created make sure to set the fields back to empty

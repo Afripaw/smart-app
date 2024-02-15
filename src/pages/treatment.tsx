@@ -40,6 +40,9 @@ const Treatment: NextPage = () => {
   //For moving between different pages
   const router = useRouter();
 
+  //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
+  const updateIdentification = api.petTreatment.updateIdentification.useMutation();
+
   /*
   //Excel upload
   const insertExcelData = api.petTreatment.insertExcelData.useMutation();
@@ -510,7 +513,7 @@ const Treatment: NextPage = () => {
 
   const handleNewUser = async () => {
     const query = router.asPath.split("?")[1] ?? "";
-    await newTreatment.mutateAsync({
+    const newUser_ = await newTreatment.mutateAsync({
       petID: petID === 0 ? Number(query?.split("&")[0]?.split("=")[1]) : petID,
       category: categoryOption === "Select one" ? "" : categoryOption,
       type: typeOption === "Select one" ? "" : typeOption,
@@ -522,6 +525,13 @@ const Treatment: NextPage = () => {
     setIsUpdate(false);
 
     // return newUser_;
+
+    //update identification table
+    if (newUser_?.treatmentID) {
+      await updateIdentification.mutateAsync({
+        treatmentID: newUser_?.treatmentID ?? 0,
+      });
+    }
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------

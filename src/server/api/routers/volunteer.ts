@@ -395,4 +395,22 @@ export const volunteerRouter = createTRPCRouter({
       });
       return result;
     }),
+
+  //Update identification
+  updateIdentification: publicProcedure
+    .input(
+      z.object({
+        volunteerID: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.identification.update({
+        where: {
+          identificationID: 80,
+        },
+        data: {
+          volunteerID: input.volunteerID,
+        },
+      });
+    }),
 });

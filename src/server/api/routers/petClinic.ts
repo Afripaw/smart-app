@@ -191,4 +191,22 @@ export const petClinicRouter = createTRPCRouter({
       });
       return result;
     }),
+
+  //Update identification
+  updateIdentification: publicProcedure
+    .input(
+      z.object({
+        clinicID: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.identification.update({
+        where: {
+          identificationID: 80,
+        },
+        data: {
+          clinicID: input.clinicID,
+        },
+      });
+    }),
 });

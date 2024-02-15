@@ -539,4 +539,22 @@ export const petRouter = createTRPCRouter({
       });
       return result;
     }),
+
+  //Update identification
+  updateIdentification: publicProcedure
+    .input(
+      z.object({
+        petID: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.identification.update({
+        where: {
+          identificationID: 80,
+        },
+        data: {
+          petID: input.petID,
+        },
+      });
+    }),
 });

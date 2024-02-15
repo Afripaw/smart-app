@@ -44,6 +44,9 @@ const Volunteer: NextPage = () => {
   //-------------------------------COMMUNICATION OF VOLUNTEER DETAILS-----------------------------------------
   const [sendVolunteerDetails, setSendVolunteerDetails] = useState(false);
 
+  //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
+  const updateIdentification = api.volunteer.updateIdentification.useMutation();
+
   /*
   //Excel upload
   const insertExcelData = api.volunteer.insertExcelData.useMutation();
@@ -811,10 +814,10 @@ const Volunteer: NextPage = () => {
           "You have been registered as a volunteer on the AfriPaw Smart App." +
           "\nYour volunteer ID is: " +
           "V" +
-          id +
+          newUser_?.volunteerID +
           "\n" +
-          // "You indicated that your preferred means of communication is: SMS" +
-          // "\n" +
+          "You indicated that your preferred means of communication is: SMS" +
+          "\n" +
           "Regards, Afripaw Team";
         //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
         const destinationNumber = mobile;
@@ -832,6 +835,13 @@ const Volunteer: NextPage = () => {
       handleUploadModal(newUser_.volunteerID, firstName, newUser_?.image ?? "");
       setIsCreate(false);
       setIsUpdate(false);
+
+      //update identification table
+      if (newUser_?.volunteerID) {
+        await updateIdentification.mutateAsync({
+          volunteerID: newUser_?.volunteerID ?? 0,
+        });
+      }
     } catch (error) {
       console.log("Mobile number is already in database");
       const mandatoryFields: string[] = [];

@@ -45,6 +45,11 @@ const Pet: NextPage = () => {
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
 
+
+   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
+   const updateIdentification = api.pet.updateIdentification.useMutation();
+
+
   /*
   //Excel upload
   const insertExcelData = api.pet.insertExcelData.useMutation();
@@ -1722,6 +1727,13 @@ const Pet: NextPage = () => {
     setIsUpdate(false);
 
     // return newUser_;
+
+    //update identification table
+    if (newUser_?.petID) {
+      await updateIdentification.mutateAsync({
+        petID: newUser_?.petID ?? 0,
+      });
+    }
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------

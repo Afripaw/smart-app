@@ -40,6 +40,8 @@ const Clinic: NextPage = () => {
   //For moving between different pages
   const router = useRouter();
 
+  //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
+  const updateIdentification = api.petClinic.updateIdentification.useMutation();
   /*
 
   //Excel upload
@@ -449,7 +451,7 @@ const Clinic: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
-    await newClinic.mutateAsync({
+    const newUser_ = await newClinic.mutateAsync({
       greaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
       area: areaOption === "Select one" ? "" : areaOption,
       date: startingDate,
@@ -461,6 +463,13 @@ const Clinic: NextPage = () => {
     setIsUpdate(false);
 
     // return newUser_;
+
+    //update identification table
+    if (newUser_?.clinicID) {
+      await updateIdentification.mutateAsync({
+        clinicID: newUser_?.clinicID ?? 0,
+      });
+    }
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------

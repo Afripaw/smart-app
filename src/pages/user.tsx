@@ -55,6 +55,35 @@ const User: NextPage = () => {
     return phrase;
   };
 
+  //-------------------------------IDENTIFICATION-----------------------------------------
+  const identification = api.user.createIdentification.useMutation();
+  const updateIdentification = api.user.updateIdentification.useMutation();
+
+  const handleCreateIdentification = async (
+    userID: number,
+    volunteerID: number,
+    petOwnerID: number,
+    petID: number,
+    treatmentID: number,
+    clinicID: number,
+    communicationID: number,
+  ) => {
+    await identification.mutateAsync({
+      userID: userID,
+      volunteerID: volunteerID,
+      petID: petID,
+      petOwnerID: petOwnerID,
+      clinicID: clinicID,
+      treatmentID: treatmentID,
+      communicationID: communicationID,
+    });
+  };
+
+  const deletAllIdentifications = api.user.deleteAllIdentification.useMutation();
+  const handleDeleteAllIdentifications = async () => {
+    await deletAllIdentifications.mutateAsync();
+  };
+
   //-------------------------------TABLE-----------------------------------------
   //const data = api.user.searchUsers.useQuery({ searchQuery: query });
   //delete specific row
@@ -719,10 +748,10 @@ const User: NextPage = () => {
           ",\n" +
           "Your AfriPaw Smart App (afripaw.app) user ID is: " +
           "U" +
-          id +
+          newUser_?.userID +
           "\n" +
           "Your username is: " +
-          id +
+          newUser_?.userID +
           "\n" +
           "Your password is: " +
           password +
@@ -745,6 +774,13 @@ const User: NextPage = () => {
       setIsCreate(false);
       setIsUpdate(false);
       setIsUpdatePassword(false);
+
+      //update identification table
+      if (newUser_?.userID) {
+        await updateIdentification.mutateAsync({
+          userID: newUser_?.userID ?? 0,
+        });
+      }
     } catch (error) {
       console.log("Mobile number is already in database");
       const mandatoryFields: string[] = [];
@@ -1142,6 +1178,20 @@ const User: NextPage = () => {
                   >
                     Create new User
                   </button>
+                  {/* <button
+                    className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                    onClick={() => void handleCreateIdentification(1000010, 1000026, 1000021, 1000030, 10000019, 1000026, 1000001)}
+                  >
+                    Create identification record
+                  </button>
+
+                  <button
+                    className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500"
+                    onClick={handleDeleteAllIdentifications}
+                  >
+                    Delete all identification
+                  </button> */}
+
                   {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}

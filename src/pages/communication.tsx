@@ -41,6 +41,9 @@ const Communication: NextPage = () => {
   //For moving between different pages
   const router = useRouter();
 
+  //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
+  const updateIdentification = api.communication.updateIdentification.useMutation();
+
   //-------------------------------EMAILS-----------------------------------------
   async function sendEmail(message: string, email: string): Promise<void> {
     const response = await fetch("/api/generalEmails", {
@@ -311,7 +314,7 @@ const Communication: NextPage = () => {
   //show all the clinics that the volunteer attended
   const [showArea, setShowArea] = useState(false);
   const handleShowArea = () => {
-    setShowArea(!showGreaterArea);
+    setShowArea(!showArea);
   };
 
   //PREFERRED COMMUNICATION
@@ -370,96 +373,110 @@ const Communication: NextPage = () => {
 
     //Email
     if (preferredOption === "Email") {
-      //loop through all the users and send them an email
-      allUsers?.data?.map(async (user) => {
-        const email = user?.email ?? "";
-        //do a try catch statement here
-        try {
-          await sendEmail(message, email);
-          console.log("Email sent successfully");
-          setUserSuccess("Yes");
-        } catch (error) {
-          console.error("Failed to send email", error);
-          setUserSuccess("No");
-        }
-        //await sendEmail(message, email);
-      });
+      if (includeUser) {
+        //loop through all the users and send them an email
+        allUsers?.data?.map(async (user) => {
+          const email = user?.email ?? "";
+          //do a try catch statement here
+          try {
+            await sendEmail(message, email);
+            console.log("Email sent successfully");
+            setUserSuccess("Yes");
+          } catch (error) {
+            console.error("Failed to send email", error);
+            setUserSuccess("No");
+          }
+          //await sendEmail(message, email);
+        });
+      }
 
-      //loop through all the pet owners and send them an email
-      allPetOwners?.data?.map(async (petOwner) => {
-        const email = petOwner?.email ?? "";
-        //do a try statement here
-        try {
-          await sendEmail(message, email);
-          console.log("Email sent successfully");
-          setPetOwnerSuccess("Yes");
-        } catch (error) {
-          console.error("Failed to send email", error);
-          setPetOwnerSuccess("No");
-        }
-        // await sendEmail(message, email);
-      });
+      if (includePetOwner) {
+        //loop through all the pet owners and send them an email
+        allPetOwners?.data?.map(async (petOwner) => {
+          const email = petOwner?.email ?? "";
+          //do a try statement here
+          try {
+            await sendEmail(message, email);
+            console.log("Email sent successfully");
+            setPetOwnerSuccess("Yes");
+          } catch (error) {
+            console.error("Failed to send email", error);
+            setPetOwnerSuccess("No");
+          }
+          // await sendEmail(message, email);
+        });
+      }
 
-      //loop through all the volunteers and send them an email
-      allVolunteers?.data?.map(async (volunteer) => {
-        const email = volunteer?.email ?? "";
-        //do a ttry statement here
-        try {
-          await sendEmail(message, email);
-          console.log("Email sent successfully");
-          setVolunteerSuccess("Yes");
-        } catch (error) {
-          console.error("Failed to send email", error);
-          setVolunteerSuccess("No");
-        }
+      if (includeVolunteer) {
+        //loop through all the volunteers and send them an email
+        allVolunteers?.data?.map(async (volunteer) => {
+          const email = volunteer?.email ?? "";
+          //do a ttry statement here
+          try {
+            await sendEmail(message, email);
+            console.log("Email sent successfully");
+            setVolunteerSuccess("Yes");
+          } catch (error) {
+            console.error("Failed to send email", error);
+            setVolunteerSuccess("No");
+          }
+          //await sendEmail(message, email);
+        });
         //await sendEmail(message, email);
-      });
-      //await sendEmail(message, email);
+      }
     }
+
     //SMS
     if (preferredOption === "SMS") {
       //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
-      //loop through all the users
-      allUsers?.data?.map(async (user) => {
-        const mobile = user?.mobile ?? "";
-        const destinationNumber = mobile;
-        try {
-          await sendSMS(message, destinationNumber);
-          console.log("SMS sent successfully");
-          setUserSuccess("Yes");
-        } catch (error) {
-          console.error("Failed to send SMS", error);
-          setUserSuccess("No");
-        }
-      });
 
-      //loop through all the pet owners
-      allPetOwners?.data?.map(async (petOwner) => {
-        const mobile = petOwner?.mobile ?? "";
-        const destinationNumber = mobile;
-        try {
-          await sendSMS(message, destinationNumber);
-          console.log("SMS sent successfully");
-          setPetOwnerSuccess("Yes");
-        } catch (error) {
-          console.error("Failed to send SMS", error);
-          setPetOwnerSuccess("No");
-        }
-      });
+      if (includeUser) {
+        //loop through all the users
+        allUsers?.data?.map(async (user) => {
+          const mobile = user?.mobile ?? "";
+          const destinationNumber = mobile;
+          try {
+            await sendSMS(message, destinationNumber);
+            console.log("SMS sent successfully");
+            setUserSuccess("Yes");
+          } catch (error) {
+            console.error("Failed to send SMS", error);
+            setUserSuccess("No");
+          }
+        });
+      }
 
-      //loop through all the volunteers
-      allVolunteers?.data?.map(async (volunteer) => {
-        const mobile = volunteer?.mobile ?? "";
-        const destinationNumber = mobile;
-        try {
-          await sendSMS(message, destinationNumber);
-          console.log("SMS sent successfully");
-          setVolunteerSuccess("Yes");
-        } catch (error) {
-          console.error("Failed to send SMS", error);
-          setVolunteerSuccess("No");
-        }
-      });
+      if (includePetOwner) {
+        //loop through all the pet owners
+        allPetOwners?.data?.map(async (petOwner) => {
+          const mobile = petOwner?.mobile ?? "";
+          const destinationNumber = mobile;
+          try {
+            await sendSMS(message, destinationNumber);
+            console.log("SMS sent successfully");
+            setPetOwnerSuccess("Yes");
+          } catch (error) {
+            console.error("Failed to send SMS", error);
+            setPetOwnerSuccess("No");
+          }
+        });
+      }
+
+      if (includeVolunteer) {
+        //loop through all the volunteers
+        allVolunteers?.data?.map(async (volunteer) => {
+          const mobile = volunteer?.mobile ?? "";
+          const destinationNumber = mobile;
+          try {
+            await sendSMS(message, destinationNumber);
+            console.log("SMS sent successfully");
+            setVolunteerSuccess("Yes");
+          } catch (error) {
+            console.error("Failed to send SMS", error);
+            setVolunteerSuccess("No");
+          }
+        });
+      }
     }
 
     if (userSuccess === "Yes" && petOwnerSuccess === "Yes" && volunteerSuccess === "Yes") {
@@ -479,7 +496,7 @@ const Communication: NextPage = () => {
       recipients.push("Volunteer");
     }
 
-    await newCommunication.mutateAsync({
+    const newUser_ = await newCommunication.mutateAsync({
       message: message,
       recipients: recipients,
       greaterArea: greaterAreaList,
@@ -491,6 +508,13 @@ const Communication: NextPage = () => {
     setIsCreate(false);
 
     // return newUser_;
+
+    //update identification table
+    if (newUser_?.communicationID) {
+      await updateIdentification.mutateAsync({
+        communicationID: newUser_?.communicationID ?? 0,
+      });
+    }
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------

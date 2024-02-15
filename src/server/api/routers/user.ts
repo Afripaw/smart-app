@@ -306,4 +306,57 @@ export const UserRouter = createTRPCRouter({
         },
       });
     }),
+
+  //Create a new identification record
+  createIdentification: publicProcedure
+    .input(
+      z.object({
+        userID: z.number(),
+        volunteerID: z.number(),
+        petID: z.number(),
+        petOwnerID: z.number(),
+        clinicID: z.number(),
+        treatmentID: z.number(),
+        communicationID: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.identification.create({
+        data: {
+          userID: input.userID,
+          volunteerID: input.volunteerID,
+          petID: input.petID,
+          petOwnerID: input.petOwnerID,
+          clinicID: input.clinicID,
+          treatmentID: input.treatmentID,
+          communicationID: input.communicationID,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+    }),
+
+  //update identification
+  updateIdentification: publicProcedure
+    .input(
+      z.object({
+        userID: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.identification.update({
+        where: {
+          identificationID: 80,
+        },
+        data: {
+          userID: input.userID,
+          updatedAt: new Date(),
+        },
+      });
+    }),
+
+  //delete all identification
+  deleteAllIdentification: publicProcedure.mutation(async ({ ctx }) => {
+    return await ctx.db.identification.deleteMany({});
+  }),
 });

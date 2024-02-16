@@ -1276,7 +1276,7 @@ const Pet: NextPage = () => {
   //show all available options
   const kennelsReceivedOptions = [
     "No kennels received",
-    "Kennel Received in 2018",
+    "Kennel received in 2018",
     "Kennel received in 2019",
     "Kennel received in 2020",
     "Kennel received in 2021",
@@ -1852,7 +1852,8 @@ const Pet: NextPage = () => {
   const handleBackButton = async () => {
     //console.log("Back button pressed");
     //if owner id in query then go back to owner page
-    if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate) {
+    if (router.asPath.includes("petID")) {
+      // if (Number(router.asPath.split("=")[1]) != 0) {
       await router.push(`/owner`);
     }
 
@@ -2622,7 +2623,9 @@ const Pet: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Vaccination Shot 1: </div>
+                      <div className=" flex">
+                        Vaccination Shot 1<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
                     </div>
                     <div className="flex flex-col">
                       <button

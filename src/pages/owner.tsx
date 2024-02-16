@@ -988,6 +988,7 @@ const Owner: NextPage = () => {
     if (surname === "") mandatoryFields.push("Surname");
     if (mobile === "") mandatoryFields.push("Mobile");
     if (greaterAreaOption === "Select one") mandatoryFields.push("Greater Area");
+    if (areaOption === "Select one") mandatoryFields.push("Area");
     if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
     if (statusOption === "Select one") mandatoryFields.push("Status");
     if (startingDate === null) mandatoryFields.push("Starting Date");
@@ -1472,7 +1473,9 @@ const Owner: NextPage = () => {
                       <div className="flex flex-col pr-2">
                         <div className="flex items-start">
                           <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">Area: </div>
+                            <div className=" flex">
+                              Area<div className="text-lg text-main-orange">*</div>:{" "}
+                            </div>
                           </div>
                           <div className="flex flex-col">
                             <button

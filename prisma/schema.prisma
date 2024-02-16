@@ -213,6 +213,7 @@ model volunteer {
     addressFreeForm        String?
     preferredCommunication String
     role                   String[]
+    collaboratorOrg        String?
     status                 String
     clinicsAttended        volunteerOnPetClinic[]
     comments               String

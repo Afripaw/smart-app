@@ -25,6 +25,7 @@ export const communicationRouter = createTRPCRouter({
           message: input.message,
           recipients: input.recipients,
           greaterArea: input.greaterArea,
+          area: input.area,
           success: input.success,
           type: input.type,
           createdAt: new Date(),
@@ -53,24 +54,26 @@ export const communicationRouter = createTRPCRouter({
       // Construct a complex search condition
       const searchConditions = terms.map((term) => {
         // Check if term is a date
-        const termAsDate: Date = new Date(term);
-        console.log(termAsDate);
-        const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+        // const termAsDate: Date = new Date(term);
+        // console.log(termAsDate);
+        // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
         return {
-          OR: [{ message: { contains: term } }, { success: { contains: term } }, { type: { contains: term } }, dateCondition].filter(
+          OR: [{ message: { contains: term } }, { success: { contains: term } }, { type: { contains: term } }].filter(
             (condition) => Object.keys(condition).length > 0,
           ), // Filter out empty conditions
         };
       });
 
-      //Orders the results
-      const order: Record<string, string> = {};
+      // //Orders the results
+      // const order: Record<string, string> = {};
 
-      if (input.order !== "date") {
-        order.updatedAt = "desc";
-      } else {
-        order.date = "desc";
-      }
+      // if (input.order !== "date") {
+      //   order.updatedAt = "desc";
+      // } else {
+      //   order.date = "desc";
+      // }
+      const order: Record<string, string> = {};
+      order.updatedAt = "desc";
 
       const communication = await ctx.db.communication.findMany({
         where: {

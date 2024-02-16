@@ -47,6 +47,9 @@ const Communication: NextPage = () => {
   //get latest communicationID
   const latestCommunicationID = api.communication.getLatestCommunicationID.useQuery();
 
+  //Recipients
+  const [recipients, setRecipients] = useState<string[]>([]);
+
   //-------------------------------EMAILS-----------------------------------------
   async function sendEmail(message: string, email: string): Promise<void> {
     const response = await fetch("/api/generalEmails", {
@@ -360,6 +363,15 @@ const Communication: NextPage = () => {
 
   const preferredCommunicationOptions = ["Email", "SMS"];
 
+  //-------------------------------MESSAGES-----------------------------------------
+  //All users, pet owners and volunteers that are Active
+  const allUsers = api.communication.getAllUsers.useQuery({ greaterArea: greaterAreaList, area: areaList });
+  const allPetOwners = api.communication.getAllPetOwners.useQuery({ greaterArea: greaterAreaList, area: areaList });
+  const allVolunteers = api.communication.getAllVolunteers.useQuery({ greaterArea: greaterAreaList, area: areaList });
+  const [userSuccess, setUserSuccess] = useState("No");
+  const [petOwnerSuccess, setPetOwnerSuccess] = useState("No");
+  const [volunteerSuccess, setVolunteerSuccess] = useState("No");
+
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
@@ -374,19 +386,13 @@ const Communication: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
-    //All users, pet owners and volunteers
-    const allUsers = api.communication.getAllUsers.useQuery({ greaterArea: greaterAreaList, area: areaList });
-    const allPetOwners = api.communication.getAllPetOwners.useQuery({ greaterArea: greaterAreaList, area: areaList });
-    const allVolunteers = api.communication.getAllVolunteers.useQuery({ greaterArea: greaterAreaList, area: areaList });
-
-    const [userSuccess, setUserSuccess] = useState("No");
-    const [petOwnerSuccess, setPetOwnerSuccess] = useState("No");
-    const [volunteerSuccess, setVolunteerSuccess] = useState("No");
     //Send user details
-
+    const var_recipients = [];
     //Email
     if (preferredOption === "Email") {
       if (includeUser) {
+        var_recipients.push("Users");
+        setRecipients([...recipients, "Users"]);
         //loop through all the users and send them an email
         allUsers?.data?.map(async (user) => {
           const email = user?.email ?? "";
@@ -404,6 +410,8 @@ const Communication: NextPage = () => {
       }
 
       if (includePetOwner) {
+        var_recipients.push("Pet Owners");
+        setRecipients([...recipients, "Pet Owners"]);
         //loop through all the pet owners and send them an email
         allPetOwners?.data?.map(async (petOwner) => {
           const email = petOwner?.email ?? "";
@@ -421,6 +429,8 @@ const Communication: NextPage = () => {
       }
 
       if (includeVolunteer) {
+        var_recipients.push("Volunteers");
+        setRecipients([...recipients, "Volunteers"]);
         //loop through all the volunteers and send them an email
         allVolunteers?.data?.map(async (volunteer) => {
           const email = volunteer?.email ?? "";
@@ -444,6 +454,8 @@ const Communication: NextPage = () => {
       //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
 
       if (includeUser) {
+        var_recipients.push("Users");
+        setRecipients([...recipients, "Users"]);
         //loop through all the users
         allUsers?.data?.map(async (user) => {
           const mobile = user?.mobile ?? "";
@@ -460,6 +472,8 @@ const Communication: NextPage = () => {
       }
 
       if (includePetOwner) {
+        var_recipients.push("Pet Owners");
+        setRecipients([...recipients, "Pet Owners"]);
         //loop through all the pet owners
         allPetOwners?.data?.map(async (petOwner) => {
           const mobile = petOwner?.mobile ?? "";
@@ -476,6 +490,8 @@ const Communication: NextPage = () => {
       }
 
       if (includeVolunteer) {
+        var_recipients.push("Volunteers");
+        setRecipients([...recipients, "Volunteers"]);
         //loop through all the volunteers
         allVolunteers?.data?.map(async (volunteer) => {
           const mobile = volunteer?.mobile ?? "";
@@ -492,30 +508,38 @@ const Communication: NextPage = () => {
       }
     }
 
-    if (userSuccess === "Yes" && petOwnerSuccess === "Yes" && volunteerSuccess === "Yes") {
+    console.log("Before success: ", success);
+    let var_success = "";
+    if ((userSuccess === "Yes" && includeUser) || (petOwnerSuccess === "Yes" && includePetOwner) || (volunteerSuccess === "Yes" && includeVolunteer)) {
       setSuccess("Yes");
+      var_success = "Yes";
+      console.log("Success: ", var_success);
     } else {
       setSuccess("No");
+      var_success = "No";
     }
+    console.log("After success: ", var_success);
 
-    const recipients = [""];
-    if (includeUser) {
-      recipients.push("User");
-    }
-    if (includePetOwner) {
-      recipients.push("Pet Owner");
-    }
-    if (includeVolunteer) {
-      recipients.push("Volunteer");
-    }
+    // const recipients = [""];
+    // if (includeUser) {
+    //   setRecipients([...recipients, "Users"]);
+    // }
+    // if (includePetOwner) {
+    //   setRecipients([...recipients, "Pet Owners"]);
+    // }
+    // if (includeVolunteer) {
+    //   setRecipients([...recipients, "Volunteers"]);
+    // }
+
+    console.log("Here are the recipients: ", var_recipients);
 
     const newUser_ = await newCommunication.mutateAsync({
       message: message,
-      recipients: recipients,
+      recipients: var_recipients,
       greaterArea: greaterAreaList,
       area: areaList,
       type: preferredOption,
-      success: success,
+      success: var_success,
     });
 
     setIsCreate(false);
@@ -523,11 +547,11 @@ const Communication: NextPage = () => {
     // return newUser_;
 
     //update identification table
-    if (newUser_?.communicationID) {
-      await updateIdentification.mutateAsync({
-        communicationID: newUser_?.communicationID ?? 0,
-      });
-    }
+    // if (newUser_?.communicationID) {
+    await updateIdentification.mutateAsync({
+      communicationID: newUser_?.communicationID ?? 0,
+    });
+    // }
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
@@ -546,6 +570,9 @@ const Communication: NextPage = () => {
       setPreferredCommunicationOption(userData.type ?? "");
       //setType(userData.type ?? "");
       setSuccess(userData.success ?? "No");
+      setRecipients(userData.recipients ?? []);
+      setGreaterAreaList(userData.greaterArea ?? []);
+      setAreaList(userData.area ?? []);
     }
     setIsCreate(false);
     setIsViewProfilePage(true);
@@ -575,6 +602,7 @@ const Communication: NextPage = () => {
     setAreaOption("Select one");
     setPreferredCommunicationOption("Select one");
     setSuccess("No");
+    setRecipients([]);
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -695,7 +723,7 @@ const Communication: NextPage = () => {
                             <div className="px-4 py-2">{index + 1}</div>
                           </td>
                           <td className="border px-4 py-2">M{user.communicationID}</td>
-                          <td className="border px-4 py-2">{user.message}</td>
+                          <td className="border px-4 py-2">{user.message?.length > 15 ? user.message?.substring(0, 15) + "..." : user.message}</td>
                           <td className="border px-4 py-2">{user.type}</td>
                           <td className="border px-4 py-2">
                             {
@@ -704,8 +732,8 @@ const Communication: NextPage = () => {
                               //user.recipients?.map((user: string) => user).join(", ") ?? ""
                             }
                           </td>
-                          <td className="border px-4 py-2">{user.greaterArea}</td>
-                          <td className="border px-4 py-2">{user.area}</td>
+                          <td className="border px-4 py-2">{user.greaterArea.map((greaterArea) => greaterArea).join(", ")}</td>
+                          <td className="border px-4 py-2">{user.area.map((area) => area).join(", ")}</td>
                           <td className="border px-4 py-2">{user.success}</td>
                           <td className=" border px-4 py-2">
                             {user?.updatedAt?.getDate()?.toString() ?? ""}
@@ -789,7 +817,7 @@ const Communication: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Communication Data</b>
 
                   <div className="flex py-2">
-                    Message ID: <div className="px-3">M{latestCommunicationID?.data?.communicationID ?? 0}</div>
+                    Message ID: <div className="px-3">M{(latestCommunicationID?.data?.communicationID ?? 0) + 1}</div>
                   </div>
                   <div className="flex items-start">
                     <div className="flex w-32 pt-3">
@@ -1007,7 +1035,7 @@ const Communication: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">Communication Profile</div>
+                <div className=" text-2xl">Message Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back
@@ -1028,16 +1056,17 @@ const Communication: NextPage = () => {
                     />
                   </div>
 
-                  <b className="mb-14 text-center text-xl">Communication Data</b>
+                  <b className="mb-14 text-center text-xl">Message Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Communication ID:</b> C{id}
+                    <b className="mr-3">Message ID:</b> M{id}
                   </div>
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Message:</b>{" "}
                     {
-                      //Just get the first 15 characters of the message
-                      message?.length > 15 ? message?.substring(0, 15) + "..." : message
+                      message
+                      // //Just get the first 15 characters of the message
+                      // message?.length > 15 ? message?.substring(0, 15) + "..." : message
                     }
                   </div>
 
@@ -1046,7 +1075,7 @@ const Communication: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Recipients:</b> {}
+                    <b className="mr-3">Recipients:</b> {recipients.map((recipient) => recipient).join(", ")}
                   </div>
 
                   <div className="mb-2 flex items-center">

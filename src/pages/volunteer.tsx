@@ -329,6 +329,7 @@ const Volunteer: NextPage = () => {
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
   const [image, setImage] = useState("");
+  const [collaboratorOrg, setCollaboratorOrg] = useState("");
 
   //userID
   //const [userID, setUserID] = useState("");
@@ -433,7 +434,19 @@ const Volunteer: NextPage = () => {
     };
   }, []);
 
-  const roleOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+  const roleOptions = [
+    "Board Member",
+    "Foster",
+    "Groomer",
+    "Marketing",
+    "Pet Clinic Director",
+    "Programme Co-ordinator",
+    "Vet",
+    "Vet Nurse",
+    "Walker",
+    "Ward Councillor",
+    "Other",
+  ];
 
   //show all the clinics that the volunteer attended
   const [showRole, setShowRole] = useState(false);
@@ -640,6 +653,7 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+      setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
       setClinicIDList(clinicIDs);
     }
@@ -681,6 +695,7 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+      setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
       setClinicIDList(clinicIDs);
       // setClinicList(userData.clinicsAttended ?? []);
@@ -702,6 +717,7 @@ const Volunteer: NextPage = () => {
       addressPostalCode: addressPostalCode,
       addressFreeForm: addressFreeForm,
       role: roleList,
+      collaboratorOrg: collaboratorOrg,
       preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
       startingDate: startingDate,
       status: statusOption === "Select one" ? "" : statusOption,
@@ -751,6 +767,7 @@ const Volunteer: NextPage = () => {
     setPreferredCommunicationOption("Select one");
     setStatusOption("Select one");
     setComments("");
+    setCollaboratorOrg("");
     setClinicList([]);
     setIsUpdate(false);
     setIsCreate(false);
@@ -765,6 +782,7 @@ const Volunteer: NextPage = () => {
     setStatusOption("Select one");
     setStartingDate(new Date());
     setComments("");
+    setCollaboratorOrg("");
     setFirstName("");
     setEmail("");
     setSurname("");
@@ -797,6 +815,7 @@ const Volunteer: NextPage = () => {
         addressPostalCode: addressPostalCode,
         addressFreeForm: addressFreeForm,
         role: roleList,
+        collaboratorOrg: collaboratorOrg,
         preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
         startingDate: startingDate,
         status: statusOption === "Select one" ? "" : statusOption,
@@ -899,6 +918,7 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+      setCollaboratorOrg(userData.collaboratorOrg ?? "");
       console.log("Select one");
       setClinicList(clinicDates);
       setClinicIDList(clinicIDs);
@@ -944,6 +964,7 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+      setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
       setClinicIDList(clinicIDs);
       //setClinicList(userData.clinicsAttended ?? []);
@@ -978,6 +999,7 @@ const Volunteer: NextPage = () => {
     setPreferredCommunicationOption("Select one");
     setStatusOption("Select one");
     setComments("");
+    setCollaboratorOrg("");
     setClinicList([]);
   };
 
@@ -1270,8 +1292,8 @@ const Volunteer: NextPage = () => {
                   {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
                     Upload
                     <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
-                  </div>
-                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  </div> */}
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
                 </div>
@@ -1462,55 +1484,6 @@ const Volunteer: NextPage = () => {
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-4">
-                      <div className="flex">Role: </div>
-                    </div>
-
-                    <div className="flex flex-col items-center">
-                      <button
-                        onClick={handleShowRole}
-                        className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                      >
-                        Show all roles
-                      </button>
-                      {showRole && (
-                        <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
-                          {roleList.map((role) => (
-                            <li key={role} className=" py-2">
-                              {role}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnRoleRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleToggleRole}
-                      >
-                        {isUpdate ? roleOption : roleOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {isRoleOpen && (
-                        <div ref={roleRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {roleOptions.map((option) => (
-                              <li key={option} onClick={() => handleRoleOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
                         Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
@@ -1652,6 +1625,56 @@ const Volunteer: NextPage = () => {
                 </div>
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-4">
+                      <div className="flex">Role: </div>
+                    </div>
+
+                    <div className="flex flex-col items-center">
+                      <button
+                        onClick={handleShowRole}
+                        className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                      >
+                        Show all roles
+                      </button>
+                      {showRole && (
+                        <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                          {roleList.map((role) => (
+                            <li key={role} className=" py-2">
+                              {role}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnRoleRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleRole}
+                      >
+                        {isUpdate ? roleOption : roleOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isRoleOpen && (
+                        <div ref={roleRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {roleOptions.map((option) => (
+                              <li key={option} onClick={() => handleRoleOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Input label="Collaborator Organisation" placeholder="Type here: e.g. Tears" value={collaboratorOrg} onChange={setCollaboratorOrg} />
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">

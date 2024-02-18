@@ -41,6 +41,9 @@ const Volunteer: NextPage = () => {
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
 
+  //-------------------------------LOADING ANIMATIONS-----------------------------------------
+  const [isLoading, setIsLoading] = useState(false);
+
   //-------------------------------COMMUNICATION OF VOLUNTEER DETAILS-----------------------------------------
   const [sendVolunteerDetails, setSendVolunteerDetails] = useState(false);
 
@@ -703,6 +706,7 @@ const Volunteer: NextPage = () => {
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
+    setIsLoading(true);
     const volunteer = await updateVolunteer.mutateAsync({
       volunteerID: id,
       firstName: firstName,
@@ -771,6 +775,7 @@ const Volunteer: NextPage = () => {
     setClinicList([]);
     setIsUpdate(false);
     setIsCreate(false);
+    setIsLoading(false);
   };
 
   //-------------------------------CREATE NEW USER-----------------------------------------
@@ -801,6 +806,7 @@ const Volunteer: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
+    setIsLoading(true);
     try {
       const newUser_ = await newVolunteer.mutateAsync({
         firstName: firstName,
@@ -877,7 +883,7 @@ const Volunteer: NextPage = () => {
         setIsCreateButtonModalOpen(true);
       }
     }
-
+    setIsLoading(false);
     // return newUser_;
   };
 
@@ -1056,7 +1062,7 @@ const Volunteer: NextPage = () => {
     if (firstName === "") mandatoryFields.push("First Name");
     if (surname === "") mandatoryFields.push("Surname");
     if (mobile === "") mandatoryFields.push("Mobile");
-    if (greaterAreaOption === "Select one") mandatoryFields.push("Greater Area");
+    if (greaterAreaList.length === 0) mandatoryFields.push("Greater Area");
     if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
     if (statusOption === "Select one") mandatoryFields.push("Status");
     if (startingDate === null) mandatoryFields.push("Starting Date");
@@ -1349,7 +1355,7 @@ const Volunteer: NextPage = () => {
                           <td className="border px-4 py-2">{user.surname}</td>
                           <td className="border px-4 py-2">{user.email}</td>
                           <td className="border px-4 py-2">{user.mobile}</td>
-                          <td className="border px-4 py-2">{user.addressGreaterArea}</td>
+                          <td className="border px-4 py-2">{user.addressGreaterArea.map((greaterArea) => greaterArea).join(", ")}</td>
                           <td className="border px-4 py-2">{user.status}</td>
                           <td className="border px-4 py-2">
                             {user.clinics && user.clinics.length > 0 ? (
@@ -1825,7 +1831,14 @@ const Volunteer: NextPage = () => {
                 className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
                 onClick={() => void handleCreateButtonModal()}
               >
-                {isUpdate ? "Update" : "Create"}
+                {isLoading ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <div>{isUpdate ? "Update" : "Create"}</div>
+                )}
               </button>
             </div>
           </>
@@ -1891,7 +1904,7 @@ const Volunteer: NextPage = () => {
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaOption}
+                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea).join(", ")}
                   </div>
                   <div className="flex items-start divide-x-2 divide-gray-300">
                     <div className="flex w-96 flex-col pr-2">

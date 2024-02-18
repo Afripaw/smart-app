@@ -41,6 +41,9 @@ const Communication: NextPage = () => {
   //For moving between different pages
   const router = useRouter();
 
+  //-------------------------------LOADING ANIMATIONS-----------------------------------------
+  const [isLoading, setIsLoading] = useState(false);
+
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.communication.updateIdentification.useMutation();
 
@@ -386,6 +389,7 @@ const Communication: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
+    setIsLoading(true);
     //Send user details
     const var_recipients = [];
     //Email
@@ -552,6 +556,8 @@ const Communication: NextPage = () => {
       communicationID: newUser_?.communicationID ?? 0,
     });
     // }
+
+    setIsLoading(false);
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
@@ -1025,7 +1031,14 @@ const Communication: NextPage = () => {
                 className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
                 onClick={() => void handleCreateButtonModal()}
               >
-                {"Send Message"}
+                {isLoading ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <div>Send Message</div>
+                )}
               </button>
             </div>
           </>

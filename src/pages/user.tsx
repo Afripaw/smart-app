@@ -36,6 +36,9 @@ const User: NextPage = () => {
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
 
+  //-------------------------------LOADING ANIMATIONS-----------------------------------------
+  const [isLoading, setIsLoading] = useState(false);
+
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
   const [query, setQuery] = useState("");
@@ -606,6 +609,7 @@ const User: NextPage = () => {
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
+    setIsLoading(true);
     const user = await updateUser.mutateAsync({
       id: id,
       firstName: firstName,
@@ -682,6 +686,8 @@ const User: NextPage = () => {
     setIsUpdate(false);
     setIsCreate(false);
     setIsUpdatePassword(false);
+
+    setIsLoading(false);
   };
 
   //-------------------------------CREATE NEW USER-----------------------------------------
@@ -715,6 +721,7 @@ const User: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
+    setIsLoading(true);
     try {
       const newUser_ = await newUser.mutateAsync({
         firstName: firstName,
@@ -798,6 +805,7 @@ const User: NextPage = () => {
         setIsCreateButtonModalOpen(true);
       }
     }
+    setIsLoading(false);
 
     // return newUser_;
   };
@@ -1706,10 +1714,17 @@ const User: NextPage = () => {
                 </div>
               </div>
               <button
-                className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
+                className="my-4 flex items-center rounded-md bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
                 onClick={() => void handleCreateButtonModal()}
               >
-                {isUpdate ? "Update" : "Create"}
+                {isLoading ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <div>{isUpdate ? "Update" : "Create"}</div>
+                )}
               </button>
             </div>
           </>

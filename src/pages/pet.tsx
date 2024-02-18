@@ -45,11 +45,23 @@ const Pet: NextPage = () => {
   //Update the table when user is deleted
   const [isDeleted, setIsDeleted] = useState(false);
 
+  //-------------------------------LOADING ANIMATIONS-----------------------------------------
+  const [isLoading, setIsLoading] = useState(false);
+
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.pet.updateIdentification.useMutation();
 
   //get latest petID
   const latestPetID = api.pet.getLatestPetID.useQuery();
+
+  //-------------------------------TREATMENTS-----------------------------------------
+  type Treatment = {
+    treatmentID: number;
+    date: string;
+    category: string;
+    type: string;
+  };
+  const [treatmentList, setTreatmentList] = useState<Treatment[]>([]);
 
   /*
   //Excel upload
@@ -278,9 +290,14 @@ const Pet: NextPage = () => {
   const [order, setOrder] = useState("petName");
 
   //-------------------------------CLINICS ATTENDED-----------------------------------------
+  type Clinic = {
+    id: number;
+    date: string;
+    area: string;
+  };
   //The list of clinics that the user has attended
-  const [clinicList, setClinicList] = useState<string[]>([]);
-  const [clinicIDList, setClinicIDList] = useState<number[]>([]);
+  const [clinicList, setClinicList] = useState<Clinic[]>([]);
+  //const [clinicIDList, setClinicIDList] = useState<number[]>([]);
 
   //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
   const observerTarget = useRef<HTMLDivElement | null>(null);
@@ -366,7 +383,7 @@ const Pet: NextPage = () => {
   //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList, isDoneUploading]);
+  }, [isUpdate, isDeleted, isCreate, query, order, clinicList, isDoneUploading]);
   //[isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]
 
   const user = pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
@@ -1199,7 +1216,7 @@ const Pet: NextPage = () => {
 
     // Convert clinicList dates to Date objects
     const clinicDates = clinicList.map((clinicDate) => {
-      const [day, month, year] = clinicDate.split("/").map(Number);
+      const [day, month, year] = clinicDate.date.split("/").map(Number);
       return new Date(year ?? 0, (month ?? 0) - 1, day);
     });
 
@@ -1336,6 +1353,7 @@ const Pet: NextPage = () => {
   };
 
   //CLINICSATTENDED
+  const [showClinicMessage, setShowClinicMessage] = useState(false);
   //All clinics in petClinic table
   const clinicsAttendedOptions = api.petClinic.getAllClinics.useQuery().data ?? [];
 
@@ -1355,18 +1373,25 @@ const Pet: NextPage = () => {
     const [dayB, monthB, yearB]: number[] = b.split("/").map(Number);
 
     // Compare by year, then by month, then by day
-    if ((yearA ?? 0) !== (yearB ?? 0)) return (yearA ?? 0) - (yearB ?? 0);
-    if (monthA !== monthB) return (monthA ?? 0) - (monthB ?? 0);
-    return (dayA ?? 0) - (dayB ?? 0);
+    if ((yearA ?? 0) !== (yearB ?? 0)) return (yearB ?? 0) - (yearA ?? 0);
+    if (monthA !== monthB) return (monthB ?? 0) - (monthA ?? 0);
+    return (dayB ?? 0) - (dayA ?? 0);
   };
 
-  const handleClinicsAttendedOption = (option: SetStateAction<string>, optionID: number) => {
+  const handleClinicsAttendedOption = (optionID: number, option: SetStateAction<string>, optionArea: string) => {
     setClinicsAttended(false);
     setShowClinicsAttended(false);
     setClinicsAttendedOption(option);
-    if (!clinicList.includes(String(option))) {
-      setClinicList([...clinicList, String(option)]);
-      setClinicIDList([...clinicIDList, optionID]);
+
+    const clinic: Clinic = {
+      id: optionID,
+      date: String(option),
+      area: optionArea,
+    };
+
+    if (!clinicList.includes(clinic)) {
+      setClinicList([...clinicList, clinic]);
+      // setClinicIDList([...clinicIDList, optionID]);
     }
   };
 
@@ -1382,25 +1407,27 @@ const Pet: NextPage = () => {
   // }, [clinicsAttended]);
 
   useEffect(() => {
-    // Combine clinic names and their IDs into a single array
-    const combinedClinicList = clinicList.map((clinic, index) => ({
-      name: clinic,
-      id: clinicIDList[index],
-    }));
+    setClinicList(clinicList.sort((a, b) => compareDates(a.date, b.date)));
 
-    // Sort the combined array based on the clinic names (dates)
-    combinedClinicList.sort((a, b) => compareDates(a.name, b.name));
+    // // Combine clinic names and their IDs into a single array
+    // const combinedClinicList = clinicList.map((clinic) => ({
+    //   name: clinic.date,
+    //   id: clinic.id,
+    // }));
 
-    // Separate the sorted clinic names and IDs back into their respective arrays
-    const sortedClinicList = combinedClinicList.map((item) => item.name);
-    const sortedClinicIDList = combinedClinicList.map((item) => item.id);
+    // // Sort the combined array based on the clinic names (dates)
+    // combinedClinicList.sort((a, b) => compareDates(a.name, b.name));
 
-    // Update the states
-    setClinicList(sortedClinicList);
-    setClinicIDList(sortedClinicIDList.filter((id) => id !== undefined) as number[]);
+    // // Separate the sorted clinic names and IDs back into their respective arrays
+    // const sortedClinicList = combinedClinicList.map((item) => item.name);
+    // const sortedClinicIDList = combinedClinicList.map((item) => item.id);
 
-    console.log("Sorted clinic list", sortedClinicList);
-    console.log("Sorted clinic ID list", sortedClinicIDList);
+    // // Update the states
+    // setClinicList(sortedClinicList);
+    // setClinicIDList(sortedClinicIDList.filter((id) => id !== undefined) as number[]);
+
+    // console.log("Sorted clinic list", sortedClinicList);
+    // console.log("Sorted clinic ID list", sortedClinicIDList);
   }, [clinicsAttended]);
 
   useEffect(() => {
@@ -1426,6 +1453,44 @@ const Pet: NextPage = () => {
   const handleShowClinicsAttended = () => {
     setShowClinicsAttended(!showClinicsAttended);
   };
+
+  //Show clinic message
+  useEffect(() => {
+    //get the first 3 clinics
+    const lastThreeClinics = clinicsAttendedOptions.slice(0, 3);
+    console.log("Last three clinics", lastThreeClinics);
+
+    //last three clinic ids
+    const lastThreeClinicIDs = lastThreeClinics.map((clinic) => clinic?.clinicID);
+
+    for (const clinic of clinicList) {
+      if (lastThreeClinicIDs.includes(clinic.id)) {
+        setShowClinicMessage(true);
+        return;
+        console.log("In the last 3: ", showClinicMessage);
+      } else {
+        setShowClinicMessage(false);
+        console.log("No last 3: ", showClinicMessage);
+      }
+    }
+
+    // clinicList.map((clinic) => {
+    //   console.log("ClinicID: ", clinic.id);
+    //   console.log("Last 3: ", lastThreeClinics[0]?.clinicID, lastThreeClinics[1]?.clinicID, lastThreeClinics[2]?.clinicID);
+    //   if (
+    //     (lastThreeClinics[0]?.clinicID === clinic.id || lastThreeClinics[1]?.clinicID === clinic.id || lastThreeClinics[2]?.clinicID === clinic.id) &&
+    //     clinicList.length > 0
+    //   ) {
+    //     setShowClinicMessage(true);
+    //     console.log("In the last 3", showClinicMessage);
+    //   } else {
+    //     setShowClinicMessage(false);
+    //     console.log("No last 3", showClinicMessage);
+    //   }
+    // });
+    console.log("ClinicList", clinicList);
+    console.log("Show clinic message", showClinicMessage);
+  }, [clinicList]);
 
   //LAST DEWORMING
   //take the last date of the clinics that were attended and set as default for last deworming
@@ -1501,16 +1566,29 @@ const Pet: NextPage = () => {
       const userData = user;
       //Get all the clinic dates and put in a string array
       const clinicData = user?.clinics;
-      const clinicDates =
-        clinicData?.map(
-          (clinic) =>
+      const clinicDates: Clinic[] =
+        clinicData?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
             clinic.clinic.date.getDate().toString() +
             "/" +
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-        ) ?? [];
-      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+          area: clinic.clinic.area,
+        })) ?? [];
+      // const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+
+      //treatments
+      const treatmentData: Treatment[] =
+        user?.treatment?.map((treatment) => ({
+          treatmentID: treatment.treatmentID,
+          date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+          category: treatment.category,
+          type: treatment.type,
+        })) ?? [];
+      console.log("Treatment data: ", treatmentData);
+
       setPetName(userData?.petName ?? "");
       setSpeciesOption(userData?.species ?? "Select one");
       setSexOption(userData?.sex ?? "Select one");
@@ -1522,6 +1600,38 @@ const Pet: NextPage = () => {
       setSterilisationStatusOption(userData?.sterilisedStatus ?? "Select one");
       setSterilisationRequestedOption(userData?.sterilisedRequested ?? "Select one");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
+      if (userData?.vaccinationShot1?.getFullYear() !== 1970) {
+        setVaccinationShot1Option("Yes");
+        console.log("Vaccination shot 1(!1970): ", userData?.vaccinationShot1);
+      } else if (userData?.vaccinationShot1.getFullYear() === 1970) {
+        console.log("Vaccination shot 1(1970): ", userData?.vaccinationShot1);
+        setVaccinationShot1Option("Not yet");
+      } else {
+        console.log("Vaccination shot 1(select one): ", userData?.vaccinationShot1);
+        setVaccinationShot1Option("Select one");
+      }
+
+      if (userData?.vaccinationShot2?.getFullYear() !== 1970) {
+        console.log("Vaccination shot 2(!1970): ", userData?.vaccinationShot2);
+        setVaccinationShot2Option("Yes");
+      } else if (userData?.vaccinationShot2.getFullYear() === 1970) {
+        console.log("Vaccination shot 2(1970): ", userData?.vaccinationShot2);
+        setVaccinationShot2Option("Not yet");
+      } else {
+        console.log("Vaccination shot 2(select one): ", userData?.vaccinationShot2);
+        setVaccinationShot2Option("Select one");
+      }
+
+      if (userData?.vaccinationShot3?.getFullYear() !== 1970) {
+        console.log("Vaccination shot 3(!1970): ", userData?.vaccinationShot3);
+        setVaccinationShot3Option("Yes");
+      } else if (userData?.vaccinationShot3.getFullYear() === 1970) {
+        console.log("Vaccination shot 3(1970): ", userData?.vaccinationShot3);
+        setVaccinationShot3Option("Not yet");
+      } else {
+        console.log("Vaccination shot 3(select one): ", userData?.vaccinationShot3);
+        setVaccinationShot3Option("Select one");
+      }
       vaccinationShot1Option === "Yes" ? setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date()) : setVaccinationShot1Date(new Date());
       vaccinationShot2Option === "Yes" ? setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date()) : setVaccinationShot2Date(new Date());
       vaccinationShot3Option === "Yes" ? setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date()) : setVaccinationShot3Date(new Date());
@@ -1532,9 +1642,13 @@ const Pet: NextPage = () => {
       setCardStatusOption(userData?.cardStatus ?? "Select one");
       setKennelList(userData?.kennelReceived ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
-      setClinicIDList(clinicIDs ?? []);
-      setClinicList(clinicDates ?? []);
+      //setClinicIDList(clinicIDs ?? []);
+      setClinicList(clinicDates);
+
       setComments(userData?.comments ?? "");
+
+      setTreatmentList(treatmentData);
+      console.log("Treatment list: ", treatmentList);
 
       setFirstName(userData?.firstName ?? "");
       setSurname(userData?.surname ?? "");
@@ -1554,16 +1668,29 @@ const Pet: NextPage = () => {
       const userData = user;
       //Get all the clinic dates and put in a string array
       const clinicData = user.clinics;
-      const clinicDates =
-        clinicData?.map(
-          (clinic) =>
+      const clinicDates: Clinic[] =
+        clinicData?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
             clinic.clinic.date.getDate().toString() +
             "/" +
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-        ) ?? [];
-      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+          area: clinic.clinic.area,
+        })) ?? [];
+      //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+
+      //treatments
+      const treatmentData: Treatment[] =
+        user?.treatment?.map((treatment) => ({
+          treatmentID: treatment.treatmentID,
+          date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+          category: treatment.category,
+          type: treatment.type,
+        })) ?? [];
+
+      console.log("Treatment data: ", treatmentData);
       setPetName(userData?.petName ?? "");
       setSpeciesOption(userData?.species ?? "Select one");
       setSexOption(userData?.sex ?? "Select one");
@@ -1577,9 +1704,30 @@ const Pet: NextPage = () => {
       setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
 
-      setVaccinationShot1Option(userData?.vaccinationShot1 ? "Yes" : "Not yet");
-      setVaccinationShot2Option(userData?.vaccinationShot2 ? "Yes" : "Not yet");
-      setVaccinationShot3Option(userData?.vaccinationShot3 ? "Yes" : "Not yet");
+      if (userData?.vaccinationShot1.getFullYear() !== 1970) {
+        setVaccinationShot1Option("Yes");
+      } else {
+        setVaccinationShot1Option("Not yet");
+      }
+
+      if (userData?.vaccinationShot2?.getFullYear() !== 1970) {
+        setVaccinationShot2Option("Yes");
+      } else {
+        setVaccinationShot2Option("Not yet");
+      }
+
+      if (userData?.vaccinationShot3?.getFullYear() !== 1970) {
+        setVaccinationShot3Option("Yes");
+      } else {
+        setVaccinationShot3Option("Not yet");
+      }
+
+      // setVaccinationShot1Option(userData?.vaccinationShot1 ? "Yes" : "Not yet");
+      // setVaccinationShot2Option(userData?.vaccinationShot2 ? "Yes" : "Not yet");
+      // setVaccinationShot3Option(userData?.vaccinationShot3 ? "Yes" : "Not yet");
+      // setVaccinationShot1Option(userData?.vaccinationShot1 !== new Date(0) ? "Yes" : "Not yet");
+      // setVaccinationShot2Option(userData?.vaccinationShot2 !== new Date(0) ? "Yes" : "Not yet");
+      // setVaccinationShot3Option(userData?.vaccinationShot3 !== new Date(0) ? "Yes" : "Not yet");
       setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
       setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
       setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
@@ -1591,8 +1739,10 @@ const Pet: NextPage = () => {
       setLastDeworming(userData?.lastDeworming ?? new Date());
       setStatusOption(userData?.status ?? "Select one");
       setComments(userData?.comments ?? "");
-      setClinicList(clinicDates ?? []);
-      setClinicIDList(clinicIDs ?? []);
+      setClinicList(clinicDates);
+      setTreatmentList(treatmentData);
+      console.log("Treatment list: ", treatmentList);
+      //setClinicIDList(clinicIDs ?? []);
 
       setFirstName(userData?.firstName ?? "");
       setSurname(userData?.surname ?? "");
@@ -1602,6 +1752,8 @@ const Pet: NextPage = () => {
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
   //[user, isUpdate, isCreate];
   const handleUpdateUser = async () => {
+    setIsLoading(true);
+    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
     await updatePet.mutateAsync({
       petID: id,
       petName: petName,
@@ -1651,8 +1803,11 @@ const Pet: NextPage = () => {
     setLastDeworming(new Date());
     setComments("");
     setClinicList([]);
+    setTreatmentList([]);
+    setShowClinicMessage(false);
     setIsUpdate(false);
     setIsCreate(false);
+    setIsLoading(false);
   };
 
   //-------------------------------CREATE NEW USER-----------------------------------------
@@ -1683,14 +1838,17 @@ const Pet: NextPage = () => {
     setComments("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
+    setTreatmentList([]);
     setIsCreate(true);
     setIsUpdate(false);
   };
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
+    setIsLoading(true);
     console.log("Owner ID for pet creation: ", ownerID);
-    console.log("All clinics attended: ", clinicIDList);
+    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
+    // console.log("All clinics attended: ", clinicIDList);
     const newUser_ = await newPet.mutateAsync({
       ownerID: Number(router.asPath.split("=")[1]),
       petName: petName,
@@ -1735,6 +1893,7 @@ const Pet: NextPage = () => {
         petID: newUser_?.petID ?? 0,
       });
     }
+    setIsLoading(false);
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
@@ -1748,16 +1907,29 @@ const Pet: NextPage = () => {
       const userData = user;
       //Get all the clinic dates and put in a string array
       const clinicData = user.clinics;
-      const clinicDates =
-        clinicData?.map(
-          (clinic) =>
+      const clinicDates: Clinic[] =
+        clinicData?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
             clinic.clinic.date.getDate().toString() +
             "/" +
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-        ) ?? [];
-      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+          area: clinic.clinic.area,
+        })) ?? [];
+      //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+
+      //treatments
+      const treatmentData: Treatment[] =
+        user?.treatment?.map((treatment) => ({
+          treatmentID: treatment.treatmentID,
+          date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+          category: treatment.category,
+          type: treatment.type,
+        })) ?? [];
+
+      console.log("Treatment data: ", treatmentData);
       setPetName(userData?.petName ?? "");
       setSpeciesOption(userData?.species ?? "");
       setSexOption(userData?.sex ?? "");
@@ -1769,9 +1941,28 @@ const Pet: NextPage = () => {
       setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
       setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
-      setVaccinationShot1Option(userData?.vaccinationShot1 ? "Yes" : "Not yet");
-      setVaccinationShot2Option(userData?.vaccinationShot2 ? "Yes" : "Not yet");
-      setVaccinationShot3Option(userData?.vaccinationShot3 ? "Yes" : "Not yet");
+
+      if (userData?.vaccinationShot1.getFullYear() !== 1970) {
+        setVaccinationShot1Option("Yes");
+      } else {
+        setVaccinationShot1Option("Not yet");
+      }
+
+      if (userData?.vaccinationShot2?.getFullYear() !== 1970) {
+        setVaccinationShot2Option("Yes");
+      } else {
+        setVaccinationShot2Option("Not yet");
+      }
+
+      if (userData?.vaccinationShot3?.getFullYear() !== 1970) {
+        setVaccinationShot3Option("Yes");
+      } else {
+        setVaccinationShot3Option("Not yet");
+      }
+
+      // setVaccinationShot1Option(userData?.vaccinationShot1 != new Date(0) ? "Yes" : "Not yet");
+      // setVaccinationShot2Option(userData?.vaccinationShot2 != new Date(0) ? "Yes" : "Not yet");
+      // setVaccinationShot3Option(userData?.vaccinationShot3 != new Date(0) ? "Yes" : "Not yet");
       setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
       setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
       setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
@@ -1780,8 +1971,11 @@ const Pet: NextPage = () => {
       setKennelList(userData?.kennelReceived ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
       setComments(userData?.comments ?? "");
-      setClinicList(clinicDates ?? []);
-      setClinicIDList(clinicIDs ?? []);
+      setClinicList(clinicDates);
+      setTreatmentList(treatmentData);
+      console.log("Treatment list: ", treatmentList);
+
+      // setClinicIDList(clinicIDs ?? []);
 
       setFirstName(userData?.firstName ?? "");
       setSurname(userData?.surname ?? "");
@@ -1800,16 +1994,30 @@ const Pet: NextPage = () => {
       const userData = user;
       //Get all the clinic dates and put in a string array
       const clinicData = user.clinics;
-      const clinicDates =
-        clinicData?.map(
-          (clinic) =>
+      const clinicDates: Clinic[] =
+        clinicData?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
             clinic.clinic.date.getDate().toString() +
             "/" +
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-        ) ?? [];
-      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+          area: clinic.clinic.area,
+        })) ?? [];
+      //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+
+      //treatments
+      const treatmentData: Treatment[] =
+        user?.treatment?.map((treatment) => ({
+          treatmentID: treatment.treatmentID,
+          date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+          category: treatment.category,
+          type: treatment.type,
+        })) ?? [];
+
+      console.log("Treatment data: ", treatmentData);
+
       setPetName(userData?.petName ?? "");
       setSpeciesOption(userData?.species ?? "");
       setSexOption(userData?.sex ?? "");
@@ -1821,9 +2029,26 @@ const Pet: NextPage = () => {
       setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
       setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
-      setVaccinationShot1Option(userData?.vaccinationShot1 ? "Yes" : "Not yet");
-      setVaccinationShot2Option(userData?.vaccinationShot2 ? "Yes" : "Not yet");
-      setVaccinationShot3Option(userData?.vaccinationShot3 ? "Yes" : "Not yet");
+      // setVaccinationShot1Option(userData?.vaccinationShot1 !== new Date(0) ? "Yes" : "Not yet");
+      // setVaccinationShot2Option(userData?.vaccinationShot2 !== new Date(0) ? "Yes" : "Not yet");
+      // setVaccinationShot3Option(userData?.vaccinationShot3 !== new Date(0) ? "Yes" : "Not yet");
+      if (userData?.vaccinationShot1.getFullYear() !== 1970) {
+        setVaccinationShot1Option("Yes");
+      } else {
+        setVaccinationShot1Option("Not yet");
+      }
+
+      if (userData?.vaccinationShot2?.getFullYear() !== 1970) {
+        setVaccinationShot2Option("Yes");
+      } else {
+        setVaccinationShot2Option("Not yet");
+      }
+
+      if (userData?.vaccinationShot3?.getFullYear() !== 1970) {
+        setVaccinationShot3Option("Yes");
+      } else {
+        setVaccinationShot3Option("Not yet");
+      }
       setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
       setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
       setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
@@ -1831,8 +2056,10 @@ const Pet: NextPage = () => {
       setCardStatusOption(userData?.cardStatus ?? "");
       setKennelList(userData?.kennelReceived ?? []);
       setComments(userData?.comments ?? "");
-      setClinicList(clinicDates ?? []);
-      setClinicIDList(clinicIDs ?? []);
+      setClinicList(clinicDates);
+      setTreatmentList(treatmentData);
+      console.log("Treatment list: ", treatmentList);
+      // setClinicIDList(clinicIDs ?? []);
 
       setFirstName(userData?.firstName ?? "");
       setSurname(userData?.surname ?? "");
@@ -1879,11 +2106,14 @@ const Pet: NextPage = () => {
     setVaccinationShot1Date(new Date());
     setVaccinationShot2Date(new Date());
     setVaccinationShot3Date(new Date());
+    setClinicsAttendedOption("Select here");
     setMembershipTypeOption("Select one");
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select one");
     setComments("");
     setClinicList([]);
+    setTreatmentList([]);
+    setShowClinicMessage(false);
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -2006,29 +2236,95 @@ const Pet: NextPage = () => {
   };
 
   //------------------------------------ADD AN EXISTING CLINIC FOR PET--------------------------------------
+  const [todayClinicList, setTodayClinicList] = useState<Clinic[]>([]);
+
+  //show the clinic list for today
+  const [showTodayClinics, setShowTodayClinics] = useState(false);
+  const clinicRef = useRef<HTMLDivElement>(null);
+  const [petIDForClinic, setPetIDForClinic] = useState(0);
+  const [isClinicLoading, setIsClinicLoading] = useState(false);
+  // const btnClinicRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        clinicRef.current &&
+        !clinicRef.current.contains(event.target as Node)
+        // btnClinicRef.current &&
+        // !btnClinicRef.current.contains(event.target as Node)
+      ) {
+        console.log("Today clinic: ", showTodayClinics);
+        setShowTodayClinics(false);
+        setTodayClinicList([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   //Search for a clinic date and clinic ID given today's date. Todays date needs to match up with the clinic date for the clinic to be added to the pet
   const handleAddClinic = async (id: number) => {
+    setShowTodayClinics(true);
+
+    setPetIDForClinic(id);
     //get today's date
     const today = new Date();
     //add to the clinic list and ID list and then add it to the table
     //check if the clinic date is today's date
-    const option = clinicsAttendedOptions.find(
+    const option = clinicsAttendedOptions.filter(
       (clinic) => clinic.date.getDate() === today.getDate() && clinic.date.getMonth() === today.getMonth() && clinic.date.getFullYear() === today.getFullYear(),
     );
-    console.log("Option for clinic exists: ", option);
-    const optionDate = option?.date.getDate().toString() + "/" + option?.date.getMonth().toString() + "/" + option?.date.getFullYear().toString();
-    const optionID = option?.clinicID ?? 0;
+    console.log("All clinics today: ", option);
 
-    if (!clinicIDList.includes(optionID) && optionID != 0) {
-      setClinicList([...clinicList, String(optionDate)]);
-      setClinicIDList([...clinicIDList, optionID]);
+    const clinicTodayList: Clinic[] = [];
+    //Search for the clinic's of today in the clinic list
+    for (const clinic of option) {
+      const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
+      clinicTodayList.push({ id: clinic?.clinicID ?? 0, date: date, area: clinic?.area ?? "" });
 
-      //update the pet table to add the clinic to the pet
-      await addClinic.mutateAsync({
-        petID: id,
-        clinicID: optionID,
-      });
+      // //if (!clinicIDList.includes(clinic?.clinicID)) {
+      // const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
+      // setTodayClinicList([...todayClinicList, { id: clinic?.clinicID ?? 0, date: date, area: clinic?.area ?? "" }]);
+      // //}
     }
+
+    setTodayClinicList(clinicTodayList);
+
+    console.log("Today's clinic list: ", todayClinicList);
+
+    // setTodayClinicList([...todayClinicList, { id: option[0].clinicID, date: option[0].date }]);
+    // const optionDate = option?.date.getDate().toString() + "/" + option?.date.getMonth().toString() + "/" + option?.date.getFullYear().toString();
+    // const optionID = option?.clinicID ?? 0;
+
+    // if (!clinicIDList.includes(optionID) && optionID != 0) {
+    //   setClinicList([...clinicList, String(optionDate)]);
+    //   setClinicIDList([...clinicIDList, optionID]);
+
+    //   //update the pet table to add the clinic to the pet
+    //   await addClinic.mutateAsync({
+    //     petID: id,
+    //     clinicID: optionID,
+    //   });
+    // }
+  };
+
+  const handleAddTodaysClinic = async (petID: number, clinicID: number) => {
+    setIsClinicLoading(true);
+    setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }]);
+    //setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID)?.date ?? ""]);
+    //setClinicIDList([...clinicIDList, clinicID]);
+    //update the pet table to add the clinic to the pet
+    await addClinic.mutateAsync({
+      petID: petID,
+      clinicID: clinicID,
+    });
+    setShowTodayClinics(false);
+    setTodayClinicList([]);
+    setPetIDForClinic(0);
+    setIsClinicLoading(false);
   };
 
   // ----------------------------------------Uploading Image----------------------------------------
@@ -2216,6 +2512,35 @@ const Pet: NextPage = () => {
                                 <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                   Add today's clinic to pet
                                 </span>
+
+                                {showTodayClinics && petIDForClinic === pet.petID && (
+                                  <>
+                                    {isClinicLoading ? (
+                                      <div
+                                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                        role="status"
+                                      />
+                                    ) : (
+                                      <div
+                                        ref={clinicRef}
+                                        className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
+                                      >
+                                        <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                          {todayClinicList.map((option) => (
+                                            <li key={option.id} onClick={() => handleAddTodaysClinic(pet.petID, option.id)}>
+                                              <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                {
+                                                  //Give the date and in brackets the area
+                                                  option.date + " (" + option.area + ")"
+                                                }
+                                              </button>
+                                            </li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
+                                  </>
+                                )}
                               </span>
                             </div>
                           </div>
@@ -2764,8 +3089,14 @@ const Pet: NextPage = () => {
                       )}
                     </div>
                   )}
-                </div>
 
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">Treatments: </div>
+                    </div>
+                    <div className="mt-5 flex">{treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join(", ")}</div>
+                  </div>
+                </div>
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
@@ -2785,8 +3116,8 @@ const Pet: NextPage = () => {
                       {showClinicsAttended && (
                         <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
                           {clinicList.map((clinic) => (
-                            <li key={clinic} className=" py-2">
-                              {clinic}
+                            <li key={clinic.id} className=" py-2">
+                              {clinic.date + " (" + clinic.area + ")"}
                             </li>
                           ))}
                         </ul>
@@ -2810,21 +3141,16 @@ const Pet: NextPage = () => {
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {clinicsAttendedOptions.map((option) => (
                               <li
-                                key={
-                                  option.date.getDate().toString() +
-                                  "/" +
-                                  ((option.date.getMonth() ?? 0) + 1).toString() +
-                                  "/" +
-                                  option.date.getFullYear().toString()
-                                }
+                                key={option.clinicID}
                                 onClick={() =>
                                   handleClinicsAttendedOption(
+                                    option.clinicID,
                                     option.date.getDate().toString() +
                                       "/" +
                                       ((option.date.getMonth() ?? 0) + 1).toString() +
                                       "/" +
                                       option.date.getFullYear().toString(),
-                                    option.clinicID,
+                                    option.area,
                                   )
                                 }
                               >
@@ -2833,7 +3159,10 @@ const Pet: NextPage = () => {
                                     "/" +
                                     ((option.date.getMonth() ?? 0) + 1).toString() +
                                     "/" +
-                                    option.date.getFullYear().toString()}
+                                    option.date.getFullYear().toString() +
+                                    " (" +
+                                    option.area +
+                                    ")"}
                                 </button>
                               </li>
                             ))}
@@ -2841,6 +3170,8 @@ const Pet: NextPage = () => {
                         </div>
                       )}
                     </div>
+
+                    {showClinicMessage && <div className="ml-2 mt-5 text-red-600">(Veterinary fees covered)</div>}
                   </div>
 
                   {/*LAST DEWORMING*/}
@@ -3041,7 +3372,14 @@ const Pet: NextPage = () => {
                 className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
                 onClick={() => void handleCreateButtonModal()}
               >
-                {isUpdate ? "Update" : "Create"}
+                {isLoading ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <div>{isUpdate ? "Update" : "Create"}</div>
+                )}
               </button>
             </div>
           </>
@@ -3137,6 +3475,43 @@ const Pet: NextPage = () => {
                     <b className="mr-3">Sterilisation Outcome:</b>{" "}
                     {sterilisationOutcomeOption === "Select one" ? user?.sterilisationOutcome : sterilisationOutcomeOption}
                   </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Vaccination Shot 1:</b>
+                    {vaccinationShot1Option === "Yes" ? (
+                      <div className="ml-3">
+                        ({vaccinationShot1Date.getDate() + "/" + (vaccinationShot1Date.getMonth() + 1) + "/" + vaccinationShot1Date.getFullYear()})
+                      </div>
+                    ) : (
+                      <div className="ml-3">{vaccinationShot1Option}</div>
+                    )}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Vaccination Shot 2:</b>
+                    {vaccinationShot2Option === "Yes" ? (
+                      <div className="ml-3">
+                        ({vaccinationShot2Date.getDate() + "/" + (vaccinationShot2Date.getMonth() + 1) + "/" + vaccinationShot2Date.getFullYear()})
+                      </div>
+                    ) : (
+                      <div className="ml-3">{vaccinationShot2Option}</div>
+                    )}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Vaccination Shot 3:</b>
+                    {vaccinationShot3Option === "Yes" ? (
+                      <div className="ml-3">
+                        ({vaccinationShot3Date.getDate() + "/" + (vaccinationShot3Date.getMonth() + 1) + "/" + vaccinationShot3Date.getFullYear()})
+                      </div>
+                    ) : (
+                      <div className="ml-3">{vaccinationShot3Option}</div>
+                    )}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Treatments:</b> {treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join(", ")}
+                  </div>
                 </div>
 
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -3144,7 +3519,15 @@ const Pet: NextPage = () => {
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Clinics Attended:</b> {clinicList.length} in Total{" "}
-                    {clinicList.length > 0 && <>({clinicList.map((clinic, index) => (clinicList.length - 1 === index ? clinic : clinic + ", "))})</>}
+                    {clinicList.length > 0 && (
+                      <>
+                        (
+                        {clinicList.map((clinic, index) =>
+                          clinicList.length - 1 === index ? clinic.date + " (" + clinic.area : clinic.date + " (" + clinic.area + ", ",
+                        )}
+                        {")"})
+                      </>
+                    )}
                   </div>
 
                   <div className="mb-2 flex items-center">

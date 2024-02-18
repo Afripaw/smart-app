@@ -4,6 +4,7 @@ import { UploadButton } from "~/utils/uploadthing";
 import { UserCircle } from "phosphor-react";
 import Image from "next/image";
 import { api } from "~/utils/api";
+import { useEffect, useState } from "react";
 
 interface ImageUploadModalProps {
   isOpen: boolean;
@@ -15,13 +16,27 @@ interface ImageUploadModalProps {
 }
 
 const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, userName, userID, userImage, userType, onClose }) => {
+  // const [completed, setCompleted] = useState(false);
+  const [image, setImage] = useState("");
   const user = api.user.getUserByID.useQuery({ id: userID });
   if (!isOpen) return null;
+
+  if (userImage != "") {
+    setImage(userImage);
+  }
 
   if (userImage === "") {
     userImage = user.data?.image ?? "";
     // userImage = "https://res.cloudinary.com/dk-find-out/image/upload/q_80,w_1920,f_auto/DCTM_Penguin_UK_DK_AL552958_hygtqo.jpg";
   }
+
+  // useEffect(() => {
+  //   if (userImage === "") {
+  //     void user.refetch();
+  //     userImage = user.data?.image ?? "";
+  //   }
+  // }, [completed]);
+
   return (
     <div className="fixed inset-0 z-20 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50">
       <div className="flex flex-col justify-center rounded-lg bg-white p-4 shadow-md">
@@ -31,8 +46,8 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, userName, u
         <h2 className="mb-2 text-lg font-semibold">Would you like to upload an image for {userName}?</h2>
         <div className="flex justify-center">
           <div>
-            {userImage ? (
-              <Image src={userImage} alt="Afripaw profile pic" className="ml-auto aspect-auto " width={140} height={100} />
+            {image ? (
+              <Image src={image} alt="Afripaw profile pic" className="ml-auto aspect-auto " width={140} height={100} />
             ) : (
               <UserCircle size={140} className="ml-auto aspect-auto border-2" />
             )}
@@ -47,9 +62,16 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, userName, u
               // Do something with the error.
               alert(`ERROR! ${error.message}`);
             }}
-            onClientUploadComplete={() => {
+            onClientUploadComplete={(data) => {
               // run function to update user with new image
               // console.log("Response: " + response);
+              console.log("Data 0 url: " + data[0]?.url);
+              console.log("Data 1 url : " + data[1]?.url);
+              //data[1]?.url;
+              userImage = data[0]?.url ?? "";
+              setImage(data[0]?.url ?? "");
+              console.log("Immmaaagggge: " + image);
+              //setCompleted(true);
               console.log("Upload complete!!!!!!!!");
               void user.refetch();
             }}

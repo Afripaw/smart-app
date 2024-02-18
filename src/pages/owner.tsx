@@ -37,6 +37,12 @@ import Link from "next/link";
 const Owner: NextPage = () => {
   // useSession({ required: true });
 
+  //-----------------------------------TYPES FOR PET DATA-----------------------------------------
+  type Pet = {
+    id: number;
+    name: string;
+  };
+
   const newOwner = api.petOwner.create.useMutation();
   const updateOwner = api.petOwner.update.useMutation();
   const [isUpdate, setIsUpdate] = useState(false);
@@ -47,6 +53,9 @@ const Owner: NextPage = () => {
 
   //For moving between different pages
   const router = useRouter();
+
+  //-------------------------------LOADING ANIMATIONS-----------------------------------------
+  const [isLoading, setIsLoading] = useState(false);
 
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.petOwner.updateIdentification.useMutation();
@@ -290,7 +299,7 @@ const Owner: NextPage = () => {
     void refetch();
   }, [isUpdate, isDeleted, isCreate, query, order, isDoneUploading]);
 
-  const user = user_data?.find((user) => user.ownerID === id);
+  const user = owner_data?.find((user) => user.ownerID === id);
 
   //-------------------------------DELETE ALL USERS-----------------------------------------
   //Delete all users
@@ -316,6 +325,10 @@ const Owner: NextPage = () => {
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
   const [image, setImage] = useState("");
+
+  //---------------------------------NON-EDITABLE BOXES----------------------------------
+  //pets that contain the petID and petName for multiple pets. contains two strings for each pet
+  const [petsCombined, setPetsCombined] = useState<Pet[]>([]);
 
   //userID
   //const [userID, setUserID] = useState("");
@@ -589,6 +602,15 @@ const Owner: NextPage = () => {
       }
     }
 
+    const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
+    const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
+    const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+
+    const combined = petsID.map((id, index) => {
+      return { id: id, name: petsName[index] ?? "" };
+    });
+    setPetsCombined(combined);
+
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
     //isCreate ? setIsCreate(false) : setIsCreate(false);
     setIsUpdate(true);
@@ -616,6 +638,15 @@ const Owner: NextPage = () => {
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
 
+      const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
+      const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
+      const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+
+      const combined = petsID.map((id, index) => {
+        return { id: id, name: petsName[index] ?? "" };
+      });
+      setPetsCombined(combined);
+
       //Make sure thet area and street options have a value
       console.log("Helllooo address area: " + userData.addressArea);
       if (userData.addressArea === "") {
@@ -629,6 +660,7 @@ const Owner: NextPage = () => {
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
+    setIsLoading(true);
     const owner = await updateOwner.mutateAsync({
       petOwnerID: id,
       firstName: firstName,
@@ -707,6 +739,9 @@ const Owner: NextPage = () => {
     setComments("");
     setIsUpdate(false);
     setIsCreate(false);
+    setPetsCombined([]);
+
+    setIsLoading(false);
   };
 
   //-------------------------------CREATE NEW USER-----------------------------------------
@@ -728,6 +763,7 @@ const Owner: NextPage = () => {
     setAddressSuburb("");
     setAddressPostalCode("");
     setAddressFreeForm("");
+    setPetsCombined([]);
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setIsCreate(true);
     setIsUpdate(false);
@@ -735,6 +771,7 @@ const Owner: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
+    setIsLoading(true);
     try {
       const newUser_ = await newOwner.mutateAsync({
         firstName: firstName,
@@ -809,6 +846,8 @@ const Owner: NextPage = () => {
       }
     }
 
+    setIsLoading(false);
+
     // return newUser_;
   };
 
@@ -841,6 +880,15 @@ const Owner: NextPage = () => {
       setImage(userData.image ?? "");
       console.log("Select one");
 
+      const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
+      const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
+      const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+
+      const combined = petsID.map((id, index) => {
+        return { id: id, name: petsName[index] ?? "" };
+      });
+      setPetsCombined(combined);
+
       //Make sure thet area and street options have a value
       if (userData.addressArea === "Select one") {
         setAreaOption("");
@@ -851,6 +899,12 @@ const Owner: NextPage = () => {
         console.log("Street option is select one");
       }
     }
+
+    // owner_data?.map((owner) => {
+    //   if (owner.ownerID === id) {
+    //     setPets(owner.pets);
+    //   }
+    // });
 
     setIsUpdate(false);
     setIsCreate(false);
@@ -881,6 +935,16 @@ const Owner: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+
+      const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
+      const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
+      const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+
+      const combined = petsID.map((id, index) => {
+        return { id: id, name: petsName[index] ?? "" };
+      });
+      setPetsCombined(combined);
+
       //console.log("Select one");
       //Make sure thet area and street options have a value
       if (userData.addressArea === "Select one" && !isUpdate) {
@@ -896,6 +960,12 @@ const Owner: NextPage = () => {
         setStreetOption("Select one");
       }
     }
+
+    // owner_data?.map((owner) => {
+    //   if (owner.ownerID === id) {
+    //     setPets(owner.pets);
+    //   }
+    // });
   }, [isViewProfilePage]); // Effect runs when userQuery.data changes
 
   //Go to update page from the view profile page
@@ -932,6 +1002,7 @@ const Owner: NextPage = () => {
     setPreferredCommunicationOption("Select one");
     setStatusOption("Select one");
     setComments("");
+    setPetsCombined([]);
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -1062,59 +1133,6 @@ const Owner: NextPage = () => {
   const handleOrderFields = (field: string) => {
     setOrder(field);
   };
-
-  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  // const observerTarget = useRef<HTMLDivElement | null>(null);
-
-  // const [limit] = useState(12);
-  // const {
-  //   data: queryData,
-  //   fetchNextPage,
-  //   hasNextPage,
-  //   refetch,
-  // } = api.petOwner.searchOwnersInfinite.useInfiniteQuery(
-  //   {
-  //     ownerID: id,
-  //     limit: limit,
-  //     searchQuery: query,
-  //     order: order,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => {
-  //       console.log("Next Cursor: " + lastPage.nextCursor);
-  //       return lastPage.nextCursor;
-  //     },
-  //     enabled: false,
-  //   },
-  // );
-
-  // //Flattens the pages array into one array
-  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
-
-  // //Checks intersection of the observer target and reassigns target element once true
-  // useEffect(() => {
-  //   if (!observerTarget.current || !fetchNextPage) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-  //     },
-  //     { threshold: 1 },
-  //   );
-
-  //   if (observerTarget.current) observer.observe(observerTarget.current);
-
-  //   const currentTarget = observerTarget.current;
-
-  //   return () => {
-  //     if (currentTarget) observer.unobserve(currentTarget);
-  //   };
-  // }, [fetchNextPage, hasNextPage, observerTarget]);
-
-  // //Make it retrieve the data from tab;e again when the user is updated, deleted or created
-  // useEffect(() => {
-  //   void refetch();
-  // }, [isUpdate, isDeleted, isCreate, query, order]);
 
   //------------------------------------CREATE A NEW PET FOR OWNER--------------------------------------
   //When button is pressed the browser needs to go to the pet's page. The pet's page needs to know the owner's ID
@@ -1635,6 +1653,10 @@ const Owner: NextPage = () => {
                     </div>
                   </div>
 
+                  <div className="flex py-2">
+                    Pets: <div className="px-3">{petsCombined.map((pet) => (pet?.name ? pet.name : "") + " (P" + (pet?.id ?? "") + ")").join(", ")}</div>
+                  </div>
+
                   <div className="flex items-start">
                     <div className="w-32 pt-3">Comments: </div>
                     <textarea
@@ -1662,7 +1684,14 @@ const Owner: NextPage = () => {
                 className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
                 onClick={() => void handleCreateButtonModal()}
               >
-                {isUpdate ? "Update" : "Create"}
+                {isLoading ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <div>{isUpdate ? "Update" : "Create"}</div>
+                )}
               </button>
             </div>
           </>
@@ -1776,6 +1805,10 @@ const Owner: NextPage = () => {
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Starting Date:</b> {startingDate?.toLocaleDateString()}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Pets:</b> {petsCombined.map((pet) => (pet?.name ? pet.name : "") + " (P" + (pet?.id ?? "") + ")").join(", ")}
                   </div>
 
                   <div className="mb-2 flex items-start">

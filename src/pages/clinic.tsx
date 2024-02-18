@@ -40,6 +40,9 @@ const Clinic: NextPage = () => {
   //For moving between different pages
   const router = useRouter();
 
+  //-------------------------------LOADING ANIMATIONS-----------------------------------------
+  const [isLoading, setIsLoading] = useState(false);
+
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.petClinic.updateIdentification.useMutation();
 
@@ -422,6 +425,7 @@ const Clinic: NextPage = () => {
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
+    setIsLoading(true);
     await updateClinic.mutateAsync({
       clinicID: id,
       greaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
@@ -437,6 +441,8 @@ const Clinic: NextPage = () => {
     setComments("");
     setIsUpdate(false);
     setIsCreate(false);
+
+    setIsLoading(false);
   };
 
   //-------------------------------CREATE NEW USER-----------------------------------------
@@ -454,6 +460,7 @@ const Clinic: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
+    setIsLoading(true);
     const newUser_ = await newClinic.mutateAsync({
       greaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
       area: areaOption === "Select one" ? "" : areaOption,
@@ -473,6 +480,8 @@ const Clinic: NextPage = () => {
         clinicID: newUser_?.clinicID ?? 0,
       });
     }
+
+    setIsLoading(false);
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
@@ -809,7 +818,7 @@ const Clinic: NextPage = () => {
                             <div className="relative flex items-center justify-center">
                               <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                 <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.clinicID ?? 0)} />
-                                <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                <span className="absolute bottom-full hidden w-[86px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                   View clinic profile
                                 </span>
                               </span>
@@ -982,7 +991,14 @@ const Clinic: NextPage = () => {
                 className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
                 onClick={() => void handleCreateButtonModal()}
               >
-                {isUpdate ? "Update" : "Create"}
+                {isLoading ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <div>{isUpdate ? "Update" : "Create"}</div>
+                )}
               </button>
             </div>
           </>

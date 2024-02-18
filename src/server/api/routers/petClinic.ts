@@ -34,10 +34,10 @@ export const petClinicRouter = createTRPCRouter({
     .input(
       z.object({
         clinicID: z.number(),
-        greaterArea: z.string().min(1),
-        area: z.string().min(1),
-        conditions: z.string().min(1),
-        comments: z.string().min(1),
+        greaterArea: z.string(),
+        area: z.string(),
+        conditions: z.string(),
+        comments: z.string(),
         date: z.date(),
       }),
     )
@@ -163,7 +163,11 @@ export const petClinicRouter = createTRPCRouter({
 
   //get all clinics
   getAllClinics: publicProcedure.query(async ({ ctx }) => {
-    const petClinic = await ctx.db.petClinic.findMany();
+    const petClinic = await ctx.db.petClinic.findMany({
+      orderBy: {
+        date: "desc",
+      },
+    });
     return petClinic;
   }),
 

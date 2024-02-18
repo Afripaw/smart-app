@@ -40,6 +40,9 @@ const Treatment: NextPage = () => {
   //For moving between different pages
   const router = useRouter();
 
+  //-------------------------------LOADING ANIMATIONS-----------------------------------------
+  const [isLoading, setIsLoading] = useState(false);
+
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.petTreatment.updateIdentification.useMutation();
 
@@ -486,6 +489,7 @@ const Treatment: NextPage = () => {
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
+    setIsLoading(true);
     await updateTreatment.mutateAsync({
       treatmentID: id,
       category: categoryOption === "Select one" ? "" : categoryOption,
@@ -499,6 +503,8 @@ const Treatment: NextPage = () => {
     setComments("");
     setIsUpdate(false);
     setIsCreate(false);
+
+    setIsLoading(false);
   };
 
   //-------------------------------CREATE NEW USER-----------------------------------------
@@ -515,6 +521,7 @@ const Treatment: NextPage = () => {
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
+    setIsLoading(true);
     const query = router.asPath.split("?")[1] ?? "";
     const newUser_ = await newTreatment.mutateAsync({
       petID: petID === 0 ? Number(query?.split("&")[0]?.split("=")[1]) : petID,
@@ -535,6 +542,8 @@ const Treatment: NextPage = () => {
         treatmentID: newUser_?.treatmentID ?? 0,
       });
     }
+
+    setIsLoading(false);
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
@@ -1045,7 +1054,14 @@ const Treatment: NextPage = () => {
                 className="my-4 rounded-md bg-main-orange px-8 py-3 text-lg text-white hover:bg-orange-500"
                 onClick={() => void handleCreateButtonModal()}
               >
-                {isUpdate ? "Update" : "Create"}
+                {isLoading ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <div>{isUpdate ? "Update" : "Create"}</div>
+                )}
               </button>
             </div>
           </>

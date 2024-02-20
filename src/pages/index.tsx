@@ -117,19 +117,55 @@ export default function Home() {
               <div className="flex grow flex-col items-center justify-center">
                 <div className="relative my-5 flex items-center p-28 text-black">
                   <div className="absolute left-0 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-6 text-white">
-                    <div className="text-2xl">{/*clinicVisits?.data ?? 0*/ 0}</div>
+                    {!clinicVisits.data ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <>
+                        <div className="text-2xl">{clinicVisits?.data ?? 0}</div>
+                      </>
+                    )}
                     <div>Pet Clinic visits</div>
                   </div>
                   <div className="absolute right-0 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-8 text-white">
-                    <div className="text-2xl">{sterilisedPets?.data?.length ?? 0}</div>
+                    {!sterilisedPets?.data ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <>
+                        <div className="text-2xl">{sterilisedPets?.data?.length ?? 0}</div>
+                      </>
+                    )}
                     <div>Pets Sterilised</div>
                   </div>
                   <div className="absolute bottom-0 left-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-4 text-white">
-                    <div className="text-2xl">{kennels?.data ?? 0}</div>
+                    {!kennels.data ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <>
+                        <div className="text-2xl">{kennels?.data ?? 0}</div>
+                      </>
+                    )}
                     <div>Kennels Provided</div>
                   </div>
                   <div className="absolute bottom-0 right-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-5 text-white">
-                    <div className="text-2xl">{activeVolunteers?.data?.length ?? 0}</div>
+                    {!activeVolunteers?.data ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <>
+                        <div className="text-2xl">{activeVolunteers?.data?.length ?? 0}</div>
+                      </>
+                    )}
                     <div>Active Volunteers</div>
                   </div>
                   <p className="w-52 border-2 border-black bg-white p-3">
@@ -141,6 +177,12 @@ export default function Home() {
                     and protect them from suffering and disease.
                   </p>
                 </div>
+              </div>
+
+              <div className="z-20 flex flex-col items-center justify-center bg-main-orange text-black">
+                <div className="">Design by JHO Ludik and JH van Vuuren</div>
+                <div className="">Development by JHO Ludik</div>
+                <div className="">© AfriPaw (2024)</div>
               </div>
             </div>
           </>

@@ -138,17 +138,20 @@ export const petOwnerRouter = createTRPCRouter({
         const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
         return {
           OR: [
+            { ownerID: { equals: Number(term) } },
             { firstName: { contains: term } },
             { surname: { contains: term } },
             { email: { contains: term } },
             { status: { contains: term } },
             { mobile: { contains: term } },
             { addressGreaterArea: { contains: term } },
+            { addressArea: { contains: term } },
             { addressStreet: { contains: term } },
             { addressStreetCode: { contains: term } },
             { addressStreetNumber: { contains: term } },
             // { addressSuburb: { contains: term } },
             // { addressPostalCode: { contains: term } },
+            { pets: { some: { petName: { contains: term } } } },
             { addressFreeForm: { contains: term } },
             { preferredCommunication: { contains: term } },
             { comments: { contains: term } },

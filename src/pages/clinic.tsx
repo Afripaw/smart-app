@@ -719,117 +719,127 @@ const Clinic: NextPage = () => {
                   </button> */}
                 </div>
               </div>
-              <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                <table className="table-auto">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2"></th>
-                      <th className=" px-4 py-2">ID</th>
-                      <th className="w-[35px] px-4 py-2">
-                        <span className="group relative inline-block">
-                          <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
-                            Clinic Date
-                          </button>
-                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                            Sort reverse chronologically
-                          </span>
-                        </span>
-                      </th>
 
-                      <th className="px-4 py-2">Greater Area</th>
-                      <th className="px-4 py-2">Area</th>
-                      <th className="px-4 py-2">
-                        Conditions
-                        {/* <button className={`${order == "condition" ? "underline" : ""}`} onClick={() => handleOrderFields("condition")}>
+              {user_data ? (
+                <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+                  <table className="table-auto">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2"></th>
+                        <th className=" px-4 py-2">ID</th>
+                        <th className="w-[35px] px-4 py-2">
+                          <span className="group relative inline-block">
+                            <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
+                              Clinic Date
+                            </button>
+                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              Sort reverse chronologically
+                            </span>
+                          </span>
+                        </th>
+
+                        <th className="px-4 py-2">Greater Area</th>
+                        <th className="px-4 py-2">Area</th>
+                        <th className="px-4 py-2">
+                          Conditions
+                          {/* <button className={`${order == "condition" ? "underline" : ""}`} onClick={() => handleOrderFields("condition")}>
                           Conditions
                         </button> */}
-                      </th>
-                      <th className="w-[35px] px-4 py-2">
-                        <span className="group relative inline-block">
-                          <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                            Last Update
-                          </button>
-                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                            Sort reverse chronologically
+                        </th>
+                        <th className="w-[35px] px-4 py-2">
+                          <span className="group relative inline-block">
+                            <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                              Last Update
+                            </button>
+                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              Sort reverse chronologically
+                            </span>
                           </span>
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {user_data?.map((user, index) => {
-                      return (
-                        <tr className="items-center">
-                          <td className=" border px-4 py-2">
-                            <div className="px-4 py-2">{index + 1}</div>
-                          </td>
-                          <td className="border px-4 py-2">C{user.clinicID}</td>
-                          <td className="border px-4 py-2">
-                            {user?.date?.getDate()?.toString() ?? ""}
-                            {"/"}
-                            {((user?.date?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                            {"/"}
-                            {user?.date?.getFullYear()?.toString() ?? ""}
-                          </td>
-                          <td className="border px-4 py-2">{user.greaterArea}</td>
-                          <td className="border px-4 py-2">{user.area}</td>
-                          <td className="border px-4 py-2">{user.conditions}</td>
-                          <td className=" border px-4 py-2">
-                            {user?.updatedAt?.getDate()?.toString() ?? ""}
-                            {"/"}
-                            {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                            {"/"}
-                            {user?.updatedAt?.getFullYear()?.toString() ?? ""}
-                          </td>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {user_data?.map((user, index) => {
+                        return (
+                          <tr className="items-center">
+                            <td className=" border px-4 py-2">
+                              <div className="px-4 py-2">{index + 1}</div>
+                            </td>
+                            <td className="border px-4 py-2">C{user.clinicID}</td>
+                            <td className="border px-4 py-2">
+                              {user?.date?.getDate()?.toString() ?? ""}
+                              {"/"}
+                              {((user?.date?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                              {"/"}
+                              {user?.date?.getFullYear()?.toString() ?? ""}
+                            </td>
+                            <td className="border px-4 py-2">{user.greaterArea}</td>
+                            <td className="border px-4 py-2">{user.area}</td>
+                            <td className="border px-4 py-2">{user.conditions}</td>
+                            <td className=" border px-4 py-2">
+                              {user?.updatedAt?.getDate()?.toString() ?? ""}
+                              {"/"}
+                              {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                              {"/"}
+                              {user?.updatedAt?.getFullYear()?.toString() ?? ""}
+                            </td>
 
-                          <div className="flex">
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <Trash
-                                  size={24}
-                                  className="block"
-                                  onClick={() =>
-                                    handleDeleteModal(
-                                      user.clinicID ?? 0,
-                                      String(user.clinicID),
-                                      user.date?.getDate()?.toString() +
-                                        "/" +
-                                        ((user.date?.getMonth() ?? 0) + 1)?.toString() +
-                                        "/" +
-                                        user.date?.getFullYear()?.toString() ?? "",
-                                    )
-                                  }
-                                />
-                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  Delete clinic
+                            <div className="flex">
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <Trash
+                                    size={24}
+                                    className="block"
+                                    onClick={() =>
+                                      handleDeleteModal(
+                                        user.clinicID ?? 0,
+                                        String(user.clinicID),
+                                        user.date?.getDate()?.toString() +
+                                          "/" +
+                                          ((user.date?.getMonth() ?? 0) + 1)?.toString() +
+                                          "/" +
+                                          user.date?.getFullYear()?.toString() ?? "",
+                                      )
+                                    }
+                                  />
+                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Delete clinic
+                                  </span>
                                 </span>
-                              </span>
-                            </div>
+                              </div>
 
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.clinicID ?? 0)} />
-                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  Update clinic
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.clinicID ?? 0)} />
+                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Update clinic
+                                  </span>
                                 </span>
-                              </span>
-                            </div>
+                              </div>
 
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.clinicID ?? 0)} />
-                                <span className="absolute bottom-full hidden w-[86px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  View clinic profile
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.clinicID ?? 0)} />
+                                  <span className="absolute bottom-full hidden w-[86px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    View clinic profile
+                                  </span>
                                 </span>
-                              </span>
+                              </div>
                             </div>
-                          </div>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </article>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </article>
+              ) : (
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                </div>
+              )}
               <div ref={observerTarget} />
             </div>
           </>

@@ -797,128 +797,138 @@ const Treatment: NextPage = () => {
                   </button> */}
                 </div>
               </div>
-              <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                <table className="table-auto">
-                  <thead className="">
-                    <tr>
-                      <th className="px-4 py-2"></th>
-                      <th className="px-4 py-2">ID</th>
-                      <th className="w-[35px] px-4 py-2">
-                        <span className="group relative inline-block">
-                          <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
-                            Treatment Date
-                          </button>
-                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                            Sort reverse chronologically
+
+              {pet_treatment_data ? (
+                <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+                  <table className="table-auto">
+                    <thead className="">
+                      <tr>
+                        <th className="px-4 py-2"></th>
+                        <th className="px-4 py-2">ID</th>
+                        <th className="w-[35px] px-4 py-2">
+                          <span className="group relative inline-block">
+                            <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
+                              Treatment Date
+                            </button>
+                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              Sort reverse chronologically
+                            </span>
                           </span>
-                        </span>
-                      </th>
-                      <th className="px-4 py-2">Pet ID</th>
-                      <th className="px-4 py-2">Pet</th>
-                      <th className="px-4 py-2">Owner</th>
-                      <th className="px-4 py-2">Greater Area</th>
-                      <th className="px-4 py-2">Area</th>
-                      <th className="px-4 py-2">Category</th>
-                      <th className="px-4 py-2">
-                        Type
-                        {/* <button className={`${order == "condition" ? "underline" : ""}`} onClick={() => handleOrderFields("condition")}>
+                        </th>
+                        <th className="px-4 py-2">Pet ID</th>
+                        <th className="px-4 py-2">Pet</th>
+                        <th className="px-4 py-2">Owner</th>
+                        <th className="px-4 py-2">Greater Area</th>
+                        <th className="px-4 py-2">Area</th>
+                        <th className="px-4 py-2">Category</th>
+                        <th className="px-4 py-2">
+                          Type
+                          {/* <button className={`${order == "condition" ? "underline" : ""}`} onClick={() => handleOrderFields("condition")}>
                           Conditions
                         </button> */}
-                      </th>
-                      <th className="w-[35px] px-4 py-2">
-                        <span className="group relative inline-block">
-                          <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                            Last Update
-                          </button>
-                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                            Sort reverse chronologically
+                        </th>
+                        <th className="w-[35px] px-4 py-2">
+                          <span className="group relative inline-block">
+                            <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                              Last Update
+                            </button>
+                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              Sort reverse chronologically
+                            </span>
                           </span>
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pet_treatment_data?.map((treatment, index) => {
-                      return (
-                        <tr className="items-center">
-                          <td className=" border px-4 py-2">
-                            <div className="px-4 py-2">{index + 1}</div>
-                          </td>
-                          <td className="border px-4 py-2">T{treatment.treatmentID}</td>
-                          <td className="border px-4 py-2">
-                            {treatment?.date?.getDate()?.toString() ?? ""}
-                            {"/"}
-                            {((treatment?.date?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                            {"/"}
-                            {treatment?.date?.getFullYear()?.toString() ?? ""}
-                          </td>
-                          <td className="border px-4 py-2">P{treatment.petID}</td>
-                          <td className="border px-4 py-2">
-                            {treatment.petName} ({treatment.species})
-                          </td>
-                          <td className="border px-4 py-2">
-                            {treatment.firstName} {treatment.surname} (N{treatment.ownerID})
-                          </td>
-                          <td className="border px-4 py-2">{treatment.addressGreaterArea}</td>
-                          <td className="border px-4 py-2">{treatment.addressArea}</td>
-                          <td className="border px-4 py-2">{treatment.category}</td>
-                          <td className="border px-4 py-2">{treatment.type}</td>
-                          <td className=" border px-4 py-2">
-                            {treatment?.updatedAt?.getDate()?.toString() ?? ""}
-                            {"/"}
-                            {((treatment?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                            {"/"}
-                            {treatment?.updatedAt?.getFullYear()?.toString() ?? ""}
-                          </td>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pet_treatment_data?.map((treatment, index) => {
+                        return (
+                          <tr className="items-center">
+                            <td className=" border px-4 py-2">
+                              <div className="px-4 py-2">{index + 1}</div>
+                            </td>
+                            <td className="border px-4 py-2">T{treatment.treatmentID}</td>
+                            <td className="border px-4 py-2">
+                              {treatment?.date?.getDate()?.toString() ?? ""}
+                              {"/"}
+                              {((treatment?.date?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                              {"/"}
+                              {treatment?.date?.getFullYear()?.toString() ?? ""}
+                            </td>
+                            <td className="border px-4 py-2">P{treatment.petID}</td>
+                            <td className="border px-4 py-2">
+                              {treatment.petName} ({treatment.species})
+                            </td>
+                            <td className="border px-4 py-2">
+                              {treatment.firstName} {treatment.surname} (N{treatment.ownerID})
+                            </td>
+                            <td className="border px-4 py-2">{treatment.addressGreaterArea}</td>
+                            <td className="border px-4 py-2">{treatment.addressArea}</td>
+                            <td className="border px-4 py-2">{treatment.category}</td>
+                            <td className="border px-4 py-2">{treatment.type}</td>
+                            <td className=" border px-4 py-2">
+                              {treatment?.updatedAt?.getDate()?.toString() ?? ""}
+                              {"/"}
+                              {((treatment?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                              {"/"}
+                              {treatment?.updatedAt?.getFullYear()?.toString() ?? ""}
+                            </td>
 
-                          <div className="flex">
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <Trash
-                                  size={24}
-                                  className="block"
-                                  onClick={() =>
-                                    handleDeleteModal(
-                                      treatment.treatmentID ?? 0,
-                                      String(treatment.treatmentID ?? 0),
-                                      treatment.date?.getDate()?.toString() +
-                                        "/" +
-                                        ((treatment.date?.getMonth() ?? 0) + 1)?.toString() +
-                                        "/" +
-                                        treatment.date?.getFullYear()?.toString() ?? "",
-                                    )
-                                  }
-                                />
-                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  Delete treatment
+                            <div className="flex">
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <Trash
+                                    size={24}
+                                    className="block"
+                                    onClick={() =>
+                                      handleDeleteModal(
+                                        treatment.treatmentID ?? 0,
+                                        String(treatment.treatmentID ?? 0),
+                                        treatment.date?.getDate()?.toString() +
+                                          "/" +
+                                          ((treatment.date?.getMonth() ?? 0) + 1)?.toString() +
+                                          "/" +
+                                          treatment.date?.getFullYear()?.toString() ?? "",
+                                      )
+                                    }
+                                  />
+                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Delete treatment
+                                  </span>
                                 </span>
-                              </span>
-                            </div>
+                              </div>
 
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)} />
-                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  Update treatment
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)} />
+                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Update treatment
+                                  </span>
                                 </span>
-                              </span>
-                            </div>
+                              </div>
 
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)} />
-                                <span className="absolute bottom-full hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  View treatment profile
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)} />
+                                  <span className="absolute bottom-full hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    View treatment profile
+                                  </span>
                                 </span>
-                              </span>
+                              </div>
                             </div>
-                          </div>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </article>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </article>
+              ) : (
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                </div>
+              )}
               <div ref={observerTarget} />
             </div>
           </>

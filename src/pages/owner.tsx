@@ -1230,130 +1230,140 @@ const Owner: NextPage = () => {
                   </button> */}
                 </div>
               </div>
-              <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                <table className="table-auto">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2"></th>
-                      <th className="px-4 py-2">ID</th>
-                      <th className="px-4 py-2">Name</th>
-                      <th className="px-4 py-2">
-                        <span className="group relative inline-block">
-                          <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
-                            Surname
-                          </button>
-                          <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                            Sort alphabetically
+
+              {owner_data ? (
+                <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+                  <table className="table-auto">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2"></th>
+                        <th className="px-4 py-2">ID</th>
+                        <th className="px-4 py-2">Name</th>
+                        <th className="px-4 py-2">
+                          <span className="group relative inline-block">
+                            <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
+                              Surname
+                            </button>
+                            <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              Sort alphabetically
+                            </span>
                           </span>
-                        </span>
-                      </th>
+                        </th>
 
-                      <th className="px-4 py-2">Email</th>
-                      <th className="px-4 py-2">Mobile</th>
-                      <th className="px-4 py-2">Greater Area</th>
-                      <th className="px-4 py-2">Area</th>
-                      <th className="px-4 py-2">Address</th>
-                      <th className="px-4 py-2">Status</th>
-                      <th className="px-4 py-2">Pets</th>
-                      <th className="w-[35px] px-4 py-2">
-                        <span className="group relative inline-block">
-                          <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                            Last Update
-                          </button>
-                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                            Sort reverse chronologically
+                        <th className="px-4 py-2">Email</th>
+                        <th className="px-4 py-2">Mobile</th>
+                        <th className="px-4 py-2">Greater Area</th>
+                        <th className="px-4 py-2">Area</th>
+                        <th className="px-4 py-2">Address</th>
+                        <th className="px-4 py-2">Status</th>
+                        <th className="px-4 py-2">Pets</th>
+                        <th className="w-[35px] px-4 py-2">
+                          <span className="group relative inline-block">
+                            <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                              Last Update
+                            </button>
+                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              Sort reverse chronologically
+                            </span>
                           </span>
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {owner_data?.map((user, index) => {
-                      return (
-                        <tr className="items-center">
-                          <td className=" border px-4 py-2">
-                            <div className="">{index + 1}</div>
-                          </td>
-                          <td className="border px-4 py-2">N{user.ownerID}</td>
-                          <td className="border px-4 py-2">{user.firstName}</td>
-                          <td className="border px-4 py-2">{user.surname}</td>
-                          <td className="border px-4 py-2">{user.email}</td>
-                          <td className="border px-4 py-2">{user.mobile}</td>
-                          <td className="border px-4 py-2">{user.addressGreaterArea}</td>
-                          <td className="border px-4 py-2">{user.addressArea}</td>
-                          <td className="border px-4 py-2">
-                            {user.addressStreetNumber} {user.addressStreet}
-                          </td>
-                          <td className="border px-4 py-2">{user.status}</td>
-                          <td className="border px-4 py-2">
-                            {user.pets?.map((pet) => {
-                              return (
-                                <div className="flex flex-col">
-                                  {pet.map((pet_) => {
-                                    return (
-                                      <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet_.petID)}>
-                                        {pet_.petName}
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                              );
-                            })}
-                          </td>
-                          <td className=" border px-4 py-2">
-                            {user?.updatedAt?.getDate()?.toString() ?? ""}
-                            {"/"}
-                            {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                            {"/"}
-                            {user?.updatedAt?.getFullYear()?.toString() ?? ""}
-                          </td>
-                          <div className="flex">
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <Trash
-                                  size={24}
-                                  className="block"
-                                  onClick={() => handleDeleteModal(user.ownerID, String(user.ownerID), user.firstName ?? "")}
-                                />
-                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  Delete owner
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {owner_data?.map((user, index) => {
+                        return (
+                          <tr className="items-center">
+                            <td className=" border px-4 py-2">
+                              <div className="">{index + 1}</div>
+                            </td>
+                            <td className="border px-4 py-2">N{user.ownerID}</td>
+                            <td className="border px-4 py-2">{user.firstName}</td>
+                            <td className="border px-4 py-2">{user.surname}</td>
+                            <td className="border px-4 py-2">{user.email}</td>
+                            <td className="border px-4 py-2">{user.mobile}</td>
+                            <td className="border px-4 py-2">{user.addressGreaterArea}</td>
+                            <td className="border px-4 py-2">{user.addressArea}</td>
+                            <td className="border px-4 py-2">
+                              {user.addressStreetNumber} {user.addressStreet}
+                            </td>
+                            <td className="border px-4 py-2">{user.status}</td>
+                            <td className="border px-4 py-2">
+                              {user.pets?.map((pet) => {
+                                return (
+                                  <div className="flex flex-col">
+                                    {pet.map((pet_) => {
+                                      return (
+                                        <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet_.petID)}>
+                                          {pet_.petName}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                );
+                              })}
+                            </td>
+                            <td className=" border px-4 py-2">
+                              {user?.updatedAt?.getDate()?.toString() ?? ""}
+                              {"/"}
+                              {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                              {"/"}
+                              {user?.updatedAt?.getFullYear()?.toString() ?? ""}
+                            </td>
+                            <div className="flex">
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <Trash
+                                    size={24}
+                                    className="block"
+                                    onClick={() => handleDeleteModal(user.ownerID, String(user.ownerID), user.firstName ?? "")}
+                                  />
+                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Delete owner
+                                  </span>
                                 </span>
-                              </span>
-                            </div>
+                              </div>
 
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.ownerID)} />
-                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  Update owner
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.ownerID)} />
+                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Update owner
+                                  </span>
                                 </span>
-                              </span>
-                            </div>
+                              </div>
 
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.ownerID)} />
-                                <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  View owner profile
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.ownerID)} />
+                                  <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    View owner profile
+                                  </span>
                                 </span>
-                              </span>
-                            </div>
+                              </div>
 
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <Dog size={24} className="block" onClick={() => handleCreateNewPet(user.ownerID)} />
-                                <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  Add new pet to owner
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <Dog size={24} className="block" onClick={() => handleCreateNewPet(user.ownerID)} />
+                                  <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Add new pet to owner
+                                  </span>
                                 </span>
-                              </span>
+                              </div>
                             </div>
-                          </div>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </article>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </article>
+              ) : (
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                </div>
+              )}
               <div ref={observerTarget} />
             </div>
           </>

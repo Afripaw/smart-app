@@ -177,17 +177,18 @@ export const volunteerRouter = createTRPCRouter({
       // Construct a complex search condition
       const searchConditions = terms.map((term) => {
         // Check if term is a date
-        const termAsDate: Date = new Date(term);
-        console.log(termAsDate);
-        const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+        // const termAsDate: Date = new Date(term);
+        // console.log(termAsDate);
+        // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
         return {
           OR: [
+            { volunteerID: { equals: Number(term) } },
             { firstName: { contains: term } },
             { surname: { contains: term } },
             { email: { contains: term } },
             { status: { contains: term } },
             { mobile: { contains: term } },
-            //{ addressGreaterArea: { contains: term } },
+            { addressGreaterArea: { hasSome: [term] } },
             { addressStreet: { contains: term } },
             { addressStreetCode: { contains: term } },
             { addressStreetNumber: { contains: term } },
@@ -197,7 +198,7 @@ export const volunteerRouter = createTRPCRouter({
             { collaboratorOrg: { contains: term } },
             { preferredCommunication: { contains: term } },
             { comments: { contains: term } },
-            dateCondition,
+            //  dateCondition,
           ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
         };
       });

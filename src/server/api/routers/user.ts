@@ -218,6 +218,7 @@ export const UserRouter = createTRPCRouter({
         const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
         return {
           OR: [
+            { userID: { equals: Number(term) } },
             { name: { contains: term } },
             { surname: { contains: term } },
             { email: { contains: term } },

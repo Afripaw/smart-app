@@ -697,80 +697,96 @@ const Communication: NextPage = () => {
                   </button> */}
                 </div>
               </div>
-              <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                <table className="table-auto">
-                  <thead>
-                    <tr>
-                      <th className="px-4 py-2"></th>
-                      <th className=" px-4 py-2">ID</th>
-                      <th className="px-4 py-2">Message</th>
-                      <th className="px-4 py-2">Type</th>
-                      <th className="px-4 py-2">Recipients</th>
-                      <th className="px-4 py-2">Greater Area</th>
-                      <th className="px-4 py-2">Area</th>
-                      <th className="px-4 py-2">Success</th>
-                      <th className="w-[35px] px-4 py-2">
-                        <span className="group relative inline-block">
-                          <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                            Date
-                          </button>
-                          <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                            Sort reverse chronologically
+
+              {user_data ? (
+                <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+                  <table className="table-auto">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2"></th>
+                        <th className=" px-4 py-2">ID</th>
+                        <th className="px-4 py-2">Message</th>
+                        <th className="px-4 py-2">Type</th>
+                        <th className="px-4 py-2">Recipients</th>
+                        <th className=" px-4 py-2">Greater Area</th>
+                        <th className="px-4 py-2">Area</th>
+                        <th className="px-4 py-2">Success</th>
+                        <th className="w-[35px] px-4 py-2">
+                          <span className="group relative inline-block">
+                            <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                              Date
+                            </button>
+                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              Sort reverse chronologically
+                            </span>
                           </span>
-                        </span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {user_data?.map((user, index) => {
-                      return (
-                        <tr className="items-center">
-                          <td className=" border px-4 py-2">
-                            <div className="px-4 py-2">{index + 1}</div>
-                          </td>
-                          <td className="border px-4 py-2">M{user.communicationID}</td>
-                          <td className="border px-4 py-2">{user.message?.length > 15 ? user.message?.substring(0, 15) + "..." : user.message}</td>
-                          <td className="border px-4 py-2">{user.type}</td>
-                          <td className="border px-4 py-2">
-                            {
-                              //Show the list of all the recipients
-                              user.recipients
-                              //user.recipients?.map((user: string) => user).join(", ") ?? ""
-                            }
-                          </td>
-                          <td className="border px-4 py-2">{user.greaterArea.map((greaterArea) => greaterArea).join(", ")}</td>
-                          <td className="border px-4 py-2">{user.area.map((area) => area).join(", ")}</td>
-                          <td className="border px-4 py-2">{user.success}</td>
-                          <td className=" border px-4 py-2">
-                            {user?.updatedAt?.getDate()?.toString() ?? ""}
-                            {"/"}
-                            {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                            {"/"}
-                            {user?.updatedAt?.getFullYear()?.toString() ?? ""}
-                          </td>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {user_data?.map((user, index) => {
+                        return (
+                          <tr className="items-center">
+                            <td className=" border px-4 py-2">
+                              <div className="px-4 py-2">{index + 1}</div>
+                            </td>
+                            <td className="border px-4 py-2">M{user.communicationID}</td>
+                            <td className="max-w-sm border px-4 py-2">{user.message?.length > 100 ? user.message?.substring(0, 100) + "..." : user.message}</td>
+                            <td className="border px-4 py-2">{user.type}</td>
+                            <td className="border px-4 py-2">
+                              {
+                                //Show the list of all the recipients
+                                user.recipients
+                                //user.recipients?.map((user: string) => user).join(", ") ?? ""
+                              }
+                            </td>
+                            <td className="max-w-sm border px-4 py-2">
+                              {user.greaterArea.length > 10
+                                ? user.greaterArea
+                                    .slice(0, 10)
+                                    .map((greaterArea) => greaterArea)
+                                    .join(", ") + "..."
+                                : user.greaterArea.map((greaterArea) => greaterArea).join(", ")}
+                            </td>
+                            <td className="max-w-sm border px-4 py-2">
+                              {user.area.length > 10
+                                ? user.area
+                                    .slice(0, 10)
+                                    .map((area) => area)
+                                    .join(", ") + "..."
+                                : user.area.map((area) => area).join(", ")}
+                            </td>
+                            <td className="border px-4 py-2">{user.success}</td>
+                            <td className=" border px-4 py-2">
+                              {user?.updatedAt?.getDate()?.toString() ?? ""}
+                              {"/"}
+                              {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                              {"/"}
+                              {user?.updatedAt?.getFullYear()?.toString() ?? ""}
+                            </td>
 
-                          <div className="flex">
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <Trash
-                                  size={24}
-                                  className="block"
-                                  onClick={() =>
-                                    handleDeleteModal(
-                                      user.communicationID ?? 0,
-                                      String(user.communicationID),
-                                      //get the first 15 charactters of the message
-                                      user.message?.length ?? 0 > 15 ? user.message?.substring(0, 15) + "..." : user.message ?? "",
-                                    )
-                                  }
-                                />
-                                <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  Delete communication
+                            <div className="flex">
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <Trash
+                                    size={24}
+                                    className="block"
+                                    onClick={() =>
+                                      handleDeleteModal(
+                                        user.communicationID ?? 0,
+                                        String(user.communicationID),
+                                        //get the first 15 charactters of the message
+                                        user.message?.length ?? 0 > 15 ? user.message?.substring(0, 15) + "..." : user.message ?? "",
+                                      )
+                                    }
+                                  />
+                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Delete communication
+                                  </span>
                                 </span>
-                              </span>
-                            </div>
+                              </div>
 
-                            {/* <div className="relative flex items-center justify-center">
+                              {/* <div className="relative flex items-center justify-center">
                               <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                 <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.clinicID ?? 0)} />
                                 <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
@@ -779,21 +795,29 @@ const Communication: NextPage = () => {
                               </span>
                             </div> */}
 
-                            <div className="relative flex items-center justify-center">
-                              <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.communicationID ?? 0)} />
-                                <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                  View communication profile
+                              <div className="relative flex items-center justify-center">
+                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.communicationID ?? 0)} />
+                                  <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    View communication profile
+                                  </span>
                                 </span>
-                              </span>
+                              </div>
                             </div>
-                          </div>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </article>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </article>
+              ) : (
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                </div>
+              )}
               <div ref={observerTarget} />
             </div>
           </>

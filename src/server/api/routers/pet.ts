@@ -212,28 +212,30 @@ export const petRouter = createTRPCRouter({
       // Construct a complex search condition
       const searchConditions = terms.map((term) => {
         // Check if term is a date
-        const termAsDate: Date = new Date(term);
-        console.log(termAsDate);
-        const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+        // const termAsDate: Date = new Date(term);
+        // console.log(termAsDate);
+        // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
         return {
           OR: [
+            { petID: { equals: Number(term) } },
             { petName: { contains: term } },
             { species: { contains: term } },
             { sex: { contains: term } },
             { age: { contains: term } },
             { breed: { contains: term } },
-            //{ colour: { contains: term } },
+            { colour: { hasSome: [term] } },
             { markings: { contains: term } },
             { status: { contains: term } },
             { sterilisedStatus: { contains: term } },
             { sterilisedRequested: { contains: term } },
             { sterilisedRequestSigned: { contains: term } },
-            { vaccinatedStatus: { contains: term } },
-            { treatments: { contains: term } },
+            { petTreatments: { some: { type: { contains: term } } } },
+            // { vaccinatedStatus: { contains: term } },
+            //{ treatments: { contains: term } },
             { membership: { contains: term } },
             { cardStatus: { contains: term } },
             { comments: { contains: term } },
-            dateCondition,
+            //  dateCondition,
           ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
         };
       });

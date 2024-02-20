@@ -58,9 +58,12 @@ export const communicationRouter = createTRPCRouter({
         // console.log(termAsDate);
         // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
         return {
-          OR: [{ message: { contains: term } }, { success: { contains: term } }, { type: { contains: term } }].filter(
-            (condition) => Object.keys(condition).length > 0,
-          ), // Filter out empty conditions
+          OR: [
+            { communicationID: { equals: Number(term) } },
+            { message: { contains: term } },
+            { success: { contains: term } },
+            { type: { contains: term } },
+          ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
         };
       });
 

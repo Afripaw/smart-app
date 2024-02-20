@@ -77,16 +77,17 @@ export const petClinicRouter = createTRPCRouter({
       // Construct a complex search condition
       const searchConditions = terms.map((term) => {
         // Check if term is a date
-        const termAsDate: Date = new Date(term);
-        console.log(termAsDate);
-        const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+        // const termAsDate: Date = new Date(term);
+        // console.log(termAsDate);
+        // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
         return {
           OR: [
-            { addressGreaterArea: { contains: term } },
-            { addressArea: { contains: term } },
+            { clinicID: { equals: Number(term) } },
+            { greaterArea: { contains: term } },
+            { area: { contains: term } },
             { conditions: { contains: term } },
             { comments: { contains: term } },
-            dateCondition,
+            // dateCondition,
           ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
         };
       });

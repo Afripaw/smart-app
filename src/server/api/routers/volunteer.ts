@@ -180,27 +180,51 @@ export const volunteerRouter = createTRPCRouter({
         // const termAsDate: Date = new Date(term);
         // console.log(termAsDate);
         // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
-        return {
-          OR: [
-            { volunteerID: { equals: Number(term) } },
-            { firstName: { contains: term } },
-            { surname: { contains: term } },
-            { email: { contains: term } },
-            { status: { contains: term } },
-            { mobile: { contains: term } },
-            { addressGreaterArea: { hasSome: [term] } },
-            { addressStreet: { contains: term } },
-            { addressStreetCode: { contains: term } },
-            { addressStreetNumber: { contains: term } },
-            { addressSuburb: { contains: term } },
-            { addressPostalCode: { contains: term } },
-            { addressFreeForm: { contains: term } },
-            { collaboratorOrg: { contains: term } },
-            { preferredCommunication: { contains: term } },
-            { comments: { contains: term } },
-            //  dateCondition,
-          ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
-        };
+
+        // Check if term is a number
+        if (!isNaN(Number(term))) {
+          return {
+            OR: [
+              { volunteerID: { equals: Number(term) } },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              { addressGreaterArea: { hasSome: [term] } },
+              { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { collaboratorOrg: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              { addressGreaterArea: { hasSome: [term] } },
+              { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { collaboratorOrg: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+              //  dateCondition,
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
       });
 
       const order: Record<string, string> = {};

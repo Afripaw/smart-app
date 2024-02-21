@@ -215,29 +215,55 @@ export const petRouter = createTRPCRouter({
         // const termAsDate: Date = new Date(term);
         // console.log(termAsDate);
         // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
-        return {
-          OR: [
-            { petID: { equals: Number(term) } },
-            { petName: { contains: term } },
-            { species: { contains: term } },
-            { sex: { contains: term } },
-            { age: { contains: term } },
-            { breed: { contains: term } },
-            { colour: { hasSome: [term] } },
-            { markings: { contains: term } },
-            { status: { contains: term } },
-            { sterilisedStatus: { contains: term } },
-            { sterilisedRequested: { contains: term } },
-            { sterilisedRequestSigned: { contains: term } },
-            { petTreatments: { some: { type: { contains: term } } } },
-            // { vaccinatedStatus: { contains: term } },
-            //{ treatments: { contains: term } },
-            { membership: { contains: term } },
-            { cardStatus: { contains: term } },
-            { comments: { contains: term } },
-            //  dateCondition,
-          ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
-        };
+
+        // Check if term is a number
+        if (!isNaN(Number(term))) {
+          return {
+            OR: [
+              { petID: { equals: Number(term) } },
+              { petName: { contains: term } },
+              { species: { contains: term } },
+              { sex: { contains: term } },
+              { age: { contains: term } },
+              { breed: { contains: term } },
+              { colour: { hasSome: [term] } },
+              { markings: { contains: term } },
+              { status: { contains: term } },
+              { sterilisedStatus: { contains: term } },
+              { sterilisedRequested: { contains: term } },
+              { sterilisedRequestSigned: { contains: term } },
+              { petTreatments: { some: { type: { contains: term } } } },
+              // { vaccinatedStatus: { contains: term } },
+              //{ treatments: { contains: term } },
+              { membership: { contains: term } },
+              { cardStatus: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { petName: { contains: term } },
+              { species: { contains: term } },
+              { sex: { contains: term } },
+              { age: { contains: term } },
+              { breed: { contains: term } },
+              { colour: { hasSome: [term] } },
+              { markings: { contains: term } },
+              { status: { contains: term } },
+              { sterilisedStatus: { contains: term } },
+              { sterilisedRequested: { contains: term } },
+              { sterilisedRequestSigned: { contains: term } },
+              { petTreatments: { some: { type: { contains: term } } } },
+              // { vaccinatedStatus: { contains: term } },
+              //{ treatments: { contains: term } },
+              { membership: { contains: term } },
+              { cardStatus: { contains: term } },
+              { comments: { contains: term } },
+              //  dateCondition,
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
       });
 
       const order: Record<string, string> = {};

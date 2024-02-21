@@ -78,11 +78,24 @@ export const petTreatmentRouter = createTRPCRouter({
         const termAsDate: Date = new Date(term);
         console.log(termAsDate);
         const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
-        return {
-          OR: [{ category: { contains: term } }, { type: { contains: term } }, { comments: { contains: term } }, dateCondition].filter(
-            (condition) => Object.keys(condition).length > 0,
-          ), // Filter out empty conditions
-        };
+        // Check if term is a number
+        if (!isNaN(Number(term))) {
+          return {
+            OR: [
+              { treatmentID: { equals: Number(term) } },
+              { category: { contains: term } },
+              { type: { contains: term } },
+              { comments: { contains: term } },
+              dateCondition,
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [{ category: { contains: term } }, { type: { contains: term } }, { comments: { contains: term } }, dateCondition].filter(
+              (condition) => Object.keys(condition).length > 0,
+            ), // Filter out empty conditions
+          };
+        }
       });
 
       const order: Record<string, string> = {};

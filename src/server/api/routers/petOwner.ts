@@ -348,4 +348,44 @@ export const petOwnerRouter = createTRPCRouter({
 
     return identification;
   }),
+
+  //Get all the owners that are active and sum these owners for each year for the last 5 years
+  getActiveOwners: protectedProcedure.query(async ({ ctx }) => {
+    const owners = await ctx.db.petOwner.findMany({
+      where: {
+        status: "Active",
+      },
+    });
+
+    const last5YearsOwners = owners.filter((owner) => owner.startingDate.getFullYear() >= new Date().getFullYear() - 4);
+
+    const firstYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 4);
+    const secondYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 3);
+    const thirdYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 2);
+    const fourthYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 1);
+    const fifthYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear());
+
+    const activeOwners = {
+      [new Date().getFullYear() - 4]: firstYearOwners.length,
+      [new Date().getFullYear() - 3]: secondYearOwners.length,
+      [new Date().getFullYear() - 2]: thirdYearOwners.length,
+      [new Date().getFullYear() - 1]: fourthYearOwners.length,
+      [new Date().getFullYear()]: fifthYearOwners.length,
+    };
+
+    // const activeOwners = last5YearsOwners.reduce(
+    //   (acc, owner) => {
+    //     const year = owner.startingDate.getFullYear();
+    //     if (acc[year]) {
+    //       acc[year]++;
+    //     } else {
+    //       acc[year] = 1;
+    //     }
+    //     return acc;
+    //   },
+    //   {} as Record<number, number>,
+    // );
+
+    return activeOwners;
+  }),
 });

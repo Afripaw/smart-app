@@ -455,4 +455,43 @@ export const volunteerRouter = createTRPCRouter({
 
     return identification;
   }),
+
+  //Get all the volunteers that are active and sum these owners for each year for the last 5 years
+  getActiveVolunteersFor5Years: protectedProcedure.query(async ({ ctx }) => {
+    const volunteers = await ctx.db.volunteer.findMany({
+      where: {
+        status: "Active",
+      },
+    });
+
+    const last5YearsVolunteers = volunteers.filter((volunteer) => volunteer.startingDate.getFullYear() >= new Date().getFullYear() - 4);
+
+    const firstYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 4);
+    const secondYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 3);
+    const thirdYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 2);
+    const fourthYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 1);
+    const fifthYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear());
+
+    const activeVolunteers = {
+      [new Date().getFullYear() - 4]: firstYearVolunteers.length,
+      [new Date().getFullYear() - 3]: secondYearVolunteers.length,
+      [new Date().getFullYear() - 2]: thirdYearVolunteers.length,
+      [new Date().getFullYear() - 1]: fourthYearVolunteers.length,
+      [new Date().getFullYear()]: fifthYearVolunteers.length,
+    };
+    // const activeVolunteers = last5YearsVolunteers.reduce(
+    //   (acc, volunteer) => {
+    //     const year = volunteer.startingDate.getFullYear();
+    //     if (acc[year]) {
+    //       acc[year]++;
+    //     } else {
+    //       acc[year] = 1;
+    //     }
+    //     return acc;
+    //   },
+    //   {} as Record<number, number>,
+    // );
+
+    return activeVolunteers;
+  }),
 });

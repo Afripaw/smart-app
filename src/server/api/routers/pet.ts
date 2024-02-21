@@ -597,4 +597,102 @@ export const petRouter = createTRPCRouter({
 
     return identification;
   }),
+
+  //get the amount of pets sterilised for each year and seperate into two variables. The first for dogs and the other for cats
+  getAmountOfPetsSterilised: protectedProcedure.query(async ({ ctx }) => {
+    const pets = await ctx.db.pet.findMany({
+      where: {
+        sterilisedStatus: {
+          not: "No",
+        },
+      },
+    });
+
+    const dogs = pets.filter((pet) => pet.species === "Dog");
+    const cats = pets.filter((pet) => pet.species === "Cat");
+
+    //return all the pets that are sterilised in the last 5 years, and return an array of integers for each type of animal that is sterilised
+    const dogsLast5Years = dogs.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+    const catsLast5Years = cats.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+
+    //Now group the pets by year
+    const dogsGroupedByYear = dogsLast5Years.reduce(
+      (acc, pet) => {
+        const year = pet.updatedAt.getFullYear();
+        if (acc[year]) {
+          acc[year]++;
+        } else {
+          acc[year] = 1;
+        }
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
+
+    const catsGroupedByYear = catsLast5Years.reduce(
+      (acc, pet) => {
+        const year = pet.updatedAt.getFullYear();
+        if (acc[year]) {
+          acc[year]++;
+        } else {
+          acc[year] = 1;
+        }
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
+
+    return {
+      dogs: dogsGroupedByYear,
+      cats: catsGroupedByYear,
+    };
+  }),
+
+  //get the amount of active pets for each year and seperate into two variables. The first for dogs and the other for cats
+  getAmountOfActivePets: protectedProcedure.query(async ({ ctx }) => {
+    const pets = await ctx.db.pet.findMany({
+      where: {
+        status: "Active",
+      },
+    });
+
+    const dogs = pets.filter((pet) => pet.species === "Dog");
+    const cats = pets.filter((pet) => pet.species === "Cat");
+
+    //return all the pets that are sterilised in the last 5 years, and return an array of integers for each type of animal that is sterilised
+    const dogsLast5Years = dogs.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+    const catsLast5Years = cats.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+
+    //Now group the pets by year
+    const dogsGroupedByYear = dogsLast5Years.reduce(
+      (acc, pet) => {
+        const year = pet.updatedAt.getFullYear();
+        if (acc[year]) {
+          acc[year]++;
+        } else {
+          acc[year] = 1;
+        }
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
+
+    const catsGroupedByYear = catsLast5Years.reduce(
+      (acc, pet) => {
+        const year = pet.updatedAt.getFullYear();
+        if (acc[year]) {
+          acc[year]++;
+        } else {
+          acc[year] = 1;
+        }
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
+
+    return {
+      dogs: dogsGroupedByYear,
+      cats: catsGroupedByYear,
+    };
+  }),
 });

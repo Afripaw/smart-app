@@ -695,4 +695,58 @@ export const petRouter = createTRPCRouter({
       cats: catsGroupedByYear,
     };
   }),
+
+  //kennels provided over the last 5 years
+  getKennelsProvided: protectedProcedure.query(async ({ ctx }) => {
+    //get kennels received over the last 5 years
+    const pets4yearsAgo = await ctx.db.pet.findMany({
+      where: {
+        kennelReceived: {
+          hasSome: ["Kennel received in " + (new Date().getFullYear() - 4).toString()],
+        },
+      },
+    });
+
+    const pets3yearsAgo = await ctx.db.pet.findMany({
+      where: {
+        kennelReceived: {
+          hasSome: ["Kennel received in " + (new Date().getFullYear() - 3).toString()],
+        },
+      },
+    });
+
+    const pet2yearsAgo = await ctx.db.pet.findMany({
+      where: {
+        kennelReceived: {
+          hasSome: ["Kennel received in " + (new Date().getFullYear() - 2).toString()],
+        },
+      },
+    });
+
+    const pet1yearsAgo = await ctx.db.pet.findMany({
+      where: {
+        kennelReceived: {
+          hasSome: ["Kennel received in " + (new Date().getFullYear() - 1).toString()],
+        },
+      },
+    });
+
+    const pet = await ctx.db.pet.findMany({
+      where: {
+        kennelReceived: {
+          hasSome: ["Kennel received in " + new Date().getFullYear().toString()],
+        },
+      },
+    });
+
+    const kennels = {
+      [new Date().getFullYear() - 4]: pets4yearsAgo.length,
+      [new Date().getFullYear() - 3]: pets3yearsAgo.length,
+      [new Date().getFullYear() - 2]: pet2yearsAgo.length,
+      [new Date().getFullYear() - 1]: pet1yearsAgo.length,
+      [new Date().getFullYear()]: pet.length,
+    };
+
+    return kennels;
+  }),
 });

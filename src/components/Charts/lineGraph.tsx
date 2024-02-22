@@ -102,6 +102,44 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
         </LineChart>
       </ResponsiveContainer>
     );
+  } else if (type === "kennels") {
+    const kennels = api.pet.getKennelsProvided.useQuery();
+    const response = kennels?.data ?? [];
+    const transformedData = Object.entries(response).map(([category, value]) => ({
+      category: String(category),
+      value: value,
+    }));
+    return (
+      <ResponsiveContainer width="80%" height="80%">
+        <LineChart width={500} height={300} data={transformedData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="category" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="value" name="Kennels Provided" stroke="#EB4724" />
+        </LineChart>
+      </ResponsiveContainer>
+    );
+  } else if (type === "clinics") {
+    const clinics = api.petClinic.getClinicsHeld.useQuery();
+    const response = clinics?.data ?? [];
+    const transformedData = Object.entries(response).map(([category, value]) => ({
+      category: String(category),
+      value: value,
+    }));
+    return (
+      <ResponsiveContainer width="80%" height="80%">
+        <LineChart width={500} height={300} data={transformedData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="category" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="value" name="Clinics Held" stroke="#EB4724" />
+        </LineChart>
+      </ResponsiveContainer>
+    );
   }
 };
 //   const [data, setData] = useState([{ name: "Active Owners", data: [{ category: "A", value: 0 }] }]);

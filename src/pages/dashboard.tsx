@@ -21,10 +21,14 @@ const Dashboard: NextPage = () => {
           <div className="flex items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="activeVolunteers" />
           </div>
-          <div className="border border-gray-300">Block 4</div>
+          <div className="flex items-center justify-center border border-gray-300 pr-16">
+            <LineGraph type="kennels" />
+          </div>
 
           <div className="flex items-center justify-center border border-gray-300"></div>
-          <div className="border border-gray-300">Block 6</div>
+          <div className="flex items-center justify-center border border-gray-300 pr-16">
+            <LineGraph type="clinics" />
+          </div>
           <div className="border border-gray-300">Block 7</div>
           <div className="border border-gray-300">Block 8</div>
           <div className="border border-gray-300">Block 9</div>

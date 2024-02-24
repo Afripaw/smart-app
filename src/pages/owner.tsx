@@ -35,7 +35,7 @@ import { router } from "@trpc/server";
 import Link from "next/link";
 
 const Owner: NextPage = () => {
-  // useSession({ required: true });
+  useSession({ required: true });
 
   //-----------------------------------TYPES FOR PET DATA-----------------------------------------
   type Pet = {

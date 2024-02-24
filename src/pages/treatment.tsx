@@ -28,7 +28,7 @@ import { set } from "date-fns";
 import { router } from "@trpc/server";
 
 const Treatment: NextPage = () => {
-  // useSession({ required: true });
+  useSession({ required: true });
 
   const newTreatment = api.petTreatment.create.useMutation();
   const updateTreatment = api.petTreatment.update.useMutation();

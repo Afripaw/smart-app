@@ -31,7 +31,7 @@ import { set } from "date-fns";
 import { string } from "zod";
 
 const Pet: NextPage = () => {
-  //useSession({ required: true });
+  useSession({ required: true });
 
   //For moving between different pages
   const router = useRouter();

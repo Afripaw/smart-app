@@ -27,7 +27,7 @@ import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 
 const User: NextPage = () => {
-  //useSession({ required: true });
+  useSession({ required: true });
 
   const newUser = api.user.create.useMutation();
   const updateUser = api.user.update.useMutation();

@@ -388,4 +388,118 @@ export const petOwnerRouter = createTRPCRouter({
 
     return activeOwners;
   }),
+
+  //get all the dogs and cats respectively that are active and over the last 5 years since the owner's startingdate
+  getActivePets: protectedProcedure.query(async ({ ctx }) => {
+    const ownersOf5Years = await ctx.db.petOwner.findMany({
+      where: {
+        startingDate: {
+          gte: new Date(new Date().getFullYear() - 4),
+          lte: new Date(new Date().getFullYear() - 3),
+        },
+      },
+    });
+
+    const ownersOf4Years = await ctx.db.petOwner.findMany({
+      where: {
+        startingDate: {
+          gte: new Date(new Date().getFullYear() - 3),
+          lte: new Date(new Date().getFullYear() - 2),
+        },
+      },
+    });
+
+    const ownersOf3Years = await ctx.db.petOwner.findMany({
+      where: {
+        startingDate: {
+          gte: new Date(new Date().getFullYear() - 2),
+          lte: new Date(new Date().getFullYear() - 1),
+        },
+      },
+    });
+
+    const ownersOf2Years = await ctx.db.petOwner.findMany({
+      where: {
+        startingDate: {
+          gte: new Date(new Date().getFullYear() - 1),
+          lte: new Date(new Date().getFullYear()),
+        },
+      },
+    });
+
+    const ownersOf1Years = await ctx.db.petOwner.findMany({
+      where: {
+        startingDate: {
+          gte: new Date(new Date().getFullYear()),
+        },
+      },
+    });
+
+    const pets = await ctx.db.pet.findMany({
+      where: {
+        status: "Active",
+      },
+    });
+
+    const dogs = pets.filter((pet) => pet.species === "Dog");
+    const cats = pets.filter((pet) => pet.species === "Cat");
+
+    const last5YearsDogs = dogs.filter((pet) => ownersOf5Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+    const last4YearsDogs = dogs.filter((pet) => ownersOf4Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+    const last3YearsDogs = dogs.filter((pet) => ownersOf3Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+    const last2YearsDogs = dogs.filter((pet) => ownersOf2Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+    const last1YearsDogs = dogs.filter((pet) => ownersOf1Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+
+    const last5YearsCats = cats.filter((pet) => ownersOf5Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+    const last4YearsCats = cats.filter((pet) => ownersOf4Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+    const last3YearsCats = cats.filter((pet) => ownersOf3Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+    const last2YearsCats = cats.filter((pet) => ownersOf2Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+    const last1YearsCats = cats.filter((pet) => ownersOf1Years.map((owner) => owner.ownerID).includes(pet.ownerID));
+
+    const activeDogs = {
+      [new Date().getFullYear() - 4]: last5YearsDogs.length,
+      [new Date().getFullYear() - 3]: last4YearsDogs.length,
+      [new Date().getFullYear() - 2]: last3YearsDogs.length,
+      [new Date().getFullYear() - 1]: last2YearsDogs.length,
+      [new Date().getFullYear()]: last1YearsDogs.length,
+    };
+
+    const activeCats = {
+      [new Date().getFullYear() - 4]: last5YearsCats.length,
+      [new Date().getFullYear() - 3]: last4YearsCats.length,
+      [new Date().getFullYear() - 2]: last3YearsCats.length,
+      [new Date().getFullYear() - 1]: last2YearsCats.length,
+      [new Date().getFullYear()]: last1YearsCats.length,
+    };
+
+    const activePets = {
+      dogs: activeDogs,
+      cats: activeCats,
+    };
+
+    return activePets;
+    // const pets = await ctx.db.pet.findMany({
+    //   where: {
+    //     status: "Active",
+    //   },
+    // });
+
+    // const last5YearsPets = pets.filter((pet) => pet.startingDate.getFullYear() >= new Date().getFullYear() - 4);
+
+    // const firstYearPets = last5YearsPets.filter((pet) => pet.startingDate.getFullYear() === new Date().getFullYear() - 4);
+    // const secondYearPets = last5YearsPets.filter((pet) => pet.startingDate.getFullYear() === new Date().getFullYear() - 3);
+    // const thirdYearPets = last5YearsPets.filter((pet) => pet.startingDate.getFullYear() === new Date().getFullYear() - 2);
+    // const fourthYearPets = last5YearsPets.filter((pet) => pet.startingDate.getFullYear() === new Date().getFullYear() - 1);
+    // const fifthYearPets = last5YearsPets.filter((pet) => pet.startingDate.getFullYear() === new Date().getFullYear());
+
+    // const activePets = {
+    //   [new Date().getFullYear() - 4]: firstYearPets.length,
+    //   [new Date().getFullYear() - 3]: secondYearPets.length,
+    //   [new Date().getFullYear() - 2]: thirdYearPets.length,
+    //   [new Date().getFullYear() - 1]: fourthYearPets.length,
+    //   [new Date().getFullYear()]: fifthYearPets.length,
+    // };
+
+    // return activePets;
+  }),
 });

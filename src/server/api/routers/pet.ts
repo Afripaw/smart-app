@@ -749,4 +749,87 @@ export const petRouter = createTRPCRouter({
 
     return kennels;
   }),
+
+  //get the amount of pet clinics visited by dogs and cats respectively
+  getClinicsVisited: protectedProcedure.query(async ({ ctx }) => {
+    const dogVisitations = await ctx.db.petOnPetClinic.findMany({
+      where: {
+        pet: {
+          species: "Dog",
+        },
+      },
+    });
+
+    const catVisitations = await ctx.db.petOnPetClinic.findMany({
+      where: {
+        pet: {
+          species: "Cat",
+        },
+      },
+    });
+
+    return {
+      dogs: dogVisitations.length,
+      cats: catVisitations.length,
+    };
+    /*
+    const pets = await ctx.db.pet.findMany();
+
+    const dogs = pets.filter((pet) => pet.species === "Dog");
+    const cats = pets.filter((pet) => pet.species === "Cat");
+
+    //return all the pets that are sterilised in the last 5 years, and return an array of integers for each type of animal that is sterilised
+    const dogsLast5Years = dogs.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+    const catsLast5Years = cats.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+
+    //Now group the pets by year
+    const dogsGroupedByYear = dogsLast5Years.reduce(
+      (acc, pet) => {
+        const year = pet.updatedAt.getFullYear();
+        if (acc[year]) {
+          acc[year]++;
+        } else {
+          acc[year] = 1;
+        }
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
+
+    const catsGroupedByYear = catsLast5Years.reduce(
+      (acc, pet) => {
+        const year = pet.updatedAt.getFullYear();
+        if (acc[year]) {
+          acc[year]++;
+        } else {
+          acc[year] = 1;
+        }
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
+
+    return {
+      dogs: dogsGroupedByYear,
+      cats: catsGroupedByYear,
+    };*/
+  }),
+
+  //get all the treatments for dogs and cats respectively
+  getTreatments: protectedProcedure.query(async ({ ctx }) => {
+    const pets = await ctx.db.pet.findMany();
+
+    const dogs = pets.filter((pet) => pet.species === "Dog");
+    const cats = pets.filter((pet) => pet.species === "Cat");
+
+    const treatments = await ctx.db.petTreatment.findMany();
+
+    const dogsTreatments = treatments.filter((treatment) => dogs.some((dog) => dog.petID === treatment.petID)).length;
+    const catsTreatments = treatments.filter((treatment) => cats.some((cat) => cat.petID === treatment.petID)).length;
+
+    return {
+      dogs: dogsTreatments,
+      cats: catsTreatments,
+    };
+  }),
 });

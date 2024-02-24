@@ -71,6 +71,17 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
       category: String(category),
       value: value,
     }));
+
+    if (activeOwners.isLoading) {
+      return (
+        <div className="flex items-center justify-center pl-16">
+          <div
+            className="mx-2 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status"
+          />
+        </div>
+      );
+    }
     return (
       <ResponsiveContainer width="80%" height="80%">
         <LineChart width={500} height={300} data={transformedData}>
@@ -79,7 +90,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Active Owners" stroke="#EB4724" />
+          <Line type="monotone" dataKey="value" name="Active Pet Owners" stroke="#EB4724" />
         </LineChart>
       </ResponsiveContainer>
     );
@@ -90,6 +101,17 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
       category: String(category),
       value: value,
     }));
+
+    if (activeVolunteers.isLoading) {
+      return (
+        <div className="flex items-center justify-center pl-16">
+          <div
+            className="mx-2 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status"
+          />
+        </div>
+      );
+    }
     return (
       <ResponsiveContainer width="80%" height="80%">
         <LineChart width={500} height={300} data={transformedData}>
@@ -109,6 +131,17 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
       category: String(category),
       value: value,
     }));
+
+    if (kennels.isLoading) {
+      return (
+        <div className="flex items-center justify-center pl-16">
+          <div
+            className="mx-2 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status"
+          />
+        </div>
+      );
+    }
     return (
       <ResponsiveContainer width="80%" height="80%">
         <LineChart width={500} height={300} data={transformedData}>
@@ -128,6 +161,17 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
       category: String(category),
       value: value,
     }));
+
+    if (clinics.isLoading) {
+      return (
+        <div className="flex items-center justify-center pl-16">
+          <div
+            className="mx-2 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+            role="status"
+          />
+        </div>
+      );
+    }
     return (
       <ResponsiveContainer width="80%" height="80%">
         <LineChart width={500} height={300} data={transformedData}>
@@ -136,7 +180,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Clinics Held" stroke="#EB4724" />
+          <Line type="monotone" dataKey="value" name="Pet Clinics Held" stroke="#EB4724" />
         </LineChart>
       </ResponsiveContainer>
     );

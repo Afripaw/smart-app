@@ -451,6 +451,16 @@ const Pet: NextPage = () => {
     }
   }, [router.asPath]);
 
+  const pet = router.asPath.includes("petID")
+    ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) })
+    : api.pet.getPetByID.useQuery({ petID: 1000001 });
+
+  // const pet = router.asPath.includes("petID")
+  //   ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) })
+  //   : api.pet.getPetByID.useQuery({ petID: 0 });
+
+  // console.log("Pet: ", pet.data);
+
   //make sure the ownerID is not 0
   useEffect(() => {
     if (ownerID != 0 && isCreate) {
@@ -1898,16 +1908,24 @@ const Pet: NextPage = () => {
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
+
   const handleViewProfilePage = async (id: number) => {
+    void pet.refetch();
     setIsViewProfilePage(true);
     setID(id);
-    const user = pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
+
+    const user = router.asPath.includes("petID")
+      ? pet_data_with_clinics_and_treatments?.find((user) => user.petID === Number(router.asPath.split("=")[1]))
+      : pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
+
     //console.log("View profile page: ", JSON.stringify(user));
+
+    // const pet = user ? user : user_individual_route.data;
     if (user) {
       // Assuming userQuery.data contains the user object
       const userData = user;
       //Get all the clinic dates and put in a string array
-      const clinicData = user.clinics;
+      const clinicData = user?.clinics ?? [];
       const clinicDates: Clinic[] =
         clinicData?.map((clinic) => ({
           id: clinic.clinicID,
@@ -1936,7 +1954,7 @@ const Pet: NextPage = () => {
       setSexOption(userData?.sex ?? "");
       setAgeOption(userData?.age ?? "");
       setBreedOption(userData?.breed ?? "");
-      setColourList(userData?.colour ?? "");
+      setColourList(userData?.colour ?? [""]);
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "");
       setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
@@ -1983,92 +2001,275 @@ const Pet: NextPage = () => {
       setGreaterArea(userData?.addressGreaterArea ?? "");
       setArea(userData?.addressArea ?? "");
     }
+    // else {
+    //   //alternate method to get pet data
+    //   // Assuming userQuery.data contains the user object
+    //   const userData = pet.data;
+    //   //Get all the clinic dates and put in a string array
+    //   const clinicData = pet?.data?.clinic_data;
+    //   const clinicDates: Clinic[] =
+    //     clinicData?.map((clinic) => ({
+    //       id: clinic.clinicID,
+    //       date:
+    //         clinic.clinic.date.getDate().toString() +
+    //         "/" +
+    //         ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+    //         "/" +
+    //         clinic.clinic.date.getFullYear().toString(),
+    //       area: clinic.clinic.area,
+    //     })) ?? [];
+    //   //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+
+    //   //treatments
+    //   const treatmentData: Treatment[] =
+    //     pet?.data?.treatment_data.map((treatment) => ({
+    //       treatmentID: treatment.treatmentID,
+    //       date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+    //       category: treatment.category,
+    //       type: treatment.type,
+    //     })) ?? [];
+
+    //   console.log("Treatment data: ", treatmentData);
+
+    //   const petData = userData?.pet_data;
+    //   setPetName(petData?.petName ?? "");
+    //   setSpeciesOption(petData?.species ?? "");
+    //   setSexOption(petData?.sex ?? "");
+    //   setAgeOption(petData?.age ?? "");
+    //   setBreedOption(petData?.breed ?? "");
+    //   setColourList(petData?.colour ?? [""]);
+    //   setMarkings(petData?.markings ?? "");
+    //   setStatusOption(petData?.status ?? "");
+    //   setSterilisationStatusOption(petData?.sterilisedStatus ?? "");
+    //   setSterilisationRequestedOption(petData?.sterilisedRequested ?? "");
+    //   setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "");
+
+    //   if (petData?.vaccinationShot1.getFullYear() !== 1970) {
+    //     setVaccinationShot1Option("Yes");
+    //   } else {
+    //     setVaccinationShot1Option("Not yet");
+    //   }
+
+    //   if (petData?.vaccinationShot2?.getFullYear() !== 1970) {
+    //     setVaccinationShot2Option("Yes");
+    //   } else {
+    //     setVaccinationShot2Option("Not yet");
+    //   }
+
+    //   if (petData?.vaccinationShot3?.getFullYear() !== 1970) {
+    //     setVaccinationShot3Option("Yes");
+    //   } else {
+    //     setVaccinationShot3Option("Not yet");
+    //   }
+
+    //   // setVaccinationShot1Option(userData?.vaccinationShot1 != new Date(0) ? "Yes" : "Not yet");
+    //   // setVaccinationShot2Option(userData?.vaccinationShot2 != new Date(0) ? "Yes" : "Not yet");
+    //   // setVaccinationShot3Option(userData?.vaccinationShot3 != new Date(0) ? "Yes" : "Not yet");
+    //   setVaccinationShot1Date(petData?.vaccinationShot1 ?? new Date());
+    //   setVaccinationShot2Date(petData?.vaccinationShot2 ?? new Date());
+    //   setVaccinationShot3Date(petData?.vaccinationShot3 ?? new Date());
+    //   setMembershipTypeOption(petData?.membership ?? "");
+    //   setCardStatusOption(petData?.cardStatus ?? "");
+    //   setKennelList(petData?.kennelReceived ?? []);
+    //   setLastDeworming(petData?.lastDeworming ?? new Date());
+    //   setComments(petData?.comments ?? "");
+    //   setClinicList(clinicDates);
+    //   setTreatmentList(treatmentData);
+    //   console.log("Treatment list: ", treatmentList);
+
+    //   // setClinicIDList(clinicIDs ?? []);
+    //   const ownerData = userData?.owner_data;
+
+    //   setFirstName(ownerData?.firstName ?? "");
+    //   setSurname(ownerData?.surname ?? "");
+    //   setGreaterArea(ownerData?.addressGreaterArea ?? "");
+    //   setArea(ownerData?.addressArea ?? "");
+    // }
 
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(true);
   };
 
+  const [getPet, setGetPet] = useState(false);
   useEffect(() => {
-    //console.log("View profile page: ", JSON.stringify(user.data));
-    if (user) {
-      const userData = user;
-      //Get all the clinic dates and put in a string array
-      const clinicData = user.clinics;
-      const clinicDates: Clinic[] =
-        clinicData?.map((clinic) => ({
-          id: clinic.clinicID,
-          date:
-            clinic.clinic.date.getDate().toString() +
-            "/" +
-            ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
-            "/" +
-            clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area,
-        })) ?? [];
-      //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
-
-      //treatments
-      const treatmentData: Treatment[] =
-        user?.treatment?.map((treatment) => ({
-          treatmentID: treatment.treatmentID,
-          date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
-          category: treatment.category,
-          type: treatment.type,
-        })) ?? [];
-
-      console.log("Treatment data: ", treatmentData);
-
-      setPetName(userData?.petName ?? "");
-      setSpeciesOption(userData?.species ?? "");
-      setSexOption(userData?.sex ?? "");
-      setAgeOption(userData?.age ?? "");
-      setBreedOption(userData?.breed ?? "");
-      setColourList(userData?.colour ?? "");
-      setMarkings(userData?.markings ?? "");
-      setStatusOption(userData?.status ?? "");
-      setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
-      setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
-      setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
-      // setVaccinationShot1Option(userData?.vaccinationShot1 !== new Date(0) ? "Yes" : "Not yet");
-      // setVaccinationShot2Option(userData?.vaccinationShot2 !== new Date(0) ? "Yes" : "Not yet");
-      // setVaccinationShot3Option(userData?.vaccinationShot3 !== new Date(0) ? "Yes" : "Not yet");
-      if (userData?.vaccinationShot1.getFullYear() !== 1970) {
-        setVaccinationShot1Option("Yes");
-      } else {
-        setVaccinationShot1Option("Not yet");
-      }
-
-      if (userData?.vaccinationShot2?.getFullYear() !== 1970) {
-        setVaccinationShot2Option("Yes");
-      } else {
-        setVaccinationShot2Option("Not yet");
-      }
-
-      if (userData?.vaccinationShot3?.getFullYear() !== 1970) {
-        setVaccinationShot3Option("Yes");
-      } else {
-        setVaccinationShot3Option("Not yet");
-      }
-      setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
-      setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
-      setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
-      setMembershipTypeOption(userData?.membership ?? "");
-      setCardStatusOption(userData?.cardStatus ?? "");
-      setKennelList(userData?.kennelReceived ?? []);
-      setComments(userData?.comments ?? "");
-      setClinicList(clinicDates);
-      setTreatmentList(treatmentData);
-      console.log("Treatment list: ", treatmentList);
-      // setClinicIDList(clinicIDs ?? []);
-
-      setFirstName(userData?.firstName ?? "");
-      setSurname(userData?.surname ?? "");
-      setGreaterArea(userData?.addressGreaterArea ?? "");
-      setArea(userData?.addressArea ?? "");
+    if (router.asPath.includes("petID") && petName === "") {
+      void pet.refetch();
+      getPet ? setGetPet(false) : setGetPet(true);
     }
-  }, [isViewProfilePage, isUpdate]); // Effect runs when userQuery.data changes
+    void pet.refetch();
+    //console.log("View profile page: ", JSON.stringify(user.data));
+    // const user = router.asPath.includes("petID")
+    //   ? pet_data_with_clinics_and_treatments?.find((user) => user.petID === Number(router.asPath.split("=")[1]))
+    //   : pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
+
+    // console.log(pet_data_with_clinics_and_treatments);
+    // console.log("Pet ID: ", Number(router.asPath.split("=")[1]));
+    // console.log("Users router: ", user);
+
+    // if (user) {
+    //   const userData = user;
+    //   //Get all the clinic dates and put in a string array
+    //   const clinicData = user.clinics;
+    //   const clinicDates: Clinic[] =
+    //     clinicData?.map((clinic) => ({
+    //       id: clinic.clinicID,
+    //       date:
+    //         clinic.clinic.date.getDate().toString() +
+    //         "/" +
+    //         ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+    //         "/" +
+    //         clinic.clinic.date.getFullYear().toString(),
+    //       area: clinic.clinic.area,
+    //     })) ?? [];
+    //   //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+
+    //   //treatments
+    //   const treatmentData: Treatment[] =
+    //     user?.treatment?.map((treatment) => ({
+    //       treatmentID: treatment.treatmentID,
+    //       date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+    //       category: treatment.category,
+    //       type: treatment.type,
+    //     })) ?? [];
+
+    //   console.log("Treatment data: ", treatmentData);
+
+    //   setPetName(userData?.petName ?? "");
+    //   setSpeciesOption(userData?.species ?? "");
+    //   setSexOption(userData?.sex ?? "");
+    //   setAgeOption(userData?.age ?? "");
+    //   setBreedOption(userData?.breed ?? "");
+    //   setColourList(userData?.colour ?? "");
+    //   setMarkings(userData?.markings ?? "");
+    //   setStatusOption(userData?.status ?? "");
+    //   setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
+    //   setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
+    //   setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
+    //   // setVaccinationShot1Option(userData?.vaccinationShot1 !== new Date(0) ? "Yes" : "Not yet");
+    //   // setVaccinationShot2Option(userData?.vaccinationShot2 !== new Date(0) ? "Yes" : "Not yet");
+    //   // setVaccinationShot3Option(userData?.vaccinationShot3 !== new Date(0) ? "Yes" : "Not yet");
+    //   if (userData?.vaccinationShot1.getFullYear() !== 1970) {
+    //     setVaccinationShot1Option("Yes");
+    //   } else {
+    //     setVaccinationShot1Option("Not yet");
+    //   }
+
+    //   if (userData?.vaccinationShot2?.getFullYear() !== 1970) {
+    //     setVaccinationShot2Option("Yes");
+    //   } else {
+    //     setVaccinationShot2Option("Not yet");
+    //   }
+
+    //   if (userData?.vaccinationShot3?.getFullYear() !== 1970) {
+    //     setVaccinationShot3Option("Yes");
+    //   } else {
+    //     setVaccinationShot3Option("Not yet");
+    //   }
+    //   setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
+    //   setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
+    //   setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
+    //   setMembershipTypeOption(userData?.membership ?? "");
+    //   setCardStatusOption(userData?.cardStatus ?? "");
+    //   setKennelList(userData?.kennelReceived ?? []);
+    //   setComments(userData?.comments ?? "");
+    //   setClinicList(clinicDates);
+    //   setTreatmentList(treatmentData);
+    //   console.log("Treatment list: ", treatmentList);
+    //   // setClinicIDList(clinicIDs ?? []);
+
+    //   setFirstName(userData?.firstName ?? "");
+    //   setSurname(userData?.surname ?? "");
+    //   setGreaterArea(userData?.addressGreaterArea ?? "");
+    //   setArea(userData?.addressArea ?? "");
+    // }
+
+    //alternate method to get pet data
+
+    // Assuming userQuery.data contains the user object
+    const userData = pet.data;
+    //Get all the clinic dates and put in a string array
+    const clinicData = pet?.data?.clinic_data;
+    const clinicDates: Clinic[] =
+      clinicData?.map((clinic) => ({
+        id: clinic.clinicID,
+        date:
+          clinic.clinic.date.getDate().toString() +
+          "/" +
+          ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+          "/" +
+          clinic.clinic.date.getFullYear().toString(),
+        area: clinic.clinic.area,
+      })) ?? [];
+    //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+
+    //treatments
+    const treatmentData: Treatment[] =
+      pet?.data?.treatment_data.map((treatment) => ({
+        treatmentID: treatment.treatmentID,
+        date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+        category: treatment.category,
+        type: treatment.type,
+      })) ?? [];
+
+    console.log("Treatment data: ", treatmentData);
+
+    const petData = userData?.pet_data;
+    setPetName(petData?.petName ?? "");
+    setSpeciesOption(petData?.species ?? "");
+    setSexOption(petData?.sex ?? "");
+    setAgeOption(petData?.age ?? "");
+    setBreedOption(petData?.breed ?? "");
+    setColourList(petData?.colour ?? [""]);
+    setMarkings(petData?.markings ?? "");
+    setStatusOption(petData?.status ?? "");
+    setSterilisationStatusOption(petData?.sterilisedStatus ?? "");
+    setSterilisationRequestedOption(petData?.sterilisedRequested ?? "");
+    setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "");
+
+    if (petData?.vaccinationShot1.getFullYear() !== 1970) {
+      setVaccinationShot1Option("Yes");
+    } else {
+      setVaccinationShot1Option("Not yet");
+    }
+
+    if (petData?.vaccinationShot2?.getFullYear() !== 1970) {
+      setVaccinationShot2Option("Yes");
+    } else {
+      setVaccinationShot2Option("Not yet");
+    }
+
+    if (petData?.vaccinationShot3?.getFullYear() !== 1970) {
+      setVaccinationShot3Option("Yes");
+    } else {
+      setVaccinationShot3Option("Not yet");
+    }
+
+    // setVaccinationShot1Option(userData?.vaccinationShot1 != new Date(0) ? "Yes" : "Not yet");
+    // setVaccinationShot2Option(userData?.vaccinationShot2 != new Date(0) ? "Yes" : "Not yet");
+    // setVaccinationShot3Option(userData?.vaccinationShot3 != new Date(0) ? "Yes" : "Not yet");
+    setVaccinationShot1Date(petData?.vaccinationShot1 ?? new Date());
+    setVaccinationShot2Date(petData?.vaccinationShot2 ?? new Date());
+    setVaccinationShot3Date(petData?.vaccinationShot3 ?? new Date());
+    setMembershipTypeOption(petData?.membership ?? "");
+    setCardStatusOption(petData?.cardStatus ?? "");
+    setKennelList(petData?.kennelReceived ?? []);
+    setLastDeworming(petData?.lastDeworming ?? new Date());
+    setComments(petData?.comments ?? "");
+    setClinicList(clinicDates);
+    setTreatmentList(treatmentData);
+    console.log("Treatment list: ", treatmentList);
+
+    // setClinicIDList(clinicIDs ?? []);
+    const ownerData = userData?.owner_data;
+
+    setFirstName(ownerData?.firstName ?? "");
+    setSurname(ownerData?.surname ?? "");
+    setGreaterArea(ownerData?.addressGreaterArea ?? "");
+    setArea(ownerData?.addressArea ?? "");
+  }, [getPet]); // Effect runs when userQuery.data changes
   //[isViewProfilePage, user]
+
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {
     setIsUpdate(true);
@@ -2375,7 +2576,7 @@ const Pet: NextPage = () => {
       <Head>
         <title>Pet Profiles</title>
       </Head>
-      <main className="flex flex-col">
+      <main className="relative flex flex-col">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
@@ -3184,8 +3385,8 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {clinicsAttended && (
-                        <div ref={clinicsAttendedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={clinicsAttendedRef} className="z-10 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="w-full rounded-lg bg-white px-2 py-2 text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {clinicsAttendedOptions.map((option) => (
                               <li
                                 key={option.clinicID}
@@ -3201,15 +3402,14 @@ const Pet: NextPage = () => {
                                   )
                                 }
                               >
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                <button className="block w-48 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                   {option.date.getDate().toString() +
                                     "/" +
                                     ((option.date.getMonth() ?? 0) + 1).toString() +
                                     "/" +
                                     option.date.getFullYear().toString() +
-                                    " (" +
-                                    option.area +
-                                    ")"}
+                                    " " +
+                                    option.area}
                                 </button>
                               </li>
                             ))}
@@ -3434,137 +3634,148 @@ const Pet: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="flex justify-center">
-              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">Pet Profile</div>
-                <div className="flex justify-center">
-                  <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
-                  </button>
+            {!petName ? (
+              <div className=" sticky left-[28rem] top-96 z-30">
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
                 </div>
               </div>
-            </div>
-            <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex w-[40%] min-w-[38rem] max-w-xl flex-col items-start">
-                <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <div className="absolute left-0 top-0">
-                    <Image
-                      src={"/afripaw-logo.jpg"}
-                      alt="Afripaw Logo"
-                      className="m-3  aspect-square h-max rounded-full border-2 border-gray-200"
-                      width={80}
-                      height={80}
-                    />
-                  </div>
-                  <div className="absolute right-4 top-20">
-                    {user?.image ? (
-                      <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
-                    ) : (
-                      <UserCircle size={140} className="ml-auto aspect-auto" />
-                    )}
-                  </div>
-                  <b className="mb-14 text-center text-xl">Pet Identification Data</b>
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet ID:</b> P{id}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet name:</b> {petName}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Species:</b> {speciesOption === "Select one" ? user?.species : speciesOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sex:</b> {sexOption === "Select one" ? user?.sex : sexOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Age:</b> {ageOption === "Select one" ? user?.age : ageOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Breed:</b> {breedOption === "Select one" ? user?.breed : breedOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Colour:</b> {colourOption === "Select one" ? user?.colour : colourOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Markings:</b> {markings}
+            ) : (
+              <>
+                <div className="flex justify-center">
+                  <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+                    <div className=" text-2xl">Pet Profile</div>
+                    <div className="flex justify-center">
+                      <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
+                        Back
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Pet Health Data</b>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet Status:</b> {statusOption === "Select one" ? user?.status : statusOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sterilised?:</b> {sterilisationStatusOption === "Select one" ? user?.sterilisedStatus : sterilisationStatusOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sterilisation Requested:</b>{" "}
-                    {sterilisationRequestedOption === "Select one" ? user?.sterilisedRequested : sterilisationRequestedOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sterilisation Request Signed:</b>{" "}
-                    {sterilisationRequestSignedOption === "Select one" ? user?.sterilisedRequestSigned : sterilisationRequestSignedOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Sterilisation Outcome:</b>{" "}
-                    {sterilisationOutcomeOption === "Select one" ? user?.sterilisationOutcome : sterilisationOutcomeOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Vaccination Shot 1:</b>
-                    {vaccinationShot1Option === "Yes" ? (
-                      <div className="ml-3">
-                        {vaccinationShot1Date.getDate() + "/" + (vaccinationShot1Date.getMonth() + 1) + "/" + vaccinationShot1Date.getFullYear()}
+                <div ref={printComponentRef} className="flex grow flex-col items-center">
+                  <div className="mt-6 flex w-[40%] min-w-[38rem] max-w-xl flex-col items-start">
+                    <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
+                      <div className="absolute left-0 top-0">
+                        <Image
+                          src={"/afripaw-logo.jpg"}
+                          alt="Afripaw Logo"
+                          className="m-3  aspect-square h-max rounded-full border-2 border-gray-200"
+                          width={80}
+                          height={80}
+                        />
                       </div>
-                    ) : (
-                      <div className="ml-3">{vaccinationShot1Option}</div>
-                    )}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Vaccination Shot 2:</b>
-                    {vaccinationShot2Option === "Yes" ? (
-                      <div className="ml-3">
-                        {vaccinationShot2Date.getDate() + "/" + (vaccinationShot2Date.getMonth() + 1) + "/" + vaccinationShot2Date.getFullYear()}
+                      <div className="absolute right-4 top-20">
+                        {user?.image ? (
+                          <Image src={user?.image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
+                        ) : (
+                          <UserCircle size={140} className="ml-auto aspect-auto" />
+                        )}
                       </div>
-                    ) : (
-                      <div className="ml-3">{vaccinationShot2Option}</div>
-                    )}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Vaccination Shot 3:</b>
-                    {vaccinationShot3Option === "Yes" ? (
-                      <div className="ml-3">
-                        {vaccinationShot3Date.getDate() + "/" + (vaccinationShot3Date.getMonth() + 1) + "/" + vaccinationShot3Date.getFullYear()}
+                      <b className="mb-14 text-center text-xl">Pet Identification Data</b>
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Pet ID:</b> P{id}
                       </div>
-                    ) : (
-                      <div className="ml-3">{vaccinationShot3Option}</div>
-                    )}
-                  </div>
 
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Treatments:</b> {treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join("; ")}
-                  </div>
-                </div>
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Pet name:</b> {petName}
+                      </div>
 
-                <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Species:</b> {speciesOption === "Select one" ? user?.species : speciesOption}
+                      </div>
 
-                  {/* <div className="mb-2 flex items-start gap-1">
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Sex:</b> {sexOption === "Select one" ? user?.sex : sexOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Age:</b> {ageOption === "Select one" ? user?.age : ageOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Breed:</b> {breedOption === "Select one" ? user?.breed : breedOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Colour:</b> {colourOption === "Select one" ? user?.colour : colourOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Markings:</b> {markings}
+                      </div>
+                    </div>
+
+                    <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
+                      <b className="mb-3 text-center text-xl">Pet Health Data</b>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Pet Status:</b> {statusOption === "Select one" ? user?.status : statusOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Sterilised?:</b> {sterilisationStatusOption === "Select one" ? user?.sterilisedStatus : sterilisationStatusOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Sterilisation Requested:</b>{" "}
+                        {sterilisationRequestedOption === "Select one" ? user?.sterilisedRequested : sterilisationRequestedOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Sterilisation Request Signed:</b>{" "}
+                        {sterilisationRequestSignedOption === "Select one" ? user?.sterilisedRequestSigned : sterilisationRequestSignedOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Sterilisation Outcome:</b>{" "}
+                        {sterilisationOutcomeOption === "Select one" ? user?.sterilisationOutcome : sterilisationOutcomeOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Vaccination Shot 1:</b>
+                        {vaccinationShot1Option === "Yes" ? (
+                          <div className="ml-3">
+                            {vaccinationShot1Date.getDate() + "/" + (vaccinationShot1Date.getMonth() + 1) + "/" + vaccinationShot1Date.getFullYear()}
+                          </div>
+                        ) : (
+                          <div className="ml-3">{vaccinationShot1Option}</div>
+                        )}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Vaccination Shot 2:</b>
+                        {vaccinationShot2Option === "Yes" ? (
+                          <div className="ml-3">
+                            {vaccinationShot2Date.getDate() + "/" + (vaccinationShot2Date.getMonth() + 1) + "/" + vaccinationShot2Date.getFullYear()}
+                          </div>
+                        ) : (
+                          <div className="ml-3">{vaccinationShot2Option}</div>
+                        )}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Vaccination Shot 3:</b>
+                        {vaccinationShot3Option === "Yes" ? (
+                          <div className="ml-3">
+                            {vaccinationShot3Date.getDate() + "/" + (vaccinationShot3Date.getMonth() + 1) + "/" + vaccinationShot3Date.getFullYear()}
+                          </div>
+                        ) : (
+                          <div className="ml-3">{vaccinationShot3Option}</div>
+                        )}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Treatments:</b> {treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join("; ")}
+                      </div>
+                    </div>
+
+                    <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
+                      <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+
+                      {/* <div className="mb-2 flex items-start gap-1">
                    
                     <b className="mr-1">Clinics Attended:</b> {clinicList.length} in Total 
                     {clinicList.length > 0 && (
@@ -3574,83 +3785,85 @@ const Pet: NextPage = () => {
                       </div>
                     )}
                   </div> */}
-                  <div className="mb-2 flex items-start gap-2">
-                    <b className="mr-1">Clinics Attended:</b> <div className="min-w-[4rem]">{clinicList.length} in Total</div>
-                    {clinicList.length > 0 && (
-                      <div className={""}>
-                        {"("}
-                        {clinicList.map((clinic, index) => {
-                          const isLast = index === clinicList.length - 1;
-                          return (
-                            <React.Fragment key={index}>
-                              {!isLast ? (
-                                <React.Fragment>
-                                  {clinic.date} {clinic.area};{" "}
+                      <div className="mb-2 flex items-start gap-2">
+                        <b className="mr-1">Clinics Attended:</b> <div className="min-w-[4rem]">{clinicList.length} in Total</div>
+                        {clinicList.length > 0 && (
+                          <div className={""}>
+                            {"("}
+                            {clinicList.map((clinic, index) => {
+                              const isLast = index === clinicList.length - 1;
+                              return (
+                                <React.Fragment key={index}>
+                                  {!isLast ? (
+                                    <React.Fragment>
+                                      {clinic.date} {clinic.area};{" "}
+                                    </React.Fragment>
+                                  ) : (
+                                    <React.Fragment>
+                                      {clinic.date} {clinic.area})
+                                    </React.Fragment>
+                                  )}
+                                  {showClinicMessage && isLast && (
+                                    <React.Fragment>
+                                      <span className="ml-2 text-red-600">(Veterinary fees covered)</span>
+                                    </React.Fragment>
+                                  )}
                                 </React.Fragment>
-                              ) : (
-                                <React.Fragment>
-                                  {clinic.date} {clinic.area}
-                                </React.Fragment>
-                              )}
-                              {showClinicMessage && isLast && (
-                                <React.Fragment>
-                                  ) <span className="ml-2 text-red-600">(Veterinary fees covered)</span>
-                                </React.Fragment>
-                              )}
-                            </React.Fragment>
-                          );
-                        })}
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Last Deworming:</b>{" "}
-                    {lastDeworming?.getDate() + "/" + (lastDeworming.getMonth() + 1) + "/" + lastDeworming.getFullYear()}
-                    {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && <div className="ml-3 text-red-600">(Due for deworming)</div>}
-                  </div>
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Last Deworming:</b>{" "}
+                        {lastDeworming?.getDate() + "/" + (lastDeworming.getMonth() + 1) + "/" + lastDeworming.getFullYear()}
+                        {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && <div className="ml-3 text-red-600">(Due for deworming)</div>}
+                      </div>
 
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Membership Type:</b> {membershipTypeOption === "Select one" ? user?.membership : membershipTypeOption}
-                    {membershipTypeOption && membershipMessage(membershipTypeOption) && (
-                      <div className="ml-3 text-red-600">({membershipMessage(membershipTypeOption)})</div>
-                    )}
-                  </div>
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Membership Type:</b> {membershipTypeOption === "Select one" ? user?.membership : membershipTypeOption}
+                        {membershipTypeOption && membershipMessage(membershipTypeOption) && (
+                          <div className="ml-3 text-red-600">({membershipMessage(membershipTypeOption)})</div>
+                        )}
+                      </div>
 
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Card Status:</b> {cardStatusOption === "Select one" ? user?.cardStatus : cardStatusOption}
-                  </div>
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Card Status:</b> {cardStatusOption === "Select one" ? user?.cardStatus : cardStatusOption}
+                      </div>
 
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Kennels Received:</b> {kennelList.length} in Total{" "}
-                    {kennelList.length > 0 && <>({kennelList.map((kennel, index) => (kennelList.length - 1 === index ? kennel : kennel + "; "))})</>}
-                    <div className="pl-3 text-base text-red-600">{kennelMessage(kennelList)}</div>
-                  </div>
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Kennels Received:</b> {kennelList.length} in Total{" "}
+                        {kennelList.length > 0 && <>({kennelList.map((kennel, index) => (kennelList.length - 1 === index ? kennel : kennel + "; "))})</>}
+                        <div className="pl-3 text-base text-red-600">{kennelMessage(kennelList)}</div>
+                      </div>
 
-                  <div className="mb-2 flex items-start">
-                    <b className="mr-3">Comments:</b>
-                    {comments}
+                      <div className="mb-2 flex items-start">
+                        <b className="mr-3">Comments:</b>
+                        {comments}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div className="my-6 flex justify-center">
-              <button
-                className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
-                onClick={() => void handleUpdateFromViewProfilePage()}
-              >
-                Update profile
-              </button>
-              <ReactToPrint
-                trigger={() => (
-                  <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">
-                    <Printer size={24} className="mr-1" />
-                    Print
+                <div className="my-6 flex justify-center">
+                  <button
+                    className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
+                    onClick={() => void handleUpdateFromViewProfilePage()}
+                  >
+                    Update profile
                   </button>
-                )}
-                content={() => printComponentRef.current}
-              />
-            </div>
+                  <ReactToPrint
+                    trigger={() => (
+                      <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">
+                        <Printer size={24} className="mr-1" />
+                        Print
+                      </button>
+                    )}
+                    content={() => printComponentRef.current}
+                  />
+                </div>
+              </>
+            )}
           </>
         )}
       </main>

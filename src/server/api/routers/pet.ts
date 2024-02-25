@@ -460,6 +460,7 @@ export const petRouter = createTRPCRouter({
           clinic: {
             select: {
               date: true,
+              area: true,
             },
           },
         },

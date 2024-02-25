@@ -101,7 +101,6 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     firstName +
     ",\n\n" +
     "Congratulations, you have been registered as a user on the AfriPaw Smart App." +
-    "\nYour user ID is: " +
     "\n" +
     "The app may be accessed at: afripaw.app\n" +
     "Your user ID is: " +

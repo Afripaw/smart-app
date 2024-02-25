@@ -178,7 +178,7 @@ export default function Home() {
                     <div>Active Volunteers</div>
                   </div>
                   <p className="w-52 border-2 border-black bg-white p-3">
-                    <strong className="text-lg text-main-orange">Our Mision</strong> is to partner with low-income communities to educate families on their
+                    <strong className="text-lg text-main-orange">Our Mission</strong> is to partner with low-income communities to educate families on their
                     pets’ primary needs and facilitate access to affordable support services with a focus on free mass sterilisation.
                   </p>
                   <p className="ml-5 w-52 border-2 border-black bg-white p-6 py-9">

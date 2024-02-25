@@ -1671,10 +1671,23 @@ const Owner: NextPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex py-2">
+                  {/* <div className="flex py-2">
                     Pets:{" "}
                     <div className="px-3">
                       {petsCombined.map((pet) => (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")").join("; ")}
+                    </div>
+                  </div> */}
+
+                  <div className="flex py-2">
+                    Pets:{" "}
+                    <div className="px-3">
+                      {petsCombined
+                        .map((pet) => (
+                          <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
+                            {(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                          </button>
+                        ))
+                        .join("; ")}
                     </div>
                   </div>
 
@@ -1828,9 +1841,19 @@ const Owner: NextPage = () => {
                     <b className="mr-3">Starting Date:</b> {startingDate?.toLocaleDateString()}
                   </div>
 
-                  <div className="mb-2 flex items-center">
+                  {/* <div className="mb-2 flex items-center">
                     <b className="mr-3">Pets:</b>{" "}
                     {petsCombined.map((pet) => (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")").join("; ")}
+                  </div> */}
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Pets:</b>{" "}
+                    <div className="flex flex-wrap gap-2">
+                      {petsCombined.map((pet) => (
+                        <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
+                          {(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="mb-2 flex items-start">

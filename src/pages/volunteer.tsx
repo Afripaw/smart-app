@@ -1964,9 +1964,8 @@ const Volunteer: NextPage = () => {
                                     ((option.date.getMonth() ?? 0) + 1).toString() +
                                     "/" +
                                     option.date.getFullYear().toString() +
-                                    " (" +
-                                    option.area +
-                                    ")"}
+                                    " " +
+                                    option.area}
                                 </button>
                               </li>
                             ))}

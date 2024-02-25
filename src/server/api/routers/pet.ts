@@ -140,6 +140,7 @@ export const petRouter = createTRPCRouter({
           petID: input.petID,
         },
         data: {
+          petName: input.petName,
           species: input.species,
           sex: input.sex,
           age: input.age,

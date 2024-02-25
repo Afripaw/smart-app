@@ -261,9 +261,10 @@ export const volunteerRouter = createTRPCRouter({
           clinicID: true,
           volunteerID: true,
           clinic: {
-            select: {
-              date: true,
-            },
+            // select: {
+            //   date: true,
+            //   area: true,
+            // },
           },
         },
       });

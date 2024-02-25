@@ -41,6 +41,7 @@ const Owner: NextPage = () => {
   type Pet = {
     id: number;
     name: string;
+    breed: string;
   };
 
   const newOwner = api.petOwner.create.useMutation();
@@ -605,9 +606,10 @@ const Owner: NextPage = () => {
     const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
     const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
     const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+    const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
 
     const combined = petsID.map((id, index) => {
-      return { id: id, name: petsName[index] ?? "" };
+      return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
     });
     setPetsCombined(combined);
 
@@ -641,9 +643,10 @@ const Owner: NextPage = () => {
       const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
       const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
       const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+      const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
 
       const combined = petsID.map((id, index) => {
-        return { id: id, name: petsName[index] ?? "" };
+        return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
       });
       setPetsCombined(combined);
 
@@ -883,9 +886,10 @@ const Owner: NextPage = () => {
       const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
       const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
       const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+      const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
 
       const combined = petsID.map((id, index) => {
-        return { id: id, name: petsName[index] ?? "" };
+        return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
       });
       setPetsCombined(combined);
 
@@ -939,9 +943,10 @@ const Owner: NextPage = () => {
       const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
       const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
       const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+      const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
 
       const combined = petsID.map((id, index) => {
-        return { id: id, name: petsName[index] ?? "" };
+        return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
       });
       setPetsCombined(combined);
 
@@ -982,6 +987,9 @@ const Owner: NextPage = () => {
     if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate && !isViewProfilePage && !isCreate) {
       await router.push(`/pet`);
     }
+
+    //set Query to empty
+    setQuery("");
 
     setIsUpdate(false);
     setIsCreate(false);
@@ -1520,7 +1528,7 @@ const Owner: NextPage = () => {
                             {isAreaOpen && (
                               <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                                  {areaOptions.map((option) => (
+                                  {areaOptions.slice(1).map((option) => (
                                     <li key={option} onClick={() => handleAreaOption(option)}>
                                       <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                                     </li>
@@ -1598,7 +1606,7 @@ const Owner: NextPage = () => {
 
                       {/*Free form address */}
                       <div className="mt-3 flex flex-col pl-4">
-                        <div>Or, Alternatively, Free Form Address</div>
+                        <div>Or, Alternatively, Free-form Address</div>
                         <textarea
                           className=" h-64 w-72 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                           placeholder="Type here: e.g. 1234 Plaza, 1234.
@@ -1664,7 +1672,10 @@ const Owner: NextPage = () => {
                   </div>
 
                   <div className="flex py-2">
-                    Pets: <div className="px-3">{petsCombined.map((pet) => (pet?.name ? pet.name : "") + " (P" + (pet?.id ?? "") + ")").join(", ")}</div>
+                    Pets:{" "}
+                    <div className="px-3">
+                      {petsCombined.map((pet) => (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")").join("; ")}
+                    </div>
                   </div>
 
                   <div className="flex items-start">
@@ -1798,7 +1809,7 @@ const Owner: NextPage = () => {
 
                     {/*Free form address */}
                     <div className=" flex w-96 flex-col pl-4">
-                      <b>Or, Free Form Address:</b>
+                      <b>Or, Free-form Address:</b>
                       <div className=" mt-3 focus:border-black" style={{ whiteSpace: "pre-wrap" }}>
                         {addressFreeForm}
                       </div>
@@ -1818,7 +1829,8 @@ const Owner: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pets:</b> {petsCombined.map((pet) => (pet?.name ? pet.name : "") + " (P" + (pet?.id ?? "") + ")").join(", ")}
+                    <b className="mr-3">Pets:</b>{" "}
+                    {petsCombined.map((pet) => (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")").join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-start">

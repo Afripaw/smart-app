@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Gauge, Users, User, Dog, FirstAidKit, Bed, Info, SignOut, Person, Envelope } from "phosphor-react";
 import Image from "next/image";
-//import { signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 //import { router } from "@trpc/server";
 import { useRouter } from "next/router";
 
@@ -56,9 +56,15 @@ const NavbarLinks = [
 const Navbar = () => {
   const router = useRouter();
 
-  const handleLogout = () => {
-    void router.push("/");
-    //void signOut();
+  // const handleLogout = async () => {
+  //   // void router.push("/");
+  //   await signOut();
+  //   await router.push({
+  //     pathname: "/",
+  //   });
+  // };
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: `${window.location.origin}/` });
   };
   return (
     <div className=" sticky top-0 z-20 flex grow items-center justify-between bg-main-orange p-3 text-black">

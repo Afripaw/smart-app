@@ -1,6 +1,6 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import React, { SetStateAction, useEffect, useRef, useState } from "react";
+import React, { SetStateAction, use, useEffect, useRef, useState } from "react";
 import { api } from "~/utils/api";
 import ReactToPrint from "react-to-print";
 import Image from "next/image";
@@ -1345,7 +1345,7 @@ const Pet: NextPage = () => {
 
   //qualifies for a kennel message
   const kennelMessage = (kennels: string[]): string => {
-    if (kennels[0] == "No kennels received" && membershipTypeOption == "Gold card holder") {
+    if (kennels.length === 0 && membershipTypeOption == "Gold card holder") {
       return "(Qualifies for kennel)";
     } else {
       return "";
@@ -1388,8 +1388,9 @@ const Pet: NextPage = () => {
       date: String(option),
       area: optionArea,
     };
+    const clinicIDList = clinicList.map((clinic) => clinic.id);
 
-    if (!clinicList.includes(clinic)) {
+    if (!clinicIDList.includes(optionID)) {
       setClinicList([...clinicList, clinic]);
       // setClinicIDList([...clinicIDList, optionID]);
     }
@@ -1490,7 +1491,7 @@ const Pet: NextPage = () => {
     // });
     console.log("ClinicList", clinicList);
     console.log("Show clinic message", showClinicMessage);
-  }, [clinicList]);
+  }, [clinicList, isViewProfilePage]);
 
   //LAST DEWORMING
   //take the last date of the clinics that were attended and set as default for last deworming
@@ -2084,6 +2085,8 @@ const Pet: NextPage = () => {
       await router.push(`/owner`);
     }
 
+    setQuery("");
+
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);
@@ -2117,6 +2120,15 @@ const Pet: NextPage = () => {
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
+  //pet name only alphabetical characters allowed
+  const [petNameErrorMessage, setPetNameErrorMessage] = useState("");
+  useEffect(() => {
+    if (petName.match(/[^a-zA-Z0-9 ]/g)) {
+      setPetNameErrorMessage("Only letters and numbers are allowed");
+    } else {
+      setPetNameErrorMessage("");
+    }
+  }, [petName]);
 
   //-------------------------------MODAL-----------------------------------------
   //CREATE BUTTON MODAL
@@ -2144,6 +2156,9 @@ const Pet: NextPage = () => {
     //if (vaccinationShot3Option === "Select one") mandatoryFields.push("Vaccination Shot 3");
     if (membershipTypeOption === "Select one") mandatoryFields.push("Membership Type");
     // if (kennelsReceivedOption === "Select one") mandatoryFields.push("Kennels Received");
+
+    //if petName has non alphabetical characters
+    if (petNameErrorMessage !== "") errorFields.push({ field: "Pet Name", message: petNameErrorMessage });
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -2267,6 +2282,22 @@ const Pet: NextPage = () => {
 
   //Search for a clinic date and clinic ID given today's date. Todays date needs to match up with the clinic date for the clinic to be added to the pet
   const handleAddClinic = async (id: number) => {
+    const user = pet_data_with_clinics?.find((pet) => pet.petID === id);
+
+    const clinicData = user?.clinics;
+    const clinicDates: Clinic[] =
+      clinicData?.map((clinic) => ({
+        id: clinic.clinicID,
+        date:
+          clinic.clinic.date.getDate().toString() +
+          "/" +
+          ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+          "/" +
+          clinic.clinic.date.getFullYear().toString(),
+        area: clinic.clinic.area,
+      })) ?? [];
+    setClinicList(clinicDates);
+
     setShowTodayClinics(true);
 
     setPetIDForClinic(id);
@@ -2313,14 +2344,19 @@ const Pet: NextPage = () => {
 
   const handleAddTodaysClinic = async (petID: number, clinicID: number) => {
     setIsClinicLoading(true);
-    setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }]);
-    //setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID)?.date ?? ""]);
-    //setClinicIDList([...clinicIDList, clinicID]);
-    //update the pet table to add the clinic to the pet
-    await addClinic.mutateAsync({
-      petID: petID,
-      clinicID: clinicID,
-    });
+
+    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
+
+    if (!clinicIDList.includes(clinicID)) {
+      setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }]);
+      //setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID)?.date ?? ""]);
+      //setClinicIDList([...clinicIDList, clinicID]);
+      //update the pet table to add the clinic to the pet
+      await addClinic.mutateAsync({
+        petID: petID,
+        clinicID: clinicID,
+      });
+    }
     setShowTodayClinics(false);
     setTodayClinicList([]);
     setPetIDForClinic(0);
@@ -2621,6 +2657,7 @@ const Pet: NextPage = () => {
                     Pet ID: <div className="px-3">P{latestPetID?.data?.petID ?? 0}</div>
                   </div>
                   <Input label="Pet Name" placeholder="Type here: e.g. Sally" value={petName} onChange={setPetName} required />
+                  {petNameErrorMessage && <div className="text-sm text-red-500">{petNameErrorMessage}</div>}
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
@@ -3490,7 +3527,7 @@ const Pet: NextPage = () => {
                     <b className="mr-3">Vaccination Shot 1:</b>
                     {vaccinationShot1Option === "Yes" ? (
                       <div className="ml-3">
-                        ({vaccinationShot1Date.getDate() + "/" + (vaccinationShot1Date.getMonth() + 1) + "/" + vaccinationShot1Date.getFullYear()})
+                        {vaccinationShot1Date.getDate() + "/" + (vaccinationShot1Date.getMonth() + 1) + "/" + vaccinationShot1Date.getFullYear()}
                       </div>
                     ) : (
                       <div className="ml-3">{vaccinationShot1Option}</div>
@@ -3501,7 +3538,7 @@ const Pet: NextPage = () => {
                     <b className="mr-3">Vaccination Shot 2:</b>
                     {vaccinationShot2Option === "Yes" ? (
                       <div className="ml-3">
-                        ({vaccinationShot2Date.getDate() + "/" + (vaccinationShot2Date.getMonth() + 1) + "/" + vaccinationShot2Date.getFullYear()})
+                        {vaccinationShot2Date.getDate() + "/" + (vaccinationShot2Date.getMonth() + 1) + "/" + vaccinationShot2Date.getFullYear()}
                       </div>
                     ) : (
                       <div className="ml-3">{vaccinationShot2Option}</div>
@@ -3512,7 +3549,7 @@ const Pet: NextPage = () => {
                     <b className="mr-3">Vaccination Shot 3:</b>
                     {vaccinationShot3Option === "Yes" ? (
                       <div className="ml-3">
-                        ({vaccinationShot3Date.getDate() + "/" + (vaccinationShot3Date.getMonth() + 1) + "/" + vaccinationShot3Date.getFullYear()})
+                        {vaccinationShot3Date.getDate() + "/" + (vaccinationShot3Date.getMonth() + 1) + "/" + vaccinationShot3Date.getFullYear()}
                       </div>
                     ) : (
                       <div className="ml-3">{vaccinationShot3Option}</div>
@@ -3520,23 +3557,50 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Treatments:</b> {treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join(", ")}
+                    <b className="mr-3">Treatments:</b> {treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join("; ")}
                   </div>
                 </div>
 
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Clinics Attended:</b> {clinicList.length} in Total{" "}
+                  {/* <div className="mb-2 flex items-start gap-1">
+                   
+                    <b className="mr-1">Clinics Attended:</b> {clinicList.length} in Total 
                     {clinicList.length > 0 && (
-                      <>
-                        (
-                        {clinicList.map((clinic, index) =>
-                          clinicList.length - 1 === index ? clinic.date + " (" + clinic.area : clinic.date + " (" + clinic.area + ", ",
-                        )}
-                        {")"})
-                      </>
+                      <div className={""}>
+                        ({clinicList.map((clinic) => clinic.date + " " + clinic.area).join("; ")})
+                        {showClinicMessage && <div className=" text-red-600">(Veterinary fees covered)</div>}
+                      </div>
+                    )}
+                  </div> */}
+                  <div className="mb-2 flex items-start gap-2">
+                    <b className="mr-1">Clinics Attended:</b> <div className="min-w-[4rem]">{clinicList.length} in Total</div>
+                    {clinicList.length > 0 && (
+                      <div className={""}>
+                        {"("}
+                        {clinicList.map((clinic, index) => {
+                          const isLast = index === clinicList.length - 1;
+                          return (
+                            <React.Fragment key={index}>
+                              {!isLast ? (
+                                <React.Fragment>
+                                  {clinic.date} {clinic.area};{" "}
+                                </React.Fragment>
+                              ) : (
+                                <React.Fragment>
+                                  {clinic.date} {clinic.area}
+                                </React.Fragment>
+                              )}
+                              {showClinicMessage && isLast && (
+                                <React.Fragment>
+                                  ) <span className="ml-2 text-red-600">(Veterinary fees covered)</span>
+                                </React.Fragment>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
 
@@ -3559,7 +3623,8 @@ const Pet: NextPage = () => {
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Kennels Received:</b> {kennelList.length} in Total{" "}
-                    {kennelList.length > 0 && <>({kennelList.map((kennel, index) => (kennelList.length - 1 === index ? kennel : kennel + ", "))})</>}
+                    {kennelList.length > 0 && <>({kennelList.map((kennel, index) => (kennelList.length - 1 === index ? kennel : kennel + "; "))})</>}
+                    <div className="pl-3 text-base text-red-600">{kennelMessage(kennelList)}</div>
                   </div>
 
                   <div className="mb-2 flex items-start">

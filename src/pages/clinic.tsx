@@ -546,6 +546,8 @@ const Clinic: NextPage = () => {
   //-------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = () => {
     //console.log("Back button pressed");
+
+    setQuery("");
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);

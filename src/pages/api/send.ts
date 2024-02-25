@@ -73,12 +73,13 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     "Dear " +
     firstName +
     ",\n\n" +
-    "Congratulations, you have been registered as a owner on the AfriPaw Smart App." +
+    "Congratulations, you have been registered as a Pet Owner on the AfriPaw Smart App." +
     "\nYour owner ID is: " +
     "U" +
     id +
+    ". Please present this number at AfriPaw Pet Clinics to identify yourself." +
     "\n" +
-    "You indicated that your preferred means of communication is: Email" +
+    "You indicated that your preferred means of communication is: Email." +
     "\n\n" +
     "Regards,\n" +
     "AfriPaw Team";
@@ -91,7 +92,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     "V" +
     id +
     "\n" +
-    "You indicated that your preferred means of communication is: Email" +
+    "You indicated that your preferred means of communication is: Email." +
     "\n\n" +
     "Regards,\n" +
     "AfriPaw Team";
@@ -101,11 +102,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     ",\n\n" +
     "Congratulations, you have been registered as a user on the AfriPaw Smart App." +
     "\nYour user ID is: " +
-    "U" +
-    id +
     "\n" +
     "The app may be accessed at: afripaw.app\n" +
-    "Your username is: " +
+    "Your user ID is: " +
+    "U" +
     id +
     "\n" +
     "Your password is: " +

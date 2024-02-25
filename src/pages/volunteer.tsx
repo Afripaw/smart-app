@@ -235,9 +235,14 @@ const Volunteer: NextPage = () => {
   const [isViewProfilePage, setIsViewProfilePage] = useState(false);
 
   //-------------------------------CLINICS ATTENDED-----------------------------------------
+  type Clinic = {
+    id: number;
+    date: string;
+    area: string;
+  };
   //The list of clinics that the user has attended
-  const [clinicList, setClinicList] = useState<string[]>([]);
-  const [clinicIDList, setClinicIDList] = useState<number[]>([]);
+  const [clinicList, setClinicList] = useState<Clinic[]>([]);
+  //const [clinicIDList, setClinicIDList] = useState<number[]>([]);
 
   //Done uploading
   const [isDoneUploading, setIsDoneUploading] = useState(false);
@@ -303,7 +308,7 @@ const Volunteer: NextPage = () => {
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order, isViewProfilePage, clinicList, clinicIDList, isDoneUploading]);
+  }, [isUpdate, isDeleted, isCreate, query, order, isViewProfilePage, clinicList, isDoneUploading]);
 
   const user = volunteer_data_with_clinics?.find((volunteer) => volunteer.volunteerID === id);
 
@@ -549,13 +554,22 @@ const Volunteer: NextPage = () => {
     return (dayA ?? 0) - (dayB ?? 0);
   };
 
-  const handleClinicsAttendedOption = (option: SetStateAction<string>, optionID: number) => {
-    setClinicsAttendedOption(option);
+  const handleClinicsAttendedOption = (optionID: number, option: SetStateAction<string>, optionArea: string) => {
     setClinicsAttended(false);
     setShowClinicsAttended(false);
-    if (!clinicList.includes(String(option))) {
-      setClinicList([...clinicList, String(option)]);
-      setClinicIDList([...clinicIDList, optionID]);
+    setClinicsAttendedOption(option);
+
+    const clinic: Clinic = {
+      id: optionID,
+      date: String(option),
+      area: optionArea,
+    };
+
+    const clinicIDList = clinicList.map((clinic) => clinic.id);
+
+    if (!clinicIDList.includes(optionID)) {
+      setClinicList([...clinicList, clinic]);
+      // setClinicIDList([...clinicIDList, optionID]);
     }
   };
 
@@ -571,25 +585,27 @@ const Volunteer: NextPage = () => {
   // }, [clinicsAttended]);
 
   useEffect(() => {
-    // Combine clinic names and their IDs into a single array
-    const combinedClinicList = clinicList.map((clinic, index) => ({
-      name: clinic,
-      id: clinicIDList[index],
-    }));
+    setClinicList(clinicList.sort((a, b) => compareDates(a.date, b.date)));
 
-    // Sort the combined array based on the clinic names (dates)
-    combinedClinicList.sort((a, b) => compareDates(a.name, b.name));
+    // // Combine clinic names and their IDs into a single array
+    // const combinedClinicList = clinicList.map((clinic) => ({
+    //   name: clinic.date,
+    //   id: clinic.id,
+    // }));
 
-    // Separate the sorted clinic names and IDs back into their respective arrays
-    const sortedClinicList = combinedClinicList.map((item) => item.name);
-    const sortedClinicIDList = combinedClinicList.map((item) => item.id);
+    // // Sort the combined array based on the clinic names (dates)
+    // combinedClinicList.sort((a, b) => compareDates(a.name, b.name));
 
-    // Update the states
-    setClinicList(sortedClinicList);
-    setClinicIDList(sortedClinicIDList.filter((id) => id !== undefined) as number[]);
+    // // Separate the sorted clinic names and IDs back into their respective arrays
+    // const sortedClinicList = combinedClinicList.map((item) => item.name);
+    // const sortedClinicIDList = combinedClinicList.map((item) => item.id);
 
-    console.log("Sorted clinic list", sortedClinicList);
-    console.log("Sorted clinic ID list", sortedClinicIDList);
+    // // Update the states
+    // setClinicList(sortedClinicList);
+    // setClinicIDList(sortedClinicIDList.filter((id) => id !== undefined) as number[]);
+
+    // console.log("Sorted clinic list", sortedClinicList);
+    // console.log("Sorted clinic ID list", sortedClinicIDList);
   }, [clinicsAttended]);
 
   useEffect(() => {
@@ -629,18 +645,18 @@ const Volunteer: NextPage = () => {
       // Assuming userQuery.data contains the user object
       const userData = user;
 
-      //Get all the clinic dates and put in a string array
       const clinicData = user?.clinics;
-      const clinicDates =
-        clinicData?.map(
-          (clinic) =>
+      const clinicDates: Clinic[] =
+        clinicData?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
             clinic.clinic.date.getDate().toString() +
             "/" +
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-        ) ?? [];
-      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+          area: clinic.clinic.area,
+        })) ?? [];
 
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
@@ -656,9 +672,11 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+      setRoleList(userData.role ?? "Select one");
       setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
-      setClinicIDList(clinicIDs);
+      console.log("Update Clinic list: ", clinicDates);
+      //setClinicIDList(clinicIDs);
     }
 
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
@@ -671,18 +689,21 @@ const Volunteer: NextPage = () => {
     if (user) {
       // Assuming userQuery.data contains the user object
       const userData = user;
-      //Get all the clinic dates and put in a string array
       const clinicData = user?.clinics;
-      const clinicDates =
-        clinicData?.map(
-          (clinic) =>
+      const clinicDates: Clinic[] =
+        clinicData?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
             clinic.clinic.date.getDate().toString() +
             "/" +
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-        ) ?? [];
-      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+          area: clinic.clinic.area,
+        })) ?? [];
+
+      // console.log("Hellllllooooo!  Clinic area: ", clinicData?.map((clinic) => clinic.clinic.area) ?? []);
+
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -700,13 +721,16 @@ const Volunteer: NextPage = () => {
       setComments(userData.comments ?? "");
       setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
-      setClinicIDList(clinicIDs);
+      console.log("Update or create Clinic list: ", clinicDates);
+      //setClinicIDList(clinicIDs);
       // setClinicList(userData.clinicsAttended ?? []);
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
     setIsLoading(true);
+    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
+    console.log("Helloo!! Clinic ID List: ", clinicIDList);
     const volunteer = await updateVolunteer.mutateAsync({
       volunteerID: id,
       firstName: firstName,
@@ -799,7 +823,7 @@ const Volunteer: NextPage = () => {
     setAddressFreeForm("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
-    setClinicIDList([]);
+    //setClinicIDList([]);
     setIsCreate(true);
     setIsUpdate(false);
   };
@@ -807,6 +831,7 @@ const Volunteer: NextPage = () => {
 
   const handleNewUser = async () => {
     setIsLoading(true);
+    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
     try {
       const newUser_ = await newVolunteer.mutateAsync({
         firstName: firstName,
@@ -899,16 +924,18 @@ const Volunteer: NextPage = () => {
       const userData = user;
       //Get all the clinic dates and put in a string array
       const clinicData = user?.clinics;
-      const clinicDates =
-        clinicData?.map(
-          (clinic) =>
+      const clinicDates: Clinic[] =
+        clinicData?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
             clinic.clinic.date.getDate().toString() +
             "/" +
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-        ) ?? [];
-      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+          area: clinic.clinic.area,
+        })) ?? [];
+
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -924,10 +951,12 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+      setRoleList(userData.role ?? "");
       setCollaboratorOrg(userData.collaboratorOrg ?? "");
       console.log("Select one");
       setClinicList(clinicDates);
-      setClinicIDList(clinicIDs);
+      console.log("View profile Clinic list: ", clinicDates);
+      //setClinicIDList(clinicIDs);
       //setClinicList(userData. ?? []);
     }
 
@@ -944,18 +973,19 @@ const Volunteer: NextPage = () => {
     //console.log("View profile page: ", JSON.stringify(user.data));
     if (user) {
       const userData = user;
-      //Get all the clinic dates and put in a string array
       const clinicData = user?.clinics;
-      const clinicDates =
-        clinicData?.map(
-          (clinic) =>
+      const clinicDates: Clinic[] =
+        clinicData?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
             clinic.clinic.date.getDate().toString() +
             "/" +
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-        ) ?? [];
-      const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+          area: clinic.clinic.area,
+        })) ?? [];
+
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -970,9 +1000,11 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+      setRoleList(userData.role ?? "");
       setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
-      setClinicIDList(clinicIDs);
+      console.log("View profile Clinic list: ", clinicDates);
+      //setClinicIDList(clinicIDs);
       //setClinicList(userData.clinicsAttended ?? []);
     }
   }, [isViewProfilePage]); // Effect runs when userQuery.data changes
@@ -987,6 +1019,8 @@ const Volunteer: NextPage = () => {
   //-------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = () => {
     //console.log("Back button pressed");
+
+    setQuery("");
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);
@@ -1071,6 +1105,7 @@ const Volunteer: NextPage = () => {
     //if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
+    if (roleList.length === 0) mandatoryFields.push("Role");
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -1224,30 +1259,144 @@ const Volunteer: NextPage = () => {
     </button>
   );
 
+  // //------------------------------------ADD AN EXISTING CLINIC FOR VOLUNTEER--------------------------------------
+  // //Search for a clinic date and clinic ID given today's date. Todays date needs to match up with the clinic date for the clinic to be added to the volunteer
+  // const handleAddClinic = async (id: number) => {
+  //   //get today's date
+  //   const today = new Date();
+  //   //add to the clinic list and ID list and then add it to the table
+  //   //check if the clinic date is today's date
+  //   const option = clinicsAttendedOptions.find(
+  //     (clinic) => clinic.date.getDate() === today.getDate() && clinic.date.getMonth() === today.getMonth() && clinic.date.getFullYear() === today.getFullYear(),
+  //   );
+  //   console.log("Option for clinic exists: ", option);
+  //   const optionDate = option?.date.getDate().toString() + "/" + option?.date.getMonth().toString() + "/" + option?.date.getFullYear().toString();
+  //   const optionID = option?.clinicID ?? 0;
+
+  //   if (!clinicIDList.includes(optionID) && optionID != 0) {
+  //     setClinicList([...clinicList, String(optionDate)]);
+  //     setClinicIDList([...clinicIDList, optionID]);
+
+  //     //update the pet table to add the clinic to the pet
+  //     await addClinic.mutateAsync({
+  //       volunteerID: id,
+  //       clinicID: optionID,
+  //     });
+  //   }
+  // };
+
   //------------------------------------ADD AN EXISTING CLINIC FOR VOLUNTEER--------------------------------------
-  //Search for a clinic date and clinic ID given today's date. Todays date needs to match up with the clinic date for the clinic to be added to the volunteer
+  const [todayClinicList, setTodayClinicList] = useState<Clinic[]>([]);
+
+  //show the clinic list for today
+  const [showTodayClinics, setShowTodayClinics] = useState(false);
+  const clinicRef = useRef<HTMLDivElement>(null);
+  const [volunteerIDForClinic, setVolunteerIDForClinic] = useState(0);
+  const [isClinicLoading, setIsClinicLoading] = useState(false);
+  // const btnClinicRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        clinicRef.current &&
+        !clinicRef.current.contains(event.target as Node)
+        // btnClinicRef.current &&
+        // !btnClinicRef.current.contains(event.target as Node)
+      ) {
+        console.log("Today clinic: ", showTodayClinics);
+        setShowTodayClinics(false);
+        setTodayClinicList([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  //Search for a clinic date and clinic ID given today's date. Todays date needs to match up with the clinic date for the clinic to be added to the pet
   const handleAddClinic = async (id: number) => {
+    const user = volunteer_data_with_clinics?.find((volunteer) => volunteer.volunteerID === id);
+
+    const clinicData = user?.clinics;
+    const clinicDates: Clinic[] =
+      clinicData?.map((clinic) => ({
+        id: clinic.clinicID,
+        date:
+          clinic.clinic.date.getDate().toString() +
+          "/" +
+          ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+          "/" +
+          clinic.clinic.date.getFullYear().toString(),
+        area: clinic.clinic.area,
+      })) ?? [];
+    setClinicList(clinicDates);
+
+    setShowTodayClinics(true);
+
+    setVolunteerIDForClinic(id);
     //get today's date
     const today = new Date();
     //add to the clinic list and ID list and then add it to the table
     //check if the clinic date is today's date
-    const option = clinicsAttendedOptions.find(
+    const option = clinicsAttendedOptions.filter(
       (clinic) => clinic.date.getDate() === today.getDate() && clinic.date.getMonth() === today.getMonth() && clinic.date.getFullYear() === today.getFullYear(),
     );
-    console.log("Option for clinic exists: ", option);
-    const optionDate = option?.date.getDate().toString() + "/" + option?.date.getMonth().toString() + "/" + option?.date.getFullYear().toString();
-    const optionID = option?.clinicID ?? 0;
+    console.log("All clinics today: ", option);
 
-    if (!clinicIDList.includes(optionID) && optionID != 0) {
-      setClinicList([...clinicList, String(optionDate)]);
-      setClinicIDList([...clinicIDList, optionID]);
+    const clinicTodayList: Clinic[] = [];
+    //Search for the clinic's of today in the clinic list
+    for (const clinic of option) {
+      const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
+      clinicTodayList.push({ id: clinic?.clinicID ?? 0, date: date, area: clinic?.area ?? "" });
 
+      // //if (!clinicIDList.includes(clinic?.clinicID)) {
+      // const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
+      // setTodayClinicList([...todayClinicList, { id: clinic?.clinicID ?? 0, date: date, area: clinic?.area ?? "" }]);
+      // //}
+    }
+
+    setTodayClinicList(clinicTodayList);
+
+    console.log("Today's clinic list: ", todayClinicList);
+
+    // setTodayClinicList([...todayClinicList, { id: option[0].clinicID, date: option[0].date }]);
+    // const optionDate = option?.date.getDate().toString() + "/" + option?.date.getMonth().toString() + "/" + option?.date.getFullYear().toString();
+    // const optionID = option?.clinicID ?? 0;
+
+    // if (!clinicIDList.includes(optionID) && optionID != 0) {
+    //   setClinicList([...clinicList, String(optionDate)]);
+    //   setClinicIDList([...clinicIDList, optionID]);
+
+    //   //update the pet table to add the clinic to the pet
+    //   await addClinic.mutateAsync({
+    //     petID: id,
+    //     clinicID: optionID,
+    //   });
+    // }
+  };
+
+  const handleAddTodaysClinic = async (volunteerID: number, clinicID: number) => {
+    setIsClinicLoading(true);
+
+    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
+    console.log("Clinic ID List: ", clinicList);
+    console.log("Clinic ID: ", clinicID);
+    if (!clinicIDList.includes(clinicID)) {
+      setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }]);
+      //setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID)?.date ?? ""]);
+      //setClinicIDList([...clinicIDList, clinicID]);
       //update the pet table to add the clinic to the pet
       await addClinic.mutateAsync({
-        volunteerID: id,
-        clinicID: optionID,
+        volunteerID: volunteerID,
+        clinicID: clinicID,
       });
     }
+    setShowTodayClinics(false);
+    setTodayClinicList([]);
+    setVolunteerIDForClinic(0);
+    setIsClinicLoading(false);
   };
 
   // ----------------------------------------Uploading Image----------------------------------------
@@ -1412,9 +1561,38 @@ const Volunteer: NextPage = () => {
                               <div className="relative flex items-center justify-center">
                                 <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Bed size={24} className="block" onClick={() => handleAddClinic(user.volunteerID)} />
-                                  <span className="absolute bottom-full hidden w-[120px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Add today's clinic to volunteer
+                                  <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Add today's clinic to pet
                                   </span>
+
+                                  {showTodayClinics && volunteerIDForClinic === user.volunteerID && (
+                                    <>
+                                      {isClinicLoading ? (
+                                        <div
+                                          className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                          role="status"
+                                        />
+                                      ) : (
+                                        <div
+                                          ref={clinicRef}
+                                          className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
+                                        >
+                                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                            {todayClinicList.map((option) => (
+                                              <li key={option.id} onClick={() => handleAddTodaysClinic(user.volunteerID, option.id)}>
+                                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                  {
+                                                    //Give the date and in brackets the area
+                                                    option.date + " (" + option.area + ")"
+                                                  }
+                                                </button>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                    </>
+                                  )}
                                 </span>
                               </div>
                             </div>
@@ -1625,7 +1803,7 @@ const Volunteer: NextPage = () => {
                       </div>
                       {/*Free form address */}
                       <div className="mt-3 flex flex-col pl-4">
-                        <div>Or, Alternatively, Free Form Address</div>
+                        <div>Or, Alternatively, Free-form Address</div>
                         <textarea
                           className=" h-64 w-72 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                           placeholder="Type here: e.g. 1234 Plaza, 1234.
@@ -1644,7 +1822,9 @@ const Volunteer: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
-                      <div className="flex">Role: </div>
+                      <div className="flex">
+                        Role<div className="text-lg text-main-orange">*</div>:{" "}
+                      </div>
                     </div>
 
                     <div className="flex flex-col items-center">
@@ -1727,7 +1907,7 @@ const Volunteer: NextPage = () => {
                   {/*Clinics attended*/}
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Clinics Attended: {clinicList.length} in Total</div>
+                      <div className=" flex">Clinics Attended: {clinicList.length} in Total </div>
                     </div>
                     {/*Show list of all the clinics attended */}
                     <div className="flex flex-col items-center">
@@ -1740,8 +1920,8 @@ const Volunteer: NextPage = () => {
                       {showClinicsAttended && (
                         <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
                           {clinicList.map((clinic) => (
-                            <li key={clinic} className=" py-2">
-                              {clinic}
+                            <li key={clinic.id} className=" py-2">
+                              {clinic.date + " (" + clinic.area + ")"}
                             </li>
                           ))}
                         </ul>
@@ -1765,21 +1945,16 @@ const Volunteer: NextPage = () => {
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {clinicsAttendedOptions.map((option) => (
                               <li
-                                key={
-                                  option.date.getDate().toString() +
-                                  "/" +
-                                  ((option.date.getMonth() ?? 0) + 1).toString() +
-                                  "/" +
-                                  option.date.getFullYear().toString()
-                                }
+                                key={option.clinicID}
                                 onClick={() =>
                                   handleClinicsAttendedOption(
+                                    option.clinicID,
                                     option.date.getDate().toString() +
                                       "/" +
                                       ((option.date.getMonth() ?? 0) + 1).toString() +
                                       "/" +
                                       option.date.getFullYear().toString(),
-                                    option.clinicID,
+                                    option.area,
                                   )
                                 }
                               >
@@ -1788,7 +1963,10 @@ const Volunteer: NextPage = () => {
                                     "/" +
                                     ((option.date.getMonth() ?? 0) + 1).toString() +
                                     "/" +
-                                    option.date.getFullYear().toString()}
+                                    option.date.getFullYear().toString() +
+                                    " (" +
+                                    option.area +
+                                    ")"}
                                 </button>
                               </li>
                             ))}
@@ -1796,6 +1974,8 @@ const Volunteer: NextPage = () => {
                         </div>
                       )}
                     </div>
+
+                    {/* {showClinicMessage && <div className="ml-2 mt-5 text-red-600">(Veterinary fees covered)</div>} */}
                   </div>
 
                   {/*DATEPICKER*/}
@@ -1914,7 +2094,7 @@ const Volunteer: NextPage = () => {
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea).join(", ")}
+                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea).join("; ")}
                   </div>
                   <div className="flex items-start divide-x-2 divide-gray-300">
                     <div className="flex w-96 flex-col pr-2">
@@ -1941,7 +2121,7 @@ const Volunteer: NextPage = () => {
 
                     {/*Free form address */}
                     <div className=" flex w-96 flex-col pl-4">
-                      <b>Or, Free Form Address:</b>
+                      <b>Or, Free-form Address:</b>
                       <div className=" mt-3 focus:border-black" style={{ whiteSpace: "pre-wrap" }}>
                         {addressFreeForm}
                       </div>
@@ -1953,12 +2133,28 @@ const Volunteer: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
                   <div className="mb-2 flex items-center">
+                    <b className="mr-3">Role:</b> {roleList.map((role) => role).join("; ")}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Collaborator Organisation:</b> {collaboratorOrg}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
                     <b className="mr-3">Status:</b> {statusOption}
                   </div>
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Clinics Attended:</b> {clinicList.length} in Total{" "}
-                    {clinicList.length > 0 && <>({clinicList.map((clinic, index) => (clinicList.length - 1 === index ? clinic : clinic + ", "))})</>}
+                    {clinicList.length > 0 && (
+                      <>
+                        (
+                        {clinicList.map((clinic, index) =>
+                          clinicList.length - 1 === index ? clinic.date + " " + clinic.area : clinic.date + " " + clinic.area + "; ",
+                        )}
+                        )
+                      </>
+                    )}
                   </div>
 
                   <div className="mb-2 flex items-center">

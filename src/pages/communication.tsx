@@ -600,6 +600,8 @@ const Communication: NextPage = () => {
   //-------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = () => {
     //console.log("Back button pressed");
+
+    setQuery("");
     setIsCreate(false);
     setIsViewProfilePage(false);
     setID(0);
@@ -731,7 +733,9 @@ const Communication: NextPage = () => {
                               <div className="px-4 py-2">{index + 1}</div>
                             </td>
                             <td className="border px-4 py-2">M{user.communicationID}</td>
-                            <td className="max-w-sm border px-4 py-2">{user.message?.length > 100 ? user.message?.substring(0, 100) + "..." : user.message}</td>
+                            <td className="max-w-[15rem] border px-4 py-2">
+                              {user.message?.length > 100 ? user.message?.substring(0, 100) + "..." : user.message}
+                            </td>
                             <td className="border px-4 py-2">{user.type}</td>
                             <td className="border px-4 py-2">
                               {
@@ -740,18 +744,18 @@ const Communication: NextPage = () => {
                                 //user.recipients?.map((user: string) => user).join(", ") ?? ""
                               }
                             </td>
-                            <td className="max-w-sm border px-4 py-2">
-                              {user.greaterArea.length > 10
+                            <td className="max-w-[10rem] border px-4 py-2">
+                              {user.greaterArea.length > 7
                                 ? user.greaterArea
-                                    .slice(0, 10)
+                                    .slice(0, 7)
                                     .map((greaterArea) => greaterArea)
                                     .join(", ") + "..."
                                 : user.greaterArea.map((greaterArea) => greaterArea).join(", ")}
                             </td>
-                            <td className="max-w-sm border px-4 py-2">
-                              {user.area.length > 10
+                            <td className="max-w-[15rem] border px-4 py-2">
+                              {user.area.length > 7
                                 ? user.area
-                                    .slice(0, 10)
+                                    .slice(0, 7)
                                     .map((area) => area)
                                     .join(", ") + "..."
                                 : user.area.map((area) => area).join(", ")}

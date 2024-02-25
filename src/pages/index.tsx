@@ -37,6 +37,7 @@ export default function Home() {
   //passwords
   const [passwordError, setPasswordError] = useState(false);
   const [missingFields, setMissingFields] = useState(false);
+  const [userIDError, setUserIDError] = useState(false);
 
   //--------------------------------LOGIN BUTTONS--------------------------------
 
@@ -50,6 +51,7 @@ export default function Home() {
   };
 
   const handleUser = async (event: FormEvent<HTMLFormElement>) => {
+    setUserIDError(false);
     setLoading(true);
     setPasswordError(false);
     setMissingFields(false);
@@ -60,6 +62,13 @@ export default function Home() {
       1: { value: string };
     };
 
+    if (!formTarget[0].value.startsWith("U") && !formTarget[0].value.slice(1).match(/^\d{6}$/)) {
+      setUserIDError(true);
+      return console.warn("Incorrect User ID");
+    } else {
+      setUserIDError(false);
+    }
+
     if (!formTarget[0].value || !formTarget[1].value) {
       setMissingFields(true);
       return console.warn("Missing fields");
@@ -68,7 +77,7 @@ export default function Home() {
     }
 
     const result = await signIn("credentials", {
-      username: formTarget[0].value,
+      username: formTarget[0].value.slice(1),
       password: formTarget[1].value,
       redirect: false,
     });

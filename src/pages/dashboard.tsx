@@ -26,33 +26,37 @@ const Dashboard: NextPage = () => {
       <main className="flex h-screen flex-col">
         <Navbar />
         <div className="grid h-full grid-cols-3 grid-rows-3">
-          <div className="flex items-center justify-center border border-gray-300 pr-16">
+          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="activeOwners" />
+            <div className="pl-16">Total Numbers of Active Pet Owners (Last 5 Years)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <BarGraph type="activePets" />
-            <div className="pl-16">Active Pets</div>
+            <div className="pl-16">Total Numbers of Active Pets (Last 5 Years)</div>
           </div>
-          <div className="flex items-center justify-center border border-gray-300 pr-16">
+          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="activeVolunteers" />
+            <div className="pl-16">Total Numbers of Active Volunteers (Last 5 Years)</div>
           </div>
-          <div className="flex items-center justify-center border border-gray-300 pr-16">
+          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="kennels" />
+            <div className="pl-16">Total Numbers of Kennels Provided (Last 5 Years)</div>
           </div>
 
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <BarGraph type="sterilisedPets" />
-            <div className="pl-16">Sterilised Pets</div>
+            <div className="pl-16">Total Numbers of Sterilised Pets (Last 5 Years)</div>
           </div>
-          <div className="flex items-center justify-center border border-gray-300 pr-16">
+          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="clinics" />
+            <div className="pl-16">Total Numbers of Pet Clinics Held (Last 5 Years)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300">
             <PieGraph type="ClinicVisits" />
-            <div className="">Clinic Visits</div>
+            <div className="">Total Clinic Visits to Date</div>
           </div>
           <div className="relative border border-gray-300">
-            <div className="absolute left-32 top-2 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-2 text-white">
+            <div className="absolute left-32 top-8 flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
               {!clinicVisits.data ? (
                 <div
                   className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -65,7 +69,7 @@ const Dashboard: NextPage = () => {
               )}
               <div className="text-xs">Pet Clinic visits</div>
             </div>
-            <div className="absolute right-32 top-2 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-3 text-white">
+            <div className="absolute right-32 top-8 flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
               {!sterilisedPets?.data ? (
                 <div
                   className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -78,7 +82,7 @@ const Dashboard: NextPage = () => {
               )}
               <div className="text-xs">Pets Sterilised</div>
             </div>
-            <div className="absolute bottom-2 left-32 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-1 text-white">
+            <div className="absolute bottom-8 left-32 flex flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
               {!kennels.data ? (
                 <div
                   className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -91,7 +95,7 @@ const Dashboard: NextPage = () => {
               )}
               <div className="text-xs">Kennels Provided</div>
             </div>
-            <div className="absolute bottom-2 right-32 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-1 text-white">
+            <div className="absolute bottom-8 right-32 flex flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
               {!activeVolunteers?.data ? (
                 <div
                   className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -104,10 +108,11 @@ const Dashboard: NextPage = () => {
               )}
               <div className="text-xs">Active Volunteers</div>
             </div>
+            <div className="absolute bottom-1 left-36">Important Statistics (Totals to Date)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300">
             <PieGraph type="Treatments" />
-            <div className="">Treatments Administered</div>
+            <div className="">Treatments Administered to Date</div>
             {/* {PieGraphComponent}
             {!isLoading && <div className="">Treatments Administered</div>} */}
           </div>

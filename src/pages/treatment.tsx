@@ -379,7 +379,7 @@ const Treatment: NextPage = () => {
     };
   }, []);
 
-  const categoryOptions = ["Pet clinic (Infield)", "Pet clinic (Admission to TEARS)", "Reported outside of pet clinic"];
+  const categoryOptions = ["Pet clinic, Infield", "Pet clinic, Admission to TEARS", "Reported outside of pet clinic"];
 
   //TYPE
   const handleToggleType = () => {
@@ -416,10 +416,10 @@ const Treatment: NextPage = () => {
     "Cruciate",
     "Dental",
     "Distemper",
-    "Ear Infection",
+    "Ear infection",
     "Ehrlichia",
-    "Eye Infection",
-    "Feline Aids",
+    "Eye infection",
+    "Feline AIDS",
     "Foreign body ingested",
     "Fracture",
     "Heart failure",
@@ -440,7 +440,7 @@ const Treatment: NextPage = () => {
     "Steri complications",
     "TVT",
     "Urinary",
-    "Vaccinations (Ad hoc)",
+    "Vaccinations (ad hoc)",
     "Vomiting and diarrhea",
     "Wound shave and clean",
     "Wound stitch-up",
@@ -615,6 +615,8 @@ const Treatment: NextPage = () => {
       await router.push(`/pet`);
     }
     //console.log("Back button pressed");
+
+    setQuery("");
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);
@@ -1006,10 +1008,10 @@ const Treatment: NextPage = () => {
                         </svg>
                       </button>
                       {isCategoryOpen && (
-                        <div ref={categoryRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={categoryRef} className="z-10 w-56 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className=" w-56 py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {categoryOptions.map((option) => (
-                              <li key={option} onClick={() => handleCategoryOption(option)}>
+                              <li key={option} className={"flex w-56 flex-col items-start"} onClick={() => handleCategoryOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                               </li>
                             ))}

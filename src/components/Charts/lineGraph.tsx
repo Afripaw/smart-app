@@ -90,7 +90,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Active Pet Owners" stroke="#EB4724" />
+          <Line type="monotone" dataKey="value" name="Flagship" stroke="#EB4724" />
         </LineChart>
       </ResponsiveContainer>
     );
@@ -120,7 +120,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Active Volunteers" stroke="#EB4724" />
+          <Line type="monotone" dataKey="value" name="Flagship" stroke="#EB4724" />
         </LineChart>
       </ResponsiveContainer>
     );
@@ -150,7 +150,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Kennels Provided" stroke="#EB4724" />
+          <Line type="monotone" dataKey="value" name="Flagship" stroke="#EB4724" />
         </LineChart>
       </ResponsiveContainer>
     );
@@ -180,7 +180,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Pet Clinics Held" stroke="#EB4724" />
+          <Line type="monotone" dataKey="value" name="Flagship" stroke="#EB4724" />
         </LineChart>
       </ResponsiveContainer>
     );

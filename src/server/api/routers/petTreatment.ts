@@ -72,12 +72,13 @@ export const petTreatmentRouter = createTRPCRouter({
       // Parse the search query
       const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
 
-      // Construct a complex search condition
+      // Construct a complex search condition for treatment table
       const searchConditions = terms.map((term) => {
         // Check if term is a date
         const termAsDate: Date = new Date(term);
         console.log(termAsDate);
         const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+
         // Check if term is a number
         if (!isNaN(Number(term))) {
           return {
@@ -98,6 +99,51 @@ export const petTreatmentRouter = createTRPCRouter({
         }
       });
 
+      // //complex search condition for pet table
+      // const searchConditionsPet = terms.map((term) => {
+
+      //   // Check if term is a number
+      //   if (!isNaN(Number(term))) {
+      //     return {
+      //       OR: [
+      //         { petID: { equals: Number(term) } },
+      //         { petName: { contains: term } },
+      //         { species: { contains: term } },
+      //         { breed: { contains: term } },
+      //       ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+      //     };
+      //   } else {
+      //     return {
+      //       OR: [{ petName: { contains: term } }, { species: { contains: term } }, { breed: { contains: term } }].filter(
+      //         (condition) => Object.keys(condition).length > 0,
+      //       ), // Filter out empty conditions
+      //     };
+      //   }
+      // });
+
+      // //complex search condition for owner table
+      // const searchConditionsOwner = terms.map((term) => {
+
+      //   // Check if term is a number
+      //   if (!isNaN(Number(term))) {
+      //     return {
+      //       OR: [
+      //         { ownerID: { equals: Number(term) } },
+      //         { firstName: { contains: term } },
+      //         { surname: { contains: term } },
+      //         { addressGreaterArea: { contains: term } },
+      //         { addressArea: { contains: term } },
+      //       ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+      //     };
+      //   } else {
+      //     return {
+      //       OR: [{ firstName: { contains: term } }, { surname: { contains: term } }, { addressGreaterArea: { contains: term } }, { addressArea: { contains: term } }].filter(
+      //         (condition) => Object.keys(condition).length > 0,
+      //       ), // Filter out empty conditions
+      //     };
+      //   }
+      // });
+
       const order: Record<string, string> = {};
 
       if (input.order !== "date") {
@@ -105,6 +151,29 @@ export const petTreatmentRouter = createTRPCRouter({
       } else {
         order.date = "asc";
       }
+
+      //   const treatment = await ctx.db.petOwner.findMany({
+      //     where: {
+      //       AND: searchConditionsOwner,
+      //     },
+      //     select: {
+      //       pets: {
+      //         where: {
+      //           AND: searchConditionsPet,
+      //         },
+      //         select:{
+      //           petTreatments: {
+      //             where: {
+      //               AND: searchConditions,
+      //             },
+      //             orderBy: order,
+      //             take: input.limit + 1,
+      //             cursor: input.cursor ? { treatmentID: input.cursor } : undefined,
+      //           }
+      //         },
+      //       }
+      //     },
+      // });
 
       const user = await ctx.db.petTreatment.findMany({
         where: {

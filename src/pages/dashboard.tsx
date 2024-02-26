@@ -55,60 +55,66 @@ const Dashboard: NextPage = () => {
             <PieGraph type="ClinicVisits" />
             <div className="">Total Clinic Visits to Date</div>
           </div>
-          <div className="relative border border-gray-300">
-            <div className="absolute left-32 top-8 flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
-              {!clinicVisits.data ? (
-                <div
-                  className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                  role="status"
-                />
-              ) : (
-                <>
-                  <div className="text-lg">{clinicVisits?.data ?? 0}</div>
-                </>
-              )}
-              <div className="text-xs">Pet Clinic visits</div>
+          <div className="flex flex-col items-center justify-around border border-gray-300">
+            <div className="flex w-2/3 justify-around pb-2 pt-4">
+              <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
+                {!clinicVisits.data ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <>
+                    <div className="text-lg">{clinicVisits?.data ?? 0}</div>
+                  </>
+                )}
+                <div className="text-xs">Pet Clinic visits</div>
+              </div>
+              <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
+                {!sterilisedPets?.data ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <>
+                    <div className="text-lg">{sterilisedPets?.data?.length ?? 0}</div>
+                  </>
+                )}
+                <div className="text-xs">Pets Sterilised</div>
+              </div>
             </div>
-            <div className="absolute right-32 top-8 flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
-              {!sterilisedPets?.data ? (
-                <div
-                  className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                  role="status"
-                />
-              ) : (
-                <>
-                  <div className="text-lg">{sterilisedPets?.data?.length ?? 0}</div>
-                </>
-              )}
-              <div className="text-xs">Pets Sterilised</div>
+            <div className="flex w-2/3 justify-around py-2">
+              <div className=" flex flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
+                {!kennels.data ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <>
+                    <div className="text-lg">{kennels?.data ?? 0}</div>
+                  </>
+                )}
+                <div className="text-xs">Kennels Provided</div>
+              </div>
+              <div className=" flex flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
+                {!activeVolunteers?.data ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <>
+                    <div className="text-lg">{activeVolunteers?.data?.length ?? 0}</div>
+                  </>
+                )}
+                <div className="text-xs">Active Volunteers</div>
+              </div>
             </div>
-            <div className="absolute bottom-8 left-32 flex flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
-              {!kennels.data ? (
-                <div
-                  className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                  role="status"
-                />
-              ) : (
-                <>
-                  <div className="text-lg">{kennels?.data ?? 0}</div>
-                </>
-              )}
-              <div className="text-xs">Kennels Provided</div>
+            <div className=" flex w-full grow justify-center py-2">
+              <div>Important Statistics (Totals to Date)</div>
             </div>
-            <div className="absolute bottom-8 right-32 flex flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
-              {!activeVolunteers?.data ? (
-                <div
-                  className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                  role="status"
-                />
-              ) : (
-                <>
-                  <div className="text-lg">{activeVolunteers?.data?.length ?? 0}</div>
-                </>
-              )}
-              <div className="text-xs">Active Volunteers</div>
-            </div>
-            <div className="absolute bottom-1 left-36">Important Statistics (Totals to Date)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300">
             <PieGraph type="Treatments" />

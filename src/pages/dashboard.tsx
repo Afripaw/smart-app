@@ -55,7 +55,7 @@ const Dashboard: NextPage = () => {
             <PieGraph type="ClinicVisits" />
             <div className="">Total Clinic Visits to Date</div>
           </div>
-          <div className="flex flex-col items-center justify-center border border-gray-300">
+          <div className="flex h-full grow flex-col items-center justify-center border border-gray-300">
             <div className="flex w-2/3 justify-around pb-2 pt-4">
               <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
                 {!clinicVisits.data ? (

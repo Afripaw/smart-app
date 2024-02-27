@@ -32,7 +32,7 @@ const Dashboard: NextPage = () => {
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <BarGraph type="activePets" />
-            <div className="pl-16">Total Numbers of Active Pets (Last 5 Years)</div>
+            <div className="pl-16">Total Numbers of Active Pets (All Areas, Last 5 Years)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="activeVolunteers" />
@@ -45,7 +45,7 @@ const Dashboard: NextPage = () => {
 
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <BarGraph type="sterilisedPets" />
-            <div className="pl-16">Total Numbers of Sterilised Pets (Last 5 Years)</div>
+            <div className="pl-16">Total Numbers of Sterilised Pets (All Areas, Last 5 Years)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="clinics" />
@@ -55,7 +55,7 @@ const Dashboard: NextPage = () => {
             <PieGraph type="ClinicVisits" />
             <div className="">Total Clinic Visits to Date</div>
           </div>
-          <div className="flex flex-col items-center justify-around border border-gray-300">
+          <div className="flex flex-col items-center justify-center border border-gray-300">
             <div className="flex w-2/3 justify-around pb-2 pt-4">
               <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
                 {!clinicVisits.data ? (
@@ -113,7 +113,7 @@ const Dashboard: NextPage = () => {
               </div>
             </div>
             <div className=" flex w-full grow justify-center py-2">
-              <div>Important Statistics (Totals to Date)</div>
+              <div>Important Statistics (All Areas, Totals to Date)</div>
             </div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300">

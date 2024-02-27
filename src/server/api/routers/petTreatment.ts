@@ -69,16 +69,12 @@ export const petTreatmentRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      //------------------------------------------ORIGNAL CODE-------------------------------------
       // Parse the search query
       const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
 
       // Construct a complex search condition for treatment table
       const searchConditions = terms.map((term) => {
-        // Check if term is a date
-        const termAsDate: Date = new Date(term);
-        console.log(termAsDate);
-        const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
-
         // Check if term is a number
         if (!isNaN(Number(term))) {
           return {
@@ -87,17 +83,17 @@ export const petTreatmentRouter = createTRPCRouter({
               { category: { contains: term } },
               { type: { contains: term } },
               { comments: { contains: term } },
-              dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
-            OR: [{ category: { contains: term } }, { type: { contains: term } }, { comments: { contains: term } }, dateCondition].filter(
+            OR: [{ category: { contains: term } }, { type: { contains: term } }, { comments: { contains: term } }].filter(
               (condition) => Object.keys(condition).length > 0,
             ), // Filter out empty conditions
           };
         }
       });
+      //------------------------------------------ORIGNAL CODE-------------------------------------
 
       // //complex search condition for pet table
       // const searchConditionsPet = terms.map((term) => {
@@ -144,6 +140,7 @@ export const petTreatmentRouter = createTRPCRouter({
       //   }
       // });
 
+      //-----------------------------------------ORIGNAL CODE-------------------------------------
       const order: Record<string, string> = {};
 
       if (input.order !== "date") {
@@ -151,6 +148,7 @@ export const petTreatmentRouter = createTRPCRouter({
       } else {
         order.date = "asc";
       }
+      //-----------------------------------------ORIGNAL CODE-------------------------------------
 
       //   const treatment = await ctx.db.petOwner.findMany({
       //     where: {
@@ -175,6 +173,7 @@ export const petTreatmentRouter = createTRPCRouter({
       //     },
       // });
 
+      //-----------------------------------ORIGNAL CODE----------------------------------------
       const user = await ctx.db.petTreatment.findMany({
         where: {
           AND: searchConditions,
@@ -183,6 +182,7 @@ export const petTreatmentRouter = createTRPCRouter({
         take: input.limit + 1,
         cursor: input.cursor ? { treatmentID: input.cursor } : undefined,
       });
+      //-----------------------------------ORIGNAL CODE----------------------------------------
 
       let newNextCursor: typeof input.cursor | undefined = undefined;
       if (user.length > input.limit) {

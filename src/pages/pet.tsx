@@ -324,41 +324,53 @@ const Pet: NextPage = () => {
     },
   );
 
-  //Flattens the pages array into one array
-  const user_data = queryData?.pages.flatMap((page) => page.user_data);
-  const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
-  const clinic_data = queryData?.pages.flatMap((page) => page.clinic_data);
-  const treatment_data = queryData?.pages.flatMap((page) => page.treatment_data);
-  //combine the following two objects into one object
-  //const pet_data = user_data?.map((user, index) => ({ ...user, ...owner_data?.[index] }));
+  //------------------------------NEW CODE----------------------------------
 
-  // Assuming each user object contains an ownerId or similar property to relate to the owner
-  const pet_data = user_data?.map((user) => {
-    // Find the owner that matches the user's ownerId
-    const owner = owner_data?.find((o) => o.ownerID === user.ownerID);
-    // Combine the user data with the found owner data
-    return { ...user, ...owner };
-  });
+  // //
+  const pet_data_with_clinics_and_treatments = queryData?.pages.flatMap((page) => page.pet_data);
 
-  const pet_data_with_clinics = pet_data?.map((pet) => {
-    // Assuming each clinic object has a 'petID' that links it to a pet
-    const associatedClinics = clinic_data?.filter((clinic) => clinic.petID === pet.petID);
+  //const user = pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id);
 
-    return {
-      ...pet,
-      clinics: associatedClinics,
-    };
-  });
+  //--------------------------------NEW CODE----------------------------------
 
-  const pet_data_with_clinics_and_treatments = pet_data_with_clinics?.map((pet) => {
-    // Assuming each treatment object has a 'petID' that links it to a pet
-    const associatedTreatments = treatment_data?.filter((treatment) => treatment.petID === pet.petID);
+  //--------------------------------------------ORIGINAL CODE----------------------------------------------
+  // //Flattens the pages array into one array
+  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  // const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
+  // const clinic_data = queryData?.pages.flatMap((page) => page.clinic_data);
+  // const treatment_data = queryData?.pages.flatMap((page) => page.treatment_data);
+  // //combine the following two objects into one object
+  // //const pet_data = user_data?.map((user, index) => ({ ...user, ...owner_data?.[index] }));
 
-    return {
-      ...pet,
-      treatment: associatedTreatments,
-    };
-  });
+  // // Assuming each user object contains an ownerId or similar property to relate to the owner
+  // const pet_data = user_data?.map((user) => {
+  //   // Find the owner that matches the user's ownerId
+  //   const owner = owner_data?.find((o) => o.ownerID === user.ownerID);
+  //   // Combine the user data with the found owner data
+  //   return { ...user, ...owner };
+  // });
+
+  // const pet_data_with_clinics = pet_data?.map((pet) => {
+  //   // Assuming each clinic object has a 'petID' that links it to a pet
+  //   const associatedClinics = clinic_data?.filter((clinic) => clinic.petID === pet.petID);
+
+  //   return {
+  //     ...pet,
+  //     clinics: associatedClinics,
+  //   };
+  // });
+
+  // const pet_data_with_clinics_and_treatments = pet_data_with_clinics?.map((pet) => {
+  //   // Assuming each treatment object has a 'petID' that links it to a pet
+  //   const associatedTreatments = treatment_data?.filter((treatment) => treatment.petID === pet.petID);
+
+  //   return {
+  //     ...pet,
+  //     treatment: associatedTreatments,
+  //   };
+  // });
+
+  //--------------------------------------------ORIGINAL CODE----------------------------------------------
 
   //Checks intersection of the observer target and reassigns target element once true
   useEffect(() => {
@@ -475,7 +487,7 @@ const Pet: NextPage = () => {
     }
   }, [router.asPath]);
 
-  const owner = api.petOwner.getOwnerByID.useQuery({ petOwnerID: ownerID });
+  const owner = api.petOwner.getOwnerByID.useQuery({ ownerID: ownerID });
 
   useEffect(() => {
     void owner.refetch();
@@ -1576,7 +1588,7 @@ const Pet: NextPage = () => {
       // Assuming userQuery.data contains the user object
       const userData = user;
       //Get all the clinic dates and put in a string array
-      const clinicData = user?.clinics;
+      const clinicData = user?.clinic_data;
       const clinicDates: Clinic[] =
         clinicData?.map((clinic) => ({
           id: clinic.clinicID,
@@ -1592,7 +1604,7 @@ const Pet: NextPage = () => {
 
       //treatments
       const treatmentData: Treatment[] =
-        user?.treatment?.map((treatment) => ({
+        user?.petTreatments?.map((treatment) => ({
           treatmentID: treatment.treatmentID,
           date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
           category: treatment.category,
@@ -1661,10 +1673,10 @@ const Pet: NextPage = () => {
       setTreatmentList(treatmentData);
       console.log("Treatment list: ", treatmentList);
 
-      setFirstName(userData?.firstName ?? "");
-      setSurname(userData?.surname ?? "");
-      setGreaterArea(userData?.addressGreaterArea ?? "");
-      setArea(userData?.addressArea ?? "");
+      setFirstName(userData?.owner.firstName ?? "");
+      setSurname(userData?.owner?.surname ?? "");
+      setGreaterArea(userData?.owner?.addressGreaterArea ?? "");
+      setArea(userData?.owner?.addressArea ?? "");
     }
 
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
@@ -1678,7 +1690,7 @@ const Pet: NextPage = () => {
       // Assuming userQuery.data contains the user object
       const userData = user;
       //Get all the clinic dates and put in a string array
-      const clinicData = user.clinics;
+      const clinicData = user.clinic_data;
       const clinicDates: Clinic[] =
         clinicData?.map((clinic) => ({
           id: clinic.clinicID,
@@ -1694,7 +1706,7 @@ const Pet: NextPage = () => {
 
       //treatments
       const treatmentData: Treatment[] =
-        user?.treatment?.map((treatment) => ({
+        user?.petTreatments?.map((treatment) => ({
           treatmentID: treatment.treatmentID,
           date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
           category: treatment.category,
@@ -1755,10 +1767,10 @@ const Pet: NextPage = () => {
       console.log("Treatment list: ", treatmentList);
       //setClinicIDList(clinicIDs ?? []);
 
-      setFirstName(userData?.firstName ?? "");
-      setSurname(userData?.surname ?? "");
-      setGreaterArea(userData?.addressGreaterArea ?? "");
-      setArea(userData?.addressArea ?? "");
+      setFirstName(userData?.owner?.firstName ?? "");
+      setSurname(userData?.owner?.surname ?? "");
+      setGreaterArea(userData?.owner?.addressGreaterArea ?? "");
+      setArea(userData?.owner?.addressArea ?? "");
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
   //[user, isUpdate, isCreate];
@@ -1925,7 +1937,7 @@ const Pet: NextPage = () => {
       // Assuming userQuery.data contains the user object
       const userData = user;
       //Get all the clinic dates and put in a string array
-      const clinicData = user?.clinics ?? [];
+      const clinicData = user?.clinic_data ?? [];
       const clinicDates: Clinic[] =
         clinicData?.map((clinic) => ({
           id: clinic.clinicID,
@@ -1941,7 +1953,7 @@ const Pet: NextPage = () => {
 
       //treatments
       const treatmentData: Treatment[] =
-        user?.treatment?.map((treatment) => ({
+        user?.petTreatments?.map((treatment) => ({
           treatmentID: treatment.treatmentID,
           date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
           category: treatment.category,
@@ -1996,10 +2008,10 @@ const Pet: NextPage = () => {
 
       // setClinicIDList(clinicIDs ?? []);
 
-      setFirstName(userData?.firstName ?? "");
-      setSurname(userData?.surname ?? "");
-      setGreaterArea(userData?.addressGreaterArea ?? "");
-      setArea(userData?.addressArea ?? "");
+      setFirstName(userData?.owner?.firstName ?? "");
+      setSurname(userData?.owner?.surname ?? "");
+      setGreaterArea(userData?.owner?.addressGreaterArea ?? "");
+      setArea(userData?.owner?.addressArea ?? "");
     }
     // else {
     //   //alternate method to get pet data
@@ -2281,7 +2293,7 @@ const Pet: NextPage = () => {
   const handleBackButton = async () => {
     //console.log("Back button pressed");
     //if owner id in query then go back to owner page
-    if (router.asPath.includes("petID")) {
+    if (router.asPath.includes("petID") && !isUpdate && !isCreate) {
       // if (Number(router.asPath.split("=")[1]) != 0) {
       await router.push(`/owner`);
     }
@@ -2443,10 +2455,10 @@ const Pet: NextPage = () => {
         petID: id,
         petName: petName ? petName : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.petName,
         ownerID: ownerID ? ownerID : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.ownerID,
-        firstName: firstName ? firstName : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.firstName,
-        surname: surname ? surname : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.surname,
-        greaterArea: greaterArea ? greaterArea : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.addressGreaterArea,
-        area: area ? area : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.addressArea,
+        firstName: firstName ? firstName : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.firstName,
+        surname: surname ? surname : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.surname,
+        greaterArea: greaterArea ? greaterArea : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.addressGreaterArea,
+        area: area ? area : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.addressArea,
       },
     });
   };
@@ -2483,9 +2495,9 @@ const Pet: NextPage = () => {
 
   //Search for a clinic date and clinic ID given today's date. Todays date needs to match up with the clinic date for the clinic to be added to the pet
   const handleAddClinic = async (id: number) => {
-    const user = pet_data_with_clinics?.find((pet) => pet.petID === id);
+    const user = pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id);
 
-    const clinicData = user?.clinics;
+    const clinicData = user?.clinic_data ?? [];
     const clinicDates: Clinic[] =
       clinicData?.map((clinic) => ({
         id: clinic.clinicID,
@@ -2666,22 +2678,22 @@ const Pet: NextPage = () => {
                             </td>
                             <td className="border px-4 py-2">
                               <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(pet.ownerID)}>
-                                {pet.firstName} {pet.surname} (N{pet.ownerID})
+                                {pet.owner.firstName} {pet.owner.surname} (N{pet.ownerID})
                               </button>
                             </td>
 
-                            <td className="border px-4 py-2">{pet.addressGreaterArea}</td>
-                            <td className="border px-4 py-2">{pet.addressArea}</td>
+                            <td className="border px-4 py-2">{pet.owner.addressGreaterArea}</td>
+                            <td className="border px-4 py-2">{pet.owner.addressArea}</td>
                             <td className="border px-4 py-2">
-                              {pet.addressStreetNumber} {pet.addressStreet}
+                              {pet.owner.addressStreetNumber} {pet.owner.addressStreet}
                             </td>
                             <td className="border px-4 py-2">{pet.sterilisedStatus}</td>
                             <td className="border px-4 py-2">
-                              {pet.treatment && pet.treatment.length > 0 ? (
+                              {pet.petTreatments && pet.petTreatments.length > 0 ? (
                                 <>
-                                  {pet?.treatment?.[pet?.treatment.length - 1]?.date.getDate().toString()}/
-                                  {((pet?.treatment?.[pet?.treatment.length - 1]?.date.getMonth() ?? 0) + 1).toString()}/
-                                  {pet?.treatment?.[pet?.treatment.length - 1]?.date.getFullYear().toString()}
+                                  {pet?.petTreatments?.[pet?.petTreatments.length - 1]?.date.getDate().toString()}/
+                                  {((pet?.petTreatments?.[pet?.petTreatments.length - 1]?.date.getMonth() ?? 0) + 1).toString()}/
+                                  {pet?.petTreatments?.[pet?.petTreatments.length - 1]?.date.getFullYear().toString()}
                                 </>
                               ) : (
                                 "None"
@@ -2689,11 +2701,11 @@ const Pet: NextPage = () => {
                             </td>
 
                             <td className="border px-4 py-2">
-                              {pet.clinics && pet.clinics.length > 0 ? (
+                              {pet.clinic_data && pet.clinic_data.length > 0 ? (
                                 <>
-                                  {pet?.clinics?.[pet?.clinics.length - 1]?.clinic?.date.getDate().toString()}/
-                                  {((pet?.clinics?.[pet?.clinics.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
-                                  {pet?.clinics?.[pet?.clinics.length - 1]?.clinic?.date.getFullYear().toString()}
+                                  {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getDate().toString()}/
+                                  {((pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
+                                  {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getFullYear().toString()}
                                 </>
                               ) : (
                                 "None"

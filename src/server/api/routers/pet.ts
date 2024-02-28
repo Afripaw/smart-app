@@ -1,4 +1,5 @@
 import { z } from "zod";
+import Owner from "~/pages/owner";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
@@ -210,6 +211,7 @@ export const petRouter = createTRPCRouter({
       // Parse the search query
       const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
 
+      //-------------------------------------SEARCH CONDITIONS-------------------------------------
       // Construct a complex search condition
       const searchConditions = terms.map((term) => {
         // Check if term is a date
@@ -218,10 +220,10 @@ export const petRouter = createTRPCRouter({
         // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
 
         // Check if term is a number
-        if (!isNaN(Number(term))) {
+        if (term.match(/^P\d+$/) !== null) {
           return {
             OR: [
-              { petID: { equals: Number(term) } },
+              { petID: { equals: Number(term.substring(1)) } },
               { petName: { contains: term } },
               { species: { contains: term } },
               { sex: { contains: term } },
@@ -267,6 +269,36 @@ export const petRouter = createTRPCRouter({
         }
       });
 
+      //complex search condition for owner table
+      const searchConditionsOwner = terms.map((term) => {
+        // Check if term is a number
+        if (term.match(/^N\d+$/) !== null) {
+          return {
+            OR: [
+              { ownerID: { equals: Number(term.substring(1)) } },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { addressGreaterArea: { contains: term } },
+              { addressArea: { contains: term } },
+              { addressStreet: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { addressGreaterArea: { contains: term } },
+              { addressArea: { contains: term } },
+              { addressStreet: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+      });
+      //-------------------------------------SEARCH CONDITIONS-------------------------------------
+
       const order: Record<string, string> = {};
 
       if (input.order !== "petName") {
@@ -277,34 +309,25 @@ export const petRouter = createTRPCRouter({
 
       const user = await ctx.db.pet.findMany({
         where: {
-          AND: searchConditions,
+          OR: [
+            {
+              AND: searchConditions,
+            },
+            {
+              owner: {
+                AND: searchConditionsOwner,
+              },
+            },
+          ],
         },
+
         orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { petID: input.cursor } : undefined,
-      });
-
-      let newNextCursor: typeof input.cursor | undefined = undefined;
-      if (user.length > input.limit) {
-        const nextRow = user.pop();
-        newNextCursor = nextRow?.petID;
-      }
-
-      //fetch the pet owners
-      const petOwner = await ctx.db.petOwner.findMany({
-        where: {
-          ownerID: {
-            in: user.map((pet) => pet.ownerID),
-          },
-        },
-        select: {
-          ownerID: true,
-          firstName: true,
-          surname: true,
-          addressArea: true,
-          addressGreaterArea: true,
-          addressStreet: true,
-          addressStreetNumber: true,
+        include: {
+          owner: true,
+          petTreatments: true,
+          clinicsAttended: true,
         },
       });
 
@@ -318,31 +341,85 @@ export const petRouter = createTRPCRouter({
         select: {
           clinicID: true,
           petID: true,
-          clinic: {
-            select: {
-              date: true,
-              area: true,
-            },
-          },
+          clinic: true,
         },
       });
 
-      //fetch all the treatments
-      const treatments = await ctx.db.petTreatment.findMany({
-        where: {
-          petID: {
-            in: user.map((pet) => pet.petID),
-          },
-        },
+      //combine the user with the clinics
+      const pet_data = user.map((pet) => {
+        const clinic_data = clinics.filter((clinic) => clinic.petID === pet.petID);
+        return {
+          ...pet,
+          clinic_data,
+        };
       });
+
+      let newNextCursor: typeof input.cursor | undefined = undefined;
+      if (pet_data.length > input.limit) {
+        const nextRow = pet_data.pop();
+        newNextCursor = nextRow?.petID;
+      }
 
       return {
-        owner_data: petOwner,
-        treatment_data: treatments,
-        clinic_data: clinics,
-        user_data: user,
+        pet_data: pet_data,
         nextCursor: newNextCursor,
       };
+
+      //---------------------------------ORIGINAL CODE---------------------------------
+      // //fetch the pet owners
+      // const petOwner = await ctx.db.petOwner.findMany({
+      //   where: {
+      //     ownerID: {
+      //       in: user.map((pet) => pet.ownerID),
+      //     },
+      //   },
+      //   select: {
+      //     ownerID: true,
+      //     firstName: true,
+      //     surname: true,
+      //     addressArea: true,
+      //     addressGreaterArea: true,
+      //     addressStreet: true,
+      //     addressStreetNumber: true,
+      //   },
+      // });
+
+      // //fetch the clinics
+      // const clinics = await ctx.db.petOnPetClinic.findMany({
+      //   where: {
+      //     petID: {
+      //       in: user.map((pet) => pet.petID),
+      //     },
+      //   },
+      //   select: {
+      //     clinicID: true,
+      //     petID: true,
+      //     clinic: {
+      //       select: {
+      //         date: true,
+      //         area: true,
+      //       },
+      //     },
+      //   },
+      // });
+
+      // //fetch all the treatments
+      // const treatments = await ctx.db.petTreatment.findMany({
+      //   where: {
+      //     petID: {
+      //       in: user.map((pet) => pet.petID),
+      //     },
+      //   },
+      // });
+
+      // return {
+      //   owner_data: petOwner,
+      //   treatment_data: treatments,
+      //   clinic_data: clinics,
+      //   user_data: user,
+      //   nextCursor: newNextCursor,
+      // };
+      //---------------------------------ORIGINAL CODE---------------------------------
     }),
 
   //Add clinic to pet

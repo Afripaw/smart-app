@@ -210,18 +210,29 @@ export const UserRouter = createTRPCRouter({
       // Parse the search query
       const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
 
+      // // If the term is a U followed by a number, it is a user ID
+      // const userIDs = terms
+      //   .filter((term) => term.match(/^U\d+$/) !== null)
+      //   .map((term) => Number(term.substring(1)));
+
       // Construct a complex search condition
       const searchConditions = terms.map((term) => {
-        // Check if term is a date
-        const termAsDate: Date = new Date(term);
-        console.log(termAsDate);
-        const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+        // Check if term is a UserID
+        // if (term.match(/^U\d+$/) !== null) {
+        //   return {
+        //     userID: { equals: Number(term.substring(1)) },
+        //   };
+        // }
 
         // Check if term is a number
-        if (!isNaN(Number(term))) {
+        // if (!isNaN(Number(term))) {
+        //   return {
+
+        if (term.match(/^U\d+$/) !== null) {
           return {
             OR: [
-              { userID: { equals: Number(term) } },
+              // { userID: { equals: Number(term) } },
+              { userID: { equals: Number(term.substring(1)) } },
               { name: { contains: term } },
               { surname: { contains: term } },
               { email: { contains: term } },
@@ -238,7 +249,6 @@ export const UserRouter = createTRPCRouter({
               { addressFreeForm: { contains: term } },
               { preferredCommunication: { contains: term } },
               { comments: { contains: term } },
-              dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
@@ -260,7 +270,6 @@ export const UserRouter = createTRPCRouter({
               { addressFreeForm: { contains: term } },
               { preferredCommunication: { contains: term } },
               { comments: { contains: term } },
-              dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }

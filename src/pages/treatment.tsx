@@ -209,29 +209,90 @@ const Treatment: NextPage = () => {
     },
   );
 
+  //------------------------------NEW CODE-----------------------------------------
+
   //Flattens the pages array into one array
-  const user_data = queryData?.pages.flatMap((page) => page.user_data);
-  const pet_data = queryData?.pages.flatMap((page) => page.pet_data);
-  const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
+  const owners_pets_treatments = queryData?.pages.flatMap((page) => page.treatment_data);
 
-  //combine the following two objects into one object
-  // const treatment_data = user_data?.map((user, index) => ({ ...user, ...pet_data?.[index] }));
+  //----------------------------------------FIRST ATTEMPT-----------------------------------------
 
-  const treatment_pet_data = user_data?.map((treatment) => {
-    // Find the owner that matches the user's ownerId
-    const pet = pet_data?.find((p) => (p.petID ?? 0) === treatment.petID);
-    // Combine the user data with the found owner data
-    return { ...treatment, ...pet };
-  });
+  // //create a new data object that contains the owner, pet and treatment data. Data can be repeated.
+  // const treatments = owners_pets_treatments?.map((owner) => {
+  //   return owner.pets.map((pet) => {
+  //     return pet.petTreatments.map((treatment) => {
+  //       return {
+  //         ownerID: owner.ownerID,
+  //         surname: owner.surname,
+  //         firstName: owner.firstName,
+  //         area: owner.addressArea,
+  //         greaterArea: owner.addressGreaterArea,
+  //         petName: pet.petName,
+  //         petID: pet.petID,
+  //         species: pet.species,
+  //         breed: pet.breed,
+  //         treatmentID: treatment.treatmentID,
+  //         date: treatment.date,
+  //         category: treatment.category,
+  //         type: treatment.type,
+  //         comments: treatment.comments,
+  //         updatedAt: treatment.updatedAt,
+  //       };
+  //     });
+  //   });
+  // });
 
-  const pet_treatment_data = treatment_pet_data?.map((pet) => {
-    // Find the owner that matches the user's ownerId
-    const owner = owner_data?.find((o) => (o.ownerID ?? 0) === pet.ownerID);
-    // Combine the user data with the found owner data
-    return { ...pet, ...owner };
+  // const pet_treatment_data = treatments?.flat(2);
+
+  // const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
+
+  //----------------------------------------SECOND ATTEMPT-----------------------------------------
+  //create a new data object that will write all the data into one object
+  const pet_treatment_data = owners_pets_treatments?.map((treatment) => {
+    return {
+      ownerID: treatment?.pet?.ownerID ?? 0,
+      surname: treatment?.pet?.owner?.surname ?? "",
+      firstName: treatment?.pet?.owner?.firstName ?? "",
+      area: treatment?.pet?.owner?.addressArea ?? "",
+      greaterArea: treatment?.pet?.owner?.addressGreaterArea ?? "",
+      petName: treatment?.pet?.petName ?? "",
+      petID: treatment?.pet?.petID ?? 0,
+      species: treatment?.pet?.species ?? "",
+      breed: treatment?.pet?.breed ?? "",
+      treatmentID: treatment?.treatmentID,
+      date: treatment?.date,
+      category: treatment?.category,
+      type: treatment?.type,
+      comments: treatment?.comments,
+      updatedAt: treatment?.updatedAt,
+    };
   });
 
   const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
+
+  //------------------------------------NEW CODE-----------------------------------------
+
+  //-------------------------------ORIGINAL CODE-----------------------------------------
+  // //Flattens the pages array into one array
+  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  // const pet_data = queryData?.pages.flatMap((page) => page.pet_data);
+  // const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
+
+  // const treatment_pet_data = user_data?.map((treatment) => {
+  //   // Find the owner that matches the user's ownerId
+  //   const pet = pet_data?.find((p) => (p.petID ?? 0) === treatment.petID);
+  //   // Combine the user data with the found owner data
+  //   return { ...treatment, ...pet };
+  // });
+
+  // const pet_treatment_data = treatment_pet_data?.map((pet) => {
+  //   // Find the owner that matches the user's ownerId
+  //   const owner = owner_data?.find((o) => (o.ownerID ?? 0) === pet.ownerID);
+  //   // Combine the user data with the found owner data
+  //   return { ...pet, ...owner };
+  // });
+
+  // const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
+  //-------------------------------ORIGINAL CODE-----------------------------------------
 
   //Checks intersection of the observer target and reassigns target element once true
   useEffect(() => {
@@ -561,8 +622,8 @@ const Treatment: NextPage = () => {
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setOwnerID(userData.ownerID ?? 0);
-      setArea(userData.addressArea ?? "");
-      setGreaterArea(userData.addressGreaterArea ?? "");
+      setArea(userData.area ?? "");
+      setGreaterArea(userData.greaterArea ?? "");
       setCategoryOption(userData.category ?? "");
       setTypeOption(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
@@ -863,8 +924,8 @@ const Treatment: NextPage = () => {
                             <td className="border px-4 py-2">
                               {treatment.firstName} {treatment.surname} (N{treatment.ownerID})
                             </td>
-                            <td className="border px-4 py-2">{treatment.addressGreaterArea}</td>
-                            <td className="border px-4 py-2">{treatment.addressArea}</td>
+                            <td className="border px-4 py-2">{treatment.greaterArea}</td>
+                            <td className="border px-4 py-2">{treatment.area}</td>
                             <td className="border px-4 py-2">{treatment.category}</td>
                             <td className="border px-4 py-2">{treatment.type}</td>
                             <td className=" border px-4 py-2">
@@ -986,8 +1047,8 @@ const Treatment: NextPage = () => {
                   <div className="py-2">
                     Owner: {firstName ? firstName : treatment?.firstName} {surname ? surname : treatment?.surname} (N{ownerID ? ownerID : treatment?.ownerID})
                   </div>
-                  <div className="py-2">Greater Area: {greaterArea ? greaterArea : treatment?.addressGreaterArea}</div>
-                  <div className="py-2">Area: {area ? area : treatment?.addressArea}</div>
+                  <div className="py-2">Greater Area: {greaterArea ? greaterArea : treatment?.greaterArea}</div>
+                  <div className="py-2">Area: {area ? area : treatment?.area}</div>
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">

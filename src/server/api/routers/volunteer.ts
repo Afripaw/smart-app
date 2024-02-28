@@ -182,10 +182,13 @@ export const volunteerRouter = createTRPCRouter({
         // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
 
         // Check if term is a number
-        if (!isNaN(Number(term))) {
+
+        //check if term is volunteer ID or not
+
+        if (term.match(/^V\d+$/) !== null) {
           return {
             OR: [
-              { volunteerID: { equals: Number(term) } },
+              { volunteerID: { equals: Number(term.substring(1)) } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
               { email: { contains: term } },

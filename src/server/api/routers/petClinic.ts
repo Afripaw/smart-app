@@ -82,10 +82,10 @@ export const petClinicRouter = createTRPCRouter({
         // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
 
         // Check if term is a number
-        if (!isNaN(Number(term))) {
+        if (term.match(/^C\d+$/) !== null) {
           return {
             OR: [
-              { clinicID: { equals: Number(term) } },
+              { clinicID: { equals: Number(term.substring(1)) } },
               { greaterArea: { contains: term } },
               { area: { contains: term } },
               { conditions: { contains: term } },

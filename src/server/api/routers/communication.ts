@@ -58,10 +58,10 @@ export const communicationRouter = createTRPCRouter({
         // console.log(termAsDate);
         // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
         // Check if term is a number
-        if (!isNaN(Number(term))) {
+        if (term.match(/^M\d+$/)) {
           return {
             OR: [
-              { communicationID: { equals: Number(term) } },
+              { communicationID: { equals: Number(term.substring(1)) } },
               { message: { contains: term } },
               { success: { contains: term } },
               { type: { contains: term } },

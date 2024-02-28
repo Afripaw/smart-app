@@ -366,6 +366,10 @@ const Owner: NextPage = () => {
     }
   }, [router.asPath]);
 
+  const owner = router.asPath.includes("ownerID")
+    ? api.petOwner.getOwnerByID.useQuery({ ownerID: Number(router.asPath.split("=")[1]) })
+    : api.petOwner.getOwnerByID.useQuery({ ownerID: 1000001 });
+
   //-------------------------------UPDATE USER-----------------------------------------
   //const user = api.petOwner.getOwnerByID.useQuery({ petOwnerID: id });
 
@@ -915,14 +919,21 @@ const Owner: NextPage = () => {
     setIsViewProfilePage(true);
   };
 
+  //Go to update page from the view profile page
+  const [getOwner, setGetOwner] = useState(false);
   useEffect(() => {
-    //console.log("View profile page: ", JSON.stringify(user.data));
-    if (isViewProfilePage) {
-      //void user.refetch();
+    if (router.asPath.includes("ownerID") && firstName === "") {
+      void owner.refetch();
+      getOwner ? setGetOwner(false) : setGetOwner(true);
     }
-    if (user) {
-      const userData = user;
+    void owner?.refetch();
 
+    //const user = user_data?.find((user) => user.ownerID === id);
+    const user = owner?.data;
+    console.log("View profile page: ", JSON.stringify(user));
+    if (user) {
+      // Assuming userQuery.data contains the user object
+      const userData = user;
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -939,6 +950,8 @@ const Owner: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
+      setImage(userData.image ?? "");
+      console.log("Select one");
 
       const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
       const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
@@ -950,28 +963,75 @@ const Owner: NextPage = () => {
       });
       setPetsCombined(combined);
 
-      //console.log("Select one");
       //Make sure thet area and street options have a value
-      if (userData.addressArea === "Select one" && !isUpdate) {
+      if (userData.addressArea === "Select one") {
         setAreaOption("");
+        console.log("Area option is select one");
       }
-      if (userData.addressStreet === "Select one" && !isUpdate) {
+      if (userData.addressStreet === "Select one") {
         setStreetOption("");
-      }
-      if (userData.addressArea === "" && isUpdate) {
-        setAreaOption("Select one");
-      }
-      if (userData.addressStreet === "" && isUpdate) {
-        setStreetOption("Select one");
+        console.log("Street option is select one");
       }
     }
+  }, [getOwner]); // Effect runs when userQuery.data changes
 
-    // owner_data?.map((owner) => {
-    //   if (owner.ownerID === id) {
-    //     setPets(owner.pets);
-    //   }
-    // });
-  }, [isViewProfilePage]); // Effect runs when userQuery.data changes
+  // useEffect(() => {
+  //   //console.log("View profile page: ", JSON.stringify(user.data));
+  //   if (isViewProfilePage) {
+  //     //void user.refetch();
+  //   }
+  //   if (user) {
+  //     const userData = user;
+
+  //     setFirstName(userData.firstName ?? "");
+  //     setSurname(userData.surname ?? "");
+  //     setEmail(userData.email ?? "");
+  //     setMobile(userData.mobile ?? "");
+  //     setGreaterAreaOption(userData.addressGreaterArea ?? "");
+  //     setAreaOption(userData.addressArea ?? "");
+  //     setStreetOption(userData.addressStreet ?? "");
+  //     setAddressStreetCode(userData.addressStreetCode ?? "");
+  //     setAddressStreetNumber(userData.addressStreetNumber ?? "");
+  //     //setAddressSuburb(userData.addressSuburb ?? "");
+  //     //setAddressPostalCode(userData.addressPostalCode ?? "");
+  //     setAddressFreeForm(userData.addressFreeForm ?? "");
+  //     setPreferredCommunicationOption(userData.preferredCommunication ?? "");
+  //     setStartingDate(userData.startingDate ?? new Date());
+  //     setStatusOption(userData.status ?? "");
+  //     setComments(userData.comments ?? "");
+
+  //     const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
+  //     const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
+  //     const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+  //     const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
+
+  //     const combined = petsID.map((id, index) => {
+  //       return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
+  //     });
+  //     setPetsCombined(combined);
+
+  //     //console.log("Select one");
+  //     //Make sure thet area and street options have a value
+  //     if (userData.addressArea === "Select one" && !isUpdate) {
+  //       setAreaOption("");
+  //     }
+  //     if (userData.addressStreet === "Select one" && !isUpdate) {
+  //       setStreetOption("");
+  //     }
+  //     if (userData.addressArea === "" && isUpdate) {
+  //       setAreaOption("Select one");
+  //     }
+  //     if (userData.addressStreet === "" && isUpdate) {
+  //       setStreetOption("Select one");
+  //     }
+  //   }
+
+  //   // owner_data?.map((owner) => {
+  //   //   if (owner.ownerID === id) {
+  //   //     setPets(owner.pets);
+  //   //   }
+  //   // });
+  // }, [isViewProfilePage]); // Effect runs when userQuery.data changes
 
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {
@@ -984,7 +1044,11 @@ const Owner: NextPage = () => {
   const handleBackButton = async () => {
     //console.log("Back button pressed");
 
-    if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate && !isViewProfilePage && !isCreate) {
+    // if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate && !isViewProfilePage && !isCreate) {
+    //   await router.push(`/pet`);
+    // }
+    if (router.asPath.includes("ownerID") && !isUpdate && !isCreate) {
+      // if (Number(router.asPath.split("=")[1]) != 0) {
       await router.push(`/pet`);
     }
 
@@ -1733,84 +1797,95 @@ const Owner: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="flex justify-center">
-              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">Owner Profile</div>
-                <div className="flex justify-center">
-                  <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
-                  </button>
+            {!firstName ? (
+              <div className=" sticky left-[28rem] top-96 z-30">
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
                 </div>
               </div>
-            </div>
-            <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex w-[40%] max-w-xl flex-col items-start">
-                <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <div className="absolute left-0 top-0">
-                    <Image
-                      src={"/afripaw-logo.jpg"}
-                      alt="Afripaw Logo"
-                      className="m-3  aspect-square h-max rounded-full border-2 border-gray-200"
-                      width={80}
-                      height={80}
-                    />
-                  </div>
-                  <div className="absolute right-4 top-20">
-                    {user?.image ? (
-                      <Image src={image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
-                    ) : (
-                      <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem]" />
-                    )}
-                  </div>
-                  <b className="mb-14 text-center text-xl">Personal & Contact Data</b>
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Owner ID:</b> N{id}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Name:</b> {firstName}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Surname:</b> {surname}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Email:</b> {email}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Mobile:</b> {mobile}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Preferred Communication Channel:</b> {preferredOption}
+            ) : (
+              <>
+                <div className="flex justify-center">
+                  <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+                    <div className=" text-2xl">Owner Profile</div>
+                    <div className="flex justify-center">
+                      <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
+                        Back
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaOption}
-                  </div>
-                  <div className="flex items-start divide-x-2 divide-gray-300">
-                    <div className="flex w-96 flex-col pr-2">
+                <div ref={printComponentRef} className="flex grow flex-col items-center">
+                  <div className="mt-6 flex w-[40%] max-w-xl flex-col items-start">
+                    <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
+                      <div className="absolute left-0 top-0">
+                        <Image
+                          src={"/afripaw-logo.jpg"}
+                          alt="Afripaw Logo"
+                          className="m-3  aspect-square h-max rounded-full border-2 border-gray-200"
+                          width={80}
+                          height={80}
+                        />
+                      </div>
+                      <div className="absolute right-4 top-20">
+                        {user?.image ? (
+                          <Image src={image} alt="Afripaw profile pic" className="ml-auto aspect-auto max-h-52 max-w-[9rem]" width={150} height={200} />
+                        ) : (
+                          <UserCircle size={140} className="ml-auto aspect-auto max-h-52 max-w-[9rem]" />
+                        )}
+                      </div>
+                      <b className="mb-14 text-center text-xl">Personal & Contact Data</b>
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Area:</b> {areaOption}
+                        <b className="mr-3">Owner ID:</b> N{id}
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street:</b> {streetOption}
+                        <b className="mr-3">Name:</b> {firstName}
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street Code:</b> {addressStreetCode}
+                        <b className="mr-3">Surname:</b> {surname}
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street Number:</b> {addressStreetNumber}
+                        <b className="mr-3">Email:</b> {email}
                       </div>
-                      {/*
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Mobile:</b> {mobile}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Preferred Communication Channel:</b> {preferredOption}
+                      </div>
+                    </div>
+
+                    <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
+                      <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Greater Area:</b> {greaterAreaOption}
+                      </div>
+                      <div className="flex items-start divide-x-2 divide-gray-300">
+                        <div className="flex w-96 flex-col pr-2">
+                          <div className="mb-2 flex items-center">
+                            <b className="mr-3">Area:</b> {areaOption}
+                          </div>
+
+                          <div className="mb-2 flex items-center">
+                            <b className="mr-3">Street:</b> {streetOption}
+                          </div>
+
+                          <div className="mb-2 flex items-center">
+                            <b className="mr-3">Street Code:</b> {addressStreetCode}
+                          </div>
+
+                          <div className="mb-2 flex items-center">
+                            <b className="mr-3">Street Number:</b> {addressStreetNumber}
+                          </div>
+                          {/*
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Suburb:</b> {addressSuburb}
                       </div>
@@ -1818,68 +1893,70 @@ const Owner: NextPage = () => {
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Postal Code:</b> {addressPostalCode}
                     </div>*/}
+                        </div>
+
+                        {/*Free form address */}
+                        <div className=" flex w-96 flex-col pl-4">
+                          <b>Or, Free-form Address:</b>
+                          <div className=" mt-3 focus:border-black" style={{ whiteSpace: "pre-wrap" }}>
+                            {addressFreeForm}
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
-                    {/*Free form address */}
-                    <div className=" flex w-96 flex-col pl-4">
-                      <b>Or, Free-form Address:</b>
-                      <div className=" mt-3 focus:border-black" style={{ whiteSpace: "pre-wrap" }}>
-                        {addressFreeForm}
+                    <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
+                      <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Status:</b> {statusOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Starting Date:</b> {startingDate?.toLocaleDateString()}
+                      </div>
+
+                      {/* <div className="mb-2 flex items-center">
+                    <b className="mr-3">Pets:</b>{" "}
+                    {petsCombined.map((pet) => (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")").join("; ")}
+                  </div> */}
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Pets:</b>{" "}
+                        <div className="flex flex-wrap gap-2">
+                          {petsCombined.map((pet) => (
+                            <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
+                              {(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="mb-2 flex items-start">
+                        <b className="mr-3">Comments:</b>
+                        {comments}
                       </div>
                     </div>
                   </div>
                 </div>
-
-                <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Status:</b> {statusOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Starting Date:</b> {startingDate?.toLocaleDateString()}
-                  </div>
-
-                  {/* <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pets:</b>{" "}
-                    {petsCombined.map((pet) => (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")").join("; ")}
-                  </div> */}
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pets:</b>{" "}
-                    <div className="flex flex-wrap gap-2">
-                      {petsCombined.map((pet) => (
-                        <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
-                          {(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="mb-2 flex items-start">
-                    <b className="mr-3">Comments:</b>
-                    {comments}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="my-6 flex justify-center">
-              <button
-                className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
-                onClick={() => void handleUpdateFromViewProfilePage()}
-              >
-                Update profile
-              </button>
-              <ReactToPrint
-                trigger={() => (
-                  <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">
-                    <Printer size={24} className="mr-1" />
-                    Print
+                <div className="my-6 flex justify-center">
+                  <button
+                    className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
+                    onClick={() => void handleUpdateFromViewProfilePage()}
+                  >
+                    Update profile
                   </button>
-                )}
-                content={() => printComponentRef.current}
-              />
-            </div>
+                  <ReactToPrint
+                    trigger={() => (
+                      <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">
+                        <Printer size={24} className="mr-1" />
+                        Print
+                      </button>
+                    )}
+                    content={() => printComponentRef.current}
+                  />
+                </div>
+              </>
+            )}
           </>
         )}
       </main>

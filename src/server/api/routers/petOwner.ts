@@ -102,13 +102,13 @@ export const petOwnerRouter = createTRPCRouter({
   getOwnerByID: protectedProcedure
     .input(
       z.object({
-        petOwnerID: z.number(),
+        ownerID: z.number(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const petOwner = await ctx.db.petOwner.findUnique({
         where: {
-          ownerID: input.petOwnerID,
+          ownerID: input.ownerID,
         },
       });
 
@@ -132,20 +132,44 @@ export const petOwnerRouter = createTRPCRouter({
 
       // Construct a complex search condition
       const searchConditions = terms.map((term) => {
-        // Check if term is a date
-        const termAsDate: Date = new Date(term);
-        console.log(termAsDate);
-        const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
-
         // Check if term is a number
-        if (!isNaN(Number(term))) {
+        if (term.match(/^N\d+$/) !== null) {
           return {
             OR: [
-              { ownerID: { equals: Number(term) } },
+              // { userID: { equals: Number(term) } },
+              { ownerID: { equals: Number(term.substring(1)) } },
+              // {
+              //   pets: {
+              //     some: {
+              //       petID: { equals: Number(term.substring(1)) },
+              //     },
+              //   },
+              // },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              { addressGreaterArea: { contains: term } },
+              { addressArea: { contains: term } },
+              { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              // { addressSuburb: { contains: term } },
+              // { addressPostalCode: { contains: term } },
+              { pets: { some: { petName: { contains: term } } } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else if (term.match(/^P\d+$/) !== null) {
+          return {
+            OR: [
               {
                 pets: {
                   some: {
-                    petID: { equals: Number(term) },
+                    petID: { equals: Number(term.substring(1)) },
                   },
                 },
               },
@@ -165,7 +189,6 @@ export const petOwnerRouter = createTRPCRouter({
               { addressFreeForm: { contains: term } },
               { preferredCommunication: { contains: term } },
               { comments: { contains: term } },
-              dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
@@ -187,7 +210,6 @@ export const petOwnerRouter = createTRPCRouter({
               { addressFreeForm: { contains: term } },
               { preferredCommunication: { contains: term } },
               { comments: { contains: term } },
-              dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }

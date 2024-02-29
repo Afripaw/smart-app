@@ -1044,13 +1044,10 @@ const Owner: NextPage = () => {
   const handleBackButton = async () => {
     //console.log("Back button pressed");
 
-    // if (Number(router.asPath.split("=")[1]) != 0 && !isUpdate && !isViewProfilePage && !isCreate) {
+    // if (router.asPath.includes("ownerID") && !isUpdate && !isCreate) {
+    //   // if (Number(router.asPath.split("=")[1]) != 0) {
     //   await router.push(`/pet`);
     // }
-    if (router.asPath.includes("ownerID") && !isUpdate && !isCreate) {
-      // if (Number(router.asPath.split("=")[1]) != 0) {
-      await router.push(`/pet`);
-    }
 
     //set Query to empty
     setQuery("");
@@ -1259,7 +1256,7 @@ const Owner: NextPage = () => {
       <Head>
         <title>User Profiles</title>
       </Head>
-      <main className="flex flex-col text-normal">
+      <main className="text-normal flex flex-col">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
@@ -1447,7 +1444,7 @@ const Owner: NextPage = () => {
                 <b className=" text-2xl">{isUpdate ? "Update Owner Data" : "Create New Owner"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Owner Table
                   </button>
                 </div>
                 <CreateButtonModal
@@ -1813,7 +1810,7 @@ const Owner: NextPage = () => {
                     <div className=" text-2xl">Owner Profile</div>
                     <div className="flex justify-center">
                       <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                        Back
+                        Back To owner Table
                       </button>
                     </div>
                   </div>

@@ -750,7 +750,7 @@ const Communication: NextPage = () => {
                                     .slice(0, 7)
                                     .map((greaterArea) => greaterArea)
                                     .join(", ") + "..."
-                                : user.greaterArea.map((greaterArea) => greaterArea).join(", ")}
+                                : user.greaterArea.map((greaterArea) => greaterArea).join("; ")}
                             </td>
                             <td className="max-w-[15rem] border px-4 py-2">
                               {user.area.length > 7
@@ -758,7 +758,7 @@ const Communication: NextPage = () => {
                                     .slice(0, 7)
                                     .map((area) => area)
                                     .join(", ") + "..."
-                                : user.area.map((area) => area).join(", ")}
+                                : user.area.map((area) => area).join("; ")}
                             </td>
                             <td className="border px-4 py-2">{user.success}</td>
                             <td className=" border px-4 py-2">
@@ -833,7 +833,7 @@ const Communication: NextPage = () => {
                 <b className=" text-2xl">{"Create New Message"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Message Table
                   </button>
                 </div>
                 <CreateButtonModal
@@ -1079,7 +1079,7 @@ const Communication: NextPage = () => {
                 <div className=" text-2xl">Message Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Message table
                   </button>
                 </div>
               </div>
@@ -1116,11 +1116,11 @@ const Communication: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Recipients:</b> {recipients.map((recipient) => recipient).join(", ")}
+                    <b className="mr-3">Recipients:</b> {recipients.map((recipient) => recipient).join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea).join(", ")}
+                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea).join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-center">

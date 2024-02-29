@@ -2292,11 +2292,12 @@ const Pet: NextPage = () => {
   //-------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = async () => {
     //console.log("Back button pressed");
+
     //if owner id in query then go back to owner page
-    if (router.asPath.includes("petID") && !isUpdate && !isCreate) {
-      // if (Number(router.asPath.split("=")[1]) != 0) {
-      await router.push(`/owner`);
-    }
+    // if (router.asPath.includes("petID") && !isUpdate && !isCreate) {
+    //   // if (Number(router.asPath.split("=")[1]) != 0) {
+    //   await router.push(`/owner`);
+    // }
 
     setQuery("");
 
@@ -2820,7 +2821,7 @@ const Pet: NextPage = () => {
                 <b className=" text-2xl">{isUpdate ? "Update Pet Data" : "Add New Pet"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Pet Table
                   </button>
                 </div>
                 <CreateButtonModal
@@ -3662,7 +3663,7 @@ const Pet: NextPage = () => {
                     <div className=" text-2xl">Pet Profile</div>
                     <div className="flex justify-center">
                       <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                        Back
+                        Back To Pet Table
                       </button>
                     </div>
                   </div>

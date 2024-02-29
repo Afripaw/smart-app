@@ -853,7 +853,7 @@ const Clinic: NextPage = () => {
                 <b className=" text-2xl">{isUpdate ? "Update Pet Clinic Data" : "Create New Pet Clinic"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Clinic Table
                   </button>
                 </div>
                 <CreateButtonModal
@@ -1023,7 +1023,7 @@ const Clinic: NextPage = () => {
                 <div className=" text-2xl">Pet Clinic Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Clinic Table
                   </button>
                 </div>
               </div>

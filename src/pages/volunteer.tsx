@@ -1506,7 +1506,7 @@ const Volunteer: NextPage = () => {
                             <td className="border px-4 py-2">{user.surname}</td>
                             <td className="border px-4 py-2">{user.email}</td>
                             <td className="border px-4 py-2">{user.mobile}</td>
-                            <td className="border px-4 py-2">{user.addressGreaterArea.map((greaterArea) => greaterArea).join(", ")}</td>
+                            <td className="border px-4 py-2">{user.addressGreaterArea.map((greaterArea) => greaterArea).join("; ")}</td>
                             <td className="border px-4 py-2">{user.status}</td>
                             <td className="border px-4 py-2">
                               {user.clinics && user.clinics.length > 0 ? (
@@ -1621,7 +1621,7 @@ const Volunteer: NextPage = () => {
                 <b className=" text-2xl">{isUpdate ? "Update Volunteer Data" : "Create New Volunteer"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Volunteer Table
                   </button>
                 </div>
                 <CreateButtonModal
@@ -2040,7 +2040,7 @@ const Volunteer: NextPage = () => {
                 <div className=" text-2xl">Volunteer Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Volunteer Table
                   </button>
                 </div>
               </div>

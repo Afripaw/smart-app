@@ -734,6 +734,22 @@ const Treatment: NextPage = () => {
     setOrder(field);
   };
 
+  //------------------------------------GO TO PET PROFILE--------------------------------------
+  const handleGoToPetProfile = async (petID: number) => {
+    await router.push({
+      pathname: "/pet",
+      query: { petID: petID },
+    });
+  };
+
+  //------------------------------------GO TO OWNER PROFILE--------------------------------------
+  const handleGoToOwnerProfile = async (ownerID: number) => {
+    await router.push({
+      pathname: "/owner",
+      query: { ownerID: ownerID },
+    });
+  };
+
   // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
   // const observerTarget = useRef<HTMLDivElement | null>(null);
 
@@ -919,10 +935,14 @@ const Treatment: NextPage = () => {
                             </td>
                             <td className="border px-4 py-2">P{treatment.petID}</td>
                             <td className="border px-4 py-2">
-                              {treatment.petName} ({treatment.species})
+                              <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(treatment.petID)}>
+                                {treatment.petName} ({treatment.species})
+                              </button>
                             </td>
                             <td className="border px-4 py-2">
-                              {treatment.firstName} {treatment.surname} (N{treatment.ownerID})
+                              <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(treatment.ownerID)}>
+                                {treatment.firstName} {treatment.surname} (N{treatment.ownerID})
+                              </button>
                             </td>
                             <td className="border px-4 py-2">{treatment.greaterArea}</td>
                             <td className="border px-4 py-2">{treatment.area}</td>
@@ -1003,7 +1023,7 @@ const Treatment: NextPage = () => {
                 <b className=" text-2xl">{isUpdate ? "Update Pet Treatment Data" : "Add Pet Treatment"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Treatment Table
                   </button>
                 </div>
                 <CreateButtonModal
@@ -1147,7 +1167,7 @@ const Treatment: NextPage = () => {
                 <div className=" text-2xl">Pet Treatment Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To Treatment Table
                   </button>
                 </div>
               </div>
@@ -1180,11 +1200,17 @@ const Treatment: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet Name:</b> {petName}
+                    <b className="mr-3">Pet Name:</b>{" "}
+                    <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(petID)}>
+                      {petName}
+                    </button>
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Owner:</b> {firstName} {surname} (N{ownerID})
+                    <b className="mr-3">Owner:</b>{" "}
+                    <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(ownerID)}>
+                      {firstName} {surname} (N{ownerID})
+                    </button>
                   </div>
 
                   <div className="mb-2 flex items-center">

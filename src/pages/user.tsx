@@ -1158,7 +1158,7 @@ const User: NextPage = () => {
       <Head>
         <title>User Profiles</title>
       </Head>
-      <main className="flex flex-col text-normal">
+      <main className="text-normal flex flex-col">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
@@ -1335,7 +1335,7 @@ const User: NextPage = () => {
                 <b className=" text-2xl">{isUpdate ? "Update User Data" : "Create New User"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To User Table
                   </button>
                 </div>
                 <CreateButtonModal
@@ -1749,7 +1749,7 @@ const User: NextPage = () => {
                 <div className=" text-2xl">User Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back
+                    Back To User Table
                   </button>
                 </div>
               </div>

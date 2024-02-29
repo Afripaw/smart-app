@@ -105,7 +105,7 @@ export default function Home() {
         <meta name="description" content="Smart App" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className=" relative flex min-h-screen flex-col bg-gray-100">
+      <main className=" text-normal relative flex min-h-screen flex-col bg-gray-100">
         {/*Background image*/}
         <Image src={"/Collage Greyed Out.jpg"} alt="Afripaw backdrop" className="absolute left-0 top-0 max-h-screen min-w-full" width={720} height={480} />
         {!signIn_ && (

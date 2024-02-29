@@ -829,7 +829,7 @@ const Treatment: NextPage = () => {
       <Head>
         <title>Treatment Profiles</title>
       </Head>
-      <main className="flex flex-col">
+      <main className="text-normal flex flex-col">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>

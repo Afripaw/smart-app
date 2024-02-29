@@ -38,7 +38,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({ isOpen, userName, u
   // }, [completed]);
 
   return (
-    <div className="fixed inset-0 z-20 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50">
+    <div className="text-normal fixed inset-0 z-20 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50">
       <div className="flex flex-col justify-center rounded-lg bg-white p-4 shadow-md">
         <div className="flex justify-center">
           <h1 className="mb-3 text-3xl font-semibold">Upload Image</h1>

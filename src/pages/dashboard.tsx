@@ -23,7 +23,7 @@ const Dashboard: NextPage = () => {
       <Head>
         <title>Dashboard</title>
       </Head>
-      <main className="flex h-screen flex-col">
+      <main className="text-normal flex h-screen flex-col">
         <Navbar />
         <div className="grid h-full grid-cols-3 grid-rows-3">
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">

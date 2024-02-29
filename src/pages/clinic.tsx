@@ -687,7 +687,7 @@ const Clinic: NextPage = () => {
       <Head>
         <title>Clinic Profiles</title>
       </Head>
-      <main className="flex flex-col">
+      <main className="text-normal flex flex-col">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>

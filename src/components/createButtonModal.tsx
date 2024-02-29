@@ -12,7 +12,7 @@ const CreateButtonModal: React.FC<CreateButtonModalProps> = ({ isOpen, mandatory
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-20 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50">
+    <div className="text-normal fixed inset-0 z-20 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50">
       <div className="rounded-lg bg-white p-4 shadow-md">
         <div className="flex justify-center">
           <h1 className="mb-3 text-3xl font-semibold">Error</h1>

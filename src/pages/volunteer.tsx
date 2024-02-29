@@ -1411,7 +1411,7 @@ const Volunteer: NextPage = () => {
       <Head>
         <title>User Profiles</title>
       </Head>
-      <main className="flex flex-col">
+      <main className="text-normal flex flex-col">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>

@@ -2588,7 +2588,7 @@ const Pet: NextPage = () => {
       <Head>
         <title>Pet Profiles</title>
       </Head>
-      <main className="relative flex flex-col">
+      <main className="text-normal relative flex flex-col">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>

@@ -1259,7 +1259,7 @@ const Owner: NextPage = () => {
       <Head>
         <title>User Profiles</title>
       </Head>
-      <main className="flex flex-col">
+      <main className="flex flex-col text-normal">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>

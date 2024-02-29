@@ -4,11 +4,11 @@ import Head from "next/head";
 //import { api } from "~/utils/api";
 import Navbar from "../components/navbar";
 
-const Info: NextPage = () => {
+const Geographic: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Information and Retrieval</title>
+        <title>Geographic</title>
       </Head>
       <main className="text-normal flex flex-col">
         <Navbar />
@@ -17,4 +17,4 @@ const Info: NextPage = () => {
   );
 };
 
-export default Info;
+export default Geographic;

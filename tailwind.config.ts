@@ -8,6 +8,8 @@ export default withUt({
     extend: {
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        //make font of all text 0.95rem
+        //https://tailwindcss.com/docs/font-size#app
       },
       colors: {
         main: {
@@ -26,6 +28,10 @@ export default withUt({
           light: "#de6364",
           dark: "#986568",
         },
+      },
+
+      fontSize: {
+        normal: "0.95rem",
       },
     },
   },

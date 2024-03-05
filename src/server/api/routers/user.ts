@@ -11,9 +11,9 @@ export const UserRouter = createTRPCRouter({
         password: z.string().min(3),
         surname: z.string(),
         mobile: z.string().max(10),
-        addressGreaterArea: z.string(),
-        addressArea: z.string(),
-        addressStreet: z.string(),
+        addressGreaterAreaID: z.number(),
+        addressAreaID: z.number(),
+        addressStreetID: z.number(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
         addressSuburb: z.string(),
@@ -34,9 +34,27 @@ export const UserRouter = createTRPCRouter({
           password: ctx.security.hash(input.password),
           surname: input.surname,
           mobile: input.mobile,
-          addressGreaterArea: input.addressGreaterArea,
-          addressArea: input.addressArea,
-          addressStreet: input.addressStreet,
+          //addressGreaterAreaID: input.addressGreaterAreaID,
+          addressGreaterArea: {
+            connect: {
+              greaterAreaID: input.addressGreaterAreaID,
+            },
+          },
+          //addressAreaID: input.addressAreaID,
+          addressArea: input.addressAreaID
+            ? {
+                connect: {
+                  areaID: input.addressAreaID,
+                },
+              }
+            : undefined,
+          addressStreet: input.addressStreetID
+            ? {
+                connect: {
+                  streetID: input.addressStreetID,
+                },
+              }
+            : undefined,
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
           addressSuburb: input.addressSuburb,
@@ -62,9 +80,9 @@ export const UserRouter = createTRPCRouter({
         password: z.string(),
         surname: z.string(),
         mobile: z.string().max(10),
-        addressGreaterArea: z.string(),
-        addressArea: z.string(),
-        addressStreet: z.string(),
+        addressGreaterAreaID: z.number(),
+        addressAreaID: z.number(),
+        addressStreetID: z.number(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
         addressSuburb: z.string(),
@@ -89,9 +107,26 @@ export const UserRouter = createTRPCRouter({
             password: ctx.security.hash(input.password),
             surname: input.surname,
             mobile: input.mobile,
-            addressGreaterArea: input.addressGreaterArea,
-            addressArea: input.addressArea,
-            addressStreet: input.addressStreet,
+            //addressGreaterAreaID: input.addressGreaterAreaID,
+            addressGreaterArea: {
+              connect: {
+                greaterAreaID: input.addressGreaterAreaID,
+              },
+            },
+            addressArea: input.addressAreaID
+              ? {
+                  connect: {
+                    areaID: input.addressAreaID,
+                  },
+                }
+              : undefined,
+            addressStreet: input.addressStreetID
+              ? {
+                  connect: {
+                    streetID: input.addressStreetID,
+                  },
+                }
+              : undefined,
             addressStreetCode: input.addressStreetCode,
             addressStreetNumber: input.addressStreetNumber,
             addressSuburb: input.addressSuburb,
@@ -116,9 +151,26 @@ export const UserRouter = createTRPCRouter({
             email: input.email,
             surname: input.surname,
             mobile: input.mobile,
-            addressGreaterArea: input.addressGreaterArea,
-            addressArea: input.addressArea,
-            addressStreet: input.addressStreet,
+            //addressGreaterAreaID: input.addressGreaterAreaID,
+            addressGreaterArea: {
+              connect: {
+                greaterAreaID: input.addressGreaterAreaID,
+              },
+            },
+            addressArea: input.addressAreaID
+              ? {
+                  connect: {
+                    areaID: input.addressAreaID,
+                  },
+                }
+              : undefined,
+            addressStreet: input.addressStreetID
+              ? {
+                  connect: {
+                    streetID: input.addressStreetID,
+                  },
+                }
+              : undefined,
             addressStreetCode: input.addressStreetCode,
             addressStreetNumber: input.addressStreetNumber,
             addressSuburb: input.addressSuburb,
@@ -177,9 +229,9 @@ export const UserRouter = createTRPCRouter({
             { role: { contains: input.searchQuery } },
             { status: { contains: input.searchQuery } },
             { mobile: { contains: input.searchQuery } },
-            { addressGreaterArea: { contains: input.searchQuery } },
-            { addressArea: { contains: input.searchQuery } },
-            { addressStreet: { contains: input.searchQuery } },
+            // { addressGreaterArea: { contains: input.searchQuery } },
+            // { addressArea: { contains: input.searchQuery } },
+            // { addressStreet: { contains: input.searchQuery } },
             { addressStreetCode: { contains: input.searchQuery } },
             { addressStreetNumber: { contains: input.searchQuery } },
             { addressSuburb: { contains: input.searchQuery } },
@@ -239,9 +291,9 @@ export const UserRouter = createTRPCRouter({
               { role: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
-              { addressGreaterArea: { contains: term } },
-              { addressArea: { contains: term } },
-              { addressStreet: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
               { addressSuburb: { contains: term } },
@@ -260,9 +312,9 @@ export const UserRouter = createTRPCRouter({
               { role: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
-              { addressGreaterArea: { contains: term } },
-              { addressArea: { contains: term } },
-              { addressStreet: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              //{ addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
               { addressSuburb: { contains: term } },
@@ -296,6 +348,11 @@ export const UserRouter = createTRPCRouter({
         orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { id: input.cursor } : undefined,
+        include: {
+          addressGreaterArea: true,
+          addressArea: true,
+          addressStreet: true,
+        },
       });
 
       let nextCursor: typeof input.cursor | undefined = undefined;
@@ -406,4 +463,76 @@ export const UserRouter = createTRPCRouter({
 
     return identification;
   }),
+
+  //make a download
+  download: publicProcedure
+    .input(
+      z.object({
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+
+      // Construct a complex search condition
+      const searchConditions = terms.map((term) => {
+        if (term.match(/^U\d+$/) !== null) {
+          return {
+            OR: [
+              // { userID: { equals: Number(term) } },
+              { userID: { equals: Number(term.substring(1)) } },
+              { name: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { role: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { name: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { role: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              //  { addressGreaterArea: { contains: term } },
+              //  { addressArea: { contains: term } },
+              //  { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+      });
+
+      const users = await ctx.db.user.findMany({
+        where: {
+          AND: searchConditions,
+        },
+        orderBy: {
+          userID: "asc",
+        },
+      });
+
+      return users;
+    }),
 });

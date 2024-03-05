@@ -10,7 +10,7 @@ export const volunteerRouter = createTRPCRouter({
         email: z.string(),
         surname: z.string(),
         mobile: z.string(),
-        addressGreaterArea: z.string().array(),
+        addressGreaterAreaID: z.number().array(),
         addressStreet: z.string(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
@@ -34,7 +34,15 @@ export const volunteerRouter = createTRPCRouter({
           email: input.email,
           surname: input.surname,
           mobile: input.mobile,
-          addressGreaterArea: input.addressGreaterArea,
+          // addressGreaterArea: {
+          //   create: input.addressGreaterAreaID.map((areaID) => ({
+          //     greaterArea: {
+          //       connect: {
+          //         greaterAreaID: areaID,
+          //       },
+          //     },
+          //   })),
+          // },
           addressStreet: input.addressStreet,
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
@@ -49,28 +57,74 @@ export const volunteerRouter = createTRPCRouter({
           comments: input.comments,
           createdAt: new Date(),
           updatedAt: new Date(),
+
+          clinicsAttended: {
+            createMany: {
+              data: input.clinicAttended.map((clinicID) => ({
+                clinicID: clinicID,
+              })),
+            },
+          },
+
+          addressGreaterArea: {
+            createMany: {
+              data: input.addressGreaterAreaID.map((areaID) => ({
+                greaterAreaID: areaID,
+              })),
+            },
+          },
         },
       });
 
+      //First method
       // Create relationships with clinics
-      const clinicRelationships = input.clinicAttended.map(async (clinicID) => {
-        await ctx.db.volunteerOnPetClinic.create({
-          data: {
-            volunteer: {
-              connect: {
-                volunteerID: volunteer.volunteerID,
-              },
-            },
-            clinic: {
-              connect: {
-                clinicID: clinicID,
-              },
-            },
-          },
-        });
-      });
+      // const clinicRelationships = input.clinicAttended.map(async (clinicID) => {
+      //   await ctx.db.volunteerOnPetClinic.create({
+      //     data: {
+      //       volunteer: {
+      //         connect: {
+      //           volunteerID: volunteer.volunteerID,
+      //         },
+      //       },
+      //       clinic: {
+      //         connect: {
+      //           clinicID: clinicID,
+      //         },
+      //       },
+      //     },
+      //   });
+      // });
 
-      await Promise.all(clinicRelationships);
+      //await Promise.all(clinicRelationships);
+
+      //Second method
+      // await ctx.db.volunteerOnPetClinic.createMany({
+      //   data: input.clinicAttended.map((clinicID) => ({
+      //     volunteerID: volunteer.volunteerID,
+      //     clinicID: clinicID,
+      //   })),
+      // });
+
+      //First method
+      //Create relationships with greater areas
+      // const greaterAreaRelationships = input.addressGreaterAreaID.map(async (areaID) => {
+      //   await ctx.db.greaterAreaOnVolunteer.create({
+      //     data: {
+      //       volunteer: {
+      //         connect: {
+      //           volunteerID: volunteer.volunteerID,
+      //         },
+      //       },
+      //       greaterArea: {
+      //         connect: {
+      //           greaterAreaID: areaID,
+      //         },
+      //       },
+      //     },
+      //   });
+      // });
+
+      // await Promise.all(greaterAreaRelationships);
 
       return volunteer;
     }),
@@ -84,7 +138,7 @@ export const volunteerRouter = createTRPCRouter({
         email: z.string(),
         surname: z.string(),
         mobile: z.string(),
-        addressGreaterArea: z.string().array(),
+        addressGreaterAreaID: z.number().array(),
         addressStreet: z.string(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
@@ -111,7 +165,15 @@ export const volunteerRouter = createTRPCRouter({
           email: input.email,
           surname: input.surname,
           mobile: input.mobile,
-          addressGreaterArea: input.addressGreaterArea,
+          // addressGreaterArea: {
+          //   create: input.addressGreaterAreaID.map((areaID) => ({
+          //     greaterArea: {
+          //       connect: {
+          //         greaterAreaID: areaID,
+          //       },
+          //     },
+          //   })),
+          // },
           addressStreet: input.addressStreet,
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
@@ -127,6 +189,34 @@ export const volunteerRouter = createTRPCRouter({
           updatedAt: new Date(),
         },
       });
+
+      //greater areas
+      //delete all the greater areas
+      await ctx.db.greaterAreaOnVolunteer.deleteMany({
+        where: {
+          volunteerID: input.volunteerID,
+        },
+      });
+
+      //create new greater areas
+      const greaterAreaRelationships = input.addressGreaterAreaID.map(async (areaID) => {
+        await ctx.db.greaterAreaOnVolunteer.create({
+          data: {
+            volunteer: {
+              connect: {
+                volunteerID: volunteer.volunteerID,
+              },
+            },
+            greaterArea: {
+              connect: {
+                greaterAreaID: areaID,
+              },
+            },
+          },
+        });
+      });
+
+      await Promise.all(greaterAreaRelationships);
 
       // Handle clinicsAttended
       // First, remove existing relationships
@@ -194,7 +284,7 @@ export const volunteerRouter = createTRPCRouter({
               { email: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
-              { addressGreaterArea: { hasSome: [term] } },
+              // { addressGreaterArea: { hasSome: [term] } },
               { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
@@ -214,7 +304,7 @@ export const volunteerRouter = createTRPCRouter({
               { email: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
-              { addressGreaterArea: { hasSome: [term] } },
+              // { addressGreaterArea: { hasSome: [term] } },
               { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
@@ -264,6 +354,29 @@ export const volunteerRouter = createTRPCRouter({
           clinicID: true,
           volunteerID: true,
           clinic: {
+            select: {
+              area: true,
+              date: true,
+            },
+            // select: {
+            //   date: true,
+            //   area: true,
+            // },
+          },
+        },
+      });
+
+      //fetch the greater areas
+      const greaterAreas = await ctx.db.greaterAreaOnVolunteer.findMany({
+        where: {
+          volunteerID: {
+            in: user.map((volunteer) => volunteer.volunteerID),
+          },
+        },
+        select: {
+          greaterAreaID: true,
+          volunteerID: true,
+          greaterArea: {
             // select: {
             //   date: true,
             //   area: true,
@@ -275,6 +388,7 @@ export const volunteerRouter = createTRPCRouter({
       return {
         user_data: user,
         clinics_data: clinics,
+        greater_areas_data: greaterAreas,
         nextCursor: newNextCursor,
       };
     }),
@@ -498,4 +612,74 @@ export const volunteerRouter = createTRPCRouter({
 
     return activeVolunteers;
   }),
+
+  //download
+  download: publicProcedure
+    .input(
+      z.object({
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+
+      // Construct a complex search condition
+      const searchConditions = terms.map((term) => {
+        if (term.match(/^V\d+$/) !== null) {
+          return {
+            OR: [
+              { volunteerID: { equals: Number(term.substring(1)) } },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              //{ addressGreaterArea: { hasSome: [term] } },
+              { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { collaboratorOrg: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              //{ addressGreaterArea: { hasSome: [term] } },
+              { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { collaboratorOrg: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+              //  dateCondition,
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+      });
+
+      const volunteers = await ctx.db.volunteer.findMany({
+        where: {
+          AND: searchConditions,
+        },
+        orderBy: {
+          volunteerID: "asc",
+        },
+      });
+
+      return volunteers;
+    }),
 });

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import Owner from "~/pages/owner";
+//import Owner from "~/pages/owner";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
@@ -16,8 +16,8 @@ export const petRouter = createTRPCRouter({
         colour: z.string().array(),
         markings: z.string(),
         status: z.string(),
-        sterilisedStatus: z.string(),
-        sterilisedRequested: z.string(),
+        sterilisedStatus: z.date(),
+        sterilisedRequested: z.date(),
         sterilisedRequestSigned: z.string(),
         sterilisationOutcome: z.string(),
         vaccinationShot1: z.date(),
@@ -118,8 +118,8 @@ export const petRouter = createTRPCRouter({
         colour: z.string().array(),
         markings: z.string(),
         status: z.string(),
-        sterilisedStatus: z.string(),
-        sterilisedRequested: z.string(),
+        sterilisedStatus: z.date(),
+        sterilisedRequested: z.date(),
         sterilisedRequestSigned: z.string(),
         sterilisedOutcome: z.string(),
         vaccinationShot1: z.date(),
@@ -232,8 +232,8 @@ export const petRouter = createTRPCRouter({
               { colour: { hasSome: [term] } },
               { markings: { contains: term } },
               { status: { contains: term } },
-              { sterilisedStatus: { contains: term } },
-              { sterilisedRequested: { contains: term } },
+              // { sterilisedStatus: { contains: term } },
+              // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
               { petTreatments: { some: { type: { contains: term } } } },
               // { vaccinatedStatus: { contains: term } },
@@ -254,8 +254,8 @@ export const petRouter = createTRPCRouter({
               { colour: { hasSome: [term] } },
               { markings: { contains: term } },
               { status: { contains: term } },
-              { sterilisedStatus: { contains: term } },
-              { sterilisedRequested: { contains: term } },
+              // { sterilisedStatus: { contains: term } },
+              // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
               { petTreatments: { some: { type: { contains: term } } } },
               // { vaccinatedStatus: { contains: term } },
@@ -278,9 +278,9 @@ export const petRouter = createTRPCRouter({
               { ownerID: { equals: Number(term.substring(1)) } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
-              { addressGreaterArea: { contains: term } },
-              { addressArea: { contains: term } },
-              { addressStreet: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
               { addressStreetNumber: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
@@ -289,9 +289,9 @@ export const petRouter = createTRPCRouter({
             OR: [
               { firstName: { contains: term } },
               { surname: { contains: term } },
-              { addressGreaterArea: { contains: term } },
-              { addressArea: { contains: term } },
-              { addressStreet: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
               { addressStreetNumber: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
@@ -325,7 +325,17 @@ export const petRouter = createTRPCRouter({
         take: input.limit + 1,
         cursor: input.cursor ? { petID: input.cursor } : undefined,
         include: {
-          owner: true,
+          owner: {
+            select: {
+              ownerID: true,
+              firstName: true,
+              surname: true,
+              addressArea: true,
+              addressGreaterArea: true,
+              addressStreet: true,
+              addressStreetNumber: true,
+            },
+          },
           petTreatments: true,
           clinicsAttended: true,
         },
@@ -341,7 +351,12 @@ export const petRouter = createTRPCRouter({
         select: {
           clinicID: true,
           petID: true,
-          clinic: true,
+          clinic: {
+            select: {
+              date: true,
+              area: true,
+            },
+          },
         },
       });
 
@@ -911,4 +926,127 @@ export const petRouter = createTRPCRouter({
       cats: catsTreatments,
     };
   }),
+
+  //download
+  download: publicProcedure
+    .input(
+      z.object({
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+
+      //-------------------------------------SEARCH CONDITIONS-------------------------------------
+      // Construct a complex search condition
+      const searchConditions = terms.map((term) => {
+        // Check if term is a date
+        // const termAsDate: Date = new Date(term);
+        // console.log(termAsDate);
+        // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+
+        // Check if term is a number
+        if (term.match(/^P\d+$/) !== null) {
+          return {
+            OR: [
+              { petID: { equals: Number(term.substring(1)) } },
+              { petName: { contains: term } },
+              { species: { contains: term } },
+              { sex: { contains: term } },
+              { age: { contains: term } },
+              { breed: { contains: term } },
+              { colour: { hasSome: [term] } },
+              { markings: { contains: term } },
+              { status: { contains: term } },
+              // { sterilisedStatus: { contains: term } },
+              // { sterilisedRequested: { contains: term } },
+              { sterilisedRequestSigned: { contains: term } },
+              { petTreatments: { some: { type: { contains: term } } } },
+              // { vaccinatedStatus: { contains: term } },
+              //{ treatments: { contains: term } },
+              { membership: { contains: term } },
+              { cardStatus: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { petName: { contains: term } },
+              { species: { contains: term } },
+              { sex: { contains: term } },
+              { age: { contains: term } },
+              { breed: { contains: term } },
+              { colour: { hasSome: [term] } },
+              { markings: { contains: term } },
+              { status: { contains: term } },
+              // { sterilisedStatus: { contains: term } },
+              // { sterilisedRequested: { contains: term } },
+              { sterilisedRequestSigned: { contains: term } },
+              { petTreatments: { some: { type: { contains: term } } } },
+              // { vaccinatedStatus: { contains: term } },
+              //{ treatments: { contains: term } },
+              { membership: { contains: term } },
+              { cardStatus: { contains: term } },
+              { comments: { contains: term } },
+              //  dateCondition,
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+      });
+
+      //complex search condition for owner table
+      const searchConditionsOwner = terms.map((term) => {
+        // Check if term is a number
+        if (term.match(/^N\d+$/) !== null) {
+          return {
+            OR: [
+              { ownerID: { equals: Number(term.substring(1)) } },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+      });
+
+      const pet = await ctx.db.pet.findMany({
+        where: {
+          OR: [
+            {
+              AND: searchConditions,
+            },
+            {
+              owner: {
+                AND: searchConditionsOwner,
+              },
+            },
+          ],
+        },
+
+        orderBy: { petID: "asc" },
+        // include: {
+        //   owner: true,
+        //   petTreatments: true,
+        //   clinicsAttended: true,
+        // },
+      });
+
+      return pet;
+    }),
 });

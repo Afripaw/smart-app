@@ -9,7 +9,7 @@ import Navbar from "../components/navbar";
 import CreateButtonModal from "../components/createButtonModal";
 import DeleteButtonModal from "~/components/deleteButtonModal";
 import ImageUploadModal from "~/components/imageUploadModal";
-import { areaOptions } from "~/components/GeoLocation/areaOptions";
+//import { areaOptions } from "~/components/GeoLocation/areaOptions";
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { sendUserCredentialsEmail } from "~/components/CommunicationPortals/email";
 import { sendSMS } from "~/pages/api/smsPortal";
@@ -26,8 +26,33 @@ import Input from "~/components/Base/Input";
 import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 
+//Excel
+import * as XLSX from "xlsx";
+
+//File saver
+//import FileSaver from "file-saver";
+import * as FileSaver from "file-saver";
+
 const User: NextPage = () => {
   useSession({ required: true });
+
+  //-------------------------------GREATER AREA-----------------------------------------
+  type GreaterArea = {
+    id: number;
+    area: string;
+  };
+
+  //---------------------------------AREA-----------------------------------------------
+  type Area = {
+    id: number;
+    area: string;
+  };
+
+  //---------------------------------STREET-----------------------------------------------
+  type Street = {
+    id: number;
+    street: string;
+  };
 
   const newUser = api.user.create.useMutation();
   const updateUser = api.user.update.useMutation();
@@ -131,7 +156,10 @@ const User: NextPage = () => {
   //   return responseData; // Or handle the successful response as needed
   // }
 
+  // const utils = api.getUtils();
   async function sendEmail(firstName: string, email: string, id: string, password: string, typeOfUser: string): Promise<void> {
+    //   await utils.user.sendEmail.fetch({ firstName, email, id, password, typeOfUser });
+
     const response = await fetch("/api/send", {
       method: "POST",
       headers: {
@@ -305,21 +333,24 @@ const User: NextPage = () => {
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
+  const [greaterAreaID, setGreaterAreaID] = useState(0);
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
-  const [greaterAreaOption, setGreaterAreaOption] = useState("Select one");
+  const [greaterAreaOption, setGreaterAreaOption] = useState<GreaterArea>({ area: "Select one", id: 0 });
   const greaterAreaRef = useRef<HTMLDivElement>(null);
   const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
 
+  const [areaID, setAreaID] = useState(0);
   const [isAreaOpen, setIsAreaOpen] = useState(false);
-  const [areaOption, setAreaOption] = useState("Select one");
+  const [areaOption, setAreaOption] = useState<Area>({ area: "Select one", id: 0 });
   const areaRef = useRef<HTMLDivElement>(null);
   const btnAreaRef = useRef<HTMLButtonElement>(null);
 
+  const [streetID, setStreetID] = useState(0);
   const [isStreetOpen, setIsStreetOpen] = useState(false);
-  const [streetOption, setStreetOption] = useState("Select one");
+  const [streetOption, setStreetOption] = useState<Street>({ street: "Select one", id: 0 });
   const streetRef = useRef<HTMLDivElement>(null);
   const btnStreetRef = useRef<HTMLButtonElement>(null);
-  const [streetOptions, setStreetOptions] = useState<string[]>([]);
+  //const [streetOptions, setStreetOptions] = useState<string[]>([]);
 
   const [preferredCommunication, setPreferredCommunication] = useState(false);
   const [preferredOption, setPreferredCommunicationOption] = useState("Select one");
@@ -341,8 +372,9 @@ const User: NextPage = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
   };
 
-  const handleGreaterAreaOption = (option: SetStateAction<string>) => {
-    setGreaterAreaOption(option);
+  const handleGreaterAreaOption = (option: SetStateAction<string>, id: number) => {
+    const greaterArea: GreaterArea = { area: String(option), id: id };
+    setGreaterAreaOption(greaterArea);
     setIsGreaterAreaOpen(false);
   };
 
@@ -364,31 +396,33 @@ const User: NextPage = () => {
     };
   }, []);
 
-  const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+  //const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
 
   //AREA
   const handleToggleArea = () => {
     setIsAreaOpen(!isAreaOpen);
-    setStreetOption("Select one");
+    setStreetOption({ street: "Select one", id: 0 });
   };
 
   //SetStateAction<string>
-  const handleAreaOption = (option: string) => {
-    setAreaOption(option);
+  const handleAreaOption = (option: string, id: number) => {
+    const area: Area = { area: String(option), id: id };
+    setAreaOption(area);
     setIsAreaOpen(false);
 
     //Makes the options one word for the key of the areaStreetMapping
-    if (option === "Coniston Park") option = "ConistonPark";
-    if (option === "Grassy Park") option = "GrassyPark";
-    if (option === "Lavendar Hill") option = "LavendarHill";
-    if (option === "Costa da Gamma") option = "CostaDaGamma";
-    if (option === "Marina Da Gamma") option = "MarinaDaGamma";
-    if (option === "Montagu V") option = "MontaguV";
-    if (option === "Overcome Heights") option = "OvercomeHeights";
-    if (option === "Pelican Park") option = "PelicanPark";
-    if (option === "Seekoei vlei") option = "Seekoeivlei";
-    if (option === "St Ruth") option = "StRuth";
-    setStreetOptions(areaStreetMapping[option] ?? []);
+    // if (option === "Coniston Park") option = "ConistonPark";
+    // if (option === "Grassy Park") option = "GrassyPark";
+    // if (option === "Lavendar Hill") option = "LavendarHill";
+    // if (option === "Costa da Gamma") option = "CostaDaGamma";
+    // if (option === "Marina Da Gamma") option = "MarinaDaGamma";
+    // if (option === "Montagu V") option = "MontaguV";
+    // if (option === "Overcome Heights") option = "OvercomeHeights";
+    // if (option === "Pelican Park") option = "PelicanPark";
+    // if (option === "Seekoei vlei") option = "Seekoeivlei";
+    // if (option === "St Ruth") option = "StRuth";
+    // setStreetOptions(areaStreetMapping[option] ?? []);
   };
 
   useEffect(() => {
@@ -404,13 +438,16 @@ const User: NextPage = () => {
     };
   }, []);
 
+  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
+
   //STREET
   const handleToggleStreet = () => {
     setIsStreetOpen(!isStreetOpen);
   };
 
-  const handleStreetOption = (option: SetStateAction<string>) => {
-    setStreetOption(option);
+  const handleStreetOption = (option: string, id: number) => {
+    const street: Street = { street: String(option), id: id };
+    setStreetOption(street);
     setIsStreetOpen(false);
   };
 
@@ -431,6 +468,8 @@ const User: NextPage = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const streetOptions = api.geographic.getStreetsByAreaID.useQuery({ areaID: areaOption.id })?.data ?? [];
 
   //PREFERRED COMMUNICATION
   const handleTogglePreferredCommunication = () => {
@@ -529,6 +568,11 @@ const User: NextPage = () => {
   const [sendUserDetails, setSendUserDetails] = useState(false);
 
   //-------------------------------UPDATE USER-----------------------------------------
+
+  //GEOGRAPHIC LOCATION
+  const getGreaterAreaByID = api.geographic.getGreaterAreaByID.useQuery({ greaterAreaID: greaterAreaID });
+  const getAreaByID = api.geographic.getAreaByID.useQuery({ areaID: areaID });
+  const getStreetByID = api.geographic.getStreetByID.useQuery({ streetID: streetID });
   //Update the user's details in fields
   const handleUpdateUserProfile = async (id: string) => {
     setID(id);
@@ -541,9 +585,9 @@ const User: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "Select one");
-      setAreaOption(userData.addressArea ?? "Select one");
-      setStreetOption(userData.addressStreet ?? "Select one");
+      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
+      setAreaID(userData.addressAreaID ?? 0);
+      setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -556,12 +600,24 @@ const User: NextPage = () => {
       setComments(userData.comments ?? "");
       setImage(userData.image ?? "");
 
+      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+
+      setGreaterAreaOption(greaterArea);
+
+      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+
+      setAreaOption(area);
+
+      const street: Street = { street: getStreetByID.data?.street ?? "Select one", id: getStreetByID.data?.streetID ?? 0 };
+
+      setStreetOption(street);
+
       //Make sure thet area and street options have a value
-      if (userData.addressArea === "") {
-        setAreaOption("Select one");
+      if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
+        setAreaOption({ area: "Select one", id: 0 });
       }
-      if (userData.addressStreet === "") {
-        setStreetOption("Select one");
+      if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
+        setStreetOption({ street: "Select one", id: 0 });
       }
     }
 
@@ -581,9 +637,9 @@ const User: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "Select one");
-      setAreaOption(userData.addressArea ?? "");
-      setStreetOption(userData.addressStreet ?? "");
+      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
+      setAreaID(userData.addressAreaID ?? 0);
+      setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -596,14 +652,24 @@ const User: NextPage = () => {
       setComments(userData.comments ?? "");
       setImage(userData.image ?? "");
 
+      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+
+      setGreaterAreaOption(greaterArea);
+
+      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+
+      setAreaOption(area);
+
+      const street: Street = { street: getStreetByID.data?.street ?? "Select one", id: getStreetByID.data?.streetID ?? 0 };
+
+      setStreetOption(street);
+
       //Make sure thet area and street options have a value
-      console.log("Helllooo address area: " + userData.addressArea);
-      if (userData.addressArea === "") {
-        console.log("Area option is select one");
-        setAreaOption("Select one");
+      if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
+        setAreaOption({ area: "Select one", id: 0 });
       }
-      if (userData.addressStreet === "") {
-        setStreetOption("Select one");
+      if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
+        setStreetOption({ street: "Select one", id: 0 });
       }
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
@@ -616,9 +682,9 @@ const User: NextPage = () => {
       email: email,
       surname: surname,
       mobile: mobile,
-      addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      addressArea: areaOption === "Select one" ? "" : areaOption,
-      addressStreet: streetOption === "Select one" ? "" : streetOption,
+      addressGreaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
+      addressAreaID: areaOption.area === "Select one" ? 0 : areaOption.id,
+      addressStreetID: streetOption.street === "Select one" ? 0 : streetOption.id,
       addressStreetCode: addressStreetCode,
       addressStreetNumber: addressStreetNumber,
       addressSuburb: addressSuburb,
@@ -671,9 +737,12 @@ const User: NextPage = () => {
     setPassword("");
     setConfirmPassword("");
     setMobile("");
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
-    setStreetOption("Select one");
+    setGreaterAreaOption({ area: "Select one", id: 0 });
+    //setGreaterAreaID(0);
+    setAreaOption({ area: "Select one", id: 0 });
+    //setAreaID(0);
+    setStreetOption({ street: "Select one", id: 0 });
+    //setStreetID(0);
     setAddressStreetCode("");
     setAddressStreetNumber("");
     setAddressSuburb("");
@@ -693,9 +762,12 @@ const User: NextPage = () => {
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
-    setStreetOption("Select one");
+    setGreaterAreaOption({ area: "Select one", id: 0 });
+    setAreaOption({ area: "Select one", id: 0 });
+    setStreetOption({ street: "Select one", id: 0 });
+    // setGreaterAreaID(0);
+    // setAreaID(0);
+    // setStreetID(0);
     setPreferredCommunicationOption("Select one");
     setRoleOption("Select one");
     setStatusOption("Select one");
@@ -729,9 +801,9 @@ const User: NextPage = () => {
         surname: surname,
         password: password,
         mobile: mobile,
-        addressGreaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-        addressArea: areaOption === "Select one" ? "" : areaOption,
-        addressStreet: streetOption === "Select one" ? "" : streetOption,
+        addressGreaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
+        addressAreaID: areaOption.area === "Select one" ? 0 : areaOption.id,
+        addressStreetID: streetOption.street === "Select one" ? 0 : streetOption.id,
         addressStreetCode: addressStreetCode,
         addressStreetNumber: addressStreetNumber,
         addressSuburb: addressSuburb,
@@ -786,11 +858,11 @@ const User: NextPage = () => {
       setIsUpdatePassword(false);
 
       //update identification table
-      if (newUser_?.userID) {
-        await updateIdentification.mutateAsync({
-          userID: newUser_?.userID ?? 0,
-        });
-      }
+      // if (newUser_?.userID) {
+      //   await updateIdentification.mutateAsync({
+      //     userID: newUser_?.userID ?? 0,
+      //   });
+      // }
     } catch (error) {
       console.log("Mobile number is already in database");
       const mandatoryFields: string[] = [];
@@ -826,9 +898,9 @@ const User: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "");
-      setAreaOption(userData.addressArea ?? "");
-      setStreetOption(userData.addressStreet ?? "");
+      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
+      setAreaID(userData.addressAreaID ?? 0);
+      setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -843,14 +915,24 @@ const User: NextPage = () => {
       console.log("Image: ", userData.image);
       console.log("Image: ", image);
 
+      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+
+      setGreaterAreaOption(greaterArea);
+
+      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+
+      setAreaOption(area);
+
+      const street: Street = { street: getStreetByID.data?.street ?? "Select one", id: getStreetByID.data?.streetID ?? 0 };
+
+      setStreetOption(street);
+
       //Make sure thet area and street options have a value
-      if (userData.addressArea === "Select one") {
-        setAreaOption("");
-        console.log("Area option is select one");
+      if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
+        setAreaOption({ area: "Select one", id: 0 });
       }
-      if (userData.addressStreet === "Select one") {
-        setStreetOption("");
-        console.log("Street option is select one");
+      if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
+        setStreetOption({ street: "Select one", id: 0 });
       }
     }
 
@@ -871,9 +953,9 @@ const User: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaOption(userData.addressGreaterArea ?? "");
-      setAreaOption(userData.addressArea ?? "");
-      setStreetOption(userData.addressStreet ?? "");
+      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
+      setAreaID(userData.addressAreaID ?? 0);
+      setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -889,17 +971,17 @@ const User: NextPage = () => {
       console.log("Image: ", image);
       //console.log("Select one");
       //Make sure thet area and street options have a value
-      if (userData.addressArea === "Select one" && !isUpdate) {
-        setAreaOption("");
+      if ((userData.addressAreaID === 0 || userData.addressAreaID === undefined) && !isUpdate) {
+        setAreaOption({ area: "", id: 0 });
       }
-      if (userData.addressStreet === "Select one" && !isUpdate) {
-        setStreetOption("");
+      if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && !isUpdate)) {
+        setStreetOption({ street: "", id: 0 });
       }
-      if (userData.addressArea === "" && isUpdate) {
-        setAreaOption("Select one");
+      if (userData.addressAreaID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
+        setAreaOption({ area: "Select one", id: 0 });
       }
-      if (userData.addressStreet === "" && isUpdate) {
-        setStreetOption("Select one");
+      if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
+        setStreetOption({ street: "Select one", id: 0 });
       }
     }
   }, [isViewProfilePage, isCreate, isUpdate]); // Effect runs when userQuery.data changes
@@ -943,9 +1025,9 @@ const User: NextPage = () => {
     setPassword("");
     setConfirmPassword("");
     setMobile("");
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
-    setStreetOption("Select one");
+    setGreaterAreaOption({ area: "Select one", id: 0 });
+    setAreaOption({ area: "Select one", id: 0 });
+    setStreetOption({ street: "Select one", id: 0 });
     setAddressStreetCode("");
     setAddressStreetNumber("");
     setAddressSuburb("");
@@ -1042,7 +1124,7 @@ const User: NextPage = () => {
     if (firstName === "") mandatoryFields.push("First Name");
     if (surname === "") mandatoryFields.push("Surname");
     if (mobile === "") mandatoryFields.push("Mobile");
-    if (greaterAreaOption === "Select one") mandatoryFields.push("Greater Area");
+    if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
     if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
     if (roleOption === "Select one") mandatoryFields.push("Role");
     if (statusOption === "Select one") mandatoryFields.push("Status");
@@ -1153,12 +1235,29 @@ const User: NextPage = () => {
     }
   }, [user, isCreate, isUpdate, isViewProfilePage]);
 
+  //------------------------------------------DOWNLOADING USER TABLE TO EXCEL FILE------------------------------------------
+  const downloadUserTable = api.user.download.useQuery({ searchQuery: query });
+  const handleDownloadUserTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+    const data = downloadUserTable.data;
+    const fileName = "User Table";
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws = XLSX.utils.json_to_sheet(data ?? []);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    const dataFile = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataFile, fileName + fileExtension);
+    setIsLoading(false);
+  };
+
   return (
     <>
       <Head>
         <title>User Profiles</title>
       </Head>
-      <main className="text-normal flex flex-col">
+      <main className="flex flex-col text-normal">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
@@ -1180,8 +1279,21 @@ const User: NextPage = () => {
               />
               <div className="sticky top-20 z-10 bg-white py-4">
                 <div className="relative flex justify-center">
+                  <button
+                    className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                    onClick={handleDownloadUserTable}
+                  >
+                    {isLoading ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <div>Download User Table</div>
+                    )}
+                  </button>
                   <input
-                    className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
+                    className="mt-4 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
                     onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
                   />
@@ -1191,6 +1303,7 @@ const User: NextPage = () => {
                   >
                     Create new User
                   </button>
+
                   {/* <button
                     className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
                     onClick={() => void handleCreateIdentification(1000010, 1000026, 1000021, 1000030, 10000019, 1000026, 1000001)}
@@ -1211,7 +1324,7 @@ const User: NextPage = () => {
                 </div>
               </div>
               {user_data ? (
-                <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+                <article className="my-5 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
                   <table className="table-auto scroll-smooth">
                     <thead className="">
                       <tr>
@@ -1259,8 +1372,8 @@ const User: NextPage = () => {
                             <td className="border px-4 py-2">{user.surname}</td>
                             <td className="border px-4 py-2">{user.email}</td>
                             <td className="border px-4 py-2">{user.mobile}</td>
-                            <td className="border px-4 py-2">{user.addressGreaterArea}</td>
-                            <td className="border px-4 py-2">{user.addressArea}</td>
+                            <td className="border px-4 py-2">{user.addressGreaterArea.greaterArea}</td>
+                            <td className="border px-4 py-2">{user.addressArea?.area}</td>
                             <td className="border px-4 py-2">{user.role}</td>
                             <td className="border px-4 py-2">{user.status}</td>
 
@@ -1446,7 +1559,7 @@ const User: NextPage = () => {
                           type="button"
                           onClick={handleToggleGreaterArea}
                         >
-                          {isUpdate ? greaterAreaOption : greaterAreaOption + " "}
+                          {isUpdate ? greaterAreaOption.area : greaterAreaOption.area + " "}
                           <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                           </svg>
@@ -1455,8 +1568,10 @@ const User: NextPage = () => {
                           <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                             <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                               {greaterAreaOptions.map((option) => (
-                                <li key={option} onClick={() => handleGreaterAreaOption(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                <li key={option.greaterAreaID} onClick={() => handleGreaterAreaOption(option.greaterArea, option.greaterAreaID)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                    {option.greaterArea}
+                                  </button>
                                 </li>
                               ))}
                             </ul>
@@ -1478,7 +1593,7 @@ const User: NextPage = () => {
                               type="button"
                               onClick={handleToggleArea}
                             >
-                              {areaOption + " "}
+                              {areaOption.area + " "}
                               <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                               </svg>
@@ -1486,9 +1601,9 @@ const User: NextPage = () => {
                             {isAreaOpen && (
                               <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                                  {areaOptions.slice(1).map((option) => (
-                                    <li key={option} onClick={() => handleAreaOption(option)}>
-                                      <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  {areaOptions.map((option) => (
+                                    <li key={option.areaID} onClick={() => handleAreaOption(option.area, option.areaID)}>
+                                      <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.area}</button>
                                     </li>
                                   ))}
                                 </ul>
@@ -1508,7 +1623,7 @@ const User: NextPage = () => {
                               type="button"
                               onClick={handleToggleStreet}
                             >
-                              {streetOption + " "}
+                              {streetOption.street + " "}
                               <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                               </svg>
@@ -1517,8 +1632,10 @@ const User: NextPage = () => {
                               <div ref={streetRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                   {streetOptions.map((option) => (
-                                    <li key={option} onClick={() => handleStreetOption(option)}>
-                                      <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                    <li key={option.streetID} onClick={() => handleStreetOption(option.street, option.streetID)}>
+                                      <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                        {option.street}
+                                      </button>
                                     </li>
                                   ))}
                                 </ul>
@@ -1808,16 +1925,16 @@ const User: NextPage = () => {
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaOption}
+                    <b className="mr-3">Greater Area:</b> {greaterAreaOption.area}
                   </div>
                   <div className="flex items-start divide-x-2 divide-gray-300">
                     <div className="flex w-96 flex-col pr-2">
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Area:</b> {areaOption}
+                        <b className="mr-3">Area:</b> {areaOption.area}
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street:</b> {streetOption}
+                        <b className="mr-3">Street:</b> {streetOption.street}
                       </div>
 
                       <div className="mb-2 flex items-center">

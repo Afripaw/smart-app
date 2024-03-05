@@ -6,8 +6,8 @@ export const petClinicRouter = createTRPCRouter({
   create: publicProcedure
     .input(
       z.object({
-        greaterArea: z.string(),
-        area: z.string(),
+        greaterAreaID: z.number(),
+        areaID: z.number(),
         conditions: z.string(),
         comments: z.string(),
         date: z.date(),
@@ -17,8 +17,8 @@ export const petClinicRouter = createTRPCRouter({
       const petClinic = await ctx.db.petClinic.create({
         data: {
           date: input.date,
-          greaterArea: input.greaterArea,
-          area: input.area,
+          greaterArea: { connect: { greaterAreaID: input.greaterAreaID } },
+          area: { connect: { areaID: input.areaID } },
           conditions: input.conditions,
           comments: input.comments,
           createdAt: new Date(),
@@ -34,8 +34,8 @@ export const petClinicRouter = createTRPCRouter({
     .input(
       z.object({
         clinicID: z.number(),
-        greaterArea: z.string(),
-        area: z.string(),
+        greaterAreaID: z.number(),
+        areaID: z.number(),
         conditions: z.string(),
         comments: z.string(),
         date: z.date(),
@@ -47,8 +47,8 @@ export const petClinicRouter = createTRPCRouter({
           clinicID: input.clinicID,
         },
         data: {
-          greaterArea: input.greaterArea,
-          area: input.area,
+          greaterArea: { connect: { greaterAreaID: input.greaterAreaID } },
+          area: { connect: { areaID: input.areaID } },
           conditions: input.conditions,
           comments: input.comments,
           date: input.date,
@@ -86,8 +86,8 @@ export const petClinicRouter = createTRPCRouter({
           return {
             OR: [
               { clinicID: { equals: Number(term.substring(1)) } },
-              { greaterArea: { contains: term } },
-              { area: { contains: term } },
+              // { greaterArea: { contains: term } },
+              // { area: { contains: term } },
               { conditions: { contains: term } },
               { comments: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
@@ -95,8 +95,8 @@ export const petClinicRouter = createTRPCRouter({
         } else {
           return {
             OR: [
-              { greaterArea: { contains: term } },
-              { area: { contains: term } },
+              //  { greaterArea: { contains: term } },
+              //  { area: { contains: term } },
               { conditions: { contains: term } },
               { comments: { contains: term } },
               // dateCondition,
@@ -121,6 +121,10 @@ export const petClinicRouter = createTRPCRouter({
         orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { clinicID: input.cursor } : undefined,
+        include: {
+          greaterArea: true,
+          area: true,
+        },
       });
 
       let newNextCursor: typeof input.cursor | undefined = undefined;
@@ -181,6 +185,10 @@ export const petClinicRouter = createTRPCRouter({
       orderBy: {
         date: "desc",
       },
+      include: {
+        greaterArea: true,
+        area: true,
+      },
     });
     return petClinic;
   }),
@@ -195,8 +203,8 @@ export const petClinicRouter = createTRPCRouter({
     .input(
       z.array(
         z.object({
-          greaterArea: z.string(),
-          area: z.string(),
+          greaterAreaID: z.number(),
+          areaID: z.number(),
           conditions: z.string(),
           comments: z.string(),
           date: z.date(),
@@ -274,4 +282,58 @@ export const petClinicRouter = createTRPCRouter({
 
     return clinicsHeld;
   }),
+
+  //download
+  download: publicProcedure
+    .input(
+      z.object({
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+
+      // Construct a complex search condition
+      const searchConditions = terms.map((term) => {
+        // Check if term is a date
+        // const termAsDate: Date = new Date(term);
+        // console.log(termAsDate);
+        // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+
+        // Check if term is a number
+        if (term.match(/^C\d+$/) !== null) {
+          return {
+            OR: [
+              { clinicID: { equals: Number(term.substring(1)) } },
+              //  { greaterArea: { contains: term } },
+              //  { area: { contains: term } },
+              { conditions: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              // { greaterArea: { contains: term } },
+              // { area: { contains: term } },
+              { conditions: { contains: term } },
+              { comments: { contains: term } },
+              // dateCondition,
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+      });
+
+      const clinic = await ctx.db.petClinic.findMany({
+        where: {
+          AND: searchConditions,
+        },
+        orderBy: {
+          clinicID: "asc",
+        },
+      });
+
+      return clinic;
+    }),
 });

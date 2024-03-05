@@ -9,7 +9,7 @@ import { useRouter } from "next/router";
 import Navbar from "../components/navbar";
 import CreateButtonModal from "../components/createButtonModal";
 import DeleteButtonModal from "~/components/deleteButtonModal";
-import { areaOptions } from "~/components/GeoLocation/areaOptions";
+//import { areaOptions } from "~/components/GeoLocation/areaOptions";
 
 //Icons
 import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "phosphor-react";
@@ -21,6 +21,13 @@ import "react-datepicker/dist/react-datepicker.css";
 //Communication
 import { sendSMS } from "~/pages/api/smsPortal";
 
+//Excel
+import * as XLSX from "xlsx";
+
+//File saver
+//import FileSaver from "file-saver";
+import * as FileSaver from "file-saver";
+
 import { UploadButton } from "~/utils/uploadthing";
 import { useSession } from "next-auth/react";
 import Input from "~/components/Base/Input";
@@ -30,6 +37,28 @@ import { router } from "@trpc/server";
 
 const Communication: NextPage = () => {
   //useSession({ required: true });
+
+  //Types
+  type Communication = {
+    communicationID: number;
+    message: string;
+    type: string;
+    recipients: string[];
+    greaterArea: string[];
+    area: string[];
+    success: string;
+    updatedAt: string;
+  };
+
+  type GreaterArea = {
+    id: number;
+    name: string;
+  };
+
+  type Area = {
+    id: number;
+    name: string;
+  };
 
   const newCommunication = api.communication.create.useMutation();
   //const updateClinic = api.petClinic.update.useMutation();
@@ -253,21 +282,23 @@ const Communication: NextPage = () => {
 
   //GREATER AREA USERS
   //to select multiple areas
-  const [greaterAreaList, setGreaterAreaList] = useState<string[]>([]);
+  const [greaterAreaList, setGreaterAreaList] = useState<GreaterArea[]>([]);
   const handleToggleGreaterArea = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
   };
 
-  const handleGreaterAreaOption = (option: SetStateAction<string>) => {
+  const handleGreaterAreaOption = (option: SetStateAction<string>, id: number) => {
     setGreaterAreaOption(option);
     setIsGreaterAreaOpen(false);
+
+    const greaterArea: GreaterArea = { id: id, name: String(option) };
     if (option === "All greater areas") {
       //select all the greater areas except the first one
       const greaterAreaOptionsSelected = greaterAreaOptions.slice(1);
       setGreaterAreaList(greaterAreaOptionsSelected);
       // setGreaterAreaList(greaterAreaOptions.map((option) => option);
-    } else if (!greaterAreaList.includes(String(option))) {
-      setGreaterAreaList([...greaterAreaList, String(option)]);
+    } else if (!greaterAreaList.includes(greaterArea)) {
+      setGreaterAreaList([...greaterAreaList, greaterArea]);
     }
   };
 
@@ -289,7 +320,29 @@ const Communication: NextPage = () => {
     };
   }, []);
 
-  const greaterAreaOptions = ["All greater areas", "Flagship", "Replication area 1", "Replication area 2"];
+  //Greater Area
+  const getAllGreaterAreas = api.geographic.getAllGreaterAreas.useQuery().data;
+  const allGreaterAreas = getAllGreaterAreas?.map((area) => {
+    return { id: area.greaterAreaID, name: area.greaterArea };
+  });
+  //add the first option as "All greater areas" with id 0
+  const greaterAreaOptions = [{ id: 0, name: "All greater areas" }, ...(allGreaterAreas ?? [])];
+
+  //Area
+  const getAllAreas = api.geographic.getAllAreas.useQuery().data;
+  const allAreas = getAllAreas?.map((area) => {
+    return { id: area.areaID, name: area.area };
+  });
+  //add the first option as "All areas" with id 0
+  const areaOptions = [{ id: 0, name: "All areas" }, ...(allAreas ?? [])];
+
+  // //Street
+  // const getAllStreets = api.geographic.getAllStreets.useQuery().data;
+  // const allStreets = getAllStreets?.map((street) => {
+  //   return { id: street.streetID, name: street.street };
+  // });
+  // //add the first option as "All streets" with id 0
+  // const streetOptions = [{ id: 0, name: "All streets" }, ...allStreets ?? []];
 
   //show all the clinics that the volunteer attended
   const [showGreaterArea, setShowGreaterArea] = useState(false);
@@ -299,21 +352,23 @@ const Communication: NextPage = () => {
 
   //AREA
   //to select multiple areas
-  const [areaList, setAreaList] = useState<string[]>([]);
+  const [areaList, setAreaList] = useState<Area[]>([]);
   const handleToggleArea = () => {
     setIsAreaOpen(!isAreaOpen);
   };
 
-  const handleAreaOption = (option: SetStateAction<string>) => {
+  const handleAreaOption = (option: SetStateAction<string>, id: number) => {
     setAreaOption(option);
     setIsAreaOpen(false);
+
+    const area: Area = { id: id, name: String(option) };
     if (option === "All areas") {
       //select all the greater areas except the first one
       const areaOptionsSelected = areaOptions.slice(1);
       setAreaList(areaOptionsSelected);
       // setGreaterAreaList(greaterAreaOptions.map((option) => option);
-    } else if (!areaList.includes(String(option))) {
-      setAreaList([...areaList, String(option)]);
+    } else if (!areaList.includes(area)) {
+      setAreaList([...areaList, area]);
     }
   };
 
@@ -368,9 +423,12 @@ const Communication: NextPage = () => {
 
   //-------------------------------MESSAGES-----------------------------------------
   //All users, pet owners and volunteers that are Active
-  const allUsers = api.communication.getAllUsers.useQuery({ greaterArea: greaterAreaList, area: areaList });
-  const allPetOwners = api.communication.getAllPetOwners.useQuery({ greaterArea: greaterAreaList, area: areaList });
-  const allVolunteers = api.communication.getAllVolunteers.useQuery({ greaterArea: greaterAreaList, area: areaList });
+  const greaterAreaIDList = greaterAreaList.map((area) => area.id);
+  const areaIDList = areaList.map((area) => area.id);
+
+  const allUsers = api.communication.getAllUsers.useQuery({ greaterAreaID: greaterAreaIDList, areaID: areaIDList });
+  const allPetOwners = api.communication.getAllPetOwners.useQuery({ greaterAreaID: greaterAreaIDList, areaID: areaIDList });
+  const allVolunteers = api.communication.getAllVolunteers.useQuery({ greaterAreaID: greaterAreaIDList });
   const [userSuccess, setUserSuccess] = useState("No");
   const [petOwnerSuccess, setPetOwnerSuccess] = useState("No");
   const [volunteerSuccess, setVolunteerSuccess] = useState("No");
@@ -537,11 +595,14 @@ const Communication: NextPage = () => {
 
     console.log("Here are the recipients: ", var_recipients);
 
+    const greaterAreaIDList = greaterAreaList.map((area) => area.id);
+    const areaIDList = areaList.map((area) => area.id);
+
     const newUser_ = await newCommunication.mutateAsync({
       message: message,
       recipients: var_recipients,
-      greaterArea: greaterAreaList,
-      area: areaList,
+      greaterArea: greaterAreaIDList,
+      area: areaIDList,
       type: preferredOption,
       success: var_success,
     });
@@ -552,9 +613,9 @@ const Communication: NextPage = () => {
 
     //update identification table
     // if (newUser_?.communicationID) {
-    await updateIdentification.mutateAsync({
-      communicationID: newUser_?.communicationID ?? 0,
-    });
+    // await updateIdentification.mutateAsync({
+    //   communicationID: newUser_?.communicationID ?? 0,
+    // });
     // }
 
     setIsLoading(false);
@@ -572,13 +633,21 @@ const Communication: NextPage = () => {
     if (communication) {
       // Assuming userQuery.data contains the user object
       const userData = communication;
+
+      const greaterAreas = userData.greaterArea.map((area) => {
+        return { id: area.greaterArea.greaterAreaID, name: area.greaterArea.greaterArea };
+      });
+
+      const areas = userData.area.map((area) => {
+        return { id: area.area.areaID, name: area.area.area };
+      });
       setMessage(userData.message ?? "");
       setPreferredCommunicationOption(userData.type ?? "");
       //setType(userData.type ?? "");
       setSuccess(userData.success ?? "No");
       setRecipients(userData.recipients ?? []);
-      setGreaterAreaList(userData.greaterArea ?? []);
-      setAreaList(userData.area ?? []);
+      setGreaterAreaList(greaterAreas ?? []);
+      setAreaList(areas ?? []);
     }
     setIsCreate(false);
     setIsViewProfilePage(true);
@@ -664,12 +733,29 @@ const Communication: NextPage = () => {
     setOrder(field);
   };
 
+  //------------------------------------------DOWNLOADING COMMUNICATION TABLE TO EXCEL FILE------------------------------------------
+  const downloadCommunicationTable = api.communication.download.useQuery({ searchQuery: query });
+  const handleDownloadCommunicationTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+    const data = downloadCommunicationTable.data;
+    const fileName = "Communication Table";
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws = XLSX.utils.json_to_sheet(data ?? []);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    const dataFile = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataFile, fileName + fileExtension);
+    setIsLoading(false);
+  };
+
   return (
     <>
       <Head>
         <title>Communication Profiles</title>
       </Head>
-      <main className="text-normal flex flex-col">
+      <main className="flex flex-col text-normal">
         <Navbar />
         {!isCreate && !isViewProfilePage && (
           <>
@@ -683,6 +769,19 @@ const Communication: NextPage = () => {
               />
               <div className="sticky top-20 z-20 bg-white py-4">
                 <div className="relative flex justify-center">
+                  <button
+                    className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                    onClick={handleDownloadCommunicationTable}
+                  >
+                    {isLoading ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <div>Download Message Table</div>
+                    )}
+                  </button>
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
@@ -749,7 +848,7 @@ const Communication: NextPage = () => {
                                 ? user.greaterArea
                                     .slice(0, 7)
                                     .map((greaterArea) => greaterArea)
-                                    .join(", ") + "..."
+                                    .join("; ") + "..."
                                 : user.greaterArea.map((greaterArea) => greaterArea).join("; ")}
                             </td>
                             <td className="max-w-[15rem] border px-4 py-2">
@@ -757,7 +856,7 @@ const Communication: NextPage = () => {
                                 ? user.area
                                     .slice(0, 7)
                                     .map((area) => area)
-                                    .join(", ") + "..."
+                                    .join("; ") + "..."
                                 : user.area.map((area) => area).join("; ")}
                             </td>
                             <td className="border px-4 py-2">{user.success}</td>
@@ -933,8 +1032,8 @@ const Communication: NextPage = () => {
                           {showGreaterArea && (
                             <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
                               {greaterAreaList.map((greaterArea) => (
-                                <li key={greaterArea} className=" py-2">
-                                  {greaterArea}
+                                <li key={greaterArea.id} className=" py-2">
+                                  {greaterArea.name}
                                 </li>
                               ))}
                             </ul>
@@ -957,8 +1056,8 @@ const Communication: NextPage = () => {
                             <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                 {greaterAreaOptions.map((option) => (
-                                  <li key={option} onClick={() => handleGreaterAreaOption(option)}>
-                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  <li key={option.id} onClick={() => handleGreaterAreaOption(option.name, option.id)}>
+                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.name}</button>
                                   </li>
                                 ))}
                               </ul>
@@ -985,8 +1084,8 @@ const Communication: NextPage = () => {
                           {showArea && (
                             <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
                               {areaList.map((area) => (
-                                <li key={area} className=" py-2">
-                                  {area}
+                                <li key={area.id} className=" py-2">
+                                  {area.name}
                                 </li>
                               ))}
                             </ul>
@@ -1009,8 +1108,8 @@ const Communication: NextPage = () => {
                             <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                 {areaOptions.map((option) => (
-                                  <li key={option} onClick={() => handleAreaOption(option)}>
-                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  <li key={option.id} onClick={() => handleAreaOption(option.name, option.id)}>
+                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.name}</button>
                                   </li>
                                 ))}
                               </ul>
@@ -1124,7 +1223,7 @@ const Communication: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {areaList.map((area) => area).join(", ")}
+                    <b className="mr-3">Area:</b> {areaList.map((area) => area).join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-center">

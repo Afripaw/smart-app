@@ -47,6 +47,9 @@ dependencies:
   date-fns:
     specifier: ^3.0.5
     version: 3.0.5
+  file-saver:
+    specifier: ^2.0.5
+    version: 2.0.5
   mui:
     specifier: ^0.0.1
     version: 0.0.1
@@ -112,6 +115,9 @@ devDependencies:
   '@types/eslint':
     specifier: ^8.44.7
     version: 8.44.8
+  '@types/file-saver':
+    specifier: ^2.0.7
+    version: 2.0.7
   '@types/multer':
     specifier: ^1.4.11
     version: 1.4.11
@@ -1004,6 +1010,10 @@ packages:
       '@types/express-serve-static-core': 4.17.43
       '@types/qs': 6.9.11
       '@types/serve-static': 1.15.5
+    dev: true
+
+  /@types/file-saver@2.0.7:
+    resolution: {integrity: sha512-dNKVfHd/jk0SkR/exKGj2ggkB45MAkzvWCaqLUUgkyjITkGNzH8H+yUwr+BLJUBjZOe9w8X3wgmXhZDRg1ED6A==}
     dev: true
 
   /@types/http-errors@2.0.4:
@@ -2000,6 +2010,10 @@ packages:
     dependencies:
       flat-cache: 3.2.0
     dev: true
+
+  /file-saver@2.0.5:
+    resolution: {integrity: sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==}
+    dev: false
 
   /file-selector@0.6.0:
     resolution: {integrity: sha512-QlZ5yJC0VxHxQQsQhXvBaC7VRJ2uaxTf+Tfpu4Z/OcVQJVpZO+DGU0rkoVW5ce2SccxugvpBJoMvUs59iILYdw==}

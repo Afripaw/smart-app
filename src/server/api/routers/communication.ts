@@ -12,8 +12,8 @@ export const communicationRouter = createTRPCRouter({
       z.object({
         message: z.string(),
         recipients: z.string().array(),
-        greaterArea: z.string().array(),
-        area: z.string().array(),
+        greaterArea: z.number().array(),
+        area: z.number().array(),
         success: z.string(),
         type: z.string(),
       }),
@@ -23,14 +23,50 @@ export const communicationRouter = createTRPCRouter({
         data: {
           message: input.message,
           recipients: input.recipients,
-          greaterArea: input.greaterArea,
-          area: input.area,
           success: input.success,
           type: input.type,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       });
+
+      const greaterAreaRelations = input.greaterArea.map(async (greaterAreaID) => {
+        await ctx.db.greaterAreaOnCommunication.create({
+          data: {
+            communication: {
+              connect: {
+                communicationID: communication.communicationID,
+              },
+            },
+            greaterArea: {
+              connect: {
+                greaterAreaID: greaterAreaID,
+              },
+            },
+          },
+        });
+      });
+
+      await Promise.all(greaterAreaRelations);
+
+      const areaRelations = input.area.map(async (areaID) => {
+        await ctx.db.areaOnCommunication.create({
+          data: {
+            communication: {
+              connect: {
+                communicationID: communication.communicationID,
+              },
+            },
+            area: {
+              connect: {
+                areaID: areaID,
+              },
+            },
+          },
+        });
+      });
+
+      await Promise.all(areaRelations);
 
       return communication;
     }),
@@ -64,8 +100,8 @@ export const communicationRouter = createTRPCRouter({
               { message: { contains: term } },
               { success: { contains: term } },
               { type: { contains: term } },
-              { greaterArea: { hasSome: [term] } },
-              { area: { hasSome: [term] } },
+              // { greaterArea: { hasSome: [term] } },
+              // { area: { hasSome: [term] } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
@@ -74,8 +110,8 @@ export const communicationRouter = createTRPCRouter({
               { message: { contains: term } },
               { success: { contains: term } },
               { type: { contains: term } },
-              { greaterArea: { hasSome: [term] } },
-              { area: { hasSome: [term] } },
+              // { greaterArea: { hasSome: [term] } },
+              // { area: { hasSome: [term] } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
@@ -99,6 +135,18 @@ export const communicationRouter = createTRPCRouter({
         orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { communicationID: input.cursor } : undefined,
+        include: {
+          greaterArea: {
+            include: {
+              greaterArea: true,
+            },
+          },
+          area: {
+            include: {
+              area: true,
+            },
+          },
+        },
       });
 
       let newNextCursor: typeof input.cursor | undefined = undefined;
@@ -159,15 +207,15 @@ export const communicationRouter = createTRPCRouter({
   getAllUsers: publicProcedure
     .input(
       z.object({
-        greaterArea: z.string().array(),
-        area: z.string().array(),
+        greaterAreaID: z.number().array(),
+        areaID: z.number().array(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const users = ctx.db.user.findMany({
         where: {
-          addressGreaterArea: { in: input.greaterArea },
-          addressArea: { in: input.area },
+          addressGreaterAreaID: { in: input.greaterAreaID },
+          addressAreaID: { in: input.areaID },
           status: "Active",
         },
       });
@@ -175,19 +223,19 @@ export const communicationRouter = createTRPCRouter({
       return users;
     }),
 
-  //get all the pet owners with a given that their greaterArea is in an greaterArea array. As well as the Area
+  // get all the pet owners with a given that their greaterArea is in an greaterArea array. As well as the Area
   getAllPetOwners: publicProcedure
     .input(
       z.object({
-        greaterArea: z.string().array(),
-        area: z.string().array(),
+        greaterAreaID: z.number().array(),
+        areaID: z.number().array(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const petOwners = ctx.db.petOwner.findMany({
         where: {
-          addressGreaterArea: { in: input.greaterArea },
-          addressArea: { in: input.area },
+          addressGreaterAreaID: { in: input.greaterAreaID },
+          addressAreaID: { in: input.areaID },
           status: "Active",
         },
       });
@@ -199,14 +247,17 @@ export const communicationRouter = createTRPCRouter({
   getAllVolunteers: publicProcedure
     .input(
       z.object({
-        greaterArea: z.string().array(),
-        area: z.string().array(),
+        greaterAreaID: z.number().array(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const volunteers = ctx.db.volunteer.findMany({
         where: {
-          addressGreaterArea: { hasSome: input.greaterArea },
+          addressGreaterArea: {
+            some: {
+              greaterAreaID: { in: input.greaterAreaID },
+            },
+          },
           status: "Active",
         },
       });
@@ -242,4 +293,58 @@ export const communicationRouter = createTRPCRouter({
 
     return identification;
   }),
+
+  //download
+  download: publicProcedure
+    .input(
+      z.object({
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+
+      // Construct a complex search condition
+      const searchConditions = terms.map((term) => {
+        // Check if term is a date
+        // const termAsDate: Date = new Date(term);
+        // console.log(termAsDate);
+        // const dateCondition = !isNaN(termAsDate.getTime()) ? { updatedAt: { equals: termAsDate } } : {};
+        // Check if term is a number
+        if (term.match(/^M\d+$/)) {
+          return {
+            OR: [
+              { communicationID: { equals: Number(term.substring(1)) } },
+              { message: { contains: term } },
+              { success: { contains: term } },
+              { type: { contains: term } },
+              // { greaterArea: { hasSome: [term] } },
+              // { area: { hasSome: [term] } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { message: { contains: term } },
+              { success: { contains: term } },
+              { type: { contains: term } },
+              //  { greaterArea: { hasSome: [term] } },
+              //  { area: { hasSome: [term] } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+      });
+
+      const communication = await ctx.db.communication.findMany({
+        where: {
+          AND: searchConditions,
+        },
+        orderBy: {
+          communicationID: "asc",
+        },
+      });
+
+      return communication;
+    }),
 });

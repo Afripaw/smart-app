@@ -10,9 +10,9 @@ export const petOwnerRouter = createTRPCRouter({
         email: z.string(),
         surname: z.string(),
         mobile: z.string(),
-        addressGreaterArea: z.string(),
-        addressArea: z.string(),
-        addressStreet: z.string(),
+        addressGreaterAreaID: z.number(),
+        addressAreaID: z.number(),
+        addressStreetID: z.number(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
         addressFreeForm: z.string(),
@@ -29,9 +29,9 @@ export const petOwnerRouter = createTRPCRouter({
           email: input.email,
           surname: input.surname,
           mobile: input.mobile,
-          addressGreaterArea: input.addressGreaterArea,
-          addressArea: input.addressArea,
-          addressStreet: input.addressStreet,
+          addressGreaterArea: { connect: { greaterAreaID: input.addressGreaterAreaID } },
+          addressArea: { connect: { areaID: input.addressAreaID } },
+          addressStreet: { connect: { streetID: input.addressStreetID } },
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
           addressFreeForm: input.addressFreeForm,
@@ -59,10 +59,10 @@ export const petOwnerRouter = createTRPCRouter({
         email: z.string(),
         surname: z.string(),
         mobile: z.string(),
-        addressGreaterArea: z.string(),
+        addressGreaterAreaID: z.number(),
         addressFreeForm: z.string(),
-        addressArea: z.string(),
-        addressStreet: z.string(),
+        addressAreaID: z.number(),
+        addressStreetID: z.number(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
         preferredCommunication: z.string(),
@@ -81,10 +81,10 @@ export const petOwnerRouter = createTRPCRouter({
           email: input.email,
           surname: input.surname,
           mobile: input.mobile,
-          addressGreaterArea: input.addressGreaterArea,
+          addressGreaterArea: { connect: { greaterAreaID: input.addressGreaterAreaID } },
           addressFreeForm: input.addressFreeForm,
-          addressArea: input.addressArea,
-          addressStreet: input.addressStreet,
+          addressArea: { connect: { areaID: input.addressAreaID } },
+          addressStreet: { connect: { streetID: input.addressStreetID } },
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
           preferredCommunication: input.preferredCommunication,
@@ -109,6 +109,12 @@ export const petOwnerRouter = createTRPCRouter({
       const petOwner = await ctx.db.petOwner.findUnique({
         where: {
           ownerID: input.ownerID,
+        },
+        include: {
+          addressGreaterArea: true,
+          addressArea: true,
+          addressStreet: true,
+          pets: true,
         },
       });
 
@@ -150,9 +156,9 @@ export const petOwnerRouter = createTRPCRouter({
               { email: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
-              { addressGreaterArea: { contains: term } },
-              { addressArea: { contains: term } },
-              { addressStreet: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              //  { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
               // { addressSuburb: { contains: term } },
@@ -178,9 +184,9 @@ export const petOwnerRouter = createTRPCRouter({
               { email: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
-              { addressGreaterArea: { contains: term } },
-              { addressArea: { contains: term } },
-              { addressStreet: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
               // { addressSuburb: { contains: term } },
@@ -199,9 +205,9 @@ export const petOwnerRouter = createTRPCRouter({
               { email: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
-              { addressGreaterArea: { contains: term } },
-              { addressArea: { contains: term } },
-              { addressStreet: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
               // { addressSuburb: { contains: term } },
@@ -230,6 +236,11 @@ export const petOwnerRouter = createTRPCRouter({
         orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { ownerID: input.cursor } : undefined,
+        include: {
+          addressGreaterArea: true,
+          addressArea: true,
+          addressStreet: true,
+        },
       });
 
       let newNextCursor: typeof input.cursor | undefined = undefined;
@@ -322,9 +333,9 @@ export const petOwnerRouter = createTRPCRouter({
           email: z.string(),
           surname: z.string(),
           mobile: z.string(),
-          addressGreaterArea: z.string(),
-          addressArea: z.string(),
-          addressStreet: z.string(),
+          addressGreaterAreaID: z.number(),
+          addressAreaID: z.number(),
+          addressStreetID: z.number(),
           addressStreetCode: z.string(),
           addressStreetNumber: z.string(),
           addressFreeForm: z.string(),
@@ -338,6 +349,12 @@ export const petOwnerRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const result = await ctx.db.petOwner.createMany({
         data: input,
+        // data: input.map((item) => ({
+        //   ...item,
+        //   addressGreaterAreaID: 0, // Replace with the actual value
+        //   addressAreaID: 0, // Replace with the actual value
+        //   addressStreetID: 0, // Replace with the actual value
+        // })),
       });
       return result;
     }),
@@ -524,4 +541,112 @@ export const petOwnerRouter = createTRPCRouter({
 
     // return activePets;
   }),
+
+  //download
+  download: publicProcedure
+    .input(
+      z.object({
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+
+      // Construct a complex search condition
+      const searchConditions = terms.map((term) => {
+        // Check if term is a number
+        if (term.match(/^N\d+$/) !== null) {
+          return {
+            OR: [
+              // { userID: { equals: Number(term) } },
+              { ownerID: { equals: Number(term.substring(1)) } },
+              // {
+              //   pets: {
+              //     some: {
+              //       petID: { equals: Number(term.substring(1)) },
+              //     },
+              //   },
+              // },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              // { addressSuburb: { contains: term } },
+              // { addressPostalCode: { contains: term } },
+              { pets: { some: { petName: { contains: term } } } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else if (term.match(/^P\d+$/) !== null) {
+          return {
+            OR: [
+              {
+                pets: {
+                  some: {
+                    petID: { equals: Number(term.substring(1)) },
+                  },
+                },
+              },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
+              // { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              // { addressSuburb: { contains: term } },
+              // { addressPostalCode: { contains: term } },
+              { pets: { some: { petName: { contains: term } } } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              //  { addressArea: { contains: term } },
+              //  { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { contains: term } },
+              // { addressSuburb: { contains: term } },
+              // { addressPostalCode: { contains: term } },
+              { pets: { some: { petName: { contains: term } } } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+      });
+
+      const owners = await ctx.db.petOwner.findMany({
+        where: {
+          AND: searchConditions,
+        },
+        orderBy: {
+          ownerID: "asc",
+        },
+      });
+
+      return owners;
+    }),
 });

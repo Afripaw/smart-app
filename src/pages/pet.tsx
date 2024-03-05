@@ -14,8 +14,12 @@ import { areaOptions } from "~/components/GeoLocation/areaOptions";
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { clinicDates } from "~/components/clinicsAttended";
 
-//Upload excel
+//Excel
 import * as XLSX from "xlsx";
+
+//File saver
+//import FileSaver from "file-saver";
+import * as FileSaver from "file-saver";
 
 //Icons
 import { AddressBook, FirstAidKit, Pencil, Printer, Trash, UserCircle, Users, Bed } from "phosphor-react";
@@ -63,7 +67,6 @@ const Pet: NextPage = () => {
   };
   const [treatmentList, setTreatmentList] = useState<Treatment[]>([]);
 
-  /*
   //Excel upload
   const insertExcelData = api.pet.insertExcelData.useMutation();
 
@@ -75,7 +78,7 @@ const Pet: NextPage = () => {
     reader.onload = (event) => {
       const bstr = event.target?.result;
       const wb = XLSX.read(bstr, { type: "binary" });
-      const wsname = wb.SheetNames[3]; // Assuming you're interested in the third sheet
+      const wsname = wb.SheetNames[0]; // Assuming you're interested in the third sheet  [3]
       console.log("Sheet name: ", wsname);
       const ws: XLSX.WorkSheet | undefined = wb.Sheets[wsname as keyof typeof wb.Sheets];
       const data = ws ? XLSX.utils.sheet_to_json(ws) : [];
@@ -245,8 +248,6 @@ const Pet: NextPage = () => {
     const rows: string[] = data.map((row) => JSON.stringify(row));
     console.log("Rows: ", rows);
   };
-
-  */
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -544,11 +545,13 @@ const Pet: NextPage = () => {
   const [sterilisationStatusOption, setSterilisationStatusOption] = useState("Select one");
   const sterilisationStatusRef = useRef<HTMLDivElement>(null);
   const btnSterilisationStatusRef = useRef<HTMLButtonElement>(null);
+  const [sterilisationStatusDate, setSterilisationStatusDate] = useState(new Date());
 
   const [sterilisationRequested, setSterilisationRequested] = useState(false);
   const [sterilisationRequestedOption, setSterilisationRequestedOption] = useState("Select one");
   const sterilisationRequestedRef = useRef<HTMLDivElement>(null);
   const btnSterilisationRequestedRef = useRef<HTMLButtonElement>(null);
+  const [sterilisationRequestedDate, setSterilisationRequestedDate] = useState(new Date());
 
   const [sterilisationRequestSigned, setSterilisationRequestSigned] = useState(false);
   const [sterilisationRequestSignedOption, setSterilisationRequestSignedOption] = useState("Select one");
@@ -896,7 +899,35 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const sterilisationStatusOptions = ["Yes", "No", "Unknown"];
+  const sterilisationStatusOptions = ["Yes", "No"];
+
+  interface CustomInput {
+    value?: string;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  }
+
+  // CustomInput component with explicit types for the props
+  const CustomSterilisationStatusInput: React.FC<CustomInput> = ({ value, onClick }) => (
+    <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
+      <svg
+        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+      </svg>
+      <div className="m-1 mr-2">(Select here): </div>
+      {isUpdate
+        ? sterilisationStatusDate.getDate().toString() +
+          "/" +
+          (sterilisationStatusDate.getMonth() + 1).toString() +
+          "/" +
+          sterilisationStatusDate.getFullYear().toString()
+        : value}
+    </button>
+  );
 
   //STERILISATION REQUESTED
   const handleToggleSterilisationRequested = () => {
@@ -975,6 +1006,34 @@ const Pet: NextPage = () => {
       setSterilisationRequestSignedOptions(sterilisationRequestConfirmedSignedOptions);
     }
   }, [sterilisationRequestedOption]); // Add dependencies here
+
+  interface CustomInput {
+    value?: string;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  }
+
+  // CustomInput component with explicit types for the props
+  const CustomSterilisationRequestedInput: React.FC<CustomInput> = ({ value, onClick }) => (
+    <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
+      <svg
+        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+      </svg>
+      <div className="m-1 mr-2">(Select here): </div>
+      {isUpdate
+        ? sterilisationRequestedDate.getDate().toString() +
+          "/" +
+          (sterilisationRequestedDate.getMonth() + 1).toString() +
+          "/" +
+          sterilisationRequestedDate.getFullYear().toString()
+        : value}
+    </button>
+  );
 
   //STERILISATION OUTCOME
   const handleToggleSterilisationOutcome = () => {
@@ -1598,7 +1657,7 @@ const Pet: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area,
+          area: clinic.clinic.area.area,
         })) ?? [];
       // const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
 
@@ -1620,8 +1679,8 @@ const Pet: NextPage = () => {
       setColourList(userData?.colour ?? []);
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
-      setSterilisationStatusOption(userData?.sterilisedStatus ?? "Select one");
-      setSterilisationRequestedOption(userData?.sterilisedRequested ?? "Select one");
+      // setSterilisationStatusOption(userData?.sterilisedStatus.getFullYear() === 1970 ? "Select one" : "Yes");
+      // setSterilisationRequestedOption(userData?.sterilisedRequested?.getFullYear() === 1970 ? "Select one" : "Yes");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
       if (userData?.vaccinationShot1?.getFullYear() !== 1970) {
         setVaccinationShot1Option("Yes");
@@ -1655,9 +1714,37 @@ const Pet: NextPage = () => {
         console.log("Vaccination shot 3(select one): ", userData?.vaccinationShot3);
         setVaccinationShot3Option("Select one");
       }
+
+      if (userData?.sterilisedStatus?.getFullYear() !== 1970) {
+        setSterilisationStatusOption("Yes");
+        // console.log("Vaccination shot 1(!1970): ", userData?.sterilisedStatus);
+      } else if (userData?.sterilisedStatus.getFullYear() === 1970) {
+        //  console.log("Vaccination shot 1(1970): ", userData?.vaccinationShot1);
+        setSterilisationStatusOption("No");
+      } else {
+        //  console.log("Vaccination shot 1(select one): ", userData?.vaccinationShot1);
+        setSterilisationStatusOption("Select one");
+      }
+
+      if (userData?.sterilisedRequested?.getFullYear() !== 1970) {
+        setSterilisationRequestedOption("Yes");
+        // console.log("Vaccination shot 1(!1970): ", userData?.sterilisedStatus);
+      } else if (userData?.sterilisedRequested.getFullYear() === 1970) {
+        //  console.log("Vaccination shot 1(1970): ", userData?.vaccinationShot1);
+        setSterilisationRequestedOption("No");
+      } else {
+        //  console.log("Vaccination shot 1(select one): ", userData?.vaccinationShot1);
+        setSterilisationRequestedOption("Select one");
+      }
       vaccinationShot1Option === "Yes" ? setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date()) : setVaccinationShot1Date(new Date());
       vaccinationShot2Option === "Yes" ? setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date()) : setVaccinationShot2Date(new Date());
       vaccinationShot3Option === "Yes" ? setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date()) : setVaccinationShot3Date(new Date());
+
+      sterilisationStatusOption === "Yes" ? setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date()) : setSterilisationStatusDate(new Date());
+      sterilisationRequestedOption === "Yes"
+        ? setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date())
+        : setSterilisationRequestedDate(new Date());
+
       // setVaccinationShot1Option(userData?.vaccinationShot1 ?? "Select one");
       // setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
       // setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
@@ -1675,8 +1762,8 @@ const Pet: NextPage = () => {
 
       setFirstName(userData?.owner.firstName ?? "");
       setSurname(userData?.owner?.surname ?? "");
-      setGreaterArea(userData?.owner?.addressGreaterArea ?? "");
-      setArea(userData?.owner?.addressArea ?? "");
+      setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
+      setArea(userData?.owner?.addressArea.area ?? "");
     }
 
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
@@ -1700,7 +1787,7 @@ const Pet: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area,
+          area: clinic.clinic.area.area,
         })) ?? [];
       //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
 
@@ -1722,8 +1809,8 @@ const Pet: NextPage = () => {
       setColourList(userData?.colour ?? []);
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
-      setSterilisationStatusOption(userData?.sterilisedStatus ?? "Select one");
-      setSterilisationRequestedOption(userData?.sterilisedRequested ?? "Select one");
+      //setSterilisationStatusOption(userData?.sterilisedStatus ?? "Select one");
+      //setSterilisationRequestedOption(userData?.sterilisedRequested ?? "Select one");
       setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
 
@@ -1745,6 +1832,18 @@ const Pet: NextPage = () => {
         setVaccinationShot3Option("Not yet");
       }
 
+      if (userData?.sterilisedStatus?.getFullYear() !== 1970) {
+        setSterilisationStatusOption("Yes");
+      } else {
+        setSterilisationStatusOption("No");
+      }
+
+      if (userData?.sterilisedRequested?.getFullYear() !== 1970) {
+        setSterilisationRequestedOption("Yes");
+      } else {
+        setSterilisationRequestedOption("No");
+      }
+
       // setVaccinationShot1Option(userData?.vaccinationShot1 ? "Yes" : "Not yet");
       // setVaccinationShot2Option(userData?.vaccinationShot2 ? "Yes" : "Not yet");
       // setVaccinationShot3Option(userData?.vaccinationShot3 ? "Yes" : "Not yet");
@@ -1754,6 +1853,9 @@ const Pet: NextPage = () => {
       setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
       setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
       setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
+
+      setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date());
+      setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date());
       //setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
       //setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
       setMembershipTypeOption(userData?.membership ?? "Select one");
@@ -1769,8 +1871,8 @@ const Pet: NextPage = () => {
 
       setFirstName(userData?.owner?.firstName ?? "");
       setSurname(userData?.owner?.surname ?? "");
-      setGreaterArea(userData?.owner?.addressGreaterArea ?? "");
-      setArea(userData?.owner?.addressArea ?? "");
+      setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
+      setArea(userData?.owner?.addressArea.area ?? "");
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
   //[user, isUpdate, isCreate];
@@ -1787,8 +1889,8 @@ const Pet: NextPage = () => {
       colour: colourList,
       markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
-      sterilisedStatus: sterilisationStatusOption === "Select one" ? "" : sterilisationStatusOption,
-      sterilisedRequested: sterilisationRequestedOption === "Select one" ? "" : sterilisationRequestedOption,
+      sterilisedStatus: sterilisationStatusOption === "Yes" ? sterilisationStatusDate : new Date(0),
+      sterilisedRequested: sterilisationRequestedOption === "Yes" ? sterilisationRequestedDate : new Date(0),
       sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisedOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
       vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
@@ -1882,8 +1984,8 @@ const Pet: NextPage = () => {
       colour: colourList,
       markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
-      sterilisedStatus: sterilisationStatusOption === "Select one" ? "" : sterilisationStatusOption,
-      sterilisedRequested: sterilisationRequestedOption === "Select one" ? "" : sterilisationRequestedOption,
+      sterilisedStatus: sterilisationStatusOption === "Yes" ? sterilisationStatusDate : new Date(0),
+      sterilisedRequested: sterilisationRequestedOption === "Yes" ? sterilisationRequestedDate : new Date(0),
       sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisationOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
       vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
@@ -1911,11 +2013,11 @@ const Pet: NextPage = () => {
     // return newUser_;
 
     //update identification table
-    if (newUser_?.petID) {
-      await updateIdentification.mutateAsync({
-        petID: newUser_?.petID ?? 0,
-      });
-    }
+    // if (newUser_?.petID) {
+    //   await updateIdentification.mutateAsync({
+    //     petID: newUser_?.petID ?? 0,
+    //   });
+    // }
     setIsLoading(false);
   };
 
@@ -1947,7 +2049,7 @@ const Pet: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area,
+          area: clinic.clinic.area.area,
         })) ?? [];
       //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
 
@@ -1969,8 +2071,8 @@ const Pet: NextPage = () => {
       setColourList(userData?.colour ?? [""]);
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "");
-      setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
-      setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
+      //setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
+      //setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
 
       if (userData?.vaccinationShot1.getFullYear() !== 1970) {
@@ -1991,12 +2093,28 @@ const Pet: NextPage = () => {
         setVaccinationShot3Option("Not yet");
       }
 
+      if (userData?.sterilisedStatus?.getFullYear() !== 1970) {
+        setSterilisationStatusOption("Yes");
+      } else {
+        setSterilisationStatusOption("No");
+      }
+
+      if (userData?.sterilisedRequested?.getFullYear() !== 1970) {
+        setSterilisationRequestedOption("Yes");
+      } else {
+        setSterilisationRequestedOption("No");
+      }
+
       // setVaccinationShot1Option(userData?.vaccinationShot1 != new Date(0) ? "Yes" : "Not yet");
       // setVaccinationShot2Option(userData?.vaccinationShot2 != new Date(0) ? "Yes" : "Not yet");
       // setVaccinationShot3Option(userData?.vaccinationShot3 != new Date(0) ? "Yes" : "Not yet");
       setVaccinationShot1Date(userData?.vaccinationShot1 ?? new Date());
       setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
       setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
+
+      setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date());
+      setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date());
+
       setMembershipTypeOption(userData?.membership ?? "");
       setCardStatusOption(userData?.cardStatus ?? "");
       setKennelList(userData?.kennelReceived ?? []);
@@ -2010,8 +2128,8 @@ const Pet: NextPage = () => {
 
       setFirstName(userData?.owner?.firstName ?? "");
       setSurname(userData?.owner?.surname ?? "");
-      setGreaterArea(userData?.owner?.addressGreaterArea ?? "");
-      setArea(userData?.owner?.addressArea ?? "");
+      setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
+      setArea(userData?.owner?.addressArea.area ?? "");
     }
     // else {
     //   //alternate method to get pet data
@@ -2211,7 +2329,7 @@ const Pet: NextPage = () => {
           ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
           "/" +
           clinic.clinic.date.getFullYear().toString(),
-        area: clinic.clinic.area,
+        area: clinic.clinic.area.area,
       })) ?? [];
     //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
 
@@ -2235,8 +2353,8 @@ const Pet: NextPage = () => {
     setColourList(petData?.colour ?? [""]);
     setMarkings(petData?.markings ?? "");
     setStatusOption(petData?.status ?? "");
-    setSterilisationStatusOption(petData?.sterilisedStatus ?? "");
-    setSterilisationRequestedOption(petData?.sterilisedRequested ?? "");
+    //setSterilisationStatusOption(petData?.sterilisedStatus ?? "");
+    //setSterilisationRequestedOption(petData?.sterilisedRequested ?? "");
     setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "");
 
     if (petData?.vaccinationShot1.getFullYear() !== 1970) {
@@ -2257,12 +2375,27 @@ const Pet: NextPage = () => {
       setVaccinationShot3Option("Not yet");
     }
 
+    if (petData?.sterilisedStatus?.getFullYear() !== 1970) {
+      setSterilisationStatusOption("Yes");
+    } else {
+      setSterilisationStatusOption("Not yet");
+    }
+
+    if (petData?.sterilisedRequested?.getFullYear() !== 1970) {
+      setSterilisationRequestedOption("Yes");
+    } else {
+      setSterilisationRequestedOption("Not yet");
+    }
+
     // setVaccinationShot1Option(userData?.vaccinationShot1 != new Date(0) ? "Yes" : "Not yet");
     // setVaccinationShot2Option(userData?.vaccinationShot2 != new Date(0) ? "Yes" : "Not yet");
     // setVaccinationShot3Option(userData?.vaccinationShot3 != new Date(0) ? "Yes" : "Not yet");
     setVaccinationShot1Date(petData?.vaccinationShot1 ?? new Date());
     setVaccinationShot2Date(petData?.vaccinationShot2 ?? new Date());
     setVaccinationShot3Date(petData?.vaccinationShot3 ?? new Date());
+    setSterilisationStatusDate(petData?.sterilisedStatus ?? new Date());
+    setSterilisationRequestedDate(petData?.sterilisedRequested ?? new Date());
+
     setMembershipTypeOption(petData?.membership ?? "");
     setCardStatusOption(petData?.cardStatus ?? "");
     setKennelList(petData?.kennelReceived ?? []);
@@ -2277,8 +2410,8 @@ const Pet: NextPage = () => {
 
     setFirstName(ownerData?.firstName ?? "");
     setSurname(ownerData?.surname ?? "");
-    setGreaterArea(ownerData?.addressGreaterArea ?? "");
-    setArea(ownerData?.addressArea ?? "");
+    setGreaterArea(ownerData?.addressGreaterArea.greaterArea ?? "");
+    setArea(ownerData?.addressArea.area ?? "");
   }, [getPet]); // Effect runs when userQuery.data changes
   //[isViewProfilePage, user]
 
@@ -2458,8 +2591,8 @@ const Pet: NextPage = () => {
         ownerID: ownerID ? ownerID : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.ownerID,
         firstName: firstName ? firstName : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.firstName,
         surname: surname ? surname : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.surname,
-        greaterArea: greaterArea ? greaterArea : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.addressGreaterArea,
-        area: area ? area : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.addressArea,
+        greaterArea: greaterArea ? greaterArea : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.addressGreaterArea.greaterArea,
+        area: area ? area : pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === id)?.owner?.addressArea.area,
       },
     });
   };
@@ -2508,7 +2641,7 @@ const Pet: NextPage = () => {
           ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
           "/" +
           clinic.clinic.date.getFullYear().toString(),
-        area: clinic.clinic.area,
+        area: clinic.clinic.area.area,
       })) ?? [];
     setClinicList(clinicDates);
 
@@ -2528,7 +2661,7 @@ const Pet: NextPage = () => {
     //Search for the clinic's of today in the clinic list
     for (const clinic of option) {
       const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
-      clinicTodayList.push({ id: clinic?.clinicID ?? 0, date: date, area: clinic?.area ?? "" });
+      clinicTodayList.push({ id: clinic?.clinicID ?? 0, date: date, area: clinic?.area.area ?? "" });
 
       // //if (!clinicIDList.includes(clinic?.clinicID)) {
       // const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
@@ -2584,12 +2717,29 @@ const Pet: NextPage = () => {
     }
   }, [user, isCreate, isUpdate, isViewProfilePage]);
 
+  //------------------------------------------DOWNLOADING PET TABLE TO EXCEL FILE------------------------------------------
+  const downloadPetTable = api.pet.download.useQuery({ searchQuery: query });
+  const handleDownloadPetTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+    const data = downloadPetTable.data;
+    const fileName = "Pet Table";
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws = XLSX.utils.json_to_sheet(data ?? []);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    const dataFile = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataFile, fileName + fileExtension);
+    setIsLoading(false);
+  };
+
   return (
     <>
       <Head>
         <title>Pet Profiles</title>
       </Head>
-      <main className="text-normal relative flex flex-col">
+      <main className="relative flex flex-col text-normal">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
@@ -2612,6 +2762,19 @@ const Pet: NextPage = () => {
 
               <div className="sticky top-20 z-20 bg-white py-4">
                 <div className="relative flex justify-center">
+                  <button
+                    className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                    onClick={handleDownloadPetTable}
+                  >
+                    {isLoading ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <div>Download Pet Table</div>
+                    )}
+                  </button>
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
@@ -2621,9 +2784,9 @@ const Pet: NextPage = () => {
                   {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
                     Upload
                     <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
-                  </div>
+                  </div> */}
 
-                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
                 </div>
@@ -2683,12 +2846,12 @@ const Pet: NextPage = () => {
                               </button>
                             </td>
 
-                            <td className="border px-4 py-2">{pet.owner.addressGreaterArea}</td>
-                            <td className="border px-4 py-2">{pet.owner.addressArea}</td>
+                            <td className="border px-4 py-2">{pet.owner.addressGreaterArea.greaterArea}</td>
+                            <td className="border px-4 py-2">{pet.owner.addressArea.area}</td>
                             <td className="border px-4 py-2">
-                              {pet.owner.addressStreetNumber} {pet.owner.addressStreet}
+                              {pet.owner.addressStreetNumber} {pet.owner.addressStreet.street}
                             </td>
-                            <td className="border px-4 py-2">{pet.sterilisedStatus}</td>
+                            <td className="border px-4 py-2">{pet.sterilisedStatus.getFullYear() === 1970 ? "No" : "Yes"}</td>
                             <td className="border px-4 py-2">
                               {pet.petTreatments && pet.petTreatments.length > 0 ? (
                                 <>
@@ -3109,6 +3272,22 @@ const Pet: NextPage = () => {
                         </div>
                       )}
                     </div>
+                    {sterilisationStatusOption === "Yes" && (
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-5">
+                          <div className=" flex pl-3">Sterilisation Date: </div>
+                        </div>
+                        <div className="pt-2">
+                          <DatePicker
+                            selected={sterilisationStatusDate}
+                            onChange={(date) => setSterilisationStatusDate(date!)}
+                            dateFormat="dd/MM/yyyy"
+                            customInput={<CustomSterilisationStatusInput />}
+                            className="form-input rounded-md border py-2"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {sterilisationStatusOption === "No" && (
@@ -3140,6 +3319,22 @@ const Pet: NextPage = () => {
                           </div>
                         )}
                       </div>
+                      {sterilisationRequestedOption === "Yes" && (
+                        <div className="flex items-start">
+                          <div className="mr-3 flex items-center pt-5">
+                            <div className=" flex pl-3">Sterilisation Requested Date: </div>
+                          </div>
+                          <div className="pt-2">
+                            <DatePicker
+                              selected={sterilisationRequestedDate}
+                              onChange={(date) => setSterilisationRequestedDate(date!)}
+                              dateFormat="dd/MM/yyyy"
+                              customInput={<CustomSterilisationRequestedInput />}
+                              className="form-input rounded-md border py-2"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -3411,7 +3606,7 @@ const Pet: NextPage = () => {
                                       ((option.date.getMonth() ?? 0) + 1).toString() +
                                       "/" +
                                       option.date.getFullYear().toString(),
-                                    option.area,
+                                    option.area.area,
                                   )
                                 }
                               >
@@ -3422,7 +3617,7 @@ const Pet: NextPage = () => {
                                     "/" +
                                     option.date.getFullYear().toString() +
                                     " " +
-                                    option.area}
+                                    option.area.area}
                                 </button>
                               </li>
                             ))}
@@ -3729,12 +3924,27 @@ const Pet: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Sterilised?:</b> {sterilisationStatusOption === "Select one" ? user?.sterilisedStatus : sterilisationStatusOption}
+                        <b className="mr-3">Sterilised?:</b>{" "}
+                        {sterilisationStatusOption === "Yes" ? (
+                          <>
+                            {sterilisationStatusDate.getDate().toString()}/{((sterilisationStatusDate.getMonth() ?? 0) + 1).toString()}/
+                            {sterilisationStatusDate.getFullYear().toString()}
+                          </>
+                        ) : (
+                          "None"
+                        )}
                       </div>
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Sterilisation Requested:</b>{" "}
-                        {sterilisationRequestedOption === "Select one" ? user?.sterilisedRequested : sterilisationRequestedOption}
+                        {sterilisationRequestedOption === "Yes" ? (
+                          <>
+                            {sterilisationRequestedDate.getDate().toString()}/{((sterilisationRequestedDate.getMonth() ?? 0) + 1).toString()}/
+                            {sterilisationRequestedDate.getFullYear().toString()}
+                          </>
+                        ) : (
+                          "None"
+                        )}
                       </div>
 
                       <div className="mb-2 flex items-center">

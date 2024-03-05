@@ -126,8 +126,8 @@ export const petTreatmentRouter = createTRPCRouter({
               { ownerID: { equals: Number(term.substring(1)) } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
-              { addressGreaterArea: { contains: term } },
-              { addressArea: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              //  { addressArea: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
@@ -135,8 +135,8 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { firstName: { contains: term } },
               { surname: { contains: term } },
-              { addressGreaterArea: { contains: term } },
-              { addressArea: { contains: term } },
+              // { addressGreaterArea: { contains: term } },
+              // { addressArea: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
@@ -357,7 +357,12 @@ export const petTreatmentRouter = createTRPCRouter({
         include: {
           pet: {
             include: {
-              owner: true,
+              owner: {
+                include: {
+                  addressArea: true,
+                  addressGreaterArea: true,
+                },
+              },
             },
           },
         },
@@ -652,4 +657,120 @@ export const petTreatmentRouter = createTRPCRouter({
 
     return identification;
   }),
+
+  //download
+  download: publicProcedure
+    .input(
+      z.object({
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      //------------------------------------------ORIGNAL CODE-------------------------------------
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+
+      // Construct a complex search condition for treatment table
+      const searchConditions = terms.map((term) => {
+        // Check if term is a number
+        if (term.match(/^T\d+$/) !== null) {
+          return {
+            OR: [
+              { treatmentID: { equals: Number(term.substring(1)) } },
+              { category: { contains: term } },
+              { type: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [{ category: { contains: term } }, { type: { contains: term } }, { comments: { contains: term } }].filter(
+              (condition) => Object.keys(condition).length > 0,
+            ), // Filter out empty conditions
+          };
+        }
+      });
+      //------------------------------------------ORIGNAL CODE-------------------------------------
+
+      //------------------------------------------NEW CODE-------------------------------------
+      //complex search condition for pet table
+      const searchConditionsPet = terms.map((term) => {
+        // Check if term is a number
+        if (term.match(/^P\d+$/) !== null) {
+          return {
+            OR: [
+              { petID: { equals: Number(term.substring(1)) } },
+              { petName: { contains: term } },
+              { species: { contains: term } },
+              { breed: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [{ petName: { contains: term } }, { species: { contains: term } }, { breed: { contains: term } }].filter(
+              (condition) => Object.keys(condition).length > 0,
+            ), // Filter out empty conditions
+          };
+        }
+      });
+
+      //complex search condition for owner table
+      const searchConditionsOwner = terms.map((term) => {
+        // Check if term is a number
+        if (term.match(/^N\d+$/) !== null) {
+          return {
+            OR: [
+              { ownerID: { equals: Number(term.substring(1)) } },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              //  { addressGreaterArea: { contains: term } },
+              //  { addressArea: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else {
+          return {
+            OR: [
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              //  { addressGreaterArea: { contains: term } },
+              //  { addressArea: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+      });
+
+      const treatment = await ctx.db.petTreatment.findMany({
+        where: {
+          OR: [
+            {
+              AND: searchConditions,
+            },
+            {
+              pet: {
+                AND: searchConditionsPet,
+              },
+            },
+            {
+              pet: {
+                owner: {
+                  AND: searchConditionsOwner,
+                },
+              },
+            },
+          ],
+        },
+        orderBy: {
+          treatmentID: "asc",
+        },
+        // include: {
+        //   pet: {
+        //     include: {
+        //       owner: true,
+        //     },
+        //   },
+        // },
+      });
+
+      return treatment;
+    }),
 });

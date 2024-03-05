@@ -11,8 +11,12 @@ import CreateButtonModal from "../components/createButtonModal";
 import DeleteButtonModal from "~/components/deleteButtonModal";
 import { areaOptions } from "~/components/GeoLocation/areaOptions";
 
-//Upload excel
+//Excel
 import * as XLSX from "xlsx";
+
+//File saver
+//import FileSaver from "file-saver";
+import * as FileSaver from "file-saver";
 
 //Icons
 import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "phosphor-react";
@@ -28,7 +32,19 @@ import { set } from "date-fns";
 import { router } from "@trpc/server";
 
 const Clinic: NextPage = () => {
-  //useSession({ required: true });
+  useSession({ required: true });
+
+  //-------------------------------GREATER AREA-----------------------------------------
+  type GreaterArea = {
+    id: number;
+    area: string;
+  };
+
+  //---------------------------------AREA-----------------------------------------------
+  type Area = {
+    id: number;
+    area: string;
+  };
 
   const newClinic = api.petClinic.create.useMutation();
   const updateClinic = api.petClinic.update.useMutation();
@@ -48,7 +64,6 @@ const Clinic: NextPage = () => {
 
   //get latest volunteerID
   const latestClinicID = api.petClinic.getLatestClinicID.useQuery();
-  /*
 
   //Excel upload
   const insertExcelData = api.petClinic.insertExcelData.useMutation();
@@ -61,7 +76,7 @@ const Clinic: NextPage = () => {
     reader.onload = (event) => {
       const bstr = event.target?.result;
       const wb = XLSX.read(bstr, { type: "binary" });
-      const wsname = wb.SheetNames[0]; // Assuming you're interested in the third sheet
+      const wsname = wb.SheetNames[0]; // Assuming you're interested in the third sheet [0]
       console.log("Sheet name: ", wsname);
       const ws: XLSX.WorkSheet | undefined = wb.Sheets[wsname as keyof typeof wb.Sheets];
       const data = ws ? XLSX.utils.sheet_to_json(ws) : [];
@@ -70,7 +85,9 @@ const Clinic: NextPage = () => {
       //This is the format that the insertExcelData mutation expects
 
       type petClinicData = {
-        greaterArea: string;
+        greaterAreaID: number;
+        // greaterArea: string;
+        areaID: number;
         area: string;
         conditions: string;
         comments: string;
@@ -138,8 +155,6 @@ const Clinic: NextPage = () => {
     const rows: string[] = data.map((row) => JSON.stringify(row));
     console.log("Rows: ", rows);
   };
-
-*/
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -267,13 +282,15 @@ const Clinic: NextPage = () => {
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
+  const [greaterAreaID, setGreaterAreaID] = useState(0);
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
-  const [greaterAreaOption, setGreaterAreaOption] = useState("Select one");
+  const [greaterAreaOption, setGreaterAreaOption] = useState<GreaterArea>({ area: "Select one", id: 0 });
   const greaterAreaRef = useRef<HTMLDivElement>(null);
   const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
 
+  const [areaID, setAreaID] = useState(0);
   const [isAreaOpen, setIsAreaOpen] = useState(false);
-  const [areaOption, setAreaOption] = useState("Select one");
+  const [areaOption, setAreaOption] = useState<Area>({ area: "Select one", id: 0 });
   const areaRef = useRef<HTMLDivElement>(null);
   const btnAreaRef = useRef<HTMLButtonElement>(null);
 
@@ -287,8 +304,9 @@ const Clinic: NextPage = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
   };
 
-  const handleGreaterAreaOption = (option: SetStateAction<string>) => {
-    setGreaterAreaOption(option);
+  const handleGreaterAreaOption = (option: SetStateAction<string>, id: number) => {
+    const greaterArea: GreaterArea = { area: String(option), id: id };
+    setGreaterAreaOption(greaterArea);
     setIsGreaterAreaOpen(false);
   };
 
@@ -310,7 +328,8 @@ const Clinic: NextPage = () => {
     };
   }, []);
 
-  const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+  //const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
 
   //AREA
   const handleToggleArea = () => {
@@ -318,9 +337,23 @@ const Clinic: NextPage = () => {
   };
 
   //SetStateAction<string>
-  const handleAreaOption = (option: string) => {
-    setAreaOption(option);
+  const handleAreaOption = (option: string, id: number) => {
+    const area: Area = { area: String(option), id: id };
+    setAreaOption(area);
     setIsAreaOpen(false);
+
+    //Makes the options one word for the key of the areaStreetMapping
+    // if (option === "Coniston Park") option = "ConistonPark";
+    // if (option === "Grassy Park") option = "GrassyPark";
+    // if (option === "Lavendar Hill") option = "LavendarHill";
+    // if (option === "Costa da Gamma") option = "CostaDaGamma";
+    // if (option === "Marina Da Gamma") option = "MarinaDaGamma";
+    // if (option === "Montagu V") option = "MontaguV";
+    // if (option === "Overcome Heights") option = "OvercomeHeights";
+    // if (option === "Pelican Park") option = "PelicanPark";
+    // if (option === "Seekoei vlei") option = "Seekoeivlei";
+    // if (option === "St Ruth") option = "StRuth";
+    // setStreetOptions(areaStreetMapping[option] ?? []);
   };
 
   useEffect(() => {
@@ -335,6 +368,8 @@ const Clinic: NextPage = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
 
   //CONDITIONS
   const handleToggleConditions = () => {
@@ -381,6 +416,10 @@ const Clinic: NextPage = () => {
   // const [sendUserDetails, setSendUserDetails] = useState(false);
 
   //-------------------------------UPDATE USER-----------------------------------------
+
+  //GEOGRAPHIC LOCATION
+  const getGreaterAreaByID = api.geographic.getGreaterAreaByID.useQuery({ greaterAreaID: greaterAreaID });
+  const getAreaByID = api.geographic.getAreaByID.useQuery({ areaID: areaID });
   //Update the user's details in fields
   const handleUpdateUserProfile = async (id: number) => {
     setID(id);
@@ -389,15 +428,29 @@ const Clinic: NextPage = () => {
     if (clinic) {
       // Assuming userQuery.data contains the user object
       const userData = clinic;
-      setGreaterAreaOption(userData?.greaterArea ?? "Select one");
-      setAreaOption(userData.area ?? "Select one");
+      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+
+      setGreaterAreaOption(greaterArea);
+
+      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+
+      setAreaOption(area);
+
+      //Make sure thet area and street options have a value
+      if (userData.areaID === 0 || userData.areaID === undefined) {
+        setAreaOption({ area: "Select one", id: 0 });
+      }
+
       setStartingDate(userData?.date ?? new Date());
       setComments(userData.comments ?? "");
       setConditionOption(userData.conditions ?? "Select one");
 
+      setGreaterAreaID(userData.greaterAreaID ?? 0);
+      setAreaID(userData.areaID ?? 0);
+
       //Make sure thet area and street options have a value
-      if (userData.area === "") {
-        setAreaOption("Select one");
+      if (userData.area.area === "") {
+        setAreaOption({ area: "Select one", id: 0 });
       }
     }
 
@@ -411,15 +464,28 @@ const Clinic: NextPage = () => {
     if (clinic) {
       // Assuming userQuery.data contains the user object
       const userData = clinic;
-      setGreaterAreaOption(userData.greaterArea ?? "Select one");
-      setAreaOption(userData.area ?? "");
+      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+
+      setGreaterAreaOption(greaterArea);
+
+      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+
+      setAreaOption(area);
+
+      //Make sure thet area and street options have a value
+      if (userData.areaID === 0 || userData.areaID === undefined) {
+        setAreaOption({ area: "Select one", id: 0 });
+      }
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
       setConditionOption(userData.conditions ?? "Select one");
 
-      if (userData.area === "") {
+      setGreaterAreaID(userData.greaterAreaID ?? 0);
+      setAreaID(userData.areaID ?? 0);
+
+      if (userData.area.area === "") {
         console.log("Area option is select one");
-        setAreaOption("Select one");
+        setAreaOption({ area: "Select one", id: 0 });
       }
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
@@ -428,16 +494,19 @@ const Clinic: NextPage = () => {
     setIsLoading(true);
     await updateClinic.mutateAsync({
       clinicID: id,
-      greaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      area: areaOption === "Select one" ? "" : areaOption,
+      greaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
+      areaID: areaOption.area === "Select one" ? 0 : areaOption.id,
       date: startingDate,
       conditions: conditionOption === "Select one" ? "" : conditionOption,
       comments: comments,
     });
     //After the newUser has been created make sure to set the fields back to empty
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
+    setGreaterAreaOption({ area: "Select one", id: 0 });
+    //setGreaterAreaID(0);
+    setAreaOption({ area: "Select one", id: 0 });
     setConditionOption("Select one");
+    //setGreaterAreaID(0);
+    //setAreaID(0);
     setComments("");
     setIsUpdate(false);
     setIsCreate(false);
@@ -448,8 +517,8 @@ const Clinic: NextPage = () => {
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
+    setGreaterAreaOption({ area: "Select one", id: 0 });
+    setAreaOption({ area: "Select one", id: 0 });
     setStartingDate(new Date());
     setComments("");
     setConditionOption("Select one");
@@ -462,8 +531,8 @@ const Clinic: NextPage = () => {
   const handleNewUser = async () => {
     setIsLoading(true);
     const newUser_ = await newClinic.mutateAsync({
-      greaterArea: greaterAreaOption === "Select one" ? "" : greaterAreaOption,
-      area: areaOption === "Select one" ? "" : areaOption,
+      greaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
+      areaID: areaOption.area === "Select one" ? 0 : areaOption.id,
       date: startingDate,
       comments: comments,
       conditions: conditionOption === "Select one" ? "" : conditionOption,
@@ -475,11 +544,11 @@ const Clinic: NextPage = () => {
     // return newUser_;
 
     //update identification table
-    if (newUser_?.clinicID) {
-      await updateIdentification.mutateAsync({
-        clinicID: newUser_?.clinicID ?? 0,
-      });
-    }
+    // if (newUser_?.clinicID) {
+    //   await updateIdentification.mutateAsync({
+    //     clinicID: newUser_?.clinicID ?? 0,
+    //   });
+    // }
 
     setIsLoading(false);
   };
@@ -496,17 +565,24 @@ const Clinic: NextPage = () => {
     if (clinic) {
       // Assuming userQuery.data contains the user object
       const userData = clinic;
-      setGreaterAreaOption(userData.greaterArea ?? "");
-      setAreaOption(userData.area ?? "");
+      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+
+      setGreaterAreaOption(greaterArea);
+
+      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+
+      setAreaOption(area);
+
+      //Make sure thet area and street options have a value
+      if (userData.areaID === 0 || userData.areaID === undefined) {
+        setAreaOption({ area: "Select one", id: 0 });
+      }
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
       setConditionOption(userData.conditions ?? "Select one");
 
-      //Make sure thet area and street options have a value
-      if (userData.area === "Select one") {
-        setAreaOption("");
-        console.log("Area option is select one");
-      }
+      setGreaterAreaID(userData.greaterAreaID ?? 0);
+      setAreaID(userData.areaID ?? 0);
     }
 
     setIsUpdate(false);
@@ -521,17 +597,28 @@ const Clinic: NextPage = () => {
     }
     if (clinic) {
       const userData = clinic;
-      setGreaterAreaOption(userData.greaterArea ?? "");
-      setAreaOption(userData.area ?? "");
+      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+
+      setGreaterAreaOption(greaterArea);
+
+      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+
+      setAreaOption(area);
+
+      //setGreaterAreaOption(userData.greaterArea.greaterArea ?? "");
+      //setAreaOption(userData.area.area ?? "");
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
+
+      //setGreaterAreaID(userData.greaterAreaID ?? 0);
+      //setAreaID(userData.areaID ?? 0);
       //console.log("Select one");
       //Make sure thet area and street options have a value
-      if (userData.area === "Select one" && !isUpdate) {
-        setAreaOption("");
+      if ((userData.areaID === 0 || userData.areaID === undefined) && !isUpdate) {
+        setAreaOption({ area: "", id: 0 });
       }
-      if (userData.area === "" && isUpdate) {
-        setAreaOption("Select one");
+      if (userData.areaID === 0 || (userData.areaID === undefined && isUpdate)) {
+        setAreaOption({ area: "Select one", id: 0 });
       }
     }
   }, [isViewProfilePage]); // Effect runs when userQuery.data changes
@@ -552,8 +639,8 @@ const Clinic: NextPage = () => {
     setIsCreate(false);
     setIsViewProfilePage(false);
     setID(0);
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
+    setGreaterAreaOption({ area: "Select one", id: 0 });
+    setAreaOption({ area: "Select one", id: 0 });
     setComments("");
   };
 
@@ -569,9 +656,9 @@ const Clinic: NextPage = () => {
     const mandatoryFields: string[] = [];
     const errorFields: { field: string; message: string }[] = [];
 
-    if (greaterAreaOption === "Select one") mandatoryFields.push("Greater Area");
+    if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
     if (startingDate === null) mandatoryFields.push("Date");
-    if (areaOption === "Select one") mandatoryFields.push("Area");
+    if (areaOption.area === "Select one") mandatoryFields.push("Area");
     if (conditionOption === "Select one") mandatoryFields.push("Condition");
 
     setMandatoryFields(mandatoryFields);
@@ -682,12 +769,29 @@ const Clinic: NextPage = () => {
     </button>
   );
 
+  //------------------------------------------DOWNLOADING CLINIC TABLE TO EXCEL FILE------------------------------------------
+  const downloadClinicTable = api.petClinic.download.useQuery({ searchQuery: query });
+  const handleDownloadClinicTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+    const data = downloadClinicTable.data;
+    const fileName = "Clinic Table";
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws = XLSX.utils.json_to_sheet(data ?? []);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    const dataFile = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataFile, fileName + fileExtension);
+    setIsLoading(false);
+  };
+
   return (
     <>
       <Head>
         <title>Clinic Profiles</title>
       </Head>
-      <main className="text-normal flex flex-col">
+      <main className="flex flex-col text-normal">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
@@ -701,6 +805,19 @@ const Clinic: NextPage = () => {
               />
               <div className="sticky top-20 z-20 bg-white py-4">
                 <div className="relative flex justify-center">
+                  <button
+                    className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                    onClick={handleDownloadClinicTable}
+                  >
+                    {isLoading ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <div>Download Pet Clinic Table</div>
+                    )}
+                  </button>
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
@@ -715,8 +832,8 @@ const Clinic: NextPage = () => {
                   {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
                     Upload
                     <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
-                  </div>
-                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  </div> */}
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
                 </div>
@@ -775,8 +892,8 @@ const Clinic: NextPage = () => {
                               {"/"}
                               {user?.date?.getFullYear()?.toString() ?? ""}
                             </td>
-                            <td className="border px-4 py-2">{user.greaterArea}</td>
-                            <td className="border px-4 py-2">{user.area}</td>
+                            <td className="border px-4 py-2">{user.greaterArea.greaterArea}</td>
+                            <td className="border px-4 py-2">{user.area.area}</td>
                             <td className="border px-4 py-2">{user.conditions}</td>
                             <td className=" border px-4 py-2">
                               {user?.updatedAt?.getDate()?.toString() ?? ""}
@@ -904,7 +1021,7 @@ const Clinic: NextPage = () => {
                         type="button"
                         onClick={handleToggleGreaterArea}
                       >
-                        {isUpdate ? greaterAreaOption : greaterAreaOption + " "}
+                        {isUpdate ? greaterAreaOption.area : greaterAreaOption.area + " "}
                         <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                         </svg>
@@ -913,8 +1030,8 @@ const Clinic: NextPage = () => {
                         <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {greaterAreaOptions.map((option) => (
-                              <li key={option} onClick={() => handleGreaterAreaOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              <li key={option.greaterAreaID} onClick={() => handleGreaterAreaOption(option.greaterArea, option.greaterAreaID)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.greaterArea}</button>
                               </li>
                             ))}
                           </ul>
@@ -936,7 +1053,7 @@ const Clinic: NextPage = () => {
                         type="button"
                         onClick={handleToggleArea}
                       >
-                        {areaOption + " "}
+                        {areaOption.area + " "}
                         <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                         </svg>
@@ -945,8 +1062,8 @@ const Clinic: NextPage = () => {
                         <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {areaOptions.map((option) => (
-                              <li key={option} onClick={() => handleAreaOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              <li key={option.areaID} onClick={() => handleAreaOption(option.area, option.areaID)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.area}</button>
                               </li>
                             ))}
                           </ul>
@@ -1052,11 +1169,11 @@ const Clinic: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaOption}
+                    <b className="mr-3">Greater Area:</b> {greaterAreaOption.area}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {areaOption}
+                    <b className="mr-3">Area:</b> {areaOption.area}
                   </div>
 
                   <div className="mb-2 flex items-center">

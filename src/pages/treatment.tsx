@@ -11,8 +11,12 @@ import CreateButtonModal from "../components/createButtonModal";
 import DeleteButtonModal from "~/components/deleteButtonModal";
 import { areaOptions } from "~/components/GeoLocation/areaOptions";
 
-//Upload excel
+//Excel
 import * as XLSX from "xlsx";
+
+//File saver
+//import FileSaver from "file-saver";
+import * as FileSaver from "file-saver";
 
 //Icons
 import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "phosphor-react";
@@ -49,7 +53,6 @@ const Treatment: NextPage = () => {
   //get latest treatmentID
   const latestTreatmentID = api.petTreatment.getLatestTreatmentID.useQuery();
 
-  /*
   //Excel upload
   const insertExcelData = api.petTreatment.insertExcelData.useMutation();
 
@@ -61,7 +64,7 @@ const Treatment: NextPage = () => {
     reader.onload = (event) => {
       const bstr = event.target?.result;
       const wb = XLSX.read(bstr, { type: "binary" });
-      const wsname = wb.SheetNames[4]; // Assuming you're interested in the third sheet
+      const wsname = wb.SheetNames[0]; // Assuming you're interested in the third sheet   [4]
       console.log("Sheet name: ", wsname);
       const ws: XLSX.WorkSheet | undefined = wb.Sheets[wsname as keyof typeof wb.Sheets];
       const data = ws ? XLSX.utils.sheet_to_json(ws) : [];
@@ -140,7 +143,6 @@ const Treatment: NextPage = () => {
     const rows: string[] = data.map((row) => JSON.stringify(row));
     console.log("Rows: ", rows);
   };
-  */
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -252,8 +254,8 @@ const Treatment: NextPage = () => {
       ownerID: treatment?.pet?.ownerID ?? 0,
       surname: treatment?.pet?.owner?.surname ?? "",
       firstName: treatment?.pet?.owner?.firstName ?? "",
-      area: treatment?.pet?.owner?.addressArea ?? "",
-      greaterArea: treatment?.pet?.owner?.addressGreaterArea ?? "",
+      area: treatment?.pet?.owner?.addressArea.area ?? "",
+      greaterArea: treatment?.pet?.owner?.addressGreaterArea.greaterArea ?? "",
       petName: treatment?.pet?.petName ?? "",
       petID: treatment?.pet?.petID ?? 0,
       species: treatment?.pet?.species ?? "",
@@ -598,11 +600,11 @@ const Treatment: NextPage = () => {
     // return newUser_;
 
     //update identification table
-    if (newUser_?.treatmentID) {
-      await updateIdentification.mutateAsync({
-        treatmentID: newUser_?.treatmentID ?? 0,
-      });
-    }
+    // if (newUser_?.treatmentID) {
+    //   await updateIdentification.mutateAsync({
+    //     treatmentID: newUser_?.treatmentID ?? 0,
+    //   });
+    // }
 
     setIsLoading(false);
   };
@@ -840,12 +842,29 @@ const Treatment: NextPage = () => {
     </button>
   );
 
+  //------------------------------------------DOWNLOADING OWNER TABLE TO EXCEL FILE------------------------------------------
+  const downloadTreatmentTable = api.petTreatment.download.useQuery({ searchQuery: query });
+  const handleDownloadTreatmentTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+    const data = downloadTreatmentTable.data;
+    const fileName = "Treatment Table";
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws = XLSX.utils.json_to_sheet(data ?? []);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    const dataFile = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataFile, fileName + fileExtension);
+    setIsLoading(false);
+  };
+
   return (
     <>
       <Head>
         <title>Treatment Profiles</title>
       </Head>
-      <main className="text-normal flex flex-col">
+      <main className="flex flex-col text-normal">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
@@ -859,6 +878,19 @@ const Treatment: NextPage = () => {
               />
               <div className="sticky top-20 z-20 bg-white py-4">
                 <div className="relative flex justify-center">
+                  <button
+                    className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                    onClick={handleDownloadTreatmentTable}
+                  >
+                    {isLoading ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <div>Download Pet Treatment Table</div>
+                    )}
+                  </button>
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."

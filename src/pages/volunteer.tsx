@@ -13,8 +13,11 @@ import { areaOptions } from "~/components/GeoLocation/areaOptions";
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { clinicDates } from "~/components/clinicsAttended";
 
-//Upload excel
+//Excel
 import * as XLSX from "xlsx";
+
+//File saver
+import * as FileSaver from "file-saver";
 
 //Icons
 import { AddressBook, Pencil, Printer, Trash, UserCircle, Users, Bed } from "phosphor-react";
@@ -30,6 +33,7 @@ import { useSession } from "next-auth/react";
 import Input from "~/components/Base/Input";
 import { bg } from "date-fns/locale";
 import { set } from "date-fns";
+import { greaterArea } from "@prisma/client";
 
 const Volunteer: NextPage = () => {
   useSession({ required: true });
@@ -52,7 +56,7 @@ const Volunteer: NextPage = () => {
 
   //get latest volunteerID
   const latestVolunteerID = api.volunteer.getLatestVolunteerID.useQuery();
-  /*
+
   //Excel upload
   const insertExcelData = api.volunteer.insertExcelData.useMutation();
 
@@ -64,7 +68,7 @@ const Volunteer: NextPage = () => {
     reader.onload = (event) => {
       const bstr = event.target?.result;
       const wb = XLSX.read(bstr, { type: "binary" });
-      const wsname = wb.SheetNames[1];
+      const wsname = wb.SheetNames[0]; //[1]
       console.log("Sheet name: ", wsname);
       const ws: XLSX.WorkSheet | undefined = wb.Sheets[wsname as keyof typeof wb.Sheets];
       const data = ws ? XLSX.utils.sheet_to_json(ws) : [];
@@ -153,7 +157,6 @@ const Volunteer: NextPage = () => {
     const rows: string[] = data.map((row) => JSON.stringify(row));
     console.log("Rows: ", rows);
   };
-  */
 
   //-------------------------------EMAIL-----------------------------------------
   async function sendEmail(firstName: string, email: string, id: string, password: string, typeOfUser: string): Promise<void> {
@@ -234,6 +237,12 @@ const Volunteer: NextPage = () => {
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
   const [isViewProfilePage, setIsViewProfilePage] = useState(false);
 
+  //-------------------------------GREATER AREA-----------------------------------------
+  type GreaterArea = {
+    id: number;
+    area: string;
+  };
+
   //-------------------------------CLINICS ATTENDED-----------------------------------------
   type Clinic = {
     id: number;
@@ -275,13 +284,16 @@ const Volunteer: NextPage = () => {
   //Flattens the pages array into one array
   const user_data = queryData?.pages.flatMap((page) => page.user_data);
   const clinics_data = queryData?.pages.flatMap((page) => page.clinics_data);
+  const greater_area_data = queryData?.pages.flatMap((page) => page.greater_areas_data);
   const volunteer_data_with_clinics = user_data?.map((volunteer) => {
     // Assuming each clinic object has a 'petID' that links it to a pet
     const associatedClinics = clinics_data?.filter((clinic) => clinic.volunteerID === volunteer.volunteerID);
+    const associatedGreaterAreas = greater_area_data?.filter((area) => area.volunteerID === volunteer.volunteerID);
 
     return {
       ...volunteer,
       clinics: associatedClinics,
+      greaterAreas: associatedGreaterAreas,
     };
   });
 
@@ -375,16 +387,21 @@ const Volunteer: NextPage = () => {
 
   //GREATER AREA
   //to select multiple areas
-  const [greaterAreaList, setGreaterAreaList] = useState<string[]>([]);
+  const [greaterAreaList, setGreaterAreaList] = useState<GreaterArea[]>([]);
   const handleToggleGreaterArea = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
   };
 
-  const handleGreaterAreaOption = (option: SetStateAction<string>) => {
+  const handleGreaterAreaOption = (option: SetStateAction<string>, id: number) => {
     setGreaterAreaOption(option);
     setIsGreaterAreaOpen(false);
-    if (!greaterAreaList.includes(String(option))) {
-      setGreaterAreaList([...greaterAreaList, String(option)]);
+
+    const area: GreaterArea = {
+      id: id,
+      area: String(option),
+    };
+    if (!greaterAreaList.includes(area)) {
+      setGreaterAreaList([...greaterAreaList, area]);
     }
   };
 
@@ -406,7 +423,8 @@ const Volunteer: NextPage = () => {
     };
   }, []);
 
-  const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+  // const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
+  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
 
   //show all the clinics that the volunteer attended
   const [showGreaterArea, setShowGreaterArea] = useState(false);
@@ -655,14 +673,21 @@ const Volunteer: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area,
+          area: clinic.clinic.area.area,
+        })) ?? [];
+
+      const greaterAreaData = user?.greaterAreas;
+      const greaterAreas: GreaterArea[] =
+        greaterAreaData?.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea.greaterArea,
         })) ?? [];
 
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaList(userData.addressGreaterArea ?? "Select one");
+      setGreaterAreaList(greaterAreas ?? "Select one");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
@@ -699,7 +724,14 @@ const Volunteer: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area,
+          area: clinic.clinic.area.area,
+        })) ?? [];
+
+      const greaterAreaData = user?.greaterAreas;
+      const greaterAreas: GreaterArea[] =
+        greaterAreaData?.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea.greaterArea,
         })) ?? [];
 
       // console.log("Hellllllooooo!  Clinic area: ", clinicData?.map((clinic) => clinic.clinic.area) ?? []);
@@ -708,7 +740,7 @@ const Volunteer: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaList(userData.addressGreaterArea ?? "Select one");
+      setGreaterAreaList(greaterAreas ?? "Select one");
       setStreet(userData.addressStreet ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
@@ -731,13 +763,14 @@ const Volunteer: NextPage = () => {
     setIsLoading(true);
     const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
     console.log("Helloo!! Clinic ID List: ", clinicIDList);
+    const greaterAreaIDList = greaterAreaList.map((area) => (area.id ? area.id : 0));
     const volunteer = await updateVolunteer.mutateAsync({
       volunteerID: id,
       firstName: firstName,
       email: email,
       surname: surname,
       mobile: mobile,
-      addressGreaterArea: greaterAreaList,
+      addressGreaterAreaID: greaterAreaIDList,
       addressStreet: street,
       addressStreetCode: addressStreetCode,
       addressStreetNumber: addressStreetNumber,
@@ -832,13 +865,14 @@ const Volunteer: NextPage = () => {
   const handleNewUser = async () => {
     setIsLoading(true);
     const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
+    const greaterAreaIDList = greaterAreaList.map((area) => (area.id ? area.id : 0));
     try {
       const newUser_ = await newVolunteer.mutateAsync({
         firstName: firstName,
         email: email,
         surname: surname,
         mobile: mobile,
-        addressGreaterArea: greaterAreaList,
+        addressGreaterAreaID: greaterAreaIDList,
         addressStreet: street,
         addressStreetCode: addressStreetCode,
         addressStreetNumber: addressStreetNumber,
@@ -889,11 +923,11 @@ const Volunteer: NextPage = () => {
       setIsUpdate(false);
 
       //update identification table
-      if (newUser_?.volunteerID) {
-        await updateIdentification.mutateAsync({
-          volunteerID: newUser_?.volunteerID ?? 0,
-        });
-      }
+      // if (newUser_?.volunteerID) {
+      //   await updateIdentification.mutateAsync({
+      //     volunteerID: newUser_?.volunteerID ?? 0,
+      //   });
+      // }
     } catch (error) {
       console.log("Mobile number is already in database");
       const mandatoryFields: string[] = [];
@@ -933,14 +967,21 @@ const Volunteer: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area,
+          area: clinic.clinic.area.area,
+        })) ?? [];
+
+      const greaterAreaData = user?.greaterAreas;
+      const greaterAreas: GreaterArea[] =
+        greaterAreaData?.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea.greaterArea,
         })) ?? [];
 
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaList(userData.addressGreaterArea ?? "");
+      setGreaterAreaList(greaterAreas ?? "");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
@@ -983,14 +1024,21 @@ const Volunteer: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area,
+          area: clinic.clinic.area.area,
+        })) ?? [];
+
+      const greaterAreaData = user?.greaterAreas;
+      const greaterAreas: GreaterArea[] =
+        greaterAreaData?.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea.greaterArea,
         })) ?? [];
 
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaList(userData.addressGreaterArea ?? "");
+      setGreaterAreaList(greaterAreas ?? "");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
@@ -1329,7 +1377,7 @@ const Volunteer: NextPage = () => {
           ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
           "/" +
           clinic.clinic.date.getFullYear().toString(),
-        area: clinic.clinic.area,
+        area: clinic.clinic.area.area,
       })) ?? [];
     setClinicList(clinicDates);
 
@@ -1349,7 +1397,7 @@ const Volunteer: NextPage = () => {
     //Search for the clinic's of today in the clinic list
     for (const clinic of option) {
       const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
-      clinicTodayList.push({ id: clinic?.clinicID ?? 0, date: date, area: clinic?.area ?? "" });
+      clinicTodayList.push({ id: clinic?.clinicID ?? 0, date: date, area: clinic?.area.area ?? "" });
 
       // //if (!clinicIDList.includes(clinic?.clinicID)) {
       // const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
@@ -1406,12 +1454,29 @@ const Volunteer: NextPage = () => {
     }
   }, [user, isCreate, isUpdate, isViewProfilePage]);
 
+  //------------------------------------------DOWNLOADING USER TABLE TO EXCEL FILE------------------------------------------
+  const downloadUserTable = api.volunteer.download.useQuery({ searchQuery: query });
+  const handleDownloadVolunteerTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+    const data = downloadUserTable.data;
+    const fileName = "Volunteer Table";
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws = XLSX.utils.json_to_sheet(data ?? []);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    const dataFile = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataFile, fileName + fileExtension);
+    setIsLoading(false);
+  };
+
   return (
     <>
       <Head>
-        <title>User Profiles</title>
+        <title>Volunteer Profiles</title>
       </Head>
-      <main className="text-normal flex flex-col">
+      <main className="flex flex-col text-normal">
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
@@ -1433,6 +1498,19 @@ const Volunteer: NextPage = () => {
               />
               <div className="sticky top-20 z-20 bg-white py-4">
                 <div className="relative flex justify-center">
+                  <button
+                    className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                    onClick={handleDownloadVolunteerTable}
+                  >
+                    {isLoading ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <div>Download Volunteer Table</div>
+                    )}
+                  </button>
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
@@ -1448,7 +1526,7 @@ const Volunteer: NextPage = () => {
                     Upload
                     <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
                   </div> */}
-                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  {/* <button className="absolute left-10 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
                 </div>
@@ -1506,7 +1584,7 @@ const Volunteer: NextPage = () => {
                             <td className="border px-4 py-2">{user.surname}</td>
                             <td className="border px-4 py-2">{user.email}</td>
                             <td className="border px-4 py-2">{user.mobile}</td>
-                            <td className="border px-4 py-2">{user.addressGreaterArea.map((greaterArea) => greaterArea).join("; ")}</td>
+                            <td className="border px-4 py-2">{user?.greaterAreas?.map((greaterArea) => greaterArea.greaterArea).join("; ") ?? ""}</td>
                             <td className="border px-4 py-2">{user.status}</td>
                             <td className="border px-4 py-2">
                               {user.clinics && user.clinics.length > 0 ? (
@@ -1729,8 +1807,8 @@ const Volunteer: NextPage = () => {
                         {showGreaterArea && (
                           <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
                             {greaterAreaList.map((greaterArea) => (
-                              <li key={greaterArea} className=" py-2">
-                                {greaterArea}
+                              <li key={greaterArea.id} className=" py-2">
+                                {greaterArea.area}
                               </li>
                             ))}
                           </ul>
@@ -1752,9 +1830,11 @@ const Volunteer: NextPage = () => {
                         {isGreaterAreaOpen && (
                           <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                             <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                              {greaterAreaOptions.map((option) => (
-                                <li key={option} onClick={() => handleGreaterAreaOption(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              {greaterAreaOptions?.map((option) => (
+                                <li key={option.greaterAreaID} onClick={() => handleGreaterAreaOption(option.greaterArea, option.greaterAreaID)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                    {option?.greaterArea ?? ""}
+                                  </button>
                                 </li>
                               ))}
                             </ul>
@@ -1954,7 +2034,7 @@ const Volunteer: NextPage = () => {
                                       ((option.date.getMonth() ?? 0) + 1).toString() +
                                       "/" +
                                       option.date.getFullYear().toString(),
-                                    option.area,
+                                    option.area.area,
                                   )
                                 }
                               >
@@ -1965,7 +2045,7 @@ const Volunteer: NextPage = () => {
                                     "/" +
                                     option.date.getFullYear().toString() +
                                     " " +
-                                    option.area}
+                                    option.area.area}
                                 </button>
                               </li>
                             ))}

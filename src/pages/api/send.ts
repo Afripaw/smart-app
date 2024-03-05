@@ -124,7 +124,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
   //Acme <onboarding@resend.dev>
   const { data, error } = await resend.emails.send({
-    from: "Afripaw <onboarding@resend.dev>",
+    from: "Afripaw <info@afripaw.app>",
     to: [email],
     subject: "Afripaw Smart App Login Credentials",
     // html: emailHtml, // Use the rendered HTML string

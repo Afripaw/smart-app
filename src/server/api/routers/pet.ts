@@ -641,8 +641,8 @@ export const petRouter = createTRPCRouter({
           colour: z.string().array(),
           markings: z.string(),
           status: z.string(),
-          sterilisedStatus: z.string(),
-          sterilisedRequested: z.string(),
+          sterilisedStatus: z.date(),
+          sterilisedRequested: z.date(),
           sterilisedRequestSigned: z.string(),
           sterilisationOutcome: z.string(),
           vaccinationShot1: z.date(),
@@ -657,9 +657,30 @@ export const petRouter = createTRPCRouter({
       ),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.db.pet.createMany({
-        data: input,
-      });
+      // const result = await ctx.db.pet.createMany({
+      //   data: input,
+      // });
+      // return result;
+
+      const result = await Promise.all(
+        input.map(async (pet) => {
+          // Check if the owner exists
+          const owner = await ctx.db.petOwner.findUnique({
+            where: { ownerID: pet.ownerID },
+          });
+
+          // If the owner exists, create the pet
+          if (owner) {
+            return await ctx.db.pet.create({
+              data: pet,
+            });
+          }
+
+          // If the owner does not exist, return a message
+          return { message: `Owner with ID ${pet.ownerID} does not exist` };
+        }),
+      );
+
       return result;
     }),
 

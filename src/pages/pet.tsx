@@ -96,8 +96,8 @@ const Pet: NextPage = () => {
         colour: string[];
         markings: string;
         status: string;
-        sterilisedStatus: string;
-        sterilisedRequested: string;
+        sterilisedStatus: Date;
+        sterilisedRequested: Date;
         sterilisedRequestSigned: string;
         sterilisationOutcome: string;
         vaccinationShot1: Date;
@@ -118,7 +118,7 @@ const Pet: NextPage = () => {
         //  console.log("Key: ", key);
         //}
         //take the first character away from the ownerID
-        obj.ownerID = Number(obj.ownerID.toString().slice(1));
+        //obj.ownerID = Number(obj.ownerID.toString().slice(1));
         console.log("Owner ID: ", obj.ownerID);
         //last dewroming
         console.log("Last deworming from data: ", obj.lastDeworming);
@@ -148,6 +148,36 @@ const Pet: NextPage = () => {
 
         //kennelReceived
         obj.kennelReceived = [""];
+
+        //sterilisationStatus
+        console.log("Sterilisation status from data: ", obj.sterilisedStatus);
+        if (Number(obj.sterilisedStatus) >= 35000) {
+          obj.sterilisedStatus = ExcelDateToJSDate(Number(obj.sterilisedStatus));
+        }
+        if (obj.sterilisedStatus === undefined) {
+          obj.sterilisedStatus = new Date(0);
+        } else if (String(obj.sterilisedStatus) === "None") {
+          obj.sterilisedStatus = new Date(0);
+        } else if (String(obj.sterilisedStatus) === "") {
+          obj.sterilisedStatus = new Date(0);
+        } else {
+          obj.sterilisedStatus = new Date(obj.sterilisedStatus);
+        }
+
+        //sterilisationRequested
+        console.log("Sterilisation requested from data: ", obj.sterilisedRequested);
+        if (Number(obj.sterilisedRequested) >= 35000) {
+          obj.sterilisedRequested = ExcelDateToJSDate(Number(obj.sterilisedRequested));
+        }
+        if (obj.sterilisedRequested === undefined) {
+          obj.sterilisedRequested = new Date(0);
+        } else if (String(obj.sterilisedRequested) === "None") {
+          obj.sterilisedRequested = new Date(0);
+        } else if (String(obj.sterilisedRequested) === "") {
+          obj.sterilisedRequested = new Date(0);
+        } else {
+          obj.sterilisedRequested = new Date(obj.sterilisedRequested);
+        }
 
         //vaccinationShot1
         console.log("Vaccination shot 1 from data: ", obj.vaccinationShot1);
@@ -225,7 +255,7 @@ const Pet: NextPage = () => {
       // Now data is an array of objects, each object representing a row in the Excel sheet.
       // The keys of each object are the column headers from your Excel sheet.
       // You can directly pass this data to convert_to_json without needing to splice or adjust.
-      void convert_to_json(data as Record<string, unknown>[]);
+      //void convert_to_json(data as Record<string, unknown>[]);
     };
     if (file) {
       reader.readAsBinaryString(file);
@@ -244,10 +274,10 @@ const Pet: NextPage = () => {
     return new Date(msSinceEpoch);
   };
 
-  const convert_to_json = async (data: Array<Record<string, unknown>>) => {
-    const rows: string[] = data.map((row) => JSON.stringify(row));
-    console.log("Rows: ", rows);
-  };
+  // const convert_to_json = async (data: Array<Record<string, unknown>>) => {
+  //   const rows: string[] = data.map((row) => JSON.stringify(row));
+  //   console.log("Rows: ", rows);
+  // };
 
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
@@ -466,7 +496,7 @@ const Pet: NextPage = () => {
 
   const pet = router.asPath.includes("petID")
     ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) })
-    : api.pet.getPetByID.useQuery({ petID: 1000001 });
+    : api.pet.getPetByID.useQuery({ petID: 1000112 });
 
   // const pet = router.asPath.includes("petID")
   //   ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) })

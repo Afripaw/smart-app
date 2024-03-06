@@ -521,7 +521,7 @@ export const volunteerRouter = createTRPCRouter({
           email: z.string(),
           surname: z.string(),
           mobile: z.string(),
-          addressGreaterArea: z.string().array(),
+          //addressGreaterAreaID: z.number().array(),
           addressStreet: z.string(),
           addressStreetCode: z.string(),
           addressStreetNumber: z.string(),

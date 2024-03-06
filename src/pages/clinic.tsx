@@ -86,7 +86,7 @@ const Clinic: NextPage = () => {
 
       type petClinicData = {
         greaterAreaID: number;
-        // greaterArea: string;
+        greaterArea: string;
         areaID: number;
         area: string;
         conditions: string;

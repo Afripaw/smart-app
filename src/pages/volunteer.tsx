@@ -81,7 +81,7 @@ const Volunteer: NextPage = () => {
         email: string;
         surname: string;
         mobile: string;
-        addressGreaterArea: string[]; // Array of strings
+        //addressGreaterAreaID: number[]; // Array of strings
         addressStreet: string;
         addressStreetCode: string;
         addressStreetNumber: string;
@@ -120,7 +120,8 @@ const Volunteer: NextPage = () => {
         obj.comments = "";
 
         //make addressGreaterArea an array
-        obj.addressGreaterArea = [String(obj.addressGreaterArea)];
+        //obj.addressGreaterArea = [String(obj.addressGreaterArea)];
+        // obj.addressGreaterAreaID = [Number(obj.addressGreaterAreaID)];
 
         //check if email is empty
         if (obj.email === undefined || obj.email === null) {

@@ -1,3 +1,4 @@
+import { ChatText } from "phosphor-react";
 import { z } from "zod";
 //import Owner from "~/pages/owner";
 
@@ -513,7 +514,8 @@ export const petRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       if (input.petID === 0) {
         // Return some default response or error
-        throw new Error("Invalid pet ID");
+        //throw new Error("Invalid pet ID");
+        return;
       }
 
       const pet = await ctx.db.pet.findUnique({
@@ -811,6 +813,84 @@ export const petRouter = createTRPCRouter({
     };
   }),
 
+  // //get amount of pets sterilised for last 5 years. Seperate into data into respective greater areas
+  // getSterilisedPets: protectedProcedure.query(async ({ ctx }) => {
+  //   const currentYear = new Date().getFullYear();
+  //   const sterilisedPets = [];
+
+  //   const greaterAreas = await ctx.db.greaterArea.findMany();
+
+  //   for (const area of greaterAreas) {
+  //     const pets = await ctx.db.pet.findMany({
+  //       where: {
+  //         AND: [
+  //           {
+  //             owner: {
+  //               addressGreaterAreaID: area.greaterAreaID,
+  //             },
+  //           },
+  //           {
+  //             sterilisedStatus: {
+  //               gte: new Date(currentYear - 4),
+  //               lte: new Date(currentYear + 1),
+  //             },
+  //           },
+  //         ],
+  //       },
+  //     });
+
+  //     sterilisedPets.push({
+  //       greaterArea: area.greaterArea,
+  //       sterilisedPets: {
+  //         [currentYear - 4]: pets.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 4).length,
+  //         [currentYear - 3]: pets.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 3).length,
+  //         [currentYear - 2]: pets.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 2).length,
+  //         [currentYear - 1]: pets.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 1).length,
+  //         [currentYear]: pets.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear).length,
+  //       },
+  //     });
+  //   }
+
+  //   return sterilisedPets;
+  // }),
+
+  //get the amount of pets that are sterilised for the last 5 years seperate them into dogs and cats
+  getSterilisedPets: protectedProcedure.query(async ({ ctx }) => {
+    const currentYear = new Date().getFullYear();
+
+    const pets = await ctx.db.pet.findMany({
+      where: {
+        sterilisedStatus: {
+          gte: new Date(new Date().getFullYear() - 4),
+        },
+      },
+    });
+
+    const dogs = pets.filter((pet) => pet.species === "Dog");
+    const cats = pets.filter((pet) => pet.species === "Cat");
+
+    const sterilisedDogs = {
+      [currentYear - 4]: dogs.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 4).length,
+      [currentYear - 3]: dogs.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 3).length,
+      [currentYear - 2]: dogs.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 2).length,
+      [currentYear - 1]: dogs.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 1).length,
+      [currentYear]: dogs.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear).length,
+    };
+
+    const sterilisedCats = {
+      [currentYear - 4]: cats.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 4).length,
+      [currentYear - 3]: cats.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 3).length,
+      [currentYear - 2]: cats.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 2).length,
+      [currentYear - 1]: cats.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear - 1).length,
+      [currentYear]: cats.filter((pet) => pet.sterilisedStatus.getFullYear() === currentYear).length,
+    };
+
+    return {
+      dogs: sterilisedDogs,
+      cats: sterilisedCats,
+    };
+  }),
+
   //kennels provided over the last 5 years
   getKennelsProvided: protectedProcedure.query(async ({ ctx }) => {
     //get kennels received over the last 5 years
@@ -863,6 +943,54 @@ export const petRouter = createTRPCRouter({
     };
 
     return kennels;
+  }),
+
+  // //Get all the owners that are active and sum these owners for each year for the last 5 years. seperate into respective greater areas
+  getKennels: protectedProcedure.query(async ({ ctx }) => {
+    const currentYear = new Date().getFullYear();
+    const kennelsProvided: Record<number, Record<string, number>> = {};
+
+    const greaterAreas = await ctx.db.greaterArea.findMany();
+
+    const kennels = await ctx.db.pet.findMany({
+      where: {
+        kennelReceived: {
+          isEmpty: false,
+        },
+      },
+      include: {
+        owner: {
+          select: {
+            addressGreaterArea: true,
+          },
+        },
+      },
+    });
+
+    const kennelYears = kennels.filter((kennel) => kennel.kennelReceived.some((kennel) => kennel === "Kennel received in " + currentYear.toString()));
+    for (let year = currentYear - 4; year <= currentYear; year++) {
+      const kennelsInYear = kennels.filter((kennel) => kennel.kennelReceived.some((kennel) => kennel === "Kennel received in " + year.toString()));
+      //activeOwners[year] = {};
+
+      for (const area of greaterAreas) {
+        const kennelsInArea = kennelsInYear.filter((kennel) => kennel.owner.addressGreaterArea.greaterAreaID === area.greaterAreaID).length;
+        if (kennelsProvided[year] === undefined) {
+          kennelsProvided[year] = {};
+        }
+        kennelsProvided[year]![area.greaterArea] = kennelsInArea;
+      }
+    }
+
+    const transformedData = Object.entries(kennelsProvided).map(([category, value]) => ({
+      category: Number(category),
+      value,
+    }));
+
+    return {
+      transformedData: transformedData,
+      kennels: kennels,
+      kennelYears: kennelYears,
+    };
   }),
 
   //get the amount of pet clinics visited by dogs and cats respectively

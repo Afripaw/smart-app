@@ -159,6 +159,24 @@ const Volunteer: NextPage = () => {
     console.log("Rows: ", rows);
   };
 
+  //---------------------------------RANDOM DATE GENERATOR----------------------------------
+  function getRandomDate(): Date {
+    const start = new Date("2020-01-01T00:00:00Z").getTime(); // Start of January 2020
+    const end = new Date("2024-02-29T23:59:59Z").getTime(); // End of February 2024 (leap year)
+
+    // Generate a random timestamp between the start and end
+    const randomTimestamp = start + Math.random() * (end - start);
+
+    // Create a new Date object using the random timestamp
+    return new Date(randomTimestamp);
+  }
+
+  const ownerStartingDate = api.volunteer.updateStartingDate.useMutation();
+  const handleRandomDate = async (id: number) => {
+    const date = getRandomDate();
+    await ownerStartingDate.mutateAsync({ volunteerID: id, startingDate: date });
+  };
+
   //-------------------------------EMAIL-----------------------------------------
   async function sendEmail(firstName: string, email: string, id: string, password: string, typeOfUser: string): Promise<void> {
     const response = await fetch("/api/send", {
@@ -684,6 +702,7 @@ const Volunteer: NextPage = () => {
           area: area.greaterArea.greaterArea,
         })) ?? [];
 
+      setID(userData.volunteerID ?? 0);
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -737,6 +756,7 @@ const Volunteer: NextPage = () => {
 
       // console.log("Hellllllooooo!  Clinic area: ", clinicData?.map((clinic) => clinic.clinic.area) ?? []);
 
+      setID(userData.volunteerID ?? 0);
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -978,6 +998,7 @@ const Volunteer: NextPage = () => {
           area: area.greaterArea.greaterArea,
         })) ?? [];
 
+      setID(userData.volunteerID ?? 0);
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -1090,6 +1111,8 @@ const Volunteer: NextPage = () => {
     setComments("");
     setCollaboratorOrg("");
     setClinicList([]);
+    setRoleList([]);
+    setRoleOption("Select one");
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -1585,7 +1608,9 @@ const Volunteer: NextPage = () => {
                             <td className="border px-4 py-2">{user.surname}</td>
                             <td className="border px-4 py-2">{user.email}</td>
                             <td className="border px-4 py-2">{user.mobile}</td>
-                            <td className="border px-4 py-2">{user?.greaterAreas?.map((greaterArea) => greaterArea.greaterArea).join("; ") ?? ""}</td>
+                            <td className="border px-4 py-2">
+                              {user?.greaterAreas?.map((greaterArea) => greaterArea.greaterArea.greaterArea).join("; ") ?? ""}
+                            </td>
                             <td className="border px-4 py-2">{user.status}</td>
                             <td className="border px-4 py-2">
                               {user.clinics && user.clinics.length > 0 ? (
@@ -1636,6 +1661,16 @@ const Volunteer: NextPage = () => {
                                   </span>
                                 </span>
                               </div>
+                              {/* <div className="relative flex items-center justify-center">
+                                <button
+                                  onClick={() => handleRandomDate(user.volunteerID)}
+                                  className="rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
+                                >
+                                  <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Random date
+                                  </span>
+                                </button>
+                              </div> */}
 
                               <div className="relative flex items-center justify-center">
                                 <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
@@ -1748,7 +1783,7 @@ const Volunteer: NextPage = () => {
                     />
                   )}
                   <div className="flex py-2">
-                    Volunteer ID: <div className="px-3">V{latestVolunteerID?.data?.volunteerID ?? 0}</div>
+                    Volunteer ID: <div className="px-3">V{isCreate ? latestVolunteerID?.data?.volunteerID ?? 0 : id}</div>
                   </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
@@ -2174,7 +2209,7 @@ const Volunteer: NextPage = () => {
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea).join("; ")}
+                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea.area).join("; ")}
                   </div>
                   <div className="flex items-start divide-x-2 divide-gray-300">
                     <div className="flex w-96 flex-col pr-2">

@@ -66,11 +66,15 @@ interface LineGraphProps {
 const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
   if (type === "activeOwners") {
     const activeOwners = api.petOwner.getActiveOwners?.useQuery();
-    const response = activeOwners?.data ?? [];
-    const transformedData = Object.entries(response).map(([category, value]) => ({
-      category: String(category),
-      value: value,
-    }));
+    const response = activeOwners?.data?.transformedData ?? [];
+
+    const colours = ["#EB4724", "#1111DD", "11DD11", "#D1D5DB"];
+
+    console.log("owners: ", activeOwners?.data?.owners ?? []);
+
+    // Assuming all items in the response have the same structure,
+    // we can take the keys from the first item's value object.
+    const areaKeys = response.length > 0 ? Object.keys(response[0]?.value ?? "") : [];
 
     if (activeOwners.isLoading) {
       return (
@@ -82,25 +86,34 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
         </div>
       );
     }
+
+    console.log(response, areaKeys);
+
     return (
       <ResponsiveContainer width="80%" height="80%">
-        <LineChart width={500} height={300} data={transformedData}>
+        <LineChart width={500} height={300} data={response}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="category" />
+          <XAxis dataKey="category" padding={{ left: 30, right: 30 }} />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Flagship" stroke="#EB4724" />
+          {areaKeys.map((key, index) => (
+            <Line type="monotone" dataKey={`value.${key}`} stroke={colours[index]} name={key} />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     );
   } else if (type === "activeVolunteers") {
-    const activeVolunteers = api.volunteer.getActiveVolunteersFor5Years.useQuery();
-    const response = activeVolunteers?.data ?? [];
-    const transformedData = Object.entries(response).map(([category, value]) => ({
-      category: String(category),
-      value: value,
-    }));
+    const activeVolunteers = api.volunteer.getActiveVolunteersFor5Years?.useQuery();
+    const response = activeVolunteers?.data?.transformedData ?? [];
+
+    const colours = ["#EB4724", "#1111DD", "11DD11", "#D1D5DB"];
+
+    console.log("volunteers: ", activeVolunteers?.data?.owners ?? []);
+
+    // Assuming all items in the response have the same structure,
+    // we can take the keys from the first item's value object.
+    const areaKeys = response.length > 0 ? Object.keys(response[0]?.value ?? "") : [];
 
     if (activeVolunteers.isLoading) {
       return (
@@ -112,27 +125,66 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
         </div>
       );
     }
+
+    console.log(response, areaKeys);
+
     return (
       <ResponsiveContainer width="80%" height="80%">
-        <LineChart width={500} height={300} data={transformedData}>
+        <LineChart width={500} height={300} data={response}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="category" />
+          <XAxis dataKey="category" padding={{ left: 30, right: 30 }} />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Flagship" stroke="#EB4724" />
+          {areaKeys.map((key, index) => (
+            <Line type="monotone" dataKey={`value.${key}`} stroke={colours[index]} name={key} />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     );
-  } else if (type === "kennels") {
-    const kennels = api.pet.getKennelsProvided.useQuery();
-    const response = kennels?.data ?? [];
-    const transformedData = Object.entries(response).map(([category, value]) => ({
-      category: String(category),
-      value: value,
-    }));
+    // const activeVolunteers = api.volunteer.getActiveVolunteersFor5Years.useQuery();
+    // const response = activeVolunteers?.data ?? [];
+    // const transformedData = Object.entries(response).map(([category, value]) => ({
+    //   category: String(category),
+    //   value: value,
+    // }));
 
-    if (kennels.isLoading) {
+    // if (activeVolunteers.isLoading) {
+    //   return (
+    //     <div className="flex items-center justify-center pl-16">
+    //       <div
+    //         className="mx-2 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+    //         role="status"
+    //       />
+    //     </div>
+    //   );
+    // }
+    // return (
+    //   <ResponsiveContainer width="80%" height="80%">
+    //     <LineChart width={500} height={300} data={transformedData}>
+    //       <CartesianGrid strokeDasharray="3 3" />
+    //       <XAxis dataKey="category" />
+    //       <YAxis />
+    //       <Tooltip />
+    //       <Legend />
+    //       <Line type="monotone" dataKey="value" name="Flagship" stroke="#EB4724" />
+    //     </LineChart>
+    //   </ResponsiveContainer>
+    // );
+  } else if (type === "kennels") {
+    const kennelsProvided = api.pet.getKennels?.useQuery();
+    const response = kennelsProvided?.data?.transformedData ?? [];
+
+    const colours = ["#EB4724", "#1111DD", "11DD11", "#D1D5DB"];
+
+    console.log("kennels: ", kennelsProvided?.data?.kennels ?? []);
+    console.log("kennel years", kennelsProvided?.data?.kennelYears ?? []);
+
+    // Assuming all items in the response have the same structure,
+    // we can take the keys from the first item's value object.
+    const areaKeys = response.length > 0 ? Object.keys(response[0]?.value ?? "") : [];
+
+    if (kennelsProvided.isLoading) {
       return (
         <div className="flex items-center justify-center pl-16">
           <div
@@ -142,27 +194,37 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
         </div>
       );
     }
+
+    console.log(response, areaKeys);
+
     return (
       <ResponsiveContainer width="80%" height="80%">
-        <LineChart width={500} height={300} data={transformedData}>
+        <LineChart width={500} height={300} data={response}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="category" />
+          <XAxis dataKey="category" padding={{ left: 30, right: 30 }} />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Flagship" stroke="#EB4724" />
+          {areaKeys.map((key, index) => (
+            <Line type="monotone" dataKey={`value.${key}`} stroke={colours[index]} name={key} />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     );
   } else if (type === "clinics") {
-    const clinics = api.petClinic.getClinicsHeld.useQuery();
-    const response = clinics?.data ?? [];
-    const transformedData = Object.entries(response).map(([category, value]) => ({
-      category: String(category),
-      value: value,
-    }));
+    const clinicsHeld = api.petClinic.getClinicsHeld?.useQuery();
+    const response = clinicsHeld?.data?.transformedData ?? [];
 
-    if (clinics.isLoading) {
+    const colours = ["#EB4724", "#1111DD", "11DD11", "#D1D5DB"];
+
+    console.log("clinics: ", clinicsHeld?.data?.clinics ?? []);
+    //console.log("kennel years", kennelsProvided?.data?.kennelYears ?? []);
+
+    // Assuming all items in the response have the same structure,
+    // we can take the keys from the first item's value object.
+    const areaKeys = response.length > 0 ? Object.keys(response[0]?.value ?? "") : [];
+
+    if (clinicsHeld.isLoading) {
       return (
         <div className="flex items-center justify-center pl-16">
           <div
@@ -172,15 +234,20 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
         </div>
       );
     }
+
+    console.log(response, areaKeys);
+
     return (
       <ResponsiveContainer width="80%" height="80%">
-        <LineChart width={500} height={300} data={transformedData}>
+        <LineChart width={500} height={300} data={response}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="category" />
+          <XAxis dataKey="category" padding={{ left: 30, right: 30 }} />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="value" name="Flagship" stroke="#EB4724" />
+          {areaKeys.map((key, index) => (
+            <Line type="monotone" dataKey={`value.${key}`} stroke={colours[index]} name={key} />
+          ))}
         </LineChart>
       </ResponsiveContainer>
     );

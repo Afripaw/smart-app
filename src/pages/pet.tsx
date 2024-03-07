@@ -460,9 +460,17 @@ const Pet: NextPage = () => {
   // const [id, setID] = useState(0);
 
   //---------------------------------NAVIGATION OF OWNER TO PET----------------------------------
+
   useEffect(() => {
     if (router.asPath.includes("ownerID")) {
+      // const path = router.asPath.split("?")[1] ?? "";
+      // console.log("Path: ", path);
+      // console.log("Owner ID: ", Number(path.split("=")[1]));
       setOwnerID(Number(router.asPath.split("=")[1]));
+
+      //setFirstName(owner?.data?.firstName);
+      //setSurname(owner?.data?.surname);
+
       /*const query = router.asPath.split("?")[1] ?? "";
 
       console.log("Owner ID: ", query?.split("&")[0]?.split("=")[1] ?? "");
@@ -485,7 +493,9 @@ const Pet: NextPage = () => {
       //console.log("as path: ", router.asPath);
       //console.log("base path: ", router.basePath);
       // console.log("Owner ID: ", ownerID);
-      setIsCreate(true);
+
+      //setIsCreate(true);
+      void handleCreateNewUser();
     }
     if (router.asPath.includes("petID")) {
       setIsViewProfilePage(true);
@@ -496,7 +506,7 @@ const Pet: NextPage = () => {
 
   const pet = router.asPath.includes("petID")
     ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) })
-    : api.pet.getPetByID.useQuery({ petID: 1000112 });
+    : api.pet.getPetByID.useQuery({ petID: 0 });
 
   // const pet = router.asPath.includes("petID")
   //   ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) })
@@ -909,6 +919,12 @@ const Pet: NextPage = () => {
   const handleSterilisationStatusOption = (option: SetStateAction<string>) => {
     setSterilisationStatusOption(option);
     setSterilisationStatus(false);
+
+    if (option === "Yes") {
+      setSterilisationRequestSignedOption("Select one");
+      setSterilisationRequestedOption("Select one");
+      setSterilisationOutcomeOption("Select one");
+    }
   };
 
   useEffect(() => {
@@ -1139,7 +1155,7 @@ const Pet: NextPage = () => {
 
   // CustomInput component with explicit types for the props
   const CustomVaccine1Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
+    <button className="form-input flex items-center rounded-md border px-1 py-2 " onClick={onClick}>
       <svg
         className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
         aria-hidden="true"
@@ -1701,6 +1717,7 @@ const Pet: NextPage = () => {
         })) ?? [];
       console.log("Treatment data: ", treatmentData);
 
+      setID(userData?.petID ?? 0);
       setPetName(userData?.petName ?? "");
       setSpeciesOption(userData?.species ?? "Select one");
       setSexOption(userData?.sex ?? "Select one");
@@ -1709,6 +1726,7 @@ const Pet: NextPage = () => {
       setColourList(userData?.colour ?? []);
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
+      setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
       // setSterilisationStatusOption(userData?.sterilisedStatus.getFullYear() === 1970 ? "Select one" : "Yes");
       // setSterilisationRequestedOption(userData?.sterilisedRequested?.getFullYear() === 1970 ? "Select one" : "Yes");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
@@ -1790,6 +1808,7 @@ const Pet: NextPage = () => {
       setTreatmentList(treatmentData);
       console.log("Treatment list: ", treatmentList);
 
+      setOwnerID(userData?.owner?.ownerID ?? 0);
       setFirstName(userData?.owner.firstName ?? "");
       setSurname(userData?.owner?.surname ?? "");
       setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
@@ -1899,6 +1918,7 @@ const Pet: NextPage = () => {
       console.log("Treatment list: ", treatmentList);
       //setClinicIDList(clinicIDs ?? []);
 
+      setOwnerID(userData?.owner?.ownerID ?? 0);
       setFirstName(userData?.owner?.firstName ?? "");
       setSurname(userData?.owner?.surname ?? "");
       setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
@@ -1978,6 +1998,8 @@ const Pet: NextPage = () => {
     setStatusOption("Select one");
     setSterilisationStatusOption("Select one");
     setSterilisationRequestedOption("Select one");
+    setSterilisationStatusDate(new Date());
+    setSterilisationRequestedDate(new Date());
     setSterilisationOutcomeOption("Select one");
     setVaccinationShot1Option("Select one");
     setVaccinationShot2Option("Select one");
@@ -2156,6 +2178,7 @@ const Pet: NextPage = () => {
 
       // setClinicIDList(clinicIDs ?? []);
 
+      setOwnerID(userData?.owner?.ownerID ?? 0);
       setFirstName(userData?.owner?.firstName ?? "");
       setSurname(userData?.owner?.surname ?? "");
       setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
@@ -2375,47 +2398,121 @@ const Pet: NextPage = () => {
     console.log("Treatment data: ", treatmentData);
 
     const petData = userData?.pet_data;
-    setPetName(petData?.petName ?? "");
-    setSpeciesOption(petData?.species ?? "");
-    setSexOption(petData?.sex ?? "");
-    setAgeOption(petData?.age ?? "");
-    setBreedOption(petData?.breed ?? "");
-    setColourList(petData?.colour ?? [""]);
-    setMarkings(petData?.markings ?? "");
-    setStatusOption(petData?.status ?? "");
-    //setSterilisationStatusOption(petData?.sterilisedStatus ?? "");
-    //setSterilisationRequestedOption(petData?.sterilisedRequested ?? "");
-    setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "");
 
-    if (petData?.vaccinationShot1.getFullYear() !== 1970) {
-      setVaccinationShot1Option("Yes");
-    } else {
-      setVaccinationShot1Option("Not yet");
+    if (isCreate || isUpdate) {
+      setPetName(petData?.petName ?? "");
+      setSpeciesOption(petData?.species ?? "Select one");
+      setSexOption(petData?.sex ?? "Select one");
+      setAgeOption(petData?.age ?? "Select one");
+      setBreedOption(petData?.breed ?? "Select one");
+      setColourList(petData?.colour ?? [""]);
+      setMarkings(petData?.markings ?? "");
+      setStatusOption(petData?.status ?? "Select one");
+      setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "Select one");
+      setSterilisationStatusOption(
+        petData?.sterilisedStatus === undefined || petData?.sterilisedStatus === null
+          ? "Select one"
+          : petData?.sterilisedStatus.getFullYear() === 1970
+            ? "No"
+            : "Yes",
+      );
+      setSterilisationRequestedOption(
+        petData?.sterilisedRequested === undefined || petData?.sterilisedRequested === null
+          ? "Select one"
+          : petData?.sterilisedRequested.getFullYear() === 1970
+            ? "No"
+            : "Yes",
+      );
+      setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "Select one");
+      setMembershipTypeOption(petData?.membership ?? "Select one");
+      setCardStatusOption(petData?.cardStatus ?? "Select one");
+
+      setVaccinationShot1Option(
+        petData?.vaccinationShot1 === undefined || petData?.vaccinationShot1 === null
+          ? "Select one"
+          : petData?.vaccinationShot1.getFullYear() === 1970
+            ? "No"
+            : "Yes",
+      );
+      setVaccinationShot2Option(
+        petData?.vaccinationShot2 === undefined || petData?.vaccinationShot2 === null
+          ? "Select one"
+          : petData?.vaccinationShot2.getFullYear() === 1970
+            ? "No"
+            : "Yes",
+      );
+      setVaccinationShot3Option(
+        petData?.vaccinationShot3 === undefined || petData?.vaccinationShot3 === null
+          ? "Select one"
+          : petData?.vaccinationShot3.getFullYear() === 1970
+            ? "No"
+            : "Yes",
+      );
+    }
+    if (isViewProfilePage) {
+      setPetName(petData?.petName ?? "");
+      setSpeciesOption(petData?.species ?? "");
+      setSexOption(petData?.sex ?? "");
+      setAgeOption(petData?.age ?? "");
+      setBreedOption(petData?.breed ?? "");
+      setColourList(petData?.colour ?? [""]);
+      setMarkings(petData?.markings ?? "");
+      setStatusOption(petData?.status ?? "");
+      setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "");
+      setSterilisationStatusOption(
+        petData?.sterilisedStatus === undefined || petData?.sterilisedStatus === null ? "" : petData?.sterilisedStatus.getFullYear() === 1970 ? "No" : "Yes",
+      );
+      setSterilisationRequestedOption(
+        petData?.sterilisedRequested === undefined || petData?.sterilisedRequested === null
+          ? ""
+          : petData?.sterilisedRequested.getFullYear() === 1970
+            ? "No"
+            : "Yes",
+      );
+      setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "");
+      setMembershipTypeOption(petData?.membership ?? "");
+      setCardStatusOption(petData?.cardStatus ?? "");
+
+      setVaccinationShot1Option(
+        petData?.vaccinationShot1 === undefined || petData?.vaccinationShot1 === null ? "" : petData?.vaccinationShot1.getFullYear() === 1970 ? "No" : "Yes",
+      );
+      setVaccinationShot2Option(
+        petData?.vaccinationShot2 === undefined || petData?.vaccinationShot2 === null ? "" : petData?.vaccinationShot2.getFullYear() === 1970 ? "No" : "Yes",
+      );
+      setVaccinationShot3Option(
+        petData?.vaccinationShot3 === undefined || petData?.vaccinationShot3 === null ? "" : petData?.vaccinationShot3.getFullYear() === 1970 ? "No" : "Yes",
+      );
     }
 
-    if (petData?.vaccinationShot2?.getFullYear() !== 1970) {
-      setVaccinationShot2Option("Yes");
-    } else {
-      setVaccinationShot2Option("Not yet");
-    }
+    // if (petData?.vaccinationShot1.getFullYear() !== 1970) {
+    //   setVaccinationShot1Option("Yes");
+    // } else {
+    //   setVaccinationShot1Option("Not yet");
+    // }
 
-    if (petData?.vaccinationShot3?.getFullYear() !== 1970) {
-      setVaccinationShot3Option("Yes");
-    } else {
-      setVaccinationShot3Option("Not yet");
-    }
+    // if (petData?.vaccinationShot2?.getFullYear() !== 1970) {
+    //   setVaccinationShot2Option("Yes");
+    // } else {
+    //   setVaccinationShot2Option("Not yet");
+    // }
 
-    if (petData?.sterilisedStatus?.getFullYear() !== 1970) {
-      setSterilisationStatusOption("Yes");
-    } else {
-      setSterilisationStatusOption("Not yet");
-    }
+    // if (petData?.vaccinationShot3?.getFullYear() !== 1970) {
+    //   setVaccinationShot3Option("Yes");
+    // } else {
+    //   setVaccinationShot3Option("Not yet");
+    // }
 
-    if (petData?.sterilisedRequested?.getFullYear() !== 1970) {
-      setSterilisationRequestedOption("Yes");
-    } else {
-      setSterilisationRequestedOption("Not yet");
-    }
+    // if (petData?.sterilisedStatus?.getFullYear() !== 1970) {
+    //   setSterilisationStatusOption("Yes");
+    // } else {
+    //   setSterilisationStatusOption("Not yet");
+    // }
+
+    // if (petData?.sterilisedRequested?.getFullYear() !== 1970) {
+    //   setSterilisationRequestedOption("Yes");
+    // } else {
+    //   setSterilisationRequestedOption("Not yet");
+    // }
 
     // setVaccinationShot1Option(userData?.vaccinationShot1 != new Date(0) ? "Yes" : "Not yet");
     // setVaccinationShot2Option(userData?.vaccinationShot2 != new Date(0) ? "Yes" : "Not yet");
@@ -2426,8 +2523,6 @@ const Pet: NextPage = () => {
     setSterilisationStatusDate(petData?.sterilisedStatus ?? new Date());
     setSterilisationRequestedDate(petData?.sterilisedRequested ?? new Date());
 
-    setMembershipTypeOption(petData?.membership ?? "");
-    setCardStatusOption(petData?.cardStatus ?? "");
     setKennelList(petData?.kennelReceived ?? []);
     setLastDeworming(petData?.lastDeworming ?? new Date());
     setComments(petData?.comments ?? "");
@@ -2438,6 +2533,7 @@ const Pet: NextPage = () => {
     // setClinicIDList(clinicIDs ?? []);
     const ownerData = userData?.owner_data;
 
+    setOwnerID(ownerData?.ownerID ?? 0);
     setFirstName(ownerData?.firstName ?? "");
     setSurname(ownerData?.surname ?? "");
     setGreaterArea(ownerData?.addressGreaterArea.greaterArea ?? "");
@@ -3061,7 +3157,7 @@ const Pet: NextPage = () => {
                     />
                   )}
                   <div className="flex py-2">
-                    Pet ID: <div className="px-3">P{latestPetID?.data?.petID ?? 0}</div>
+                    Pet ID: <div className="px-3">P{isCreate ? latestPetID?.data?.petID ?? 0 : id}</div>
                   </div>
                   <Input label="Pet Name" placeholder="Type here: e.g. Sally" value={petName} onChange={setPetName} required />
                   {petNameErrorMessage && <div className="text-sm text-red-500">{petNameErrorMessage}</div>}
@@ -3235,6 +3331,15 @@ const Pet: NextPage = () => {
                       value={markings}
                     />
                   </div>
+
+                  {isUpdate && (
+                    <div className="mt-3 flex items-start">
+                      <div className="mr-3">Owner: </div>
+                      <div>
+                        {firstName} {surname} N{ownerID}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -3307,13 +3412,13 @@ const Pet: NextPage = () => {
                         <div className="mr-3 flex items-center pt-5">
                           <div className=" flex pl-3">Sterilisation Date: </div>
                         </div>
-                        <div className="pt-2">
+                        <div className="z-50 pt-2">
                           <DatePicker
                             selected={sterilisationStatusDate}
                             onChange={(date) => setSterilisationStatusDate(date!)}
                             dateFormat="dd/MM/yyyy"
                             customInput={<CustomSterilisationStatusInput />}
-                            className="form-input rounded-md border py-2"
+                            className="form-input z-40 rounded-md border py-2"
                           />
                         </div>
                       </div>
@@ -3354,7 +3459,7 @@ const Pet: NextPage = () => {
                           <div className="mr-3 flex items-center pt-5">
                             <div className=" flex pl-3">Sterilisation Requested Date: </div>
                           </div>
-                          <div className="pt-2">
+                          <div className="z-50 pt-2">
                             <DatePicker
                               selected={sterilisationRequestedDate}
                               onChange={(date) => setSterilisationRequestedDate(date!)}
@@ -3467,7 +3572,7 @@ const Pet: NextPage = () => {
                         <div className="mr-3 flex items-center pt-5">
                           <div className=" flex pl-3">Vaccination Shot 1 Date: </div>
                         </div>
-                        <div className="pt-2">
+                        <div className="z-40 pt-2">
                           <DatePicker
                             selected={vaccinationShot1Date}
                             onChange={(date) => setVaccinationShot1Date(date!)}
@@ -3514,7 +3619,7 @@ const Pet: NextPage = () => {
                           <div className="mr-3 flex items-center pt-5">
                             <div className=" flex pl-3">Vaccination Shot 2 Date: </div>
                           </div>
-                          <div className="pt-2">
+                          <div className="z-40 pt-2">
                             <DatePicker
                               selected={vaccinationShot2Date}
                               onChange={(date) => setVaccinationShot2Date(date!)}
@@ -3528,7 +3633,7 @@ const Pet: NextPage = () => {
                     </div>
                   )}
 
-                  {vaccinationShot2Option === "Yes" && (
+                  {vaccinationShot2Option === "Yes" && vaccinationShot1Option === "Yes" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
                         <div className=" flex">Vaccination Shot 3: </div>
@@ -3562,7 +3667,7 @@ const Pet: NextPage = () => {
                           <div className="mr-3 flex items-center pt-5">
                             <div className=" flex pl-3">Vaccination Shot 3 Date: </div>
                           </div>
-                          <div className="pt-2">
+                          <div className="z-40 pt-2">
                             <DatePicker
                               selected={vaccinationShot3Date}
                               onChange={(date) => setVaccinationShot3Date(date!)}
@@ -3576,12 +3681,14 @@ const Pet: NextPage = () => {
                     </div>
                   )}
 
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Treatments: </div>
+                  {isUpdate && treatmentList.length > 0 && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">Treatments: </div>
+                      </div>
+                      <div className="mt-5 flex">{treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join(", ")}</div>
                     </div>
-                    <div className="mt-5 flex">{treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join(", ")}</div>
-                  </div>
+                  )}
                 </div>
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
@@ -3944,6 +4051,13 @@ const Pet: NextPage = () => {
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Markings:</b> {markings}
                       </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Owner:</b>{" "}
+                        <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(ownerID)}>
+                          {firstName} {surname} (N{ownerID})
+                        </button>
+                      </div>
                     </div>
 
                     <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -4000,23 +4114,23 @@ const Pet: NextPage = () => {
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Vaccination Shot 2:</b>
-                        {vaccinationShot2Option === "Yes" ? (
+                        {vaccinationShot2Option === "Yes" && vaccinationShot1Option === "Yes" ? (
                           <div className="ml-3">
                             {vaccinationShot2Date.getDate() + "/" + (vaccinationShot2Date.getMonth() + 1) + "/" + vaccinationShot2Date.getFullYear()}
                           </div>
                         ) : (
-                          <div className="ml-3">{vaccinationShot2Option}</div>
+                          <div className="ml-3">Not yet</div>
                         )}
                       </div>
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Vaccination Shot 3:</b>
-                        {vaccinationShot3Option === "Yes" ? (
+                        {vaccinationShot3Option === "Yes" && vaccinationShot1Option === "Yes" && vaccinationShot2Option === "Yes" ? (
                           <div className="ml-3">
                             {vaccinationShot3Date.getDate() + "/" + (vaccinationShot3Date.getMonth() + 1) + "/" + vaccinationShot3Date.getFullYear()}
                           </div>
                         ) : (
-                          <div className="ml-3">{vaccinationShot3Option}</div>
+                          <div className="ml-3">Not yet</div>
                         )}
                       </div>
 

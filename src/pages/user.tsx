@@ -569,10 +569,10 @@ const User: NextPage = () => {
 
   //-------------------------------UPDATE USER-----------------------------------------
 
-  //GEOGRAPHIC LOCATION
-  const getGreaterAreaByID = api.geographic.getGreaterAreaByID.useQuery({ greaterAreaID: greaterAreaID });
-  const getAreaByID = api.geographic.getAreaByID.useQuery({ areaID: areaID });
-  const getStreetByID = api.geographic.getStreetByID.useQuery({ streetID: streetID });
+  // //GEOGRAPHIC LOCATION
+  // const getGreaterAreaByID = api.geographic.getGreaterAreaByID.useQuery({ greaterAreaID: greaterAreaID });
+  // const getAreaByID = api.geographic.getAreaByID.useQuery({ areaID: areaID });
+  // const getStreetByID = api.geographic.getStreetByID.useQuery({ streetID: streetID });
   //Update the user's details in fields
   const handleUpdateUserProfile = async (id: string) => {
     setID(id);
@@ -600,15 +600,15 @@ const User: NextPage = () => {
       setComments(userData.comments ?? "");
       setImage(userData.image ?? "");
 
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
 
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+      const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
-      const street: Street = { street: getStreetByID.data?.street ?? "Select one", id: getStreetByID.data?.streetID ?? 0 };
+      const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
 
@@ -652,15 +652,15 @@ const User: NextPage = () => {
       setComments(userData.comments ?? "");
       setImage(userData.image ?? "");
 
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
 
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+      const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
-      const street: Street = { street: getStreetByID.data?.street ?? "Select one", id: getStreetByID.data?.streetID ?? 0 };
+      const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
 
@@ -898,9 +898,9 @@ const User: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
-      setAreaID(userData.addressAreaID ?? 0);
-      setStreetID(userData.addressStreetID ?? 0);
+      //setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
+      //setAreaID(userData.addressAreaID ?? 0);
+      //setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -915,24 +915,30 @@ const User: NextPage = () => {
       console.log("Image: ", userData.image);
       console.log("Image: ", image);
 
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "", id: userData.addressGreaterAreaID ?? 0 };
 
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+      const area: Area = { area: userData.addressArea?.area ?? "", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
-      const street: Street = { street: getStreetByID.data?.street ?? "Select one", id: getStreetByID.data?.streetID ?? 0 };
+      const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
 
       //Make sure thet area and street options have a value
-      if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
-        setAreaOption({ area: "Select one", id: 0 });
+      // if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
+      //   setAreaOption({ area: "", id: 0 });
+      // }
+      // if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
+      //   setStreetOption({ street: "", id: 0 });
+      // }
+      if (areaOption.area == "Select one" || areaOption.area == "" || areaOption.area == undefined || areaOption.id == 0) {
+        setAreaOption({ area: "", id: 0 });
       }
-      if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
-        setStreetOption({ street: "Select one", id: 0 });
+      if (streetOption.street == "Select one" || streetOption.street == "" || streetOption.street == undefined || streetOption.id == 0) {
+        setStreetOption({ street: "", id: 0 });
       }
     }
 
@@ -943,9 +949,6 @@ const User: NextPage = () => {
 
   useEffect(() => {
     //console.log("View profile page: ", JSON.stringify(user.data));
-    if (isViewProfilePage) {
-      // void user.refetch();
-    }
     if (user) {
       const userData = user;
       setUserID(userData.userID ?? 0);
@@ -953,9 +956,9 @@ const User: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
-      setAreaID(userData.addressAreaID ?? 0);
-      setStreetID(userData.addressStreetID ?? 0);
+      //setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
+      //setAreaID(userData.addressAreaID ?? 0);
+      //setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -969,19 +972,54 @@ const User: NextPage = () => {
       setImage(userData.image ?? "");
       console.log("Image: ", userData.image);
       console.log("Image: ", image);
+
+      if (isUpdate) {
+        const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
+
+        setGreaterAreaOption(greaterArea);
+
+        const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
+
+        setAreaOption(area);
+
+        const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
+
+        setStreetOption(street);
+      }
+      if (isViewProfilePage) {
+        const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "", id: userData.addressGreaterAreaID ?? 0 };
+
+        setGreaterAreaOption(greaterArea);
+
+        const area: Area = { area: userData.addressArea?.area ?? "", id: userData.addressAreaID ?? 0 };
+
+        setAreaOption(area);
+
+        const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
+
+        setStreetOption(street);
+      }
+
       //console.log("Select one");
       //Make sure thet area and street options have a value
-      if ((userData.addressAreaID === 0 || userData.addressAreaID === undefined) && !isUpdate) {
+      // if ((userData.addressAreaID === 0 || userData.addressAreaID === undefined) && !isUpdate) {
+      //   setAreaOption({ area: "", id: 0 });
+      // }
+      // if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && !isUpdate)) {
+      //   setStreetOption({ street: "", id: 0 });
+      // }
+      // if (userData.addressAreaID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
+      //   setAreaOption({ area: "Select one", id: 0 });
+      // }
+      // if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
+      //   setStreetOption({ street: "Select one", id: 0 });
+      // }
+
+      if (areaOption.area === "Select one" && isViewProfilePage) {
         setAreaOption({ area: "", id: 0 });
       }
-      if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && !isUpdate)) {
+      if (streetOption.street === "Select one" && isViewProfilePage) {
         setStreetOption({ street: "", id: 0 });
-      }
-      if (userData.addressAreaID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
-        setAreaOption({ area: "Select one", id: 0 });
-      }
-      if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
-        setStreetOption({ street: "Select one", id: 0 });
       }
     }
   }, [isViewProfilePage, isCreate, isUpdate]); // Effect runs when userQuery.data changes
@@ -1503,7 +1541,7 @@ const User: NextPage = () => {
                     />
                   )}
                   <div className="flex py-2">
-                    User ID: <div className="px-3">U{latestUserID?.data?.userID ?? 0}</div>
+                    User ID: <div className="px-3">U{isCreate ? latestUserID?.data?.userID ?? 0 : userID}</div>
                   </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />

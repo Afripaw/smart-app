@@ -17,7 +17,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { data, error } = await resend.emails.send({
     from: "Afripaw <info@afripaw.app>",
     to: [email],
-    subject: "Afripaw Smart App Login Credentials",
+    subject: "Afripaw Smart App Message",
     // html: emailHtml, // Use the rendered HTML string
     // text: "Dear " + firstName + ",\n\n" + "Congratulations, you have been registered as a Here is your user credentials: \n\n" + "User ID: " + id + "\n" + "Password: " + password,
     text: message,

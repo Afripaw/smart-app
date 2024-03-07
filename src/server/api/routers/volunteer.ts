@@ -574,43 +574,87 @@ export const volunteerRouter = createTRPCRouter({
     return identification;
   }),
 
-  //Get all the volunteers that are active and sum these owners for each year for the last 5 years
+  // //Get all the volunteers that are active and sum these owners for each year for the last 5 years
+  // getActiveVolunteersFor5Years: protectedProcedure.query(async ({ ctx }) => {
+  //   const volunteers = await ctx.db.volunteer.findMany({
+  //     where: {
+  //       status: "Active",
+  //     },
+  //   });
+
+  //   const last5YearsVolunteers = volunteers.filter((volunteer) => volunteer.startingDate.getFullYear() >= new Date().getFullYear() - 4);
+
+  //   const firstYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 4);
+  //   const secondYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 3);
+  //   const thirdYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 2);
+  //   const fourthYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 1);
+  //   const fifthYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear());
+
+  //   const activeVolunteers = {
+  //     [new Date().getFullYear() - 4]: firstYearVolunteers.length,
+  //     [new Date().getFullYear() - 3]: secondYearVolunteers.length,
+  //     [new Date().getFullYear() - 2]: thirdYearVolunteers.length,
+  //     [new Date().getFullYear() - 1]: fourthYearVolunteers.length,
+  //     [new Date().getFullYear()]: fifthYearVolunteers.length,
+  //   };
+  //   // const activeVolunteers = last5YearsVolunteers.reduce(
+  //   //   (acc, volunteer) => {
+  //   //     const year = volunteer.startingDate.getFullYear();
+  //   //     if (acc[year]) {
+  //   //       acc[year]++;
+  //   //     } else {
+  //   //       acc[year] = 1;
+  //   //     }
+  //   //     return acc;
+  //   //   },
+  //   //   {} as Record<number, number>,
+  //   // );
+
+  //   return activeVolunteers;
+  // }),
+
+  // //Get all the owners that are active and sum these owners for each year for the last 5 years. seperate into respective greater areas
   getActiveVolunteersFor5Years: protectedProcedure.query(async ({ ctx }) => {
+    const currentYear = new Date().getFullYear();
+    const activeVolunteers: Record<number, Record<string, number>> = {};
+
+    const greaterAreas = await ctx.db.greaterArea.findMany();
+
     const volunteers = await ctx.db.volunteer.findMany({
       where: {
         status: "Active",
       },
+      include: {
+        addressGreaterArea: true,
+      },
     });
 
-    const last5YearsVolunteers = volunteers.filter((volunteer) => volunteer.startingDate.getFullYear() >= new Date().getFullYear() - 4);
+    for (let year = currentYear - 4; year <= currentYear; year++) {
+      const volunteersInYear = volunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === year);
+      //activeOwners[year] = {};
 
-    const firstYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 4);
-    const secondYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 3);
-    const thirdYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 2);
-    const fourthYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear() - 1);
-    const fifthYearVolunteers = last5YearsVolunteers.filter((volunteer) => volunteer.startingDate.getFullYear() === new Date().getFullYear());
+      for (const area of greaterAreas) {
+        //search through the ID array of greaterAreas in volunteers and if any of the ids match the area.greaterAreaID, then count the number of volunteers in that area
+        const volunteersInArea = volunteersInYear.filter((volunteer) =>
+          volunteer.addressGreaterArea.some((greaterArea) => greaterArea.greaterAreaID === area.greaterAreaID),
+        ).length;
+        //const volunteersInArea = volunteersInYear.filter((volunteer) => volunteer. === area.greaterAreaID).length;
+        if (activeVolunteers[year] === undefined) {
+          activeVolunteers[year] = {};
+        }
+        activeVolunteers[year]![area.greaterArea] = volunteersInArea;
+      }
+    }
 
-    const activeVolunteers = {
-      [new Date().getFullYear() - 4]: firstYearVolunteers.length,
-      [new Date().getFullYear() - 3]: secondYearVolunteers.length,
-      [new Date().getFullYear() - 2]: thirdYearVolunteers.length,
-      [new Date().getFullYear() - 1]: fourthYearVolunteers.length,
-      [new Date().getFullYear()]: fifthYearVolunteers.length,
+    const transformedData = Object.entries(activeVolunteers).map(([category, value]) => ({
+      category: Number(category),
+      value,
+    }));
+
+    return {
+      transformedData: transformedData,
+      owners: volunteers,
     };
-    // const activeVolunteers = last5YearsVolunteers.reduce(
-    //   (acc, volunteer) => {
-    //     const year = volunteer.startingDate.getFullYear();
-    //     if (acc[year]) {
-    //       acc[year]++;
-    //     } else {
-    //       acc[year] = 1;
-    //     }
-    //     return acc;
-    //   },
-    //   {} as Record<number, number>,
-    // );
-
-    return activeVolunteers;
   }),
 
   //download
@@ -681,5 +725,24 @@ export const volunteerRouter = createTRPCRouter({
       });
 
       return volunteers;
+    }),
+
+  //update owners starting date
+  updateStartingDate: publicProcedure
+    .input(
+      z.object({
+        volunteerID: z.number(),
+        startingDate: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.volunteer.update({
+        where: {
+          volunteerID: input.volunteerID,
+        },
+        data: {
+          startingDate: input.startingDate,
+        },
+      });
     }),
 });

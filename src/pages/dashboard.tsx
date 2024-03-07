@@ -23,7 +23,7 @@ const Dashboard: NextPage = () => {
       <Head>
         <title>Dashboard</title>
       </Head>
-      <main className="text-normal flex h-screen flex-col">
+      <main className="flex h-screen flex-col text-normal">
         <Navbar />
         <div className="grid h-full grid-cols-3 grid-rows-3">
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
@@ -45,7 +45,7 @@ const Dashboard: NextPage = () => {
 
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <BarGraph type="sterilisedPets" />
-            <div className="pl-16">Total Numbers of Sterilised Pets (All Areas, Last 5 Years)</div>
+            <div className="pl-16">Total Numbers of Pets Sterilised (All Areas, Last 5 Years)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="clinics" />

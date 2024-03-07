@@ -388,45 +388,156 @@ export const petOwnerRouter = createTRPCRouter({
     return identification;
   }),
 
-  //Get all the owners that are active and sum these owners for each year for the last 5 years
+  // //Get all the owners that are active and sum these owners for each year for the last 5 years. seperate into respective greater areas
   getActiveOwners: protectedProcedure.query(async ({ ctx }) => {
+    const currentYear = new Date().getFullYear();
+    const activeOwners: Record<number, Record<string, number>> = {};
+
+    const greaterAreas = await ctx.db.greaterArea.findMany();
+
     const owners = await ctx.db.petOwner.findMany({
       where: {
         status: "Active",
       },
     });
 
-    const last5YearsOwners = owners.filter((owner) => owner.startingDate.getFullYear() >= new Date().getFullYear() - 4);
+    for (let year = currentYear - 4; year <= currentYear; year++) {
+      const ownersInYear = owners.filter((owner) => owner.startingDate.getFullYear() === year);
+      //activeOwners[year] = {};
 
-    const firstYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 4);
-    const secondYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 3);
-    const thirdYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 2);
-    const fourthYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 1);
-    const fifthYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear());
+      for (const area of greaterAreas) {
+        const ownersInArea = ownersInYear.filter((owner) => owner.addressGreaterAreaID === area.greaterAreaID).length;
+        if (activeOwners[year] === undefined) {
+          activeOwners[year] = {};
+        }
+        activeOwners[year]![area.greaterArea] = ownersInArea;
+      }
+    }
 
-    const activeOwners = {
-      [new Date().getFullYear() - 4]: firstYearOwners.length,
-      [new Date().getFullYear() - 3]: secondYearOwners.length,
-      [new Date().getFullYear() - 2]: thirdYearOwners.length,
-      [new Date().getFullYear() - 1]: fourthYearOwners.length,
-      [new Date().getFullYear()]: fifthYearOwners.length,
+    const transformedData = Object.entries(activeOwners).map(([category, value]) => ({
+      category: Number(category),
+      value,
+    }));
+
+    return {
+      transformedData: transformedData,
+      owners: owners,
     };
-
-    // const activeOwners = last5YearsOwners.reduce(
-    //   (acc, owner) => {
-    //     const year = owner.startingDate.getFullYear();
-    //     if (acc[year]) {
-    //       acc[year]++;
-    //     } else {
-    //       acc[year] = 1;
-    //     }
-    //     return acc;
-    //   },
-    //   {} as Record<number, number>,
-    // );
-
-    return activeOwners;
   }),
+
+  // getActiveOwners: protectedProcedure.query(async ({ ctx }) => {
+  //   const greaterAreas = await ctx.db.greaterArea.findMany();
+
+  //   const activeOwners = [];
+
+  //   const areas = [];
+
+  //   //get all the active owners of the last 5 years
+  //   const owners = await ctx.db.petOwner.findMany({
+  //     where: {
+  //       startingDate: {
+  //         gte: new Date(new Date().getFullYear() - 4),
+  //         lte: new Date(new Date().getFullYear() + 1),
+  //       },
+  //     },
+  //   });
+
+  //   for (const area of greaterAreas) {
+  //     const ownersInArea = owners.filter((owner) => owner.addressGreaterAreaID === area.greaterAreaID).length;
+  //     areas.push(ownersInArea);
+  //   }
+
+  // const currentYear = new Date().getFullYear();
+  // const activeOwners = [];
+
+  // const greaterAreas = await ctx.db.greaterArea.findMany();
+
+  // for (const area of greaterAreas) {
+  //   const owners = await ctx.db.petOwner.findMany({
+  //     where: {
+  //       AND: [
+  //         {
+  //           addressGreaterAreaID: area.greaterAreaID,
+  //         },
+  //         {
+  //           startingDate: {
+  //             gte: new Date(currentYear - 4),
+  //             lte: new Date(currentYear + 1),
+  //           },
+  //         },
+  //       ],
+  //     },
+  //   });
+
+  //   const data = [
+  //     {
+  //       category: 2022,
+  //       greaterArea1: 4000,
+  //       greaterArea2: 2400,
+  //     },
+  //     {
+  //       category: 2023,
+  //       greaterArea1: 3000,
+  //       greaterArea2: 1398,
+  //     },
+  //   ];
+
+  //   activeOwners.push({
+  //     greaterArea: area.greaterArea,
+  //     activeOwners: {
+  //       [currentYear - 4]: {
+  //         value: owners.filter((owner) => owner.startingDate.getFullYear() === currentYear - 4).length,
+
+  //       },
+  //       [currentYear - 3]: owners.filter((owner) => owner.startingDate.getFullYear() === currentYear - 3).length,
+  //       [currentYear - 2]: owners.filter((owner) => owner.startingDate.getFullYear() === currentYear - 2).length,
+  //       [currentYear - 1]: owners.filter((owner) => owner.startingDate.getFullYear() === currentYear - 1).length,
+  //       [currentYear]: owners.filter((owner) => owner.startingDate.getFullYear() === currentYear).length,
+  //     },
+  //   });
+  // }
+
+  // return activeOwners;
+  //}),
+
+  // getActiveOwners: protectedProcedure.query(async ({ ctx }) => {
+  //   const owners = await ctx.db.petOwner.findMany({
+  //     where: {
+  //       status: "Active",
+  //     },
+  //   });
+
+  //   const last5YearsOwners = owners.filter((owner) => owner.startingDate.getFullYear() >= new Date().getFullYear() - 4);
+
+  //   const firstYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 4);
+  //   const secondYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 3);
+  //   const thirdYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 2);
+  //   const fourthYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear() - 1);
+  //   const fifthYearOwners = last5YearsOwners.filter((owner) => owner.startingDate.getFullYear() === new Date().getFullYear());
+
+  //   const activeOwners = {
+  //     [new Date().getFullYear() - 4]: firstYearOwners.length,
+  //     [new Date().getFullYear() - 3]: secondYearOwners.length,
+  //     [new Date().getFullYear() - 2]: thirdYearOwners.length,
+  //     [new Date().getFullYear() - 1]: fourthYearOwners.length,
+  //     [new Date().getFullYear()]: fifthYearOwners.length,
+  //   };
+
+  //   // const activeOwners = last5YearsOwners.reduce(
+  //   //   (acc, owner) => {
+  //   //     const year = owner.startingDate.getFullYear();
+  //   //     if (acc[year]) {
+  //   //       acc[year]++;
+  //   //     } else {
+  //   //       acc[year] = 1;
+  //   //     }
+  //   //     return acc;
+  //   //   },
+  //   //   {} as Record<number, number>,
+  //   // );
+
+  //   return activeOwners;
+  // }),
 
   //get all the dogs and cats respectively that are active and over the last 5 years since the owner's startingdate
   getActivePets: protectedProcedure.query(async ({ ctx }) => {
@@ -648,5 +759,24 @@ export const petOwnerRouter = createTRPCRouter({
       });
 
       return owners;
+    }),
+
+  //update owners starting date
+  updateStartingDate: publicProcedure
+    .input(
+      z.object({
+        ownerID: z.number(),
+        startingDate: z.date(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.petOwner.update({
+        where: {
+          ownerID: input.ownerID,
+        },
+        data: {
+          startingDate: input.startingDate,
+        },
+      });
     }),
 });

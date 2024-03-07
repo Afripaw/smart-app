@@ -186,7 +186,7 @@ const Geographic: NextPage = () => {
   };
 
   const handleAreaInput = (name: string) => {
-    setAreaOption({ id: 0, name: name, greaterAreaID: greaterArea?.id ?? 0, selected: false });
+    setAreaOption({ id: 0, name: name, greaterAreaID: greaterArea?.id ?? 0, selected: true });
   };
 
   const handleSelectedArea = (id: number) => {
@@ -235,7 +235,7 @@ const Geographic: NextPage = () => {
 
   //street edit box
   const handleStreetInput = (name: string) => {
-    setStreetOption({ id: 0, name: name, areaID: areaOption?.id ?? 0, selected: false });
+    setStreetOption({ id: 0, name: name, areaID: areaOption?.id ?? 0, selected: true });
   };
 
   const handleSelectedStreet = (id: number) => {
@@ -786,7 +786,7 @@ const Geographic: NextPage = () => {
           <>
             <div className="flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <b className=" text-2xl">{"Create New Greater Area"}</b>
+                <b className=" text-2xl">{isCreate ? "Create New Greater Area" : "Update Greater Area"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
                     Back To Greater Area Table
@@ -829,7 +829,7 @@ const Geographic: NextPage = () => {
                           role="status"
                         />
                       ) : (
-                        <div>Add Greater Area</div>
+                        <div>{isCreate ? "Add Greater Area" : "Edit Greater Area"}</div>
                       )}
                     </button>
                   </div>
@@ -854,8 +854,14 @@ const Geographic: NextPage = () => {
                           <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
                             {areaList.map((area) => (
                               <li key={area.id} className=" py-2">
-                                <label>
-                                  <input type="radio" name="area" value={areaOption?.name} onChange={() => handleSelectedArea(area.id)} />
+                                <label className="flex justify-center">
+                                  <input
+                                    type="radio"
+                                    name="area"
+                                    className="mr-1 checked:bg-main-orange"
+                                    value={areaOption?.name}
+                                    onChange={() => handleSelectedArea(area.id)}
+                                  />
                                   {area.name}
                                 </label>
                               </li>
@@ -877,7 +883,7 @@ const Geographic: NextPage = () => {
                               role="status"
                             />
                           ) : (
-                            <div>Add Area to Greater Area</div>
+                            <div>{isUpdate ? "Edit Area" : "Add Area to Greater Area"}</div>
                           )}
                         </button>
                       </div>
@@ -917,8 +923,14 @@ const Geographic: NextPage = () => {
                           <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
                             {selectedStreetList.map((street) => (
                               <li key={street.id} className=" py-2">
-                                <label>
-                                  <input type="radio" name="area" value={street.name} onChange={() => handleSelectedStreet(street.id)} />
+                                <label className="flex justify-center">
+                                  <input
+                                    type="radio"
+                                    className="mr-1 checked:bg-main-orange"
+                                    name="area"
+                                    value={street.name}
+                                    onChange={() => handleSelectedStreet(street.id)}
+                                  />
                                   {street.name}
                                 </label>
                               </li>
@@ -940,7 +952,7 @@ const Geographic: NextPage = () => {
                               role="status"
                             />
                           ) : (
-                            <div>Add Street to Area</div>
+                            <div>{isUpdate ? "Edit Street" : "Add Street to Area"}</div>
                           )}
                         </button>
                       </div>
@@ -1017,13 +1029,43 @@ const Geographic: NextPage = () => {
                     <b className="mr-3">Greater Area:</b> {greaterArea?.name}
                   </div>
 
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {areaList.map((area) => area.name).join("; ")}
+                  <div className="mb-2 flex items-start">
+                    {/* Make a dictionary list where you give the */}
+                    <b className="mr-3">Areas and Streets:</b>{" "}
+                    {/* {areaList
+                      .map(
+                        (area, index) =>
+                          String(index + 1) +
+                          ". " +
+                          area.name +
+                          " (" +
+                          streetList
+                            .filter((street) => street.areaID === area.id)
+                            .map((street) => street.name)
+                            .join("; ") +
+                          ")",
+                      )
+                      .join("\n")} */}
+                    <div className="flex flex-col gap-1">
+                      {areaList.map((area, index) => (
+                        <p className="" key={index}>
+                          <b>
+                            {String(index + 1)}. {area.name}
+                          </b>{" "}
+                          (
+                          {streetList
+                            .filter((street) => street.areaID === area.id)
+                            .map((street) => street.name)
+                            .join("; ")}
+                          )
+                        </p>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="mb-2 flex items-center">
+                  {/* <div className="mb-2 flex items-center">
                     <b className="mr-3">Street:</b> {streetList.map((street) => street.name).join("; ")}
-                  </div>
+                  </div> */}
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Date:</b>{" "}

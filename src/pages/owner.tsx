@@ -177,6 +177,24 @@ const Owner: NextPage = () => {
     console.log("Rows: ", rows);
   };
 
+  //---------------------------------RANDOM DATE GENERATOR----------------------------------
+  function getRandomDate(): Date {
+    const start = new Date("2020-01-01T00:00:00Z").getTime(); // Start of January 2020
+    const end = new Date("2024-02-29T23:59:59Z").getTime(); // End of February 2024 (leap year)
+
+    // Generate a random timestamp between the start and end
+    const randomTimestamp = start + Math.random() * (end - start);
+
+    // Create a new Date object using the random timestamp
+    return new Date(randomTimestamp);
+  }
+
+  const ownerStartingDate = api.petOwner.updateStartingDate.useMutation();
+  const handleRandomDate = async (id: number) => {
+    const date = getRandomDate();
+    await ownerStartingDate.mutateAsync({ ownerID: id, startingDate: date });
+  };
+
   //---------------------------------EMAILS----------------------------------
   async function sendEmail(firstName: string, email: string, id: string, password: string, typeOfUser: string): Promise<void> {
     const response = await fetch("/api/send", {
@@ -603,13 +621,11 @@ const Owner: NextPage = () => {
 
   //-------------------------------UPDATE USER-----------------------------------------
 
-  //GEOGRAPHIC LOCATION
-  const getGreaterAreaByID = api.geographic.getGreaterAreaByID.useQuery({ greaterAreaID: greaterAreaID });
-  const getAreaByID = api.geographic.getAreaByID.useQuery({ areaID: areaID });
-  const getStreetByID = api.geographic.getStreetByID.useQuery({ streetID: streetID });
-
   //Update the user's details in fields
   const handleUpdateUserProfile = async (id: number) => {
+    setIsUpdate(true);
+    setIsCreate(false);
+    setIsViewProfilePage(false);
     setID(id);
 
     const user = user_data?.find((user) => user.ownerID === id);
@@ -633,15 +649,15 @@ const Owner: NextPage = () => {
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
 
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
 
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+      const area: Area = { area: userData.addressArea.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
-      const street: Street = { street: getStreetByID.data?.street ?? "Select one", id: getStreetByID.data?.streetID ?? 0 };
+      const street: Street = { street: userData.addressStreet.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
 
@@ -654,6 +670,24 @@ const Owner: NextPage = () => {
       }
     }
 
+    // const pets = pet_data?.filter((pet: { ownerID: number }[]) => pet[0]?.ownerID === id);
+    // const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
+    // const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+    // const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
+
+    // const combined: Pet[] = petsID.map((id, index) => {
+    //   return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
+    // });
+    // setPetsCombined(combined);
+    // const pets = pet_data?.find((petArray) => petArray.some((pet) => pet.ownerID === id)) ?? [];
+
+    // const combined: Pet[] = pets.map((pet) => ({
+    //   id: pet.petID,
+    //   name: pet.petName ?? "",
+    //   breed: pet.breed ?? "",
+    // }));
+
+    // setPetsCombined(combined);
     const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
     const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
     const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
@@ -664,10 +698,15 @@ const Owner: NextPage = () => {
     });
     setPetsCombined(combined);
 
+    //setPetsCombined(combined);
+
+    console.log("Pets combined: ", combined);
+    console.log("Pets combined state: ", petsCombined);
+
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
     //isCreate ? setIsCreate(false) : setIsCreate(false);
-    setIsUpdate(true);
-    setIsCreate(false);
+    //setIsUpdate(true);
+    //setIsCreate(false);
   };
 
   useEffect(() => {
@@ -691,34 +730,58 @@ const Owner: NextPage = () => {
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
 
-      const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
-      const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
-      const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
-      const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
+      // const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
+      // const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
+      // const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+      // const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
 
-      const combined = petsID.map((id, index) => {
-        return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
-      });
-      setPetsCombined(combined);
+      // const combined = petsID.map((id, index) => {
+      //   return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
+      // });
+      // setPetsCombined(combined);
 
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      if (isUpdate || isCreate) {
+        const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
 
-      setGreaterAreaOption(greaterArea);
+        setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+        const area: Area = { area: userData.addressArea.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
-      setAreaOption(area);
+        setAreaOption(area);
 
-      const street: Street = { street: getStreetByID.data?.street ?? "Select one", id: getStreetByID.data?.streetID ?? 0 };
+        const street: Street = { street: userData.addressStreet.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
-      setStreetOption(street);
+        setStreetOption(street);
 
-      //Make sure thet area and street options have a value
-      if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
-        setAreaOption({ area: "Select one", id: 0 });
+        //Make sure thet area and street options have a value
+        if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
+          setAreaOption({ area: "Select one", id: 0 });
+        }
+        if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
+          setStreetOption({ street: "Select one", id: 0 });
+        }
       }
-      if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
-        setStreetOption({ street: "Select one", id: 0 });
+
+      if (isViewProfilePage) {
+        const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "", id: userData.addressGreaterAreaID ?? 0 };
+
+        setGreaterAreaOption(greaterArea);
+
+        const area: Area = { area: userData.addressArea.area ?? "", id: userData.addressAreaID ?? 0 };
+
+        setAreaOption(area);
+
+        const street: Street = { street: userData.addressStreet.street ?? "", id: userData.addressStreetID ?? 0 };
+
+        setStreetOption(street);
+
+        //Make sure thet area and street options have a value
+        if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
+          setAreaOption({ area: "", id: 0 });
+        }
+        if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
+          setStreetOption({ street: "", id: 0 });
+        }
       }
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
@@ -936,9 +999,9 @@ const Owner: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
-      setAreaID(userData.addressAreaID ?? 0);
-      setStreetID(userData.addressStreetID ?? 0);
+      //setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
+      //setAreaID(userData.addressAreaID ?? 0);
+      //setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       //setAddressSuburb(userData.addressSuburb ?? "");
@@ -965,24 +1028,24 @@ const Owner: NextPage = () => {
       });
       setPetsCombined(combined);
 
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "", id: userData.addressGreaterAreaID ?? 0 };
 
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+      const area: Area = { area: userData.addressArea.area ?? "", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
-      const street: Street = { street: getStreetByID.data?.street ?? "Select one", id: getStreetByID.data?.streetID ?? 0 };
+      const street: Street = { street: userData.addressStreet.street ?? "", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
 
       //Make sure thet area and street options have a value
       if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
-        setAreaOption({ area: "Select one", id: 0 });
+        setAreaOption({ area: "", id: 0 });
       }
       if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
-        setStreetOption({ street: "Select one", id: 0 });
+        setStreetOption({ street: "", id: 0 });
       }
     }
 
@@ -1016,9 +1079,7 @@ const Owner: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
-      setAreaID(userData.addressAreaID ?? 0);
-      setStreetID(userData.addressStreetID ?? 0);
+
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       //setAddressSuburb(userData.addressSuburb ?? "");
@@ -1041,18 +1102,38 @@ const Owner: NextPage = () => {
       });
       setPetsCombined(combined);
 
-      if ((userData.addressAreaID === 0 || userData.addressAreaID === undefined) && !isUpdate) {
+      const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "", id: userData.addressGreaterAreaID ?? 0 };
+
+      setGreaterAreaOption(greaterArea);
+
+      const area: Area = { area: userData.addressArea.area ?? "", id: userData.addressAreaID ?? 0 };
+
+      setAreaOption(area);
+
+      const street: Street = { street: userData.addressStreet.street ?? "", id: userData.addressStreetID ?? 0 };
+
+      setStreetOption(street);
+
+      //Make sure thet area and street options have a value
+      if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
         setAreaOption({ area: "", id: 0 });
       }
-      if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && !isUpdate)) {
+      if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
         setStreetOption({ street: "", id: 0 });
       }
-      if (userData.addressAreaID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
-        setAreaOption({ area: "Select one", id: 0 });
-      }
-      if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
-        setStreetOption({ street: "Select one", id: 0 });
-      }
+
+      // if ((userData.addressAreaID === 0 || userData.addressAreaID === undefined) && !isUpdate) {
+      //   setAreaOption({ area: "", id: 0 });
+      // }
+      // if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && !isUpdate)) {
+      //   setStreetOption({ street: "", id: 0 });
+      // }
+      // if (userData.addressAreaID === 0 || (userData.addressAreaID === undefined && isUpdate && !isViewProfilePage)) {
+      //   setAreaOption({ area: "Select one", id: 0 });
+      // }
+      // if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && isUpdate && !isViewProfilePage)) {
+      //   setStreetOption({ street: "Select one", id: 0 });
+      // }
     }
   }, [getOwner]); // Effect runs when userQuery.data changes
 
@@ -1529,6 +1610,14 @@ const Owner: NextPage = () => {
                                   </span>
                                 </span>
                               </div>
+
+                              {/* <div className="relative flex items-center justify-center">
+                                <button onClick={() => handleRandomDate(user.ownerID)} className="rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500">
+                                  <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    Random date
+                                  </span>
+                                </button>
+                              </div> */}
                             </div>
                           </tr>
                         );
@@ -1602,7 +1691,7 @@ const Owner: NextPage = () => {
                     />
                   )}
                   <div className="flex py-2">
-                    Owner ID: <div className="px-3">N{latestOwnerID?.data?.petOwnerID ?? 0}</div>
+                    Owner ID: <div className="px-3">N{isCreate ? latestOwnerID?.data?.petOwnerID ?? 0 : id}</div>
                   </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
@@ -1702,7 +1791,7 @@ const Owner: NextPage = () => {
                             {isAreaOpen && (
                               <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                                  {areaOptions.slice(1).map((option) => (
+                                  {areaOptions.map((option) => (
                                     <li key={option.areaID} onClick={() => handleAreaOption(option.area, option.areaID)}>
                                       <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.area}</button>
                                     </li>
@@ -1854,18 +1943,28 @@ const Owner: NextPage = () => {
                     </div>
                   </div> */}
 
-                  <div className="flex py-2">
-                    Pets:{" "}
-                    <div className="px-3">
-                      {petsCombined
-                        .map((pet) => (
-                          <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
-                            {(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
-                          </button>
-                        ))
-                        .join("; ")}
+                  {isUpdate && petsCombined.length > 0 && (
+                    // <div className="flex py-2">
+                    //   Pets:{" "}
+                    //   <div className="px-3">
+                    //     {petsCombined
+                    //       .map((pet) => (
+                    //         <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
+                    //           {(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                    //         </button>
+                    //       ))
+                    //       .join("; ")}
+                    //   </div>
+                    // </div>
+                    <div className="mb-2 flex items-center">
+                      <span className="mr-3">Pets:</span>{" "}
+                      <div className="flex flex-wrap gap-2">
+                        {petsCombined.map((pet) => (
+                          <div>{(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}</div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="flex items-start">
                     <div className="w-32 pt-3">Comments: </div>

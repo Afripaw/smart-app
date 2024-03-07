@@ -247,41 +247,74 @@ export const petClinicRouter = createTRPCRouter({
     return identification;
   }),
 
-  //Get all the clinics and sum these clinics for each year for the last 5 years
+  // //Get all the owners that are active and sum these owners for each year for the last 5 years. seperate into respective greater areas
   getClinicsHeld: protectedProcedure.query(async ({ ctx }) => {
-    const clinics = await ctx.db.petClinic.findMany();
+    const currentYear = new Date().getFullYear();
+    const clinicsHeld: Record<number, Record<string, number>> = {};
 
-    const last5YearsClinics = clinics.filter((clinic) => clinic.date.getFullYear() >= new Date().getFullYear() - 4);
+    const greaterAreas = await ctx.db.greaterArea.findMany();
 
-    const firstYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear() - 4);
-    const secondYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear() - 3);
-    const thirdYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear() - 2);
-    const fourthYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear() - 1);
-    const fifthYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear());
+    const clinics = await ctx.db.petClinic.findMany({});
 
-    const clinicsHeld = {
-      [new Date().getFullYear() - 4]: firstYearClinics.length,
-      [new Date().getFullYear() - 3]: secondYearClinics.length,
-      [new Date().getFullYear() - 2]: thirdYearClinics.length,
-      [new Date().getFullYear() - 1]: fourthYearClinics.length,
-      [new Date().getFullYear()]: fifthYearClinics.length,
+    for (let year = currentYear - 4; year <= currentYear; year++) {
+      const clinicsInYear = clinics.filter((clinic) => clinic.date.getFullYear() === year);
+      //activeOwners[year] = {};
+
+      for (const area of greaterAreas) {
+        const clinicsInArea = clinicsInYear.filter((clinic) => clinic.greaterAreaID === area.greaterAreaID).length;
+        if (clinicsHeld[year] === undefined) {
+          clinicsHeld[year] = {};
+        }
+        clinicsHeld[year]![area.greaterArea] = clinicsInArea;
+      }
+    }
+
+    const transformedData = Object.entries(clinicsHeld).map(([category, value]) => ({
+      category: Number(category),
+      value,
+    }));
+
+    return {
+      transformedData: transformedData,
+      clinics: clinics,
     };
-
-    // const activeOwners = last5YearsOwners.reduce(
-    //   (acc, owner) => {
-    //     const year = owner.startingDate.getFullYear();
-    //     if (acc[year]) {
-    //       acc[year]++;
-    //     } else {
-    //       acc[year] = 1;
-    //     }
-    //     return acc;
-    //   },
-    //   {} as Record<number, number>,
-    // );
-
-    return clinicsHeld;
   }),
+
+  // //Get all the clinics and sum these clinics for each year for the last 5 years
+  // getClinicsHeld: protectedProcedure.query(async ({ ctx }) => {
+  //   const clinics = await ctx.db.petClinic.findMany();
+
+  //   const last5YearsClinics = clinics.filter((clinic) => clinic.date.getFullYear() >= new Date().getFullYear() - 4);
+
+  //   const firstYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear() - 4);
+  //   const secondYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear() - 3);
+  //   const thirdYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear() - 2);
+  //   const fourthYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear() - 1);
+  //   const fifthYearClinics = last5YearsClinics.filter((clinic) => clinic.date.getFullYear() === new Date().getFullYear());
+
+  //   const clinicsHeld = {
+  //     [new Date().getFullYear() - 4]: firstYearClinics.length,
+  //     [new Date().getFullYear() - 3]: secondYearClinics.length,
+  //     [new Date().getFullYear() - 2]: thirdYearClinics.length,
+  //     [new Date().getFullYear() - 1]: fourthYearClinics.length,
+  //     [new Date().getFullYear()]: fifthYearClinics.length,
+  //   };
+
+  //   // const activeOwners = last5YearsOwners.reduce(
+  //   //   (acc, owner) => {
+  //   //     const year = owner.startingDate.getFullYear();
+  //   //     if (acc[year]) {
+  //   //       acc[year]++;
+  //   //     } else {
+  //   //       acc[year] = 1;
+  //   //     }
+  //   //     return acc;
+  //   //   },
+  //   //   {} as Record<number, number>,
+  //   // );
+
+  //   return clinicsHeld;
+  // }),
 
   //download
   download: publicProcedure

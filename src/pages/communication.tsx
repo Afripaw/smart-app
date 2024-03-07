@@ -847,17 +847,17 @@ const Communication: NextPage = () => {
                               {user.greaterArea.length > 7
                                 ? user.greaterArea
                                     .slice(0, 7)
-                                    .map((greaterArea) => greaterArea)
+                                    .map((greaterArea) => greaterArea.greaterArea.greaterArea)
                                     .join("; ") + "..."
-                                : user.greaterArea.map((greaterArea) => greaterArea).join("; ")}
+                                : user.greaterArea.map((greaterArea) => greaterArea.greaterArea.greaterArea).join("; ")}
                             </td>
                             <td className="max-w-[15rem] border px-4 py-2">
                               {user.area.length > 7
                                 ? user.area
                                     .slice(0, 7)
-                                    .map((area) => area)
+                                    .map((area) => area.area.area)
                                     .join("; ") + "..."
-                                : user.area.map((area) => area).join("; ")}
+                                : user.area.map((area) => area.area.area).join("; ")}
                             </td>
                             <td className="border px-4 py-2">{user.success}</td>
                             <td className=" border px-4 py-2">

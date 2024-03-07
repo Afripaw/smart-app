@@ -85,7 +85,7 @@ const BarGraph: React.FC<BarGraphProps> = ({ type }) => {
       //   </ResponsiveContainer>
     );
   } else if (type === "sterilisedPets") {
-    const sterilisedPets = api.petOwner.getActivePets.useQuery();
+    const sterilisedPets = api.pet.getSterilisedPets.useQuery();
     const response = sterilisedPets?.data ?? { dogs: {}, cats: {} };
 
     // const transformedData = Object.entries(response).map(([category, value]) => ({

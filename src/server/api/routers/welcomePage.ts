@@ -17,10 +17,18 @@ export const welcomePageRouter = createTRPCRouter({
   getSterilisedPets: publicProcedure.query(async ({ ctx }) => {
     const pets = await ctx.db.pet.findMany({
       where: {
-        //sterilisedStats year is not 1970
-        sterilisedStatus: {
-          gt: new Date(0),
-        },
+        OR: [
+          {
+            sterilisedStatus: {
+              gt: new Date("1970-12-31T23:59:59.999Z"),
+            },
+          },
+          {
+            sterilisedStatus: {
+              lt: new Date("1970-01-01T00:00:00.000Z"),
+            },
+          },
+        ],
       },
     });
     return pets;

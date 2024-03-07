@@ -515,6 +515,8 @@ const Treatment: NextPage = () => {
   const handleUpdateUserProfile = async (id: number) => {
     setID(id);
 
+    const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
+
     if (treatment) {
       // Assuming userQuery.data contains the user object
       const userData = treatment;
@@ -536,6 +538,7 @@ const Treatment: NextPage = () => {
   };
 
   useEffect(() => {
+    const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
     if (treatment) {
       // Assuming userQuery.data contains the user object
       const userData = treatment;

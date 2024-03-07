@@ -75,7 +75,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     ",\n\n" +
     "Congratulations, you have been registered as a Pet Owner on the AfriPaw Smart App." +
     "\nYour owner ID is: " +
-    "U" +
+    "N" +
     id +
     ". Please present this number at AfriPaw Pet Clinics to identify yourself." +
     "\n" +

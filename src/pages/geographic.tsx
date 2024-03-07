@@ -172,7 +172,9 @@ const Geographic: NextPage = () => {
   const printComponentRef = useRef(null);
 
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
-  const updateIdentification = api.communication.updateIdentification.useMutation();
+  const updateIdentification = api.geographic.updateIdentification.useMutation();
+  //get latest communicationID
+  const latestGreaterAreaID = api.geographic.getLatestGreaterAreaID.useQuery();
 
   //GREATER AREA
   const handleGreaterArea = (name: string) => {
@@ -275,6 +277,14 @@ const Geographic: NextPage = () => {
     });
 
     setGreaterArea({ id: newGreaterArea_.greaterAreaID, name: newGreaterArea_.greaterArea });
+
+    //update identification table
+    if (newGreaterArea_?.greaterAreaID) {
+      await updateIdentification.mutateAsync({
+        greaterAreaID: newGreaterArea_?.greaterAreaID ?? 0,
+      });
+    }
+
     setIsLoadingGreaterArea(false);
   };
 
@@ -807,7 +817,7 @@ const Geographic: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Geographic Data</b>
 
                   <div className="flex py-2">
-                    Greater area ID: <div className="px-3">G{1000001}</div>
+                    Greater area ID: <div className="px-3">G{isCreate ? String((latestGreaterAreaID?.data?.greaterAreaID ?? 0) + 1) : greaterArea?.id}</div>
                   </div>
 
                   <div className="flex items-start">

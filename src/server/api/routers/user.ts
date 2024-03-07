@@ -327,6 +327,15 @@ export const UserRouter = createTRPCRouter({
         }
       });
 
+      //search conditions for greater area
+      const searchConditionsGreaterArea = terms.map((term) => {
+        return {
+          OR: [{ greaterArea: { contains: term } }, { area: { contains: term } }, { street: { contains: term } }].filter(
+            (condition) => Object.keys(condition).length > 0,
+          ), // Filter out empty conditions
+        };
+      });
+
       //let order = { surname: "asc" };
       //const order = (input.order !== "surname") ? { updatedAt: "desc" } : { surname: "asc" };
       // Replace this line
@@ -411,6 +420,7 @@ export const UserRouter = createTRPCRouter({
         clinicID: z.number(),
         treatmentID: z.number(),
         communicationID: z.number(),
+        greaterAreaID: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -423,6 +433,7 @@ export const UserRouter = createTRPCRouter({
           clinicID: input.clinicID,
           treatmentID: input.treatmentID,
           communicationID: input.communicationID,
+          greaterAreaID: input.greaterAreaID,
           createdAt: new Date(),
           updatedAt: new Date(),
         },
@@ -439,7 +450,7 @@ export const UserRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.identification.update({
         where: {
-          identificationID: 80,
+          identificationID: 1,
         },
         data: {
           userID: input.userID,
@@ -457,7 +468,7 @@ export const UserRouter = createTRPCRouter({
   getLatestUserID: publicProcedure.query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
-        identificationID: 80,
+        identificationID: 1,
       },
     });
 

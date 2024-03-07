@@ -603,11 +603,11 @@ const Treatment: NextPage = () => {
     // return newUser_;
 
     //update identification table
-    // if (newUser_?.treatmentID) {
-    //   await updateIdentification.mutateAsync({
-    //     treatmentID: newUser_?.treatmentID ?? 0,
-    //   });
-    // }
+    if (newUser_?.treatmentID) {
+      await updateIdentification.mutateAsync({
+        treatmentID: newUser_?.treatmentID ?? 0,
+      });
+    }
 
     setIsLoading(false);
   };
@@ -1079,7 +1079,7 @@ const Treatment: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Pet Treatment Data</b>
 
                   <div className="flex py-2">
-                    Treatment ID: <div className="px-3">T{latestTreatmentID?.data?.treatmentID ?? 0}</div>
+                    Treatment ID: <div className="px-3">T{isCreate ? String((latestTreatmentID?.data?.treatmentID ?? 0) + 1) : id}</div>
                   </div>
                   {/*DATEPICKER*/}
                   <div className="flex items-center">

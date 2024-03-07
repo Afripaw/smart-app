@@ -275,10 +275,11 @@ export const communicationRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.identification.update({
         where: {
-          identificationID: 80,
+          identificationID: 1,
         },
         data: {
           communicationID: input.communicationID,
+          updatedAt: new Date(),
         },
       });
     }),
@@ -287,7 +288,7 @@ export const communicationRouter = createTRPCRouter({
   getLatestCommunicationID: publicProcedure.query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
-        identificationID: 80,
+        identificationID: 1,
       },
     });
 

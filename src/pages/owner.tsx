@@ -842,11 +842,11 @@ const Owner: NextPage = () => {
     }
 
     //update identification table
-    // if (owner?.ownerID) {
-    //   await updateIdentification.mutateAsync({
-    //     ownerID: owner?.ownerID ?? 0,
-    //   });
-    // }
+    if (owner?.ownerID) {
+      await updateIdentification.mutateAsync({
+        ownerID: owner?.ownerID ?? 0,
+      });
+    }
 
     //After the newUser has been created make sure to set the fields back to empty
     setFirstName("");
@@ -1291,6 +1291,7 @@ const Owner: NextPage = () => {
     if (mobile === "") mandatoryFields.push("Mobile");
     if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
     if (areaOption.area === "Select one") mandatoryFields.push("Area");
+    if (streetOption.street === "Select one") mandatoryFields.push("Street");
     if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
     if (statusOption === "Select one") mandatoryFields.push("Status");
     if (startingDate === null) mandatoryFields.push("Starting Date");
@@ -1691,7 +1692,7 @@ const Owner: NextPage = () => {
                     />
                   )}
                   <div className="flex py-2">
-                    Owner ID: <div className="px-3">N{isCreate ? latestOwnerID?.data?.petOwnerID ?? 0 : id}</div>
+                    Owner ID: <div className="px-3">N{isCreate ? String((latestOwnerID?.data?.clinicID ?? 0) + 1) : id}</div>
                   </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
@@ -1804,7 +1805,9 @@ const Owner: NextPage = () => {
 
                         <div className="flex items-start">
                           <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">Street: </div>
+                            <div className=" flex">
+                              Street<div className="text-lg text-main-orange">*</div>:{" "}
+                            </div>
                           </div>
                           <div className="flex flex-col">
                             <button

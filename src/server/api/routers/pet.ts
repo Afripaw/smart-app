@@ -696,10 +696,11 @@ export const petRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.identification.update({
         where: {
-          identificationID: 80,
+          identificationID: 1,
         },
         data: {
           petID: input.petID,
+          updatedAt: new Date(),
         },
       });
     }),
@@ -708,7 +709,7 @@ export const petRouter = createTRPCRouter({
   getLatestPetID: publicProcedure.query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
-        identificationID: 80,
+        identificationID: 1,
       },
     });
 

@@ -95,6 +95,7 @@ const User: NextPage = () => {
     treatmentID: number,
     clinicID: number,
     communicationID: number,
+    greaterAreaID: number,
   ) => {
     await identification.mutateAsync({
       userID: userID,
@@ -104,6 +105,7 @@ const User: NextPage = () => {
       clinicID: clinicID,
       treatmentID: treatmentID,
       communicationID: communicationID,
+      greaterAreaID: greaterAreaID,
     });
   };
 
@@ -858,11 +860,11 @@ const User: NextPage = () => {
       setIsUpdatePassword(false);
 
       //update identification table
-      // if (newUser_?.userID) {
-      //   await updateIdentification.mutateAsync({
-      //     userID: newUser_?.userID ?? 0,
-      //   });
-      // }
+      if (newUser_?.userID) {
+        await updateIdentification.mutateAsync({
+          userID: newUser_?.userID ?? 0,
+        });
+      }
     } catch (error) {
       console.log("Mobile number is already in database");
       const mandatoryFields: string[] = [];
@@ -1341,15 +1343,14 @@ const User: NextPage = () => {
                   >
                     Create new User
                   </button>
-
                   {/* <button
                     className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
-                    onClick={() => void handleCreateIdentification(1000010, 1000026, 1000021, 1000030, 10000019, 1000026, 1000001)}
+                    onClick={() => void handleCreateIdentification(1000004, 1000026, 1000021, 1000030, 10000019, 1000026, 1000001, 11)}
                   >
                     Create identification record
-                  </button>
+                  </button> */}
 
-                  <button
+                  {/* <button
                     className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500"
                     onClick={handleDeleteAllIdentifications}
                   >
@@ -1541,7 +1542,7 @@ const User: NextPage = () => {
                     />
                   )}
                   <div className="flex py-2">
-                    User ID: <div className="px-3">U{isCreate ? latestUserID?.data?.userID ?? 0 : userID}</div>
+                    User ID: <div className="px-3">U{isCreate ? String((latestUserID?.data?.userID ?? 0) + 1) : userID}</div>
                   </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />

@@ -469,4 +469,34 @@ export const geographicRouter = createTRPCRouter({
       // }
     }
   }),
+
+  //Update identification
+  updateIdentification: publicProcedure
+    .input(
+      z.object({
+        greaterAreaID: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.identification.update({
+        where: {
+          identificationID: 1,
+        },
+        data: {
+          greaterAreaID: input.greaterAreaID,
+          updatedAt: new Date(),
+        },
+      });
+    }),
+
+  //get latest communicationID from identification
+  getLatestGreaterAreaID: publicProcedure.query(async ({ ctx }) => {
+    const identification = await ctx.db.identification.findUnique({
+      where: {
+        identificationID: 1,
+      },
+    });
+
+    return identification;
+  }),
 });

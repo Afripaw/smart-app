@@ -2065,11 +2065,11 @@ const Pet: NextPage = () => {
     // return newUser_;
 
     //update identification table
-    // if (newUser_?.petID) {
-    //   await updateIdentification.mutateAsync({
-    //     petID: newUser_?.petID ?? 0,
-    //   });
-    // }
+    if (newUser_?.petID) {
+      await updateIdentification.mutateAsync({
+        petID: newUser_?.petID ?? 0,
+      });
+    }
     setIsLoading(false);
   };
 
@@ -3157,7 +3157,7 @@ const Pet: NextPage = () => {
                     />
                   )}
                   <div className="flex py-2">
-                    Pet ID: <div className="px-3">P{isCreate ? latestPetID?.data?.petID ?? 0 : id}</div>
+                    Pet ID: <div className="px-3">P{isCreate ? String((latestPetID?.data?.petID ?? 0) + 1) : id}</div>
                   </div>
                   <Input label="Pet Name" placeholder="Type here: e.g. Sally" value={petName} onChange={setPetName} required />
                   {petNameErrorMessage && <div className="text-sm text-red-500">{petNameErrorMessage}</div>}

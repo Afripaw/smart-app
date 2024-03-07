@@ -330,7 +330,7 @@ model identification {
     petOwnerID       Int
     communicationID  Int
     treatmentID      Int
-    //greaterAreaID    Int
+    greaterAreaID    Int
     createdAt        DateTime @default(now())
     updatedAt        DateTime @updatedAt
 }

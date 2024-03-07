@@ -944,11 +944,11 @@ const Volunteer: NextPage = () => {
       setIsUpdate(false);
 
       //update identification table
-      // if (newUser_?.volunteerID) {
-      //   await updateIdentification.mutateAsync({
-      //     volunteerID: newUser_?.volunteerID ?? 0,
-      //   });
-      // }
+      if (newUser_?.volunteerID) {
+        await updateIdentification.mutateAsync({
+          volunteerID: newUser_?.volunteerID ?? 0,
+        });
+      }
     } catch (error) {
       console.log("Mobile number is already in database");
       const mandatoryFields: string[] = [];
@@ -1783,7 +1783,7 @@ const Volunteer: NextPage = () => {
                     />
                   )}
                   <div className="flex py-2">
-                    Volunteer ID: <div className="px-3">V{isCreate ? latestVolunteerID?.data?.volunteerID ?? 0 : id}</div>
+                    Volunteer ID: <div className="px-3">V{isCreate ? String((latestVolunteerID?.data?.volunteerID ?? 0) + 1) : id}</div>
                   </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />

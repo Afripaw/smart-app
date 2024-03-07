@@ -294,7 +294,7 @@ const Communication: NextPage = () => {
     const greaterArea: GreaterArea = { id: id, name: String(option) };
     if (option === "All greater areas") {
       //select all the greater areas except the first one
-      const greaterAreaOptionsSelected = greaterAreaOptions.slice(1);
+      const greaterAreaOptionsSelected = greaterAreaOptions;
       setGreaterAreaList(greaterAreaOptionsSelected);
       // setGreaterAreaList(greaterAreaOptions.map((option) => option);
     } else if (!greaterAreaList.includes(greaterArea)) {
@@ -364,7 +364,7 @@ const Communication: NextPage = () => {
     const area: Area = { id: id, name: String(option) };
     if (option === "All areas") {
       //select all the greater areas except the first one
-      const areaOptionsSelected = areaOptions.slice(1);
+      const areaOptionsSelected = areaOptions;
       setAreaList(areaOptionsSelected);
       // setGreaterAreaList(greaterAreaOptions.map((option) => option);
     } else if (!areaList.includes(area)) {
@@ -612,11 +612,12 @@ const Communication: NextPage = () => {
     // return newUser_;
 
     //update identification table
-    // if (newUser_?.communicationID) {
-    // await updateIdentification.mutateAsync({
-    //   communicationID: newUser_?.communicationID ?? 0,
-    // });
-    // }
+    if (newUser_?.communicationID) {
+      console.log("Communication ID: ", newUser_?.communicationID);
+      await updateIdentification.mutateAsync({
+        communicationID: newUser_?.communicationID ?? 0,
+      });
+    }
 
     setIsLoading(false);
   };
@@ -950,7 +951,7 @@ const Communication: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Communication Data</b>
 
                   <div className="flex py-2">
-                    Message ID: <div className="px-3">M{(latestCommunicationID?.data?.communicationID ?? 0) + 1}</div>
+                    Message ID: <div className="px-3">M{isCreate ? String((latestCommunicationID?.data?.communicationID ?? 0) + 1) : id}</div>
                   </div>
                   <div className="flex items-start">
                     <div className="flex w-32 pt-3">

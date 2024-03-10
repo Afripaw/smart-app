@@ -251,6 +251,9 @@ export const geographicRouter = createTRPCRouter({
       orderBy: {
         greaterArea: "asc",
       },
+      include: {
+        area: true,
+      },
     });
     return greaterAreas;
   }),
@@ -365,7 +368,8 @@ export const geographicRouter = createTRPCRouter({
           OR: [
             { greaterArea: { contains: term } },
             { area: { some: { area: { contains: term } } } },
-            { area: { some: { area: { street: { contains: term } } } } },
+            { area: { some: { street: { some: { street: { contains: term } } } } } },
+            //{ area: { some: { area: { some: { street: { contains: term } } } } } },
             // { area: { contains: term } },
             // { street: { contains: term } },
           ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions

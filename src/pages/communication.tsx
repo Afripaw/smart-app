@@ -291,13 +291,19 @@ const Communication: NextPage = () => {
     setGreaterAreaOption(option);
     setIsGreaterAreaOpen(false);
 
+    const greaterAreaIDList = greaterAreaList.map((area) => area.id);
+
     const greaterArea: GreaterArea = { id: id, name: String(option) };
+
+    //console.log("Option chosen!!!!!: ", option);
     if (option === "All greater areas") {
+      //console.log("Option chosen!!!!!: ", option);
       //select all the greater areas except the first one
-      const greaterAreaOptionsSelected = greaterAreaOptions;
+      const greaterAreaOptionsSelected = greaterAreaOptions.slice(1);
       setGreaterAreaList(greaterAreaOptionsSelected);
+      //console.log("Greater Area List for all greaters: ", greaterAreaList);
       // setGreaterAreaList(greaterAreaOptions.map((option) => option);
-    } else if (!greaterAreaList.includes(greaterArea)) {
+    } else if (!greaterAreaIDList.includes(greaterArea.id)) {
       setGreaterAreaList([...greaterAreaList, greaterArea]);
     }
   };
@@ -329,10 +335,26 @@ const Communication: NextPage = () => {
   const greaterAreaOptions = [{ id: 0, name: "All greater areas" }, ...(allGreaterAreas ?? [])];
 
   //Area
-  const getAllAreas = api.geographic.getAllAreas.useQuery().data;
+  //const getAllAreas = api.geographic.getAllAreas.useQuery().data;
+  const getAllAreas = greaterAreaList
+    .map((area) => {
+      if (getAllGreaterAreas === undefined) return [];
+      //console.log("Greater Area ID: ", area.id);
+      if (getAllGreaterAreas.find((greaterArea) => greaterArea.greaterAreaID === area.id)) {
+        // console.log("Here is your Area: ", getAllGreaterAreas.find((greaterArea) => greaterArea.greaterAreaID === area.id)?.area);
+        return getAllGreaterAreas.find((greaterArea) => greaterArea.greaterAreaID === area.id)?.area;
+      }
+    })
+    .flat();
+
+  //console.log("Here are all the areas: ", getAllAreas);
   const allAreas = getAllAreas?.map((area) => {
-    return { id: area.areaID, name: area.area };
+    //make the id and name in the allAreas not undefined
+    if (area === undefined) return { id: 0, name: "" };
+    return { id: area?.areaID, name: area?.area };
   });
+
+  //console.log("Here are all the areas2: ", allAreas);
   //add the first option as "All areas" with id 0
   const areaOptions = [{ id: 0, name: "All areas" }, ...(allAreas ?? [])];
 
@@ -361,13 +383,20 @@ const Communication: NextPage = () => {
     setAreaOption(option);
     setIsAreaOpen(false);
 
+    const areaIDList = areaList.map((area) => area.id);
+
     const area: Area = { id: id, name: String(option) };
     if (option === "All areas") {
+      // areaOptions.map((area) => {
+      //   if (area.id === undefined || area.name === undefined) return {}});
       //select all the greater areas except the first one
-      const areaOptionsSelected = areaOptions;
+
+      //make the id and name in the areaOptions not undefined
+
+      const areaOptionsSelected = areaOptions.slice(1);
       setAreaList(areaOptionsSelected);
       // setGreaterAreaList(greaterAreaOptions.map((option) => option);
-    } else if (!areaList.includes(area)) {
+    } else if (!areaIDList.includes(area.id)) {
       setAreaList([...areaList, area]);
     }
   };
@@ -429,9 +458,16 @@ const Communication: NextPage = () => {
   const allUsers = api.communication.getAllUsers.useQuery({ greaterAreaID: greaterAreaIDList, areaID: areaIDList });
   const allPetOwners = api.communication.getAllPetOwners.useQuery({ greaterAreaID: greaterAreaIDList, areaID: areaIDList });
   const allVolunteers = api.communication.getAllVolunteers.useQuery({ greaterAreaID: greaterAreaIDList });
-  const [userSuccess, setUserSuccess] = useState("No");
-  const [petOwnerSuccess, setPetOwnerSuccess] = useState("No");
-  const [volunteerSuccess, setVolunteerSuccess] = useState("No");
+  const [userSuccess, setUserSuccess] = useState("Yes");
+  const [petOwnerSuccess, setPetOwnerSuccess] = useState("Yes");
+  const [volunteerSuccess, setVolunteerSuccess] = useState("Yes");
+
+  const [userSuccessCount, setUserSuccessCount] = useState(0);
+  const [userUnSuccessCount, setUserUnSuccessCount] = useState(0);
+  const [petOwnerSuccessCount, setPetOwnerSuccessCount] = useState(0);
+  const [petOwnerUnSuccessCount, setPetOwnerUnSuccessCount] = useState(0);
+  const [volunteerSuccessCount, setVolunteerSuccessCount] = useState(0);
+  const [volunteerUnSuccessCount, setVolunteerUnSuccessCount] = useState(0);
 
   //-------------------------------CREATE NEW USER-----------------------------------------
 
@@ -450,6 +486,19 @@ const Communication: NextPage = () => {
     setIsLoading(true);
     //Send user details
     const var_recipients = [];
+
+    //calculate success
+    //let var_user_success = "";
+    //let var_petOwner_success = "";
+    //let var_volunteer_success = "";
+    let var_user_success_count = 0;
+    let var_user_unsuccess_count = 0;
+    let var_petOwner_success_count = 0;
+    let var_petOwner_unsuccess_count = 0;
+    let var_volunteer_success_count = 0;
+    let var_volunteer_unsuccess_count = 0;
+    let total_users = 0;
+
     //Email
     if (preferredOption === "Email") {
       if (includeUser) {
@@ -458,13 +507,18 @@ const Communication: NextPage = () => {
         //loop through all the users and send them an email
         allUsers?.data?.map(async (user) => {
           const email = user?.email ?? "";
+          total_users = total_users + 1;
           //do a try catch statement here
           try {
+            //var_user_success_count = var_user_success_count + 1;
             await sendEmail(message, email);
             console.log("Email sent successfully");
+            //var_user_success = "Yes";
             setUserSuccess("Yes");
           } catch (error) {
+            var_user_unsuccess_count = var_user_unsuccess_count + 1;
             console.error("Failed to send email", error);
+            //var_user_success = "No";
             setUserSuccess("No");
           }
           //await sendEmail(message, email);
@@ -481,10 +535,14 @@ const Communication: NextPage = () => {
           try {
             await sendEmail(message, email);
             console.log("Email sent successfully");
+            //var_petOwner_success = "Yes";
+            var_petOwner_success_count = var_petOwner_success_count + 1;
             setPetOwnerSuccess("Yes");
           } catch (error) {
             console.error("Failed to send email", error);
+            //var_petOwner_success = "No";
             setPetOwnerSuccess("No");
+            var_petOwner_unsuccess_count = var_petOwner_unsuccess_count + 1;
           }
           // await sendEmail(message, email);
         });
@@ -500,10 +558,14 @@ const Communication: NextPage = () => {
           try {
             await sendEmail(message, email);
             console.log("Email sent successfully");
+            //var_volunteer_success = "Yes";
             setVolunteerSuccess("Yes");
+            var_volunteer_success_count = var_volunteer_success_count + 1;
           } catch (error) {
             console.error("Failed to send email", error);
+            //var_volunteer_success = "No";
             setVolunteerSuccess("No");
+            var_volunteer_unsuccess_count = var_volunteer_unsuccess_count + 1;
           }
           //await sendEmail(message, email);
         });
@@ -525,10 +587,14 @@ const Communication: NextPage = () => {
           try {
             await sendSMS(message, destinationNumber);
             console.log("SMS sent successfully");
+            //var_user_success = "Yes";
             setUserSuccess("Yes");
+            var_user_success_count = var_user_success_count + 1;
           } catch (error) {
             console.error("Failed to send SMS", error);
+            //var_user_success = "No";
             setUserSuccess("No");
+            var_user_unsuccess_count = var_user_unsuccess_count + 1;
           }
         });
       }
@@ -544,9 +610,13 @@ const Communication: NextPage = () => {
             await sendSMS(message, destinationNumber);
             console.log("SMS sent successfully");
             setPetOwnerSuccess("Yes");
+            var_petOwner_success_count = var_petOwner_success_count + 1;
+            //var_petOwner_success = "Yes";
           } catch (error) {
             console.error("Failed to send SMS", error);
             setPetOwnerSuccess("No");
+            var_petOwner_unsuccess_count = var_petOwner_unsuccess_count + 1;
+            //var_petOwner_success = "No";
           }
         });
       }
@@ -562,14 +632,28 @@ const Communication: NextPage = () => {
             await sendSMS(message, destinationNumber);
             console.log("SMS sent successfully");
             setVolunteerSuccess("Yes");
+            var_volunteer_success_count = var_volunteer_success_count + 1;
+            //var_volunteer_success = "Yes";
           } catch (error) {
             console.error("Failed to send SMS", error);
             setVolunteerSuccess("No");
+            var_volunteer_unsuccess_count = var_volunteer_unsuccess_count + 1;
+            //var_volunteer_success = "No";
           }
         });
       }
     }
 
+    // console.log(
+    //   "Success rate: ",
+    //   var_user_success_count,
+    //   var_user_unsuccess_count,
+    //   var_petOwner_success_count,
+    //   var_petOwner_unsuccess_count,
+    //   var_volunteer_success_count,
+    //   var_volunteer_unsuccess_count,
+    // );
+    // console.log("Total users: ", total_users);
     console.log("Before success: ", success);
     let var_success = "";
     if ((userSuccess === "Yes" && includeUser) || (petOwnerSuccess === "Yes" && includePetOwner) || (volunteerSuccess === "Yes" && includeVolunteer)) {
@@ -579,6 +663,7 @@ const Communication: NextPage = () => {
     } else {
       setSuccess("No");
       var_success = "No";
+      console.log("Success: ", var_success);
     }
     console.log("After success: ", var_success);
 
@@ -618,6 +703,17 @@ const Communication: NextPage = () => {
         communicationID: newUser_?.communicationID ?? 0,
       });
     }
+
+    setMessage("");
+    setGreaterAreaOption("Select one");
+    setAreaOption("Select one");
+    setPreferredCommunicationOption("Select one");
+    setSuccess("No");
+    setRecipients([]);
+    setGreaterAreaList([]);
+    setAreaList([]);
+    setQuery("");
+    setID(0);
 
     setIsLoading(false);
   };
@@ -681,6 +777,8 @@ const Communication: NextPage = () => {
     setPreferredCommunicationOption("Select one");
     setSuccess("No");
     setRecipients([]);
+    setGreaterAreaList([]);
+    setAreaList([]);
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -1220,11 +1318,11 @@ const Communication: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea).join("; ")}
+                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea.name).join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {areaList.map((area) => area).join("; ")}
+                    <b className="mr-3">Area:</b> {areaList.map((area) => area.name).join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-center">

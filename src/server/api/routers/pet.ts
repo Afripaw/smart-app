@@ -233,6 +233,42 @@ export const petRouter = createTRPCRouter({
               { colour: { hasSome: [term] } },
               { markings: { contains: term } },
               { status: { contains: term } },
+              { owner: { firstName: { contains: term } } },
+              { owner: { surname: { contains: term } } },
+              { owner: { addressGreaterArea: { greaterArea: { contains: term } } } },
+              { owner: { addressArea: { area: { contains: term } } } },
+              { owner: { addressStreet: { street: { contains: term } } } },
+              { owner: { addressStreetNumber: { contains: term } } },
+              // { sterilisedStatus: { contains: term } },
+              // { sterilisedRequested: { contains: term } },
+              { sterilisedRequestSigned: { contains: term } },
+              { petTreatments: { some: { type: { contains: term } } } },
+              // { vaccinatedStatus: { contains: term } },
+              //{ treatments: { contains: term } },
+              { membership: { contains: term } },
+              { cardStatus: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        }
+        if (term.match(/^N\d+$/) !== null) {
+          return {
+            OR: [
+              { owner: { ownerID: { equals: Number(term.substring(1)) } } },
+              { petName: { contains: term } },
+              { species: { contains: term } },
+              { sex: { contains: term } },
+              { age: { contains: term } },
+              { breed: { contains: term } },
+              { colour: { hasSome: [term] } },
+              { markings: { contains: term } },
+              { status: { contains: term } },
+              { owner: { firstName: { contains: term } } },
+              { owner: { surname: { contains: term } } },
+              { owner: { addressGreaterArea: { greaterArea: { contains: term } } } },
+              { owner: { addressArea: { area: { contains: term } } } },
+              { owner: { addressStreet: { street: { contains: term } } } },
+              { owner: { addressStreetNumber: { contains: term } } },
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
@@ -255,6 +291,12 @@ export const petRouter = createTRPCRouter({
               { colour: { hasSome: [term] } },
               { markings: { contains: term } },
               { status: { contains: term } },
+              { owner: { firstName: { contains: term } } },
+              { owner: { surname: { contains: term } } },
+              { owner: { addressGreaterArea: { greaterArea: { contains: term } } } },
+              { owner: { addressArea: { area: { contains: term } } } },
+              { owner: { addressStreet: { street: { contains: term } } } },
+              { owner: { addressStreetNumber: { contains: term } } },
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
@@ -270,34 +312,6 @@ export const petRouter = createTRPCRouter({
         }
       });
 
-      //complex search condition for owner table
-      const searchConditionsOwner = terms.map((term) => {
-        // Check if term is a number
-        if (term.match(/^N\d+$/) !== null) {
-          return {
-            OR: [
-              { ownerID: { equals: Number(term.substring(1)) } },
-              { firstName: { contains: term } },
-              { surname: { contains: term } },
-              // { addressGreaterArea: { contains: term } },
-              // { addressArea: { contains: term } },
-              // { addressStreet: { contains: term } },
-              { addressStreetNumber: { contains: term } },
-            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
-          };
-        } else {
-          return {
-            OR: [
-              { firstName: { contains: term } },
-              { surname: { contains: term } },
-              // { addressGreaterArea: { contains: term } },
-              // { addressArea: { contains: term } },
-              // { addressStreet: { contains: term } },
-              { addressStreetNumber: { contains: term } },
-            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
-          };
-        }
-      });
       //-------------------------------------SEARCH CONDITIONS-------------------------------------
 
       const order: Record<string, string> = {};
@@ -310,16 +324,17 @@ export const petRouter = createTRPCRouter({
 
       const user = await ctx.db.pet.findMany({
         where: {
-          OR: [
-            {
-              AND: searchConditions,
-            },
-            {
-              owner: {
-                AND: searchConditionsOwner,
-              },
-            },
-          ],
+          AND: searchConditions,
+          // OR: [
+          //   {
+          //     AND: searchConditions,
+          //   },
+          //   {
+          //     owner: {
+          //       AND: searchConditionsOwner,
+          //     },
+          //   },
+          // ],
         },
 
         orderBy: order,

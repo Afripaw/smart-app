@@ -83,65 +83,73 @@ export const petTreatmentRouter = createTRPCRouter({
               { category: { contains: term } },
               { type: { contains: term } },
               { comments: { contains: term } },
+              //pet
+              { pet: { petName: { contains: term } } },
+              { pet: { species: { contains: term } } },
+              { pet: { breed: { contains: term } } },
+              //owner
+              { pet: { owner: { firstName: { contains: term } } } },
+              { pet: { owner: { surname: { contains: term } } } },
+              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term } } } } },
+              { pet: { owner: { addressArea: { area: { contains: term } } } } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else if (term.match(/^P\d+$/) !== null) {
+          return {
+            OR: [
+              { pet: { petID: { equals: Number(term.substring(1)) } } },
+              { category: { contains: term } },
+              { type: { contains: term } },
+              { comments: { contains: term } },
+              //pet
+              { pet: { petName: { contains: term } } },
+              { pet: { species: { contains: term } } },
+              { pet: { breed: { contains: term } } },
+              //owner
+              { pet: { owner: { firstName: { contains: term } } } },
+              { pet: { owner: { surname: { contains: term } } } },
+              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term } } } } },
+              { pet: { owner: { addressArea: { area: { contains: term } } } } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else if (term.match(/^N\d+$/) !== null) {
+          return {
+            OR: [
+              { ownerID: { equals: Number(term.substring(1)) } },
+              { category: { contains: term } },
+              { type: { contains: term } },
+              { comments: { contains: term } },
+              //pet
+              { pet: { petName: { contains: term } } },
+              { pet: { species: { contains: term } } },
+              { pet: { breed: { contains: term } } },
+              //owner
+              { pet: { owner: { firstName: { contains: term } } } },
+              { pet: { owner: { surname: { contains: term } } } },
+              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term } } } } },
+              { pet: { owner: { addressArea: { area: { contains: term } } } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
-            OR: [{ category: { contains: term } }, { type: { contains: term } }, { comments: { contains: term } }].filter(
-              (condition) => Object.keys(condition).length > 0,
-            ), // Filter out empty conditions
+            OR: [
+              { category: { contains: term } },
+              { type: { contains: term } },
+              { comments: { contains: term } },
+              //pet
+              { pet: { petName: { contains: term } } },
+              { pet: { species: { contains: term } } },
+              { pet: { breed: { contains: term } } },
+              //owner
+              { pet: { owner: { firstName: { contains: term } } } },
+              { pet: { owner: { surname: { contains: term } } } },
+              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term } } } } },
+              { pet: { owner: { addressArea: { area: { contains: term } } } } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
       });
       //------------------------------------------ORIGNAL CODE-------------------------------------
-
-      //------------------------------------------NEW CODE-------------------------------------
-      //complex search condition for pet table
-      const searchConditionsPet = terms.map((term) => {
-        // Check if term is a number
-        if (term.match(/^P\d+$/) !== null) {
-          return {
-            OR: [
-              { petID: { equals: Number(term.substring(1)) } },
-              { petName: { contains: term } },
-              { species: { contains: term } },
-              { breed: { contains: term } },
-            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
-          };
-        } else {
-          return {
-            OR: [{ petName: { contains: term } }, { species: { contains: term } }, { breed: { contains: term } }].filter(
-              (condition) => Object.keys(condition).length > 0,
-            ), // Filter out empty conditions
-          };
-        }
-      });
-
-      //complex search condition for owner table
-      const searchConditionsOwner = terms.map((term) => {
-        // Check if term is a number
-        if (term.match(/^N\d+$/) !== null) {
-          return {
-            OR: [
-              { ownerID: { equals: Number(term.substring(1)) } },
-              { firstName: { contains: term } },
-              { surname: { contains: term } },
-              // { addressGreaterArea: { contains: term } },
-              //  { addressArea: { contains: term } },
-            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
-          };
-        } else {
-          return {
-            OR: [
-              { firstName: { contains: term } },
-              { surname: { contains: term } },
-              // { addressGreaterArea: { contains: term } },
-              // { addressArea: { contains: term } },
-            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
-          };
-        }
-      });
-      //------------------------------------------NEW CODE-------------------------------------
 
       //-----------------------------------------ORIGNAL CODE-------------------------------------
       const order: Record<string, string> = {};
@@ -153,179 +161,6 @@ export const petTreatmentRouter = createTRPCRouter({
       }
       //-----------------------------------------ORIGNAL CODE-------------------------------------
 
-      //-----------------------------------------NEW CODE-------------------------------------
-      //------------------------------FIRST APPROACH-------------------------------------
-      // const treatment = await ctx.db.petOwner.findMany({
-      //   where: {
-      //     AND: searchConditionsOwner,
-      //   },
-      //   select: {
-      //     ownerID: true,
-      //     firstName: true,
-      //     surname: true,
-      //     addressGreaterArea: true,
-      //     addressArea: true,
-      //     pets: {
-      //       where: {
-      //         AND: searchConditionsPet,
-      //       },
-      //       select: {
-      //         petID: true,
-      //         petName: true,
-      //         species: true,
-      //         breed: true,
-      //         petTreatments: {
-      //           where: {
-      //             AND: searchConditions,
-      //           },
-      //           orderBy: order,
-      //           take: input.limit + 1,
-      //           cursor: input.cursor ? { treatmentID: input.cursor } : undefined,
-      //         },
-      //       },
-      //     },
-      //   },
-      // });
-
-      //---------------------------------SECOND APPROACH-------------------------------------
-      // const treatment = await ctx.db.petTreatment.findMany({
-      //   where: {
-      //     AND: searchConditions,
-      //   },
-      //   orderBy: order,
-      //   take: input.limit + 1,
-      //   cursor: input.cursor ? { treatmentID: input.cursor } : undefined,
-      //   include: {
-      //     pet: {
-      //       where: {
-      //         AND: searchConditionsPet,
-      //       },
-      //       include: {
-      //         owner: {
-      //           where: {
-      //             AND: searchConditionsOwner,
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // });
-
-      //---------------------------------------THIRD APPROACH-------------------------------------
-      //       // First, fetch the treatments with the given conditions
-      // const treatments = await ctx.db.petTreatment.findMany({
-      //   where: {
-      //     AND: searchConditions,
-      //   },
-      //   orderBy: order,
-      //   take: input.limit + 1,
-      //   cursor: input.cursor ? { treatmentID: input.cursor } : undefined,
-      // });
-
-      // // Then, for each treatment, fetch the associated pet and owner
-      // const treatmentsWithPetsAndOwners = await Promise.all(
-      //   treatments.map(async (treatment) => {
-      //     const pet = await ctx.db.pet.findUnique({
-      //       where: { petID: treatment.petID },
-      //       include: { owner: true },
-      //     });
-
-      //     return {
-      //       ...treatment,
-      //       pet,
-      //     };
-      //   })
-      // );
-
-      //---------------------------------------FOURTH APPROACH-------------------------------------
-      // // First, fetch the treatments with the given conditions
-      // const treatments = await ctx.db.petTreatment.findMany({
-      //   where: {
-      //     AND: searchConditions,
-      //   },
-      //   orderBy: order,
-      //   take: input.limit + 1,
-      //   cursor: input.cursor ? { treatmentID: input.cursor } : undefined,
-      // });
-
-      // // Then, for each treatment, fetch the associated pet and owner if they match the conditions
-      // const treatmentsWithPetsAndOwners = await Promise.all(
-      //   treatments.map(async (treatment) => {
-      //     const pet = await ctx.db.pet.findUnique({
-      //       where: { petID: treatment.petID },
-      //       include: { owner: true },
-      //     });
-
-      //     if (
-      //       pet &&
-      //       (input.searchQuery === "" ||
-      //         (searchConditionsPet.some((condition) => {
-      //           const key = Object.keys(condition)[0] as keyof typeof condition;
-      //           return key in pet && condition[key] === pet[key];
-      //         }) &&
-      //           searchConditionsOwner.some((condition) => {
-      //             const key = Object.keys(condition)[0] as keyof typeof condition;
-      //             return pet.owner && key in pet.owner && condition[key] === pet.owner[key];
-      //           })))
-      //     ) {
-      //       return {
-      //         ...treatment,
-      //         pet,
-      //       };
-      //     }
-      //   }),
-      // );
-
-      // // Filter out any undefined values (treatments where the pet or owner didn't match the conditions)
-      // const treatment = treatmentsWithPetsAndOwners.filter(Boolean);
-
-      //-----------------------------------FIFTH APPROACH-------------------------------------
-      // First, construct the search conditions for the treatment, pet, and owner
-      // const searchConditionsTreatment = terms.map((term) => ({
-      //   OR: [
-      //     { treatmentID: { equals: isNaN(Number(term)) ? undefined : Number(term) } },
-      //     { category: { contains: term } },
-      //     { type: { contains: term } },
-      //     { comments: { contains: term } },
-      //   ],
-      // }));
-
-      // const searchConditionsPet = terms.map((term) => ({
-      //   OR: [
-      //     { petID: { equals: isNaN(Number(term)) ? undefined : Number(term) } },
-      //     { name: { contains: term } },
-      //     { type: { contains: term } },
-      //     { breed: { contains: term } },
-      //   ],
-      // }));
-
-      // const searchConditionsOwner = terms.map((term) => ({
-      //   OR: [{ ownerID: { equals: isNaN(Number(term)) ? undefined : Number(term) } }, { name: { contains: term } }, { address: { contains: term } }],
-      // }));
-
-      // const searchConditionsTreatment = terms.map((term) => ({
-      //   OR: [
-      //     ...(isNaN(Number(term)) ? [] : [{ treatmentID: { equals: Number(term) } }]),
-      //     { category: { contains: term } },
-      //     { type: { contains: term } },
-      //     { comments: { contains: term } },
-      //   ],
-      // }));
-
-      // const searchConditionsPet = terms.map((term) => ({
-      //   OR: [...(isNaN(Number(term)) ? [] : [{ petID: { equals: Number(term) } }]), { petName: { contains: term } }, { species: { contains: term } }],
-      // }));
-
-      // const searchConditionsOwner = terms.map((term) => ({
-      //   OR: [
-      //     ...(isNaN(Number(term)) ? [] : [{ ownerID: { equals: Number(term) } }]),
-      //     { firstName: { contains: term } },
-      //     { surname: { contains: term } },
-      //     { addressGreaterArea: { contains: term } },
-      //     { addressArea: { contains: term } },
-      //   ],
-      // }));
-
       // Fetch all the treatments based on the search conditions of treatments
       const treatment = await ctx.db.petTreatment.findMany({
         where:
@@ -333,23 +168,7 @@ export const petTreatmentRouter = createTRPCRouter({
           //   ? {}
           //   :
           {
-            OR: [
-              {
-                AND: searchConditions,
-              },
-              {
-                pet: {
-                  AND: searchConditionsPet,
-                },
-              },
-              {
-                pet: {
-                  owner: {
-                    AND: searchConditionsOwner,
-                  },
-                },
-              },
-            ],
+            AND: searchConditions,
           },
         orderBy: order,
         take: input.limit + 1,

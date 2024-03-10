@@ -86,8 +86,8 @@ export const petClinicRouter = createTRPCRouter({
           return {
             OR: [
               { clinicID: { equals: Number(term.substring(1)) } },
-              // { greaterArea: { contains: term } },
-              // { area: { contains: term } },
+              { greaterArea: { greaterArea: { contains: term } } },
+              { area: { area: { contains: term } } },
               { conditions: { contains: term } },
               { comments: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
@@ -95,8 +95,8 @@ export const petClinicRouter = createTRPCRouter({
         } else {
           return {
             OR: [
-              //  { greaterArea: { contains: term } },
-              //  { area: { contains: term } },
+              { greaterArea: { greaterArea: { contains: term } } },
+              { area: { area: { contains: term } } },
               { conditions: { contains: term } },
               { comments: { contains: term } },
               // dateCondition,

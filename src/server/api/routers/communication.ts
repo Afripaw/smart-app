@@ -100,6 +100,8 @@ export const communicationRouter = createTRPCRouter({
               { message: { contains: term } },
               { success: { contains: term } },
               { type: { contains: term } },
+              { greaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { area: { some: { area: { area: { contains: term } } } } },
               // { greaterArea: { hasSome: [term] } },
               // { area: { hasSome: [term] } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
@@ -110,8 +112,8 @@ export const communicationRouter = createTRPCRouter({
               { message: { contains: term } },
               { success: { contains: term } },
               { type: { contains: term } },
-              // { greaterArea: { hasSome: [term] } },
-              // { area: { hasSome: [term] } },
+              { greaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { area: { some: { area: { area: { contains: term } } } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }

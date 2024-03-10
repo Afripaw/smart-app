@@ -268,22 +268,12 @@ export const UserRouter = createTRPCRouter({
       //   .map((term) => Number(term.substring(1)));
 
       // Construct a complex search condition
+      // Construct a complex search condition
       const searchConditions = terms.map((term) => {
         // Check if term is a UserID
-        // if (term.match(/^U\d+$/) !== null) {
-        //   return {
-        //     userID: { equals: Number(term.substring(1)) },
-        //   };
-        // }
-
-        // Check if term is a number
-        // if (!isNaN(Number(term))) {
-        //   return {
-
         if (term.match(/^U\d+$/) !== null) {
           return {
             OR: [
-              // { userID: { equals: Number(term) } },
               { userID: { equals: Number(term.substring(1)) } },
               { name: { contains: term } },
               { surname: { contains: term } },
@@ -291,9 +281,6 @@ export const UserRouter = createTRPCRouter({
               { role: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
-              // { addressGreaterArea: { contains: term } },
-              // { addressArea: { contains: term } },
-              // { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
               { addressSuburb: { contains: term } },
@@ -301,6 +288,9 @@ export const UserRouter = createTRPCRouter({
               { addressFreeForm: { contains: term } },
               { preferredCommunication: { contains: term } },
               { comments: { contains: term } },
+              { addressGreaterArea: { greaterArea: { contains: term } } },
+              { addressArea: { area: { contains: term } } },
+              { addressStreet: { street: { contains: term } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
@@ -312,9 +302,6 @@ export const UserRouter = createTRPCRouter({
               { role: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
-              // { addressGreaterArea: { contains: term } },
-              // { addressArea: { contains: term } },
-              //{ addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
               { addressSuburb: { contains: term } },
@@ -322,26 +309,14 @@ export const UserRouter = createTRPCRouter({
               { addressFreeForm: { contains: term } },
               { preferredCommunication: { contains: term } },
               { comments: { contains: term } },
+              { addressGreaterArea: { greaterArea: { contains: term } } },
+              { addressArea: { area: { contains: term } } },
+              { addressStreet: { street: { contains: term } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
       });
 
-      //search conditions for greater area
-      const searchConditionsGreaterArea = terms.map((term) => {
-        return {
-          OR: [{ greaterArea: { contains: term } }, { area: { contains: term } }, { street: { contains: term } }].filter(
-            (condition) => Object.keys(condition).length > 0,
-          ), // Filter out empty conditions
-        };
-      });
-
-      //let order = { surname: "asc" };
-      //const order = (input.order !== "surname") ? { updatedAt: "desc" } : { surname: "asc" };
-      // Replace this line
-      //const order = (input.order !== "surname") ? { updatedAt: "desc" } : { surname: "asc" };
-
-      // With something like this, where 'SortOrder' is the correct type for sorting
       const order: Record<string, string> = {};
 
       if (input.order !== "surname") {
@@ -351,9 +326,7 @@ export const UserRouter = createTRPCRouter({
       }
 
       const user = await ctx.db.user.findMany({
-        where: {
-          AND: searchConditions,
-        },
+        where: { AND: searchConditions },
         orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { id: input.cursor } : undefined,
@@ -363,7 +336,6 @@ export const UserRouter = createTRPCRouter({
           addressStreet: true,
         },
       });
-
       let nextCursor: typeof input.cursor | undefined = undefined;
       if (user.length > input.limit) {
         const nextRow = user.pop();

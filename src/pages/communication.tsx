@@ -904,13 +904,15 @@ const Communication: NextPage = () => {
                     <thead>
                       <tr>
                         <th className="px-4 py-2"></th>
-                        <th className=" px-4 py-2">ID</th>
-                        <th className="px-4 py-2">Message</th>
+                        {/* <th className=" px-4 py-2">ID</th> */}
+                        <th className="px-4 py-2">Message Content</th>
                         <th className="px-4 py-2">Type</th>
                         <th className="px-4 py-2">Recipients</th>
-                        <th className=" px-4 py-2">Greater Area</th>
-                        <th className="px-4 py-2">Area</th>
-                        <th className="px-4 py-2">Success</th>
+                        <th className=" px-4 py-2">
+                          <div className="w-[7rem]">Recipient Greater Area(s)</div>
+                        </th>
+                        <th className="px-4 py-2">Recipient Area(s)</th>
+                        <th className="px-4 py-2">Success?</th>
                         <th className="w-[35px] px-4 py-2">
                           <span className="group relative inline-block">
                             <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
@@ -927,22 +929,22 @@ const Communication: NextPage = () => {
                       {user_data?.map((user, index) => {
                         return (
                           <tr className="items-center">
-                            <td className=" border px-4 py-2">
-                              <div className="px-4 py-2">{index + 1}</div>
+                            <td className=" border px-2 py-1">
+                              <div className="flex justify-center">{index + 1}</div>
                             </td>
-                            <td className="border px-4 py-2">M{user.communicationID}</td>
-                            <td className="max-w-[15rem] border px-4 py-2">
+                            {/* <td className="border px-2 py-1">M{user.communicationID}</td> */}
+                            <td className="max-w-[15rem] border px-2 py-1">
                               {user.message?.length > 100 ? user.message?.substring(0, 100) + "..." : user.message}
                             </td>
-                            <td className="border px-4 py-2">{user.type}</td>
-                            <td className="border px-4 py-2">
+                            <td className="border px-2 py-1">{user.type}</td>
+                            <td className="border px-2 py-1">
                               {
                                 //Show the list of all the recipients
                                 user.recipients
                                 //user.recipients?.map((user: string) => user).join(", ") ?? ""
                               }
                             </td>
-                            <td className="max-w-[10rem] border px-4 py-2">
+                            <td className="max-w-[10rem] border px-2 py-1">
                               {user.greaterArea.length > 7
                                 ? user.greaterArea
                                     .slice(0, 7)
@@ -950,7 +952,7 @@ const Communication: NextPage = () => {
                                     .join("; ") + "..."
                                 : user.greaterArea.map((greaterArea) => greaterArea.greaterArea.greaterArea).join("; ")}
                             </td>
-                            <td className="max-w-[15rem] border px-4 py-2">
+                            <td className="max-w-[15rem] border px-2 py-1">
                               {user.area.length > 7
                                 ? user.area
                                     .slice(0, 7)
@@ -958,8 +960,8 @@ const Communication: NextPage = () => {
                                     .join("; ") + "..."
                                 : user.area.map((area) => area.area.area).join("; ")}
                             </td>
-                            <td className="border px-4 py-2">{user.success}</td>
-                            <td className=" border px-4 py-2">
+                            <td className="border px-2 py-1">{user.success}</td>
+                            <td className=" border px-2 py-1">
                               {user?.updatedAt?.getDate()?.toString() ?? ""}
                               {"/"}
                               {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
@@ -969,7 +971,7 @@ const Communication: NextPage = () => {
 
                             <div className="flex">
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Trash
                                     size={24}
                                     className="block"
@@ -983,7 +985,7 @@ const Communication: NextPage = () => {
                                     }
                                   />
                                   <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Delete communication
+                                    Delete Message
                                   </span>
                                 </span>
                               </div>
@@ -998,10 +1000,10 @@ const Communication: NextPage = () => {
                             </div> */}
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.communicationID ?? 0)} />
-                                  <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    View communication profile
+                                  <span className="absolute bottom-full hidden w-[102px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    View Message profile
                                   </span>
                                 </span>
                               </div>

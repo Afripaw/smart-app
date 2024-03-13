@@ -679,10 +679,10 @@ const Geographic: NextPage = () => {
                     <thead>
                       <tr>
                         <th className="px-4 py-2"></th>
-                        <th className=" px-4 py-2">ID</th>
+                        {/* <th className=" px-4 py-2">ID</th> */}
                         <th className=" px-4 py-2">Greater Area</th>
-                        <th className="px-4 py-2">Area</th>
-                        <th className="px-4 py-2">Street</th>
+                        <th className="px-4 py-2">Areas (with their Streets)</th>
+                        {/* <th className="px-4 py-2">Street</th> */}
                         <th className="w-[35px] px-4 py-2">
                           <span className="group relative inline-block">
                             <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
@@ -698,13 +698,124 @@ const Geographic: NextPage = () => {
                     <tbody>
                       {geographic_data?.map((geo, index) => {
                         return (
-                          <tr className=" items-center">
-                            <td className=" border px-4 py-2">
-                              <div className="px-4 py-2">{index + 1}</div>
+                          <tr className=" items-start">
+                            <td className=" border px-2 py-1">
+                              <div className="flex  justify-center">{index + 1}</div>
                             </td>
-                            <td className="border px-4 py-2">G{geo.greaterAreaID}</td>
-                            <td className="max-w-[15rem] border px-4 py-2">{geo.greaterArea}</td>
-                            <td className="max-w-[15rem] border px-4 py-2">
+                            {/* <td className="border px-4 py-2">G{geo.greaterAreaID}</td> */}
+                            <td className="max-w-[15rem] border px-2 py-1">{geo.greaterArea}</td>
+                            <td className="max-w-[45rem] border px-2 py-1">
+                              {/* Solution returns all areas but truncates their streets */}
+                              {/* {geo.area.map((area, index) => {
+                                // Determine if the current area's street list should be truncated
+                                const shouldTruncate = area.street.length > 8;
+                                // Generate the street names string, truncating if necessary
+                                const streetNames = shouldTruncate
+                                  ? area.street
+                                      .slice(0, 8)
+                                      .map((street) => street.street)
+                                      .join("; ") + "..."
+                                  : area.street.map((street) => street.street).join("; ");
+
+                                return (
+                                  <p className="" key={index}>
+                                    <b>
+                                      {String(index + 1)}. {area.area}
+                                    </b>{" "}
+                                    ({streetNames})
+                                  </p>
+                                );
+                              })} */}
+
+                              {(geo.area[0]?.street?.length ?? 0) > 16
+                                ? geo.area.slice(0, 1).map((area, index) => (
+                                    <p className="" key={index}>
+                                      <b>
+                                        {String(index + 1)}. {area.area}
+                                      </b>
+                                      {" ("}
+
+                                      {area.street
+                                        .slice(0, 16)
+                                        .map((street) => street.street)
+                                        .join("; ") + ")..."}
+                                    </p>
+                                  ))
+                                : (geo.area[1]?.street.length ?? 0) > 8
+                                  ? geo.area.slice(0, 2).map((area, index) => (
+                                      <p className="" key={index}>
+                                        <b>
+                                          {String(index + 1)}. {area.area}
+                                        </b>
+                                        {" ("}
+
+                                        {index + 1 == 2
+                                          ? area.street
+                                              .slice(0, 8)
+                                              .map((street) => street.street)
+                                              .join("; ") + ")..."
+                                          : area.street.map((street) => street.street).join("; ")}
+                                      </p>
+                                    ))
+                                  : (geo.area[2]?.street.length ?? 0) > 4
+                                    ? geo.area.slice(0, 3).map((area, index) => (
+                                        <p className="" key={index}>
+                                          <b>
+                                            {String(index + 1)}. {area.area}
+                                          </b>
+                                          {" ("}(
+                                          {index + 1 == 3
+                                            ? area.street
+                                                .slice(0, 4)
+                                                .map((street) => street.street)
+                                                .join("; ") + ")..."
+                                            : area.street.map((street) => street.street).join("; ")}
+                                          )
+                                        </p>
+                                      ))
+                                    : (geo.area[3]?.street.length ?? 0) > 2
+                                      ? geo.area.slice(0, 4).map((area, index) => (
+                                          <p className="" key={index}>
+                                            <b>
+                                              {String(index + 1)}. {area.area}
+                                            </b>
+                                            {" ("}(
+                                            {index + 1 == 4
+                                              ? area.street
+                                                  .slice(0, 2)
+                                                  .map((street) => street.street)
+                                                  .join("; ") + ")..."
+                                              : area.street.map((street) => street.street).join("; ")}
+                                            )
+                                          </p>
+                                        ))
+                                      : (geo.area[4]?.street.length ?? 0) > 0
+                                        ? geo.area.slice(0, 5).map((area, index) => (
+                                            <p className="" key={index}>
+                                              <b>
+                                                {String(index + 1)}. {area.area}
+                                              </b>
+                                              {" ("}(
+                                              {index + 1 == 5
+                                                ? area.street
+                                                    .slice(0, 1)
+                                                    .map((street) => street.street)
+                                                    .join("; ") + ")..."
+                                                : area.street.map((street) => street.street).join("; ")}
+                                              )
+                                            </p>
+                                          ))
+                                        : geo.area.map((area, index) => (
+                                            <p className="" key={index}>
+                                              <b>
+                                                {String(index + 1)}. {area.area}
+                                              </b>{" "}
+                                              ({area.street.map((street) => street.street).join("; ")})
+                                            </p>
+                                          ))}
+                            </td>
+
+                            {/* <td className="max-w-[15rem] border px-4 py-2">
                               {geo.area.length > 10
                                 ? geo.area
                                     .slice(0, 10)
@@ -716,8 +827,8 @@ const Geographic: NextPage = () => {
                               {/* {geo.area.map((street) => {
                                 return street.street.map((street) => street.street).join("; ");
                               })} */}
-                              {/* Flatten the streets to one string array */}
-                              {geo.area.length > 10
+                            {/* Flatten the streets to one string array */}
+                            {/* {geo.area.length > 10
                                 ? geo.area
                                     .map((street) => {
                                       return street.street.slice(0, 1).map((street) => street.street);
@@ -730,8 +841,8 @@ const Geographic: NextPage = () => {
                                     })
                                     .flat()
                                     .join("; ")}
-                            </td>
-                            <td className=" border px-4 py-2">
+                            </td>  */}
+                            <td className=" border px-2 py-1">
                               {geo?.updatedAt?.getDate()?.toString() ?? ""}
                               {"/"}
                               {((geo?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
@@ -753,7 +864,7 @@ const Geographic: NextPage = () => {
                               </div> */}
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Pencil size={24} className="block" onClick={() => handleUpdatePage(geo.greaterAreaID)} />
                                   <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-center text-sm text-gray-700 shadow-sm group-hover:block">
                                     Update greater area
@@ -762,7 +873,7 @@ const Geographic: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(geo.greaterAreaID, geo.greaterArea)} />
                                   <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-center text-sm text-gray-700 shadow-sm group-hover:block">
                                     View greater area profile
@@ -1041,7 +1152,7 @@ const Geographic: NextPage = () => {
 
                   <div className="mb-2 flex items-start">
                     {/* Make a dictionary list where you give the */}
-                    <b className="mr-3">Areas and Streets:</b>{" "}
+                    <b className="mr-3">Areas:</b>{" "}
                     {/* {areaList
                       .map(
                         (area, index) =>

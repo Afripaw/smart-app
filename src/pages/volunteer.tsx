@@ -262,6 +262,28 @@ const Volunteer: NextPage = () => {
     area: string;
   };
 
+  type GreaterAreaOptions = {
+    id: number;
+    area: string;
+    state: boolean;
+  };
+
+  type GreaterAreaSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
+
+  //------------------------------ROLES-----------------------------------------
+  type RoleOptions = {
+    role: string;
+    state: boolean;
+  };
+
+  type RoleSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
+
   //-------------------------------CLINICS ATTENDED-----------------------------------------
   type Clinic = {
     id: number;
@@ -407,22 +429,68 @@ const Volunteer: NextPage = () => {
   //GREATER AREA
   //to select multiple areas
   const [greaterAreaList, setGreaterAreaList] = useState<GreaterArea[]>([]);
+
+  const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+  const [greaterAreaSelection, setGreaterAreaSelection] = useState<GreaterAreaSelect>();
+
   const handleToggleGreaterArea = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
   };
 
-  const handleGreaterAreaOption = (option: SetStateAction<string>, id: number) => {
-    setGreaterAreaOption(option);
-    setIsGreaterAreaOpen(false);
+  const handleGreaterArea = (id: number, option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setGreaterAreaOption("Select All");
+      setGreaterAreaSelection({ allSelected: state, clear: false });
 
-    const area: GreaterArea = {
-      id: id,
-      area: String(option),
-    };
-    if (!greaterAreaList.includes(area)) {
-      setGreaterAreaList([...greaterAreaList, area]);
+      const greaterAreas = greaterAreaListOptions.map((area) => ({
+        id: area.id,
+        area: area.area,
+      }));
+      setGreaterAreaList(greaterAreas);
+      setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: true })));
+    } else if (selectionCategory === "clear") {
+      setGreaterAreaOption("Clear All");
+      setGreaterAreaSelection({ allSelected: false, clear: state });
+
+      setGreaterAreaList([]);
+      setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: false })));
+    } else if (selectionCategory === "normal") {
+      setGreaterAreaOption(option);
+      if (state) {
+        const area: GreaterArea = {
+          id: id,
+          area: String(option),
+        };
+        const greaterAreaIDList = greaterAreaList.map((area) => area.id);
+        if (!greaterAreaIDList.includes(id)) {
+          setGreaterAreaList([...greaterAreaList, area]);
+        }
+        setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: true } : area)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedGreaterAreaList = greaterAreaList.filter((area) => area.id !== id);
+        setGreaterAreaList(updatedGreaterAreaList);
+        setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: false } : area)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
     }
   };
+
+  //----------------------ORIGINAL CODE-------------------------
+  // const handleGreaterAreaOption = (option: SetStateAction<string>, id: number) => {
+  //   setGreaterAreaOption(option);
+  //   setIsGreaterAreaOpen(false);
+
+  //   const area: GreaterArea = {
+  //     id: id,
+  //     area: String(option),
+  //   };
+  //   if (!greaterAreaList.includes(area)) {
+  //     setGreaterAreaList([...greaterAreaList, area]);
+  //   }
+  // };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -433,6 +501,8 @@ const Volunteer: NextPage = () => {
         !btnGreaterAreaRef.current.contains(event.target as Node)
       ) {
         setIsGreaterAreaOpen(false);
+        console.log("Greater Area list: ", greaterAreaList);
+        console.log("Greater Area List Options: ", greaterAreaListOptions);
       }
     };
 
@@ -442,29 +512,67 @@ const Volunteer: NextPage = () => {
     };
   }, []);
 
-  // const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
   const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
 
-  //show all the clinics that the volunteer attended
-  const [showGreaterArea, setShowGreaterArea] = useState(false);
-  const handleShowGreaterArea = () => {
-    setShowGreaterArea(!showGreaterArea);
-  };
+  //Old code
+  // //show all the clinics that the volunteer attended
+  // const [showGreaterArea, setShowGreaterArea] = useState(false);
+  // const handleShowGreaterArea = () => {
+  //   setShowGreaterArea(!showGreaterArea);
+  // };
 
   //ROLE
-  //to select multiple areas
+
+  //const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+  const [roleListOptions, setRoleListOptions] = useState<RoleOptions[]>([]);
+  const [roleSelection, setRoleSelection] = useState<RoleSelect>();
+  //to select multiple roles
   const [roleList, setRoleList] = useState<string[]>([]);
   const handleToggleRole = () => {
     setIsRoleOpen(!isRoleOpen);
   };
 
-  const handleRoleOption = (option: SetStateAction<string>) => {
-    setRoleOption(option);
-    setIsRoleOpen(false);
-    if (!roleList.includes(String(option))) {
-      setRoleList([...roleList, String(option)]);
+  const handleRole = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setRoleOption("Select All");
+      setRoleSelection({ allSelected: state, clear: false });
+
+      const roles = roleListOptions.map((role) => role.role);
+      setRoleList(roles);
+      setRoleListOptions(roleListOptions.map((role) => ({ ...role, state: true })));
+    } else if (selectionCategory === "clear") {
+      setRoleOption("Clear All");
+      setRoleSelection({ allSelected: false, clear: state });
+
+      setRoleList([]);
+      setRoleListOptions(roleListOptions.map((role) => ({ ...role, state: false })));
+    } else if (selectionCategory === "normal") {
+      setRoleOption(option);
+      if (state) {
+        if (!roleList.includes(String(option))) {
+          setRoleList([...roleList, String(option)]);
+        }
+
+        setRoleListOptions(roleListOptions.map((role) => (role.role === option ? { ...role, state: true } : role)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedRoleList = roleList.filter((role) => role !== option);
+        setRoleList(updatedRoleList);
+        setRoleListOptions(roleListOptions.map((role) => (role.role === option ? { ...role, state: false } : role)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
     }
   };
+
+  // const handleRoleOption = (option: SetStateAction<string>) => {
+  //   setRoleOption(option);
+  //   setIsRoleOpen(false);
+  //   if (!roleList.includes(String(option))) {
+  //     setRoleList([...roleList, String(option)]);
+  //   }
+  // };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -720,7 +828,24 @@ const Volunteer: NextPage = () => {
       setRoleList(userData.role ?? "Select one");
       setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
-      console.log("Update Clinic list: ", clinicDates);
+
+      const greaterAreasIDs = greaterAreas.map((area) => area.id);
+
+      setGreaterAreaListOptions(
+        greaterAreaOptions.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea,
+          state: greaterAreasIDs.includes(area.greaterAreaID),
+        })),
+      );
+
+      setRoleListOptions(
+        roleOptions.map((role) => ({
+          role: role,
+          state: userData.role.includes(role),
+        })),
+      );
+      // console.log("Update Clinic list: ", clinicDates);
       //setClinicIDList(clinicIDs);
     }
 
@@ -877,6 +1002,10 @@ const Volunteer: NextPage = () => {
     setAddressFreeForm("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
+
+    setGreaterAreaListOptions(greaterAreaOptions.map((area) => ({ id: area.greaterAreaID, area: area.greaterArea, state: false })));
+    setRoleListOptions(roleOptions.map((role) => ({ role: role, state: false })));
+
     //setClinicIDList([]);
     setIsCreate(true);
     setIsUpdate(false);
@@ -1494,6 +1623,14 @@ const Volunteer: NextPage = () => {
     FileSaver.saveAs(dataFile, fileName + fileExtension);
     setIsLoading(false);
   };
+  const [checked, setChecked] = useState(false);
+  // const handleChecked = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.checked) {
+  //     setChecked("checked");
+  //   } else {
+  //     setChecked("unchecked");
+  //   }
+  // };
 
   return (
     <>
@@ -1562,7 +1699,7 @@ const Volunteer: NextPage = () => {
                     <thead className="">
                       <tr>
                         <th className="px-4 py-2"></th>
-                        <th className="px-4 py-2">ID</th>
+                        {/* <th className="px-4 py-2">ID</th> */}
                         <th className="px-4 py-2">Name</th>
                         <th className="px-4 py-2">
                           <span className="group relative inline-block">
@@ -1600,19 +1737,19 @@ const Volunteer: NextPage = () => {
                       {volunteer_data_with_clinics?.map((user, index) => {
                         return (
                           <tr className="items-center">
-                            <td className=" border px-4 py-2">
-                              <div className="px-4 py-2">{index + 1}</div>
+                            <td className=" border px-2 py-1">
+                              <div className="flex justify-center">{index + 1}</div>
                             </td>
-                            <td className="border px-4 py-2">V{user.volunteerID}</td>
-                            <td className="border px-4 py-2">{user.firstName}</td>
-                            <td className="border px-4 py-2">{user.surname}</td>
-                            <td className="border px-4 py-2">{user.email}</td>
-                            <td className="border px-4 py-2">{user.mobile}</td>
-                            <td className="border px-4 py-2">
+                            {/* <td className="border px-4 py-2">V{user.volunteerID}</td> */}
+                            <td className="border px-2 py-1">{user.firstName}</td>
+                            <td className="border px-2 py-1">{user.surname}</td>
+                            <td className="border px-2 py-1">{user.email}</td>
+                            <td className="border px-2 py-1">{user.mobile}</td>
+                            <td className="border px-2 py-1">
                               {user?.greaterAreas?.map((greaterArea) => greaterArea.greaterArea.greaterArea).join("; ") ?? ""}
                             </td>
-                            <td className="border px-4 py-2">{user.status}</td>
-                            <td className="border px-4 py-2">
+                            <td className="border px-2 py-1">{user.status}</td>
+                            <td className="border px-2 py-1">
                               {user.clinics && user.clinics.length > 0 ? (
                                 <>
                                   {user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getDate().toString()}/
@@ -1623,7 +1760,7 @@ const Volunteer: NextPage = () => {
                                 "None"
                               )}
                             </td>
-                            <td className="border px-4 py-2">
+                            <td className="border px-2 py-1">
                               {user?.updatedAt?.getDate()?.toString() ?? ""}
                               {"/"}
                               {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
@@ -1632,7 +1769,7 @@ const Volunteer: NextPage = () => {
                             </td>
                             <div className="flex">
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Trash
                                     size={24}
                                     className="block"
@@ -1645,7 +1782,7 @@ const Volunteer: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.volunteerID)} />
                                   <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Update volunteer
@@ -1654,7 +1791,7 @@ const Volunteer: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.volunteerID)} />
                                   <span className="absolute bottom-full hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     View volunteer profile
@@ -1673,35 +1810,42 @@ const Volunteer: NextPage = () => {
                               </div> */}
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Bed size={24} className="block" onClick={() => handleAddClinic(user.volunteerID)} />
                                   <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Add today's clinic to pet
+                                    Add today's clinic to volunteer
                                   </span>
 
                                   {showTodayClinics && volunteerIDForClinic === user.volunteerID && (
                                     <>
                                       {isClinicLoading ? (
                                         <div
-                                          className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                          className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] group-hover:block motion-reduce:animate-[spin_1.5s_linear_infinite]"
                                           role="status"
                                         />
                                       ) : (
                                         <div
                                           ref={clinicRef}
-                                          className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
+                                          className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow group-hover:block dark:bg-gray-700"
                                         >
-                                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                                            {todayClinicList.map((option) => (
-                                              <li key={option.id} onClick={() => handleAddTodaysClinic(user.volunteerID, option.id)}>
-                                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                  {
-                                                    //Give the date and in brackets the area
-                                                    option.date + " (" + option.area + ")"
-                                                  }
-                                                </button>
-                                              </li>
-                                            ))}
+                                          <ul
+                                            className="rounded-lg border-2 border-black py-2 text-sm text-gray-700 dark:text-gray-200"
+                                            aria-labelledby="dropdownHoverButton"
+                                          >
+                                            {todayClinicList.length > 0 ? (
+                                              todayClinicList.map((option) => (
+                                                <li key={option.id} onClick={() => handleAddTodaysClinic(user.volunteerID, option.id)}>
+                                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                    {
+                                                      //Give the date and in brackets the area
+                                                      option.date + " (" + option.area + ")"
+                                                    }
+                                                  </button>
+                                                </li>
+                                              ))
+                                            ) : (
+                                              <li className="px-2">There is no clinics today</li>
+                                            )}
                                           </ul>
                                         </div>
                                       )}
@@ -1833,7 +1977,8 @@ const Volunteer: NextPage = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-center">
+                      {/* Old code. before checkboxes */}
+                      {/* <div className="flex flex-col items-center">
                         <button
                           onClick={handleShowGreaterArea}
                           className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -1849,7 +1994,7 @@ const Volunteer: NextPage = () => {
                             ))}
                           </ul>
                         )}
-                      </div>
+                      </div> */}
 
                       <div className="flex flex-col">
                         <button
@@ -1866,11 +2011,48 @@ const Volunteer: NextPage = () => {
                         {isGreaterAreaOpen && (
                           <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                             <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                              {greaterAreaOptions?.map((option) => (
-                                <li key={option.greaterAreaID} onClick={() => handleGreaterAreaOption(option.greaterArea, option.greaterAreaID)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                    {option?.greaterArea ?? ""}
-                                  </button>
+                              <li key={1}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id="1"
+                                    type="checkbox"
+                                    checked={greaterAreaSelection?.allSelected}
+                                    onChange={(e) => handleGreaterArea(0, "", e.target.checked, "allSelected")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                    Select All
+                                  </label>
+                                </div>
+                              </li>
+                              <li key={2}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id="2"
+                                    type="checkbox"
+                                    checked={greaterAreaSelection?.clear}
+                                    onChange={(e) => handleGreaterArea(0, "", e.target.checked, "clear")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                    Clear All
+                                  </label>
+                                </div>
+                              </li>
+                              {greaterAreaListOptions?.map((option) => (
+                                <li key={option.id}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id={String(option.id)}
+                                      type="checkbox"
+                                      checked={option.state}
+                                      onChange={(e) => handleGreaterArea(option.id, option.area, e.target.checked, "normal")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
+                                      {option.area}
+                                    </label>
+                                  </div>
                                 </li>
                               ))}
                             </ul>
@@ -1943,7 +2125,7 @@ const Volunteer: NextPage = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-center">
+                    {/* <div className="flex flex-col items-center">
                       <button
                         onClick={handleShowRole}
                         className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -1959,7 +2141,7 @@ const Volunteer: NextPage = () => {
                           ))}
                         </ul>
                       )}
-                    </div>
+                    </div> */}
 
                     <div className="flex flex-col">
                       <button
@@ -1974,11 +2156,58 @@ const Volunteer: NextPage = () => {
                         </svg>
                       </button>
                       {isRoleOpen && (
-                        <div ref={roleRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={roleRef} className="z-10 w-52 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {roleOptions.map((option) => (
                               <li key={option} onClick={() => handleRoleOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul> */}
+
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key={1}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="1"
+                                  type="checkbox"
+                                  checked={roleSelection?.allSelected}
+                                  onChange={(e) => handleRole("", e.target.checked, "allSelected")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                  Select All
+                                </label>
+                              </div>
+                            </li>
+                            <li key={2}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="2"
+                                  type="checkbox"
+                                  checked={roleSelection?.clear}
+                                  onChange={(e) => handleRole("", e.target.checked, "clear")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                  Clear All
+                                </label>
+                              </div>
+                            </li>
+                            {roleListOptions?.map((option) => (
+                              <li key={option.role}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.role)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleRole(option.role, e.target.checked, "normal")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.role)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.role}
+                                  </label>
+                                </div>
                               </li>
                             ))}
                           </ul>

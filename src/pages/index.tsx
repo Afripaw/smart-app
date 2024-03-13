@@ -24,6 +24,8 @@ export default function Home() {
   const sterilisedPets = api.welcomePage.getSterilisedPets.useQuery();
   const clinicVisits = api.welcomePage.getAllClinicVisits.useQuery();
   const kennels = api.welcomePage.getAllKennels.useQuery();
+  const vaccinatedPets = api.welcomePage.getPetsVaccinated.useQuery();
+  const treatments = api.welcomePage.getAllTreatments.useQuery();
 
   console.log("Clinics: ", clinicVisits.data);
 
@@ -32,6 +34,8 @@ export default function Home() {
     void sterilisedPets.refetch();
     void clinicVisits.refetch();
     void kennels.refetch();
+    void vaccinatedPets.refetch();
+    void treatments.refetch();
   }, []);
 
   //passwords
@@ -105,7 +109,7 @@ export default function Home() {
         <meta name="description" content="Smart App" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className=" text-normal relative flex min-h-screen flex-col bg-gray-100">
+      <main className=" relative flex min-h-screen flex-col bg-gray-100 text-normal">
         {/*Background image*/}
         <Image src={"/Collage Greyed Out.jpg"} alt="Afripaw backdrop" className="absolute left-0 top-0 max-h-screen min-w-full" width={720} height={480} />
         {!signIn_ && (
@@ -124,8 +128,8 @@ export default function Home() {
                 </button>
               </div>
               <div className="flex grow flex-col items-center justify-center">
-                <div className="relative my-5 flex items-center p-28 text-black">
-                  <div className="absolute left-0 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-6 text-white">
+                <div className="relative my-5 flex items-center p-32 text-black">
+                  <div className="absolute left-5 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-6 text-white">
                     {!clinicVisits.data ? (
                       <div
                         className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -136,9 +140,24 @@ export default function Home() {
                         <div className="text-2xl">{clinicVisits?.data ?? 0}</div>
                       </>
                     )}
-                    <div>Pet Clinic visits</div>
+                    <div>Pet Clinic Visits</div>
                   </div>
-                  <div className="absolute right-0 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-8 text-white">
+
+                  <div className="absolute left-[275px] top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-2 text-white">
+                    {!vaccinatedPets.data ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <>
+                        <div className="text-2xl">{vaccinatedPets?.data ?? 0}</div>
+                      </>
+                    )}
+                    <div>Pets Fully Vaccinated</div>
+                  </div>
+
+                  <div className="absolute right-5 top-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-8 text-white">
                     {!sterilisedPets?.data ? (
                       <div
                         className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -151,7 +170,8 @@ export default function Home() {
                     )}
                     <div>Pets Sterilised</div>
                   </div>
-                  <div className="absolute bottom-0 left-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-4 text-white">
+
+                  <div className="absolute bottom-0 left-5 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-4 text-white">
                     {!kennels.data ? (
                       <div
                         className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -164,7 +184,22 @@ export default function Home() {
                     )}
                     <div>Kennels Provided</div>
                   </div>
-                  <div className="absolute bottom-0 right-0 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-5 text-white">
+
+                  <div className="absolute bottom-0 left-[275px] flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-6 text-white">
+                    {!treatments.data ? (
+                      <div
+                        className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                        role="status"
+                      />
+                    ) : (
+                      <>
+                        <div className="text-2xl">{treatments?.data ?? 0}</div>
+                      </>
+                    )}
+                    <div>Pets Treatments</div>
+                  </div>
+
+                  <div className="absolute bottom-0 right-5 flex aspect-square flex-col items-center justify-center rounded-full bg-main-orange p-5 text-white">
                     {!activeVolunteers?.data ? (
                       <div
                         className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -191,7 +226,7 @@ export default function Home() {
               <div className="z-20 flex flex-col items-center justify-center bg-main-orange text-black">
                 <div className="">Design by JHO Ludik and JH van Vuuren</div>
                 <div className="">Development by JHO Ludik</div>
-                <div className="">© AfriPaw (2024)</div>
+                <div className="">© Jacques Ludik (2024)</div>
               </div>
             </div>
           </>

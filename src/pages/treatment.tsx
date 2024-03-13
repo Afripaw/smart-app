@@ -34,6 +34,13 @@ import { router } from "@trpc/server";
 const Treatment: NextPage = () => {
   useSession({ required: true });
 
+  //TYPES
+  type previousTreatment = {
+    id: number;
+    type: string;
+    category: string;
+  };
+
   const newTreatment = api.petTreatment.create.useMutation();
   const updateTreatment = api.petTreatment.update.useMutation();
   const [isUpdate, setIsUpdate] = useState(false);
@@ -349,6 +356,10 @@ const Treatment: NextPage = () => {
   //const [userID, setUserID] = useState("");
   // const [id, setID] = useState(0);
 
+  //-------------------------------PREVIOUS TREATMENTS-----------------------------------------
+  const [previousTreatments, setPreviousTreatments] = useState<previousTreatment[]>([]);
+  const prevTreatments = api.petTreatment.getAllTreatmentsForPet.useQuery({ petID: petID });
+
   //---------------------------------NAVIGATION OF PET TO TREATMENT----------------------------------
   useEffect(() => {
     if (router.asPath.includes("petID")) {
@@ -377,6 +388,12 @@ const Treatment: NextPage = () => {
       setSurname(String(query?.split("&")[4]?.split("=")[1]?.replaceAll("+", " ")));
       setArea(String(query?.split("&")[6]?.split("=")[1]?.replaceAll("+", " ")));
       setGreaterArea(String(query?.split("&")[5]?.split("=")[1]?.replaceAll("+", " ")));
+
+      setPreviousTreatments(
+        prevTreatments.data?.map((treatment) => ({ id: treatment.treatmentID ?? 0, type: treatment.type ?? "", category: treatment.category ?? "" })) ?? [],
+      );
+
+      console.log("Previous treatments: ", prevTreatments.data);
       //console.log("Query: ", router.query);
       //console.log("Route: ", router.route);
       //console.log("as path: ", router.asPath);
@@ -385,6 +402,14 @@ const Treatment: NextPage = () => {
       setIsCreate(true);
     }
   }, [router.asPath]);
+
+  //fetch previous treatments
+  useEffect(() => {
+    void prevTreatments.refetch();
+    setPreviousTreatments(
+      prevTreatments.data?.map((treatment) => ({ id: treatment.treatmentID ?? 0, type: treatment.type ?? "", category: treatment.category ?? "" })) ?? [],
+    );
+  }, [petID, router.asPath, isCreate]);
 
   //-------------------------------NAVIGATING BY CLICKING ON THE TAB---------------------
   useEffect(() => {
@@ -918,7 +943,7 @@ const Treatment: NextPage = () => {
                     <thead className="">
                       <tr>
                         <th className="px-4 py-2"></th>
-                        <th className="px-4 py-2">ID</th>
+                        {/* <th className="px-4 py-2">ID</th> */}
                         <th className="w-[35px] px-4 py-2">
                           <span className="group relative inline-block">
                             <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
@@ -929,7 +954,7 @@ const Treatment: NextPage = () => {
                             </span>
                           </span>
                         </th>
-                        <th className="px-4 py-2">Pet ID</th>
+                        {/* <th className="px-4 py-2">Pet ID</th> */}
                         <th className="px-4 py-2">Pet</th>
                         <th className="px-4 py-2">Owner</th>
                         <th className="px-4 py-2">Greater Area</th>
@@ -957,33 +982,33 @@ const Treatment: NextPage = () => {
                       {pet_treatment_data?.map((treatment, index) => {
                         return (
                           <tr className="items-center">
-                            <td className=" border px-4 py-2">
-                              <div className="px-4 py-2">{index + 1}</div>
+                            <td className=" border px-2 py-1">
+                              <div className="flex justify-center">{index + 1}</div>
                             </td>
-                            <td className="border px-4 py-2">T{treatment.treatmentID}</td>
-                            <td className="border px-4 py-2">
+                            {/* <td className="border px-2 py-1">T{treatment.treatmentID}</td> */}
+                            <td className="border px-2 py-1">
                               {treatment?.date?.getDate()?.toString() ?? ""}
                               {"/"}
                               {((treatment?.date?.getMonth() ?? 0) + 1)?.toString() ?? ""}
                               {"/"}
                               {treatment?.date?.getFullYear()?.toString() ?? ""}
                             </td>
-                            <td className="border px-4 py-2">P{treatment.petID}</td>
-                            <td className="border px-4 py-2">
+                            {/* <td className="border px-4 py-2">P{treatment.petID}</td> */}
+                            <td className="border px-2 py-1">
                               <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(treatment.petID)}>
                                 {treatment.petName} ({treatment.species})
                               </button>
                             </td>
-                            <td className="border px-4 py-2">
+                            <td className="border px-2 py-1">
                               <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(treatment.ownerID)}>
-                                {treatment.firstName} {treatment.surname} (N{treatment.ownerID})
+                                {treatment.firstName} {treatment.surname}
                               </button>
                             </td>
-                            <td className="border px-4 py-2">{treatment.greaterArea}</td>
-                            <td className="border px-4 py-2">{treatment.area}</td>
-                            <td className="border px-4 py-2">{treatment.category}</td>
-                            <td className="border px-4 py-2">{treatment.type}</td>
-                            <td className=" border px-4 py-2">
+                            <td className="border px-2 py-1">{treatment.greaterArea}</td>
+                            <td className="border px-2 py-1">{treatment.area}</td>
+                            <td className="border px-2 py-1">{treatment.category}</td>
+                            <td className="border px-2 py-1">{treatment.type}</td>
+                            <td className=" border px-2 py-1">
                               {treatment?.updatedAt?.getDate()?.toString() ?? ""}
                               {"/"}
                               {((treatment?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
@@ -993,7 +1018,7 @@ const Treatment: NextPage = () => {
 
                             <div className="flex">
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Trash
                                     size={24}
                                     className="block"
@@ -1016,7 +1041,7 @@ const Treatment: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)} />
                                   <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Update treatment
@@ -1025,7 +1050,7 @@ const Treatment: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)} />
                                   <span className="absolute bottom-full hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     View treatment profile
@@ -1104,6 +1129,24 @@ const Treatment: NextPage = () => {
                   </div>
                   <div className="py-2">Greater Area: {greaterArea ? greaterArea : treatment?.greaterArea}</div>
                   <div className="py-2">Area: {area ? area : treatment?.area}</div>
+
+                  {isCreate && (
+                    <div className="mb-2 flex items-start py-2">
+                      <div className="mr-3">Previous Treatments:</div>{" "}
+                      <div className="flex flex-col items-start">
+                        {previousTreatments.map((treatment, index) => (
+                          <button key={treatment?.id} className="underline hover:text-blue-400">
+                            {index + 1 + ". " + (treatment?.type ?? "") + " (" + (treatment?.category ?? "") + ")"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/*Draw a horisontal line */}
+                  <hr className="my-3 border-[1px] border-gray-400" />
+
+                  {/*CATEGORY*/}
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">

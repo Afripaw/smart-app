@@ -593,4 +593,19 @@ export const petTreatmentRouter = createTRPCRouter({
 
       return treatment;
     }),
+
+  getAllTreatmentsForPet: publicProcedure
+    .input(
+      z.object({
+        petID: z.number(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const petTreatment = await ctx.db.petTreatment.findMany({
+        where: {
+          petID: input.petID,
+        },
+      });
+      return petTreatment;
+    }),
 });

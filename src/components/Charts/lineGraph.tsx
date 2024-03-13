@@ -68,7 +68,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
     const activeOwners = api.petOwner.getActiveOwners?.useQuery();
     const response = activeOwners?.data?.transformedData ?? [];
 
-    const colours = ["#EB4724", "#1111DD", "11DD11", "#D1D5DB"];
+    const colours = ["#EB4724", "#1111DD", "#A020F0", "#D1D5DB"];
 
     console.log("owners: ", activeOwners?.data?.owners ?? []);
 
@@ -87,7 +87,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
       );
     }
 
-    console.log(response, areaKeys);
+    console.log("Active owers response: ", response, areaKeys);
 
     return (
       <ResponsiveContainer width="80%" height="80%">
@@ -107,7 +107,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
     const activeVolunteers = api.volunteer.getActiveVolunteersFor5Years?.useQuery();
     const response = activeVolunteers?.data?.transformedData ?? [];
 
-    const colours = ["#EB4724", "#1111DD", "11DD11", "#D1D5DB"];
+    const colours = ["#EB4724", "#1111DD", "#A020F0", "#D1D5DB"];
 
     console.log("volunteers: ", activeVolunteers?.data?.owners ?? []);
 
@@ -175,7 +175,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
     const kennelsProvided = api.pet.getKennels?.useQuery();
     const response = kennelsProvided?.data?.transformedData ?? [];
 
-    const colours = ["#EB4724", "#1111DD", "11DD11", "#D1D5DB"];
+    const colours = ["#EB4724", "#1111DD", "#A020F0", "#D1D5DB"];
 
     console.log("kennels: ", kennelsProvided?.data?.kennels ?? []);
     console.log("kennel years", kennelsProvided?.data?.kennelYears ?? []);
@@ -195,7 +195,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
       );
     }
 
-    console.log(response, areaKeys);
+    console.log("response and areaKeys", response, areaKeys);
 
     return (
       <ResponsiveContainer width="80%" height="80%">
@@ -215,7 +215,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
     const clinicsHeld = api.petClinic.getClinicsHeld?.useQuery();
     const response = clinicsHeld?.data?.transformedData ?? [];
 
-    const colours = ["#EB4724", "#1111DD", "11DD11", "#D1D5DB"];
+    const colours = ["#EB4724", "#1111DD", "A020F0", "#D1D5DB"];
 
     console.log("clinics: ", clinicsHeld?.data?.clinics ?? []);
     //console.log("kennel years", kennelsProvided?.data?.kennelYears ?? []);

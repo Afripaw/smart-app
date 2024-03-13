@@ -124,6 +124,15 @@ export const petClinicRouter = createTRPCRouter({
         include: {
           greaterArea: true,
           area: true,
+          pet: {
+            include: {
+              pet: {
+                select: {
+                  species: true,
+                },
+              },
+            },
+          },
         },
       });
 

@@ -15,6 +15,8 @@ const Dashboard: NextPage = () => {
   const sterilisedPets = api.welcomePage.getSterilisedPets.useQuery();
   const clinicVisits = api.welcomePage.getAllClinicVisits.useQuery();
   const kennels = api.welcomePage.getAllKennels.useQuery();
+  const vaccinatedPets = api.welcomePage.getPetsVaccinated.useQuery();
+  const treatments = api.welcomePage.getAllTreatments.useQuery();
 
   //const { isLoading, component: PieGraphComponent } = PieGraph({ type: "Treatments" });
 
@@ -72,6 +74,19 @@ const Dashboard: NextPage = () => {
                   <div className="text-xs">Pet Clinic visits</div>
                 </div>
                 <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
+                  {!vaccinatedPets.data ? (
+                    <div
+                      className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                      role="status"
+                    />
+                  ) : (
+                    <>
+                      <div className="text-lg">{vaccinatedPets?.data ?? 0}</div>
+                    </>
+                  )}
+                  <div className="text-xs">Pets Vaccinated</div>
+                </div>
+                <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
                   {!sterilisedPets?.data ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -99,6 +114,21 @@ const Dashboard: NextPage = () => {
                   )}
                   <div className="text-xs">Kennels Provided</div>
                 </div>
+
+                <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
+                  {!treatments.data ? (
+                    <div
+                      className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                      role="status"
+                    />
+                  ) : (
+                    <>
+                      <div className="text-lg">{treatments?.data ?? 0}</div>
+                    </>
+                  )}
+                  <div className="text-xs">Pet Treatments</div>
+                </div>
+
                 <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
                   {!activeVolunteers?.data ? (
                     <div

@@ -1368,7 +1368,7 @@ const User: NextPage = () => {
                     <thead className="">
                       <tr>
                         <th className="px-4 py-2"></th>
-                        <th className="px-4 py-2">ID</th>
+                        {/* <th className="px-4 py-2">ID</th> */}
                         <th className="px-4 py-2">Name</th>
 
                         <th className="px-4 py-2">
@@ -1403,20 +1403,20 @@ const User: NextPage = () => {
                       {user_data?.map((user, index) => {
                         return (
                           <tr className="items-center">
-                            <td className=" border px-4 py-2">
-                              <div className="px-4 py-2">{index + 1}</div>
+                            <td className=" border px-2 py-1">
+                              <div className="flex justify-center">{index + 1}</div>
                             </td>
-                            <td className="border px-4 py-2">U{user.userID}</td>
-                            <td className="border px-4 py-2">{user.name}</td>
-                            <td className="border px-4 py-2">{user.surname}</td>
-                            <td className="border px-4 py-2">{user.email}</td>
-                            <td className="border px-4 py-2">{user.mobile}</td>
-                            <td className="border px-4 py-2">{user.addressGreaterArea.greaterArea}</td>
-                            <td className="border px-4 py-2">{user.addressArea?.area}</td>
-                            <td className="border px-4 py-2">{user.role}</td>
-                            <td className="border px-4 py-2">{user.status}</td>
+                            {/* <td className="border px-4 py-2">U{user.userID}</td> */}
+                            <td className="border px-2 py-1">{user.name}</td>
+                            <td className="border px-2 py-1">{user.surname}</td>
+                            <td className="border px-2 py-1">{user.email}</td>
+                            <td className="border px-2 py-1">{user.mobile}</td>
+                            <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
+                            <td className="border px-2 py-1">{user.addressArea?.area}</td>
+                            <td className="border px-2 py-1">{user.role}</td>
+                            <td className="border px-2 py-1">{user.status}</td>
 
-                            <td className=" border px-4 py-2">
+                            <td className=" border px-2 py-1">
                               {user?.updatedAt?.getDate()?.toString() ?? ""}
                               {"/"}
                               {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
@@ -1435,7 +1435,7 @@ const User: NextPage = () => {
                               />
                             </div> */}
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Trash size={24} className="block" onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")} />
                                   <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Delete user
@@ -1444,7 +1444,7 @@ const User: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(String(user.id))} />
                                   <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Update user
@@ -1453,7 +1453,7 @@ const User: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(String(user.id))} />
                                   <span className="absolute bottom-full hidden w-[75px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     View user profile

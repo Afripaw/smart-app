@@ -845,7 +845,7 @@ const Clinic: NextPage = () => {
                     <thead>
                       <tr>
                         <th className="px-4 py-2"></th>
-                        <th className=" px-4 py-2">ID</th>
+                        {/* <th className=" px-4 py-2">ID</th> */}
                         <th className="w-[35px] px-4 py-2">
                           <span className="group relative inline-block">
                             <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
@@ -858,8 +858,10 @@ const Clinic: NextPage = () => {
                         </th>
 
                         <th className="px-4 py-2">Greater Area</th>
-                        <th className="px-4 py-2">Area</th>
-                        <th className="px-4 py-2">
+                        {/* <th className="px-4 py-2">Area</th> */}
+                        <th className="max-w-[60px] px-4 py-2">Dog visits</th>
+                        <th className="max-w-[60px] px-4 py-2">Cat visits</th>
+                        <th className="min-w-[20rem] px-4 py-2">
                           Conditions
                           {/* <button className={`${order == "condition" ? "underline" : ""}`} onClick={() => handleOrderFields("condition")}>
                           Conditions
@@ -881,21 +883,27 @@ const Clinic: NextPage = () => {
                       {user_data?.map((user, index) => {
                         return (
                           <tr className="items-center">
-                            <td className=" border px-4 py-2">
-                              <div className="px-4 py-2">{index + 1}</div>
+                            <td className=" border px-2 py-1">
+                              <div className="flex justify-center">{index + 1}</div>
                             </td>
-                            <td className="border px-4 py-2">C{user.clinicID}</td>
-                            <td className="border px-4 py-2">
+                            {/* <td className="border px-4 py-2">C{user.clinicID}</td> */}
+                            <td className="border px-2 py-1">
                               {user?.date?.getDate()?.toString() ?? ""}
                               {"/"}
                               {((user?.date?.getMonth() ?? 0) + 1)?.toString() ?? ""}
                               {"/"}
                               {user?.date?.getFullYear()?.toString() ?? ""}
                             </td>
-                            <td className="border px-4 py-2">{user.greaterArea.greaterArea}</td>
-                            <td className="border px-4 py-2">{user.area.area}</td>
-                            <td className="border px-4 py-2">{user.conditions}</td>
-                            <td className=" border px-4 py-2">
+                            <td className="border px-2 py-1">{user.greaterArea.greaterArea}</td>
+                            {/* <td className="border px-2 py-1">{user.area.area}</td> */}
+                            <td className=" border px-2 py-1">
+                              <div className="flex justify-center">{user.pet.filter((pet) => pet.pet.species === "Dog").length}</div>
+                            </td>
+                            <td className=" border px-2 py-1">
+                              <div className="flex justify-center">{user.pet.filter((pet) => pet.pet.species === "Cat").length}</div>
+                            </td>
+                            <td className="border px-2 py-1">{user.conditions}</td>
+                            <td className=" border px-2 py-1">
                               {user?.updatedAt?.getDate()?.toString() ?? ""}
                               {"/"}
                               {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
@@ -905,7 +913,7 @@ const Clinic: NextPage = () => {
 
                             <div className="flex">
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Trash
                                     size={24}
                                     className="block"
@@ -928,7 +936,7 @@ const Clinic: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.clinicID ?? 0)} />
                                   <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Update clinic
@@ -937,7 +945,7 @@ const Clinic: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.clinicID ?? 0)} />
                                   <span className="absolute bottom-full hidden w-[86px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     View clinic profile
@@ -1040,7 +1048,7 @@ const Clinic: NextPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-start">
+                  {/* <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
                         Area<div className="text-lg text-main-orange">*</div>:{" "}
@@ -1070,7 +1078,7 @@ const Clinic: NextPage = () => {
                         </div>
                       )}
                     </div>
-                  </div>
+                  </div> */}
 
                   {/*CONDITIONS*/}
                   <div className="flex items-start">
@@ -1172,9 +1180,9 @@ const Clinic: NextPage = () => {
                     <b className="mr-3">Greater Area:</b> {greaterAreaOption.area}
                   </div>
 
-                  <div className="mb-2 flex items-center">
+                  {/* <div className="mb-2 flex items-center">
                     <b className="mr-3">Area:</b> {areaOption.area}
-                  </div>
+                  </div> */}
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Conditions:</b> {conditionOption}

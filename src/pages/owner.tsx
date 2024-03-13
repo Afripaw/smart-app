@@ -1092,14 +1092,29 @@ const Owner: NextPage = () => {
       setImage(userData.image ?? "");
       console.log("Select one");
 
-      const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
-      const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
-      const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
-      const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
+      // userData.pets?.map((pet) => {
+      //   console.log("Pet: ", pet);
+      // });
 
-      const combined = petsID.map((id, index) => {
-        return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
-      });
+      const combined: Pet[] =
+        userData.pets?.map((pet) => ({
+          id: pet.petID,
+          name: pet.petName ?? "",
+          breed: pet.breed ?? "",
+        })) ?? [];
+
+      // //const petsflat = pet_data?.flat();
+      // const petOwnerID = userData.ownerID ? userData.ownerID : id;
+      // console.log("Pet owner ID!!!!: ", petOwnerID);
+      // const pets = pet_data?.flat().filter((pet) => pet?.ownerID === petOwnerID);
+      // console.log("Pets!!!!!: ", pets);
+      // const petsID = pets?.map((pet) => pet.petID) ?? [];
+      // const petsName = pets?.map((pet) => pet.petName) ?? [];
+      // const petsBreed = pets?.map((pet) => pet.breed) ?? [];
+
+      // const combined = petsID.map((id, index) => {
+      //   return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
+      // });
       setPetsCombined(combined);
 
       const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "", id: userData.addressGreaterAreaID ?? 0 };
@@ -1499,7 +1514,7 @@ const Owner: NextPage = () => {
                     <thead>
                       <tr>
                         <th className="px-4 py-2"></th>
-                        <th className="px-4 py-2">ID</th>
+                        {/* <th className="px-4 py-2">ID</th> */}
                         <th className="px-4 py-2">Name</th>
                         <th className="px-4 py-2">
                           <span className="group relative inline-block">
@@ -1535,24 +1550,24 @@ const Owner: NextPage = () => {
                       {owner_data?.map((user, index) => {
                         return (
                           <tr className="items-center">
-                            <td className=" border px-4 py-2">
-                              <div className="">{index + 1}</div>
+                            <td className=" border px-2 py-1">
+                              <div className="flex justify-center">{index + 1}</div>
                             </td>
-                            <td className="border px-4 py-2">N{user.ownerID}</td>
-                            <td className="border px-4 py-2">{user.firstName}</td>
-                            <td className="border px-4 py-2">{user.surname}</td>
-                            <td className="border px-4 py-2">{user.email}</td>
-                            <td className="border px-4 py-2">{user.mobile}</td>
-                            <td className="border px-4 py-2">{user.addressGreaterArea.greaterArea}</td>
-                            <td className="border px-4 py-2">{user.addressArea.area}</td>
-                            <td className="border px-4 py-2">
+                            {/* <td className="border px-4 py-2">N{user.ownerID}</td> */}
+                            <td className="border px-2 py-1">{user.firstName}</td>
+                            <td className="border px-2 py-1">{user.surname}</td>
+                            <td className="border px-2 py-1">{user.email}</td>
+                            <td className="border px-2 py-1">{user.mobile}</td>
+                            <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
+                            <td className="border px-2 py-1">{user.addressArea.area}</td>
+                            <td className="border px-2 py-1">
                               {user.addressStreetNumber} {user.addressStreet.street}
                             </td>
-                            <td className="border px-4 py-2">{user.status}</td>
-                            <td className="border px-4 py-2">
+                            <td className="border px-2 py-1">{user.status}</td>
+                            <td className="border px-2 py-1">
                               {user.pets?.map((pet) => {
                                 return (
-                                  <div className="flex flex-col">
+                                  <div className="flex flex-col gap-0">
                                     {pet.map((pet_) => {
                                       return (
                                         <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet_.petID)}>
@@ -1573,7 +1588,7 @@ const Owner: NextPage = () => {
                             </td>
                             <div className="flex">
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Trash
                                     size={24}
                                     className="block"
@@ -1586,7 +1601,7 @@ const Owner: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.ownerID)} />
                                   <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Update owner
@@ -1595,7 +1610,7 @@ const Owner: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.ownerID)} />
                                   <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     View owner profile
@@ -1604,7 +1619,7 @@ const Owner: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Dog size={24} className="block" onClick={() => handleCreateNewPet(user.ownerID)} />
                                   <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Add new pet to owner
@@ -2134,12 +2149,14 @@ const Owner: NextPage = () => {
                     <b className="mr-3">Pets:</b>{" "}
                     {petsCombined.map((pet) => (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")").join("; ")}
                   </div> */}
-                      <div className="mb-2 flex items-center">
+                      <div className="mb-2 flex items-start">
                         <b className="mr-3">Pets:</b>{" "}
-                        <div className="flex flex-wrap gap-2">
-                          {petsCombined.map((pet) => (
+                        <div className="flex flex-col items-start">
+                          {petsCombined.map((pet, index) => (
                             <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
-                              {(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                              {pet?.breed === "Not Applicable"
+                                ? index + 1 + ". " + (pet?.name ?? "") + "(Cat, P" + (pet?.id ?? "") + ")"
+                                : index + 1 + ". " + (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
                             </button>
                           ))}
                         </div>

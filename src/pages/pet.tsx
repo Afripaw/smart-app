@@ -2923,7 +2923,7 @@ const Pet: NextPage = () => {
                     <thead>
                       <tr>
                         <th className="px-4 py-2"></th>
-                        <th className="px-4 py-2">ID</th>
+                        {/* <th className="px-4 py-2">ID</th> */}
                         <th className="px-4 py-2">
                           <span className="group relative inline-block">
                             <button className={`${order === "petName" ? "underline" : ""}`} onClick={() => handleOrderFields("petName")}>
@@ -2940,7 +2940,8 @@ const Pet: NextPage = () => {
                         <th className="px-4 py-2">Area</th>
                         <th className="px-4 py-2">Address</th>
                         <th className="px-4 py-2">Sterilised?</th>
-                        <th className="w-[35px] px-4 py-2">Last Treatment</th>
+                        <th className="w-[35px] px-4 py-2">Last Deworming</th>
+                        <th className="w-[35px] px-4 py-2">Due for Deworming?</th>
                         <th className="w-[35px] px-4 py-2">Last Clinic</th>
                         {/* <th className="px-4 py-2">Last Treatment</th> */}
                         <th className="w-[35px] px-4 py-2">
@@ -2959,38 +2960,46 @@ const Pet: NextPage = () => {
                       {pet_data_with_clinics_and_treatments?.map((pet, index) => {
                         return (
                           <tr className="items-center">
-                            <td className=" border px-4 py-2">
-                              <div className="px-4 py-2">{index + 1}</div>
+                            <td className=" border px-2 py-1">
+                              <div className="flex justify-center">{index + 1}</div>
                             </td>
-                            <td className="border px-4 py-2">P{pet.petID}</td>
-                            <td className="border px-4 py-2">
+                            {/* <td className="border px-4 py-2">P{pet.petID}</td> */}
+                            <td className="border px-2 py-1">
                               {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed})
                             </td>
-                            <td className="border px-4 py-2">
+                            <td className="border px-2 py-1">
                               <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(pet.ownerID)}>
-                                {pet.owner.firstName} {pet.owner.surname} (N{pet.ownerID})
+                                {pet.owner.firstName} {pet.owner.surname}
                               </button>
                             </td>
 
-                            <td className="border px-4 py-2">{pet.owner.addressGreaterArea.greaterArea}</td>
-                            <td className="border px-4 py-2">{pet.owner.addressArea.area}</td>
-                            <td className="border px-4 py-2">
+                            <td className="border px-2 py-1">{pet.owner.addressGreaterArea.greaterArea}</td>
+                            <td className="border px-2 py-1">{pet.owner.addressArea.area}</td>
+                            <td className="border px-2 py-1">
                               {pet.owner.addressStreetNumber} {pet.owner.addressStreet.street}
                             </td>
-                            <td className="border px-4 py-2">{pet.sterilisedStatus.getFullYear() === 1970 ? "No" : "Yes"}</td>
-                            <td className="border px-4 py-2">
-                              {pet.petTreatments && pet.petTreatments.length > 0 ? (
-                                <>
-                                  {pet?.petTreatments?.[pet?.petTreatments.length - 1]?.date.getDate().toString()}/
-                                  {((pet?.petTreatments?.[pet?.petTreatments.length - 1]?.date.getMonth() ?? 0) + 1).toString()}/
-                                  {pet?.petTreatments?.[pet?.petTreatments.length - 1]?.date.getFullYear().toString()}
-                                </>
-                              ) : (
-                                "None"
-                              )}
+                            <td className="border px-2 py-1">
+                              {pet.sterilisedStatus.getFullYear() === 1970
+                                ? "No"
+                                : "Yes, " +
+                                  pet?.sterilisedStatus?.getDate().toString() +
+                                  "/" +
+                                  ((pet?.sterilisedStatus?.getMonth() ?? 0) + 1).toString() +
+                                  "/" +
+                                  pet?.sterilisedStatus?.getFullYear().toString()}
+                            </td>
+                            <td className="border px-2 py-1">
+                              {pet?.lastDeworming?.getDate().toString() +
+                                "/" +
+                                ((pet?.lastDeworming?.getMonth() ?? 0) + 1).toString() +
+                                "/" +
+                                pet?.lastDeworming?.getFullYear().toString()}
+                            </td>
+                            <td className="border px-2 py-1">
+                              {Number(pet?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - 6)) ? "Yes" : "No"}
                             </td>
 
-                            <td className="border px-4 py-2">
+                            <td className="border px-2 py-1">
                               {pet.clinic_data && pet.clinic_data.length > 0 ? (
                                 <>
                                   {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getDate().toString()}/
@@ -3002,7 +3011,7 @@ const Pet: NextPage = () => {
                               )}
                             </td>
 
-                            <td className="border px-4 py-2">
+                            <td className="border px-2 py-1">
                               {pet?.updatedAt?.getDate()?.toString() ?? ""}
                               {"/"}
                               {((pet?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
@@ -3011,7 +3020,7 @@ const Pet: NextPage = () => {
                             </td>
                             <div className="flex">
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Trash size={24} className="block" onClick={() => handleDeleteModal(pet.petID, String(pet.petID), pet.petName ?? "")} />
                                   <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Delete pet
@@ -3020,7 +3029,7 @@ const Pet: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(pet.petID)} />
                                   <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Update pet
@@ -3029,7 +3038,7 @@ const Pet: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(pet.petID)} />
                                   <span className="absolute bottom-full hidden w-[70px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     View pet profile
@@ -3038,7 +3047,7 @@ const Pet: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <FirstAidKit size={24} className="block" onClick={() => handleCreateNewTreatment(pet.petID)} />
                                   <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Create new treatment
@@ -3047,7 +3056,7 @@ const Pet: NextPage = () => {
                               </div>
 
                               <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                   <Bed size={24} className="block" onClick={() => handleAddClinic(pet.petID)} />
                                   <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Add today's clinic to pet
@@ -3682,11 +3691,21 @@ const Pet: NextPage = () => {
                   )}
 
                   {isUpdate && treatmentList.length > 0 && (
-                    <div className="flex items-start">
-                      <div className="mr-3 flex items-center pt-5">
-                        <div className=" flex">Treatments: </div>
+                    // <div className="flex items-start">
+                    //   <div className="mr-3 flex items-center pt-5">
+                    //     <div className=" flex">Treatments: </div>
+                    //   </div>
+                    //   <div className="mt-5 flex">{treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join(", ")}</div>
+                    // </div>
+                    <div className="mb-2 flex items-start">
+                      <div className="mr-3">Treatments:</div>{" "}
+                      <div className="flex flex-col items-start">
+                        {treatmentList.map((treatment, index) => (
+                          <button key={treatment?.treatmentID} className="underline hover:text-blue-400">
+                            {(index + 1).toString() + ". " + (treatment?.type ?? "") + " (" + (treatment?.category ?? "") + ")"}
+                          </button>
+                        ))}
                       </div>
-                      <div className="mt-5 flex">{treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join(", ")}</div>
                     </div>
                   )}
                 </div>
@@ -4134,8 +4153,18 @@ const Pet: NextPage = () => {
                         )}
                       </div>
 
-                      <div className="mb-2 flex items-center">
+                      {/* <div className="mb-2 flex items-center">
                         <b className="mr-3">Treatments:</b> {treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join("; ")}
+                      </div> */}
+                      <div className="mb-2 flex items-start">
+                        <div className="mr-3">Treatments:</div>{" "}
+                        <div className="flex flex-col items-start">
+                          {treatmentList.map((treatment, index) => (
+                            <button key={treatment?.treatmentID} className="underline hover:text-blue-400">
+                              {(index + 1).toString() + ". " + (treatment?.type ?? "") + " (" + (treatment?.category ?? "") + ")"}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     </div>
 

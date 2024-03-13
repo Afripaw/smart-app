@@ -75,4 +75,30 @@ export const welcomePageRouter = createTRPCRouter({
     });
     return total;
   }),
+
+  //Pets fully vaccinated
+  getPetsVaccinated: publicProcedure.query(async ({ ctx }) => {
+    const pets = await ctx.db.pet.findMany({
+      where: {
+        OR: [
+          {
+            vaccinationShot3: {
+              gt: new Date("1970-12-31T23:59:59.999Z"),
+            },
+          },
+          {
+            vaccinationShot3: {
+              lt: new Date("1970-01-01T00:00:00.000Z"),
+            },
+          },
+        ],
+      },
+    });
+    return pets.length;
+  }),
+
+  //get all the pet treatments
+  getAllTreatments: publicProcedure.query(async ({ ctx }) => {
+    return (await ctx.db.petTreatment.findMany()).length;
+  }),
 });

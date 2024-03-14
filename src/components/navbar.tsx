@@ -72,7 +72,7 @@ const Navbar = () => {
     await signOut({ callbackUrl: `${window.location.origin}/` });
   };
   return (
-    <div className=" text-normal sticky top-0 z-20 flex grow items-center justify-between bg-main-orange p-3 text-black">
+    <div className=" sticky top-0 z-50 flex grow items-center justify-between bg-main-orange p-3 text-normal text-black">
       <div className="justify-begin flex">
         <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="ml-auto aspect-square h-max rounded-full" width={56} height={56} />
       </div>

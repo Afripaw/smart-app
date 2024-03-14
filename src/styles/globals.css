@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media print {
+  .print-div {
+    width: 65% !important; /* Override width for printing */
+    max-width: none !important;
+  }
+
+  /* Optionally, adjust flex layouts for print if necessary
+    .flex, .flex-col, .items-center, .items-start {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+    } */
+}

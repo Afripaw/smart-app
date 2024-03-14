@@ -1095,9 +1095,9 @@ const Treatment: NextPage = () => {
               </div>
             </div>
             <div className="flex grow flex-col items-center">
-              <div className="flex">
-                {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
-              </div>
+              <label>
+                {"("}All fields with <span className="px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
+              </label>
               <div className="flex w-[46%] flex-col">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -1108,9 +1108,9 @@ const Treatment: NextPage = () => {
                   </div>
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
-                    <div className=" flex">
-                      Date<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
+                    <label>
+                      Date<span className="text-lg text-main-orange">*</span>:{" "}
+                    </label>
 
                     <DatePicker
                       selected={startingDate}
@@ -1150,9 +1150,9 @@ const Treatment: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
-                      <div className="flex">
-                        Category<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                      <label>
+                        Category<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1251,7 +1251,7 @@ const Treatment: NextPage = () => {
               </div>
             </div>
             <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex w-[40%] max-w-xl flex-col items-start">
+              <div className="print-div mt-6 flex w-[40%] max-w-xl flex-col items-start">
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <div className="absolute left-0 top-0">
                     <Image

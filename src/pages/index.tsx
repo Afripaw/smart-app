@@ -226,7 +226,7 @@ export default function Home() {
               <div className="z-20 flex flex-col items-center justify-center bg-main-orange text-black">
                 <div className="">Design by JHO Ludik and JH van Vuuren</div>
                 <div className="">Development by JHO Ludik</div>
-                <div className="">© Jacques Ludik (2024)</div>
+                <div className="">© JHO Ludik (2024)</div>
               </div>
             </div>
           </>

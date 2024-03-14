@@ -1499,9 +1499,9 @@ const User: NextPage = () => {
               </div>
             </div>
             <div className="flex grow flex-col items-center">
-              <div className="flex">
-                {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
-              </div>
+              <label>
+                {"("}All fields with <span className="px-1 text-lg text-main-orange">*</span> are compulsary{")"}
+              </label>
               <div className="flex flex-col">
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Personal & Contact Data</b>
@@ -1551,10 +1551,10 @@ const User: NextPage = () => {
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Preferred Communication Channel<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1587,9 +1587,9 @@ const User: NextPage = () => {
                   <div className="flex flex-col divide-y-2 divide-gray-300">
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-4">
-                        <div className="flex">
-                          Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
-                        </div>
+                        <label>
+                          Greater Area<span className="text-lg text-main-orange">*</span>:{" "}
+                        </label>
                       </div>
                       <div className="flex flex-col">
                         <button
@@ -1737,10 +1737,10 @@ const User: NextPage = () => {
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className="flex">
-                        Role<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Role<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1769,10 +1769,10 @@ const User: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Status<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Status<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1802,9 +1802,9 @@ const User: NextPage = () => {
 
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
-                    <div className=" flex">
-                      Starting Date<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
+                    <label>
+                      Starting Date<span className="text-lg text-main-orange">*</span>:{" "}
+                    </label>
                     <div className="p-4">
                       <DatePicker
                         selected={startingDate}
@@ -1838,9 +1838,9 @@ const User: NextPage = () => {
                   )}
                   {!isUpdatePassword && (
                     <div className="flex items-center">
-                      <div className="mr-3 flex ">
-                        Password<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                      <label className="mr-3">
+                        Password<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                       <input
                         className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                         placeholder="Type here: e.g. JohnDoe$123"
@@ -1855,9 +1855,9 @@ const User: NextPage = () => {
                   {passwordMessage && <div className="text-sm text-red-500">{passwordMessage}</div>}
                   {!isUpdatePassword && (
                     <div className="flex items-center">
-                      <div className="mr-3 flex">
-                        Confirm Password<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                      <label className="mr-3">
+                        Confirm Password<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                       <input
                         className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                         placeholder="Type here: e.g. JohnDoe$123"
@@ -1911,7 +1911,7 @@ const User: NextPage = () => {
               </div>
             </div>
             <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex w-[40%] max-w-xl flex-col items-start">
+              <div className="print-div mt-6 flex w-[40%] max-w-xl flex-col items-start">
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <div className="absolute left-0 top-0">
                     <Image

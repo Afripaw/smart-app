@@ -215,7 +215,7 @@ const LineGraph: React.FC<LineGraphProps> = ({ type }) => {
     const clinicsHeld = api.petClinic.getClinicsHeld?.useQuery();
     const response = clinicsHeld?.data?.transformedData ?? [];
 
-    const colours = ["#EB4724", "#1111DD", "A020F0", "#D1D5DB"];
+    const colours = ["#EB4724", "#1111DD", "#A020F0", "#D1D5DB"];
 
     console.log("clinics: ", clinicsHeld?.data?.clinics ?? []);
     //console.log("kennel years", kennelsProvided?.data?.kennelYears ?? []);

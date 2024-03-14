@@ -1045,6 +1045,9 @@ const Communication: NextPage = () => {
               </div>
             </div>
             <div className="flex grow flex-col items-center">
+              <label>
+                {"("}All fields with <span className="px-1 text-lg text-main-orange">*</span> are compulsary{")"}
+              </label>
               <div className="flex w-[46%] flex-col">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -1054,9 +1057,9 @@ const Communication: NextPage = () => {
                     Message ID: <div className="px-3">M{isCreate ? String((latestCommunicationID?.data?.communicationID ?? 0) + 1) : id}</div>
                   </div>
                   <div className="flex items-start">
-                    <div className="flex w-32 pt-3">
-                      Message<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
+                    <label className=" w-32 pt-3">
+                      Message<span className="text-lg text-main-orange">*</span>:{" "}
+                    </label>
                     <textarea
                       className="m-2 h-24 w-full rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                       placeholder="Type here..."
@@ -1067,9 +1070,9 @@ const Communication: NextPage = () => {
 
                   {/*Make checkboxes to select a user */}
                   <div className="flex flex-col items-center">
-                    <span className="flex">
-                      Select Recipients<div className="text-lg text-main-orange">*</div>
-                    </span>
+                    <label>
+                      Select Recipients<span className="text-lg text-main-orange">*</span>
+                    </label>
                     <div className="flex items-center justify-around">
                       <div className="flex flex-col">
                         <div className="flex items-center p-3">
@@ -1118,9 +1121,9 @@ const Communication: NextPage = () => {
                       {/* Greater Area */}
                       <div className="flex items-start">
                         <div className="mr-3 flex items-center pt-4">
-                          <div className="flex">
-                            Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
-                          </div>
+                          <label>
+                            Greater Area<span className="text-lg text-main-orange">*</span>:{" "}
+                          </label>
                         </div>
 
                         <div className="flex flex-col items-center">
@@ -1170,9 +1173,9 @@ const Communication: NextPage = () => {
                       {/* Area */}
                       <div className="flex items-start">
                         <div className="mr-3 flex items-center pt-4">
-                          <div className="flex">
-                            Area<div className="text-lg text-main-orange">*</div>:{" "}
-                          </div>
+                          <label>
+                            Area<span className="text-lg text-main-orange">*</span>:{" "}
+                          </label>
                         </div>
 
                         <div className="flex flex-col items-center">
@@ -1224,9 +1227,9 @@ const Communication: NextPage = () => {
                   {/*PREFERRED  COMMUNICATION*/}
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Type of Communication<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                      <label>
+                        Type of Communication<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1285,7 +1288,7 @@ const Communication: NextPage = () => {
               </div>
             </div>
             <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex w-[40%] max-w-xl flex-col items-start">
+              <div className="print-div mt-6 flex w-[40%] max-w-xl flex-col items-start">
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <div className="absolute left-0 top-0">
                     <Image

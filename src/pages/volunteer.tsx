@@ -290,6 +290,19 @@ const Volunteer: NextPage = () => {
     date: string;
     area: string;
   };
+
+  type ClinicOptions = {
+    id: number;
+    date: string;
+    area: string;
+    state: boolean;
+  };
+
+  type ClinicSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
+
   //The list of clinics that the user has attended
   const [clinicList, setClinicList] = useState<Clinic[]>([]);
   //const [clinicIDList, setClinicIDList] = useState<number[]>([]);
@@ -407,12 +420,12 @@ const Volunteer: NextPage = () => {
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
-  const [greaterAreaOption, setGreaterAreaOption] = useState("Select one");
+  const [greaterAreaOption, setGreaterAreaOption] = useState("Select here");
   const greaterAreaRef = useRef<HTMLDivElement>(null);
   const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
 
   const [isRoleOpen, setIsRoleOpen] = useState(false);
-  const [roleOption, setRoleOption] = useState("Select one");
+  const [roleOption, setRoleOption] = useState("Select here");
   const roleRef = useRef<HTMLDivElement>(null);
   const btnRoleRef = useRef<HTMLButtonElement>(null);
 
@@ -447,6 +460,8 @@ const Volunteer: NextPage = () => {
         area: area.area,
       }));
       setGreaterAreaList(greaterAreas);
+      //order the greaterAreaList from smallest to largest id
+      setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
       setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: true })));
     } else if (selectionCategory === "clear") {
       setGreaterAreaOption("Clear All");
@@ -456,6 +471,7 @@ const Volunteer: NextPage = () => {
       setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: false })));
     } else if (selectionCategory === "normal") {
       setGreaterAreaOption(option);
+      setGreaterAreaSelection({ allSelected: false, clear: false });
       if (state) {
         const area: GreaterArea = {
           id: id,
@@ -464,13 +480,24 @@ const Volunteer: NextPage = () => {
         const greaterAreaIDList = greaterAreaList.map((area) => area.id);
         if (!greaterAreaIDList.includes(id)) {
           setGreaterAreaList([...greaterAreaList, area]);
+
+          //order the greaterAreaList from smallest to largest id
+          // console.log(
+          //   "Sorted Greater Areas!!!: ",
+          //   greaterAreaList.sort((a, b) => a.id - b.id),
+          // );
+          // setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
         }
         setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: true } : area)));
+
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
       } else {
         const updatedGreaterAreaList = greaterAreaList.filter((area) => area.id !== id);
         setGreaterAreaList(updatedGreaterAreaList);
+
+        //order the greaterAreaList from smallest to largest id
+        setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
         setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: false } : area)));
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
@@ -539,6 +566,8 @@ const Volunteer: NextPage = () => {
 
       const roles = roleListOptions.map((role) => role.role);
       setRoleList(roles);
+      //order the roleList in alphabetical order
+      // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
       setRoleListOptions(roleListOptions.map((role) => ({ ...role, state: true })));
     } else if (selectionCategory === "clear") {
       setRoleOption("Clear All");
@@ -548,9 +577,12 @@ const Volunteer: NextPage = () => {
       setRoleListOptions(roleListOptions.map((role) => ({ ...role, state: false })));
     } else if (selectionCategory === "normal") {
       setRoleOption(option);
+      setRoleSelection({ allSelected: false, clear: false });
       if (state) {
         if (!roleList.includes(String(option))) {
           setRoleList([...roleList, String(option)]);
+          //order the roleList in alphabetical order
+          // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
         }
 
         setRoleListOptions(roleListOptions.map((role) => (role.role === option ? { ...role, state: true } : role)));
@@ -559,6 +591,8 @@ const Volunteer: NextPage = () => {
       } else {
         const updatedRoleList = roleList.filter((role) => role !== option);
         setRoleList(updatedRoleList);
+        //order the roleList in alphabetical order
+        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
         setRoleListOptions(roleListOptions.map((role) => (role.role === option ? { ...role, state: false } : role)));
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
@@ -601,11 +635,10 @@ const Volunteer: NextPage = () => {
     "Other",
   ];
 
-  //show all the clinics that the volunteer attended
-  const [showRole, setShowRole] = useState(false);
-  const handleShowRole = () => {
-    setShowRole(!showRole);
-  };
+  // const [showRole, setShowRole] = useState(false);
+  // const handleShowRole = () => {
+  //   setShowRole(!showRole);
+  // };
 
   //PREFERRED COMMUNICATION
   const handleTogglePreferredCommunication = () => {
@@ -675,6 +708,10 @@ const Volunteer: NextPage = () => {
   const statusOptions = ["Active", "Passive"];
 
   //CLINICSATTENDED
+
+  const [clinicListOptions, setClinicListOptions] = useState<ClinicOptions[]>([]);
+  const [clinicSelection, setClinicSelection] = useState<ClinicSelect>();
+
   //All clinics in petClinic table
   const clinicsAttendedOptions = api.petClinic.getAllClinics.useQuery().data ?? [];
 
@@ -697,6 +734,65 @@ const Volunteer: NextPage = () => {
     if ((yearA ?? 0) !== (yearB ?? 0)) return (yearA ?? 0) - (yearB ?? 0);
     if (monthA !== monthB) return (monthA ?? 0) - (monthB ?? 0);
     return (dayA ?? 0) - (dayB ?? 0);
+  };
+
+  const handleClinicsAttended = (id: number, area: SetStateAction<string>, date: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setClinicsAttendedOption("Select All");
+      setClinicSelection({ allSelected: state, clear: false });
+
+      const clinics = clinicListOptions.map((clinic) => ({
+        id: clinic.id,
+        date: clinic.date,
+        area: clinic.area,
+      }));
+
+      console.log("Clinics!!!!: ", clinics);
+      setClinicList(clinics);
+      //order the greaterAreaList from smallest to largest id
+      //setClinicList(clinicList.sort((a, b) => a.id - b.id));
+      setClinicListOptions(clinicListOptions.map((clinic) => ({ ...clinic, state: true })));
+    } else if (selectionCategory === "clear") {
+      setClinicsAttendedOption("Clear All");
+      setClinicSelection({ allSelected: false, clear: state });
+
+      setClinicList([]);
+      setClinicListOptions(clinicListOptions.map((clinic) => ({ ...clinic, state: false })));
+    } else if (selectionCategory === "normal") {
+      setClinicsAttendedOption(date);
+      setClinicSelection({ allSelected: false, clear: false });
+      if (state) {
+        const clinic: Clinic = {
+          id: id,
+          date: String(date),
+          area: String(area),
+        };
+        const clinicIDList = clinicList.map((clinic) => clinic.id);
+        if (!clinicIDList.includes(id)) {
+          setClinicList([...clinicList, clinic]);
+
+          //order the greaterAreaList from smallest to largest id
+          // console.log(
+          //   "Sorted Greater Areas!!!: ",
+          //   greaterAreaList.sort((a, b) => a.id - b.id),
+          // );
+          // setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        }
+        setClinicListOptions(clinicListOptions.map((clinic) => (clinic.id === id ? { ...clinic, state: true } : clinic)));
+
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedClinicList = clinicList.filter((clinic) => clinic.id !== id);
+        setClinicList(updatedClinicList);
+
+        //order the greaterAreaList from smallest to largest id
+        setClinicList(clinicList.sort((a, b) => a.id - b.id));
+        setClinicListOptions(clinicListOptions.map((clinic) => (clinic.id === id ? { ...clinic, state: false } : clinic)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
   };
 
   const handleClinicsAttendedOption = (optionID: number, option: SetStateAction<string>, optionArea: string) => {
@@ -790,6 +886,8 @@ const Volunteer: NextPage = () => {
       // Assuming userQuery.data contains the user object
       const userData = user;
 
+      console.log("User Data!!!!!: ", userData);
+
       const clinicData = user?.clinics;
       const clinicDates: Clinic[] =
         clinicData?.map((clinic) => ({
@@ -845,6 +943,15 @@ const Volunteer: NextPage = () => {
           state: userData.role.includes(role),
         })),
       );
+
+      setClinicListOptions(
+        clinicsAttendedOptions.map((clinic) => ({
+          id: clinic.clinicID,
+          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+          area: clinic.area.area,
+          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
       // console.log("Update Clinic list: ", clinicDates);
       //setClinicIDList(clinicIDs);
     }
@@ -886,7 +993,7 @@ const Volunteer: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaList(greaterAreas ?? "Select one");
+      setGreaterAreaList(greaterAreas ?? "Select here");
       setStreet(userData.addressStreet ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
@@ -899,7 +1006,57 @@ const Volunteer: NextPage = () => {
       setComments(userData.comments ?? "");
       setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
-      console.log("Update or create Clinic list: ", clinicDates);
+      setRoleList(userData.role ?? "Select here");
+
+      setGreaterAreaListOptions(
+        greaterAreaOptions.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea,
+          state: greaterAreas.map((area) => area.id).includes(area.greaterAreaID),
+        })),
+      );
+
+      console.log(
+        "Update or create Greater Area list: ",
+        greaterAreaOptions.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea,
+          state: greaterAreas.map((area) => area.id).includes(area.greaterAreaID),
+        })),
+      );
+
+      setRoleListOptions(
+        roleOptions.map((role) => ({
+          role: role,
+          state: userData.role.includes(role),
+        })),
+      );
+
+      console.log(
+        "Update or create Role list: ",
+        roleOptions.map((role) => ({
+          role: role,
+          state: userData.role.includes(role),
+        })),
+      );
+
+      setClinicListOptions(
+        clinicsAttendedOptions.map((clinic) => ({
+          id: clinic.clinicID,
+          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+          area: clinic.area.area,
+          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
+      console.log(
+        "Update or create Clinic list: ",
+        clinicsAttendedOptions.map((clinic) => ({
+          id: clinic.clinicID,
+          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+          area: clinic.area.area,
+          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
       //setClinicIDList(clinicIDs);
       // setClinicList(userData.clinicsAttended ?? []);
     }
@@ -907,9 +1064,9 @@ const Volunteer: NextPage = () => {
 
   const handleUpdateUser = async () => {
     setIsLoading(true);
-    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
+    const clinicIDList = clinicList.sort((a, b) => a.id - b.id).map((clinic) => (clinic.id ? clinic.id : 0));
     console.log("Helloo!! Clinic ID List: ", clinicIDList);
-    const greaterAreaIDList = greaterAreaList.map((area) => (area.id ? area.id : 0));
+    const greaterAreaIDList = greaterAreaList.sort((a, b) => a.id - b.id).map((area) => (area.id ? area.id : 0));
     const volunteer = await updateVolunteer.mutateAsync({
       volunteerID: id,
       firstName: firstName,
@@ -923,7 +1080,8 @@ const Volunteer: NextPage = () => {
       addressSuburb: addressSuburb,
       addressPostalCode: addressPostalCode,
       addressFreeForm: addressFreeForm,
-      role: roleList,
+      //role: roleList,
+      role: roleList.sort((a, b) => a.localeCompare(b)),
       collaboratorOrg: collaboratorOrg,
       preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
       startingDate: startingDate,
@@ -964,7 +1122,10 @@ const Volunteer: NextPage = () => {
     setEmail("");
     setSurname("");
     setMobile("");
-    setGreaterAreaOption("Select one");
+    setGreaterAreaOption("Select here");
+    setRoleOption("Select here");
+    setStartingDate(new Date());
+    setClinicsAttendedOption("Select here");
     setStreet("");
     setAddressStreetCode("");
     setAddressStreetNumber("");
@@ -976,6 +1137,8 @@ const Volunteer: NextPage = () => {
     setComments("");
     setCollaboratorOrg("");
     setClinicList([]);
+    setRoleList([]);
+    setGreaterAreaList([]);
     setIsUpdate(false);
     setIsCreate(false);
     setIsLoading(false);
@@ -984,7 +1147,9 @@ const Volunteer: NextPage = () => {
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
-    setGreaterAreaOption("Select one");
+    setGreaterAreaOption("Select here");
+    setRoleOption("Select here");
+    setClinicsAttendedOption("Select here");
     setStreet("");
     setPreferredCommunicationOption("Select one");
     setStatusOption("Select one");
@@ -1005,6 +1170,14 @@ const Volunteer: NextPage = () => {
 
     setGreaterAreaListOptions(greaterAreaOptions.map((area) => ({ id: area.greaterAreaID, area: area.greaterArea, state: false })));
     setRoleListOptions(roleOptions.map((role) => ({ role: role, state: false })));
+    setClinicListOptions(
+      clinicsAttendedOptions.map((clinic) => ({
+        id: clinic.clinicID,
+        date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+        area: clinic.area.area,
+        state: false,
+      })),
+    );
 
     //setClinicIDList([]);
     setIsCreate(true);
@@ -1014,8 +1187,8 @@ const Volunteer: NextPage = () => {
 
   const handleNewUser = async () => {
     setIsLoading(true);
-    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
-    const greaterAreaIDList = greaterAreaList.map((area) => (area.id ? area.id : 0));
+    const clinicIDList = clinicList.sort((a, b) => a.id - b.id).map((clinic) => (clinic.id ? clinic.id : 0));
+    const greaterAreaIDList = greaterAreaList.sort((a, b) => a.id - b.id).map((area) => (area.id ? area.id : 0));
     try {
       const newUser_ = await newVolunteer.mutateAsync({
         firstName: firstName,
@@ -1029,7 +1202,7 @@ const Volunteer: NextPage = () => {
         addressSuburb: addressSuburb,
         addressPostalCode: addressPostalCode,
         addressFreeForm: addressFreeForm,
-        role: roleList,
+        role: roleList.sort((a, b) => a.localeCompare(b)),
         collaboratorOrg: collaboratorOrg,
         preferredCommunication: preferredOption === "Select one" ? "" : preferredOption,
         startingDate: startingDate,
@@ -1150,6 +1323,30 @@ const Volunteer: NextPage = () => {
       console.log("View profile Clinic list: ", clinicDates);
       //setClinicIDList(clinicIDs);
       //setClinicList(userData. ?? []);
+
+      setGreaterAreaListOptions(
+        greaterAreaOptions.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea,
+          state: greaterAreas.map((area) => area.id).includes(area.greaterAreaID),
+        })),
+      );
+
+      setRoleListOptions(
+        roleOptions.map((role) => ({
+          role: role,
+          state: userData.role.includes(role),
+        })),
+      );
+
+      setClinicListOptions(
+        clinicsAttendedOptions.map((clinic) => ({
+          id: clinic.clinicID,
+          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+          area: clinic.area.area,
+          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
     }
 
     setIsUpdate(false);
@@ -1229,7 +1426,10 @@ const Volunteer: NextPage = () => {
     setEmail("");
     setSurname("");
     setMobile("");
-    setGreaterAreaOption("Select one");
+    setGreaterAreaOption("Select here");
+    setRoleOption("Select here");
+    setStartingDate(new Date());
+    setClinicsAttendedOption("Select here");
     setStreet("");
     setAddressStreetCode("");
     setAddressStreetNumber("");
@@ -1241,7 +1441,23 @@ const Volunteer: NextPage = () => {
     setCollaboratorOrg("");
     setClinicList([]);
     setRoleList([]);
-    setRoleOption("Select one");
+    setGreaterAreaList([]);
+    setGreaterAreaSelection({ allSelected: false, clear: false });
+    setRoleSelection({ allSelected: false, clear: false });
+    setClinicSelection({ allSelected: false, clear: false });
+
+    setClinicListOptions(
+      clinicsAttendedOptions.map((clinic) => ({
+        id: clinic.clinicID,
+        date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+        area: clinic.area.area,
+        state: false,
+      })),
+    );
+
+    setRoleListOptions(roleOptions.map((role) => ({ role: role, state: false })));
+
+    setGreaterAreaListOptions(greaterAreaOptions.map((area) => ({ id: area.greaterAreaID, area: area.greaterArea, state: false })));
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -1746,7 +1962,10 @@ const Volunteer: NextPage = () => {
                             <td className="border px-2 py-1">{user.email}</td>
                             <td className="border px-2 py-1">{user.mobile}</td>
                             <td className="border px-2 py-1">
-                              {user?.greaterAreas?.map((greaterArea) => greaterArea.greaterArea.greaterArea).join("; ") ?? ""}
+                              {user?.greaterAreas
+                                ?.sort((a, b) => a.greaterAreaID - b.greaterAreaID)
+                                .map((greaterArea) => greaterArea.greaterArea.greaterArea)
+                                .join("; ") ?? ""}
                             </td>
                             <td className="border px-2 py-1">{user.status}</td>
                             <td className="border px-2 py-1">
@@ -1844,7 +2063,7 @@ const Volunteer: NextPage = () => {
                                                 </li>
                                               ))
                                             ) : (
-                                              <li className="px-2">There is no clinics today</li>
+                                              <li className="px-2">There are no clinics today</li>
                                             )}
                                           </ul>
                                         </div>
@@ -1891,9 +2110,9 @@ const Volunteer: NextPage = () => {
               </div>
             </div>
             <div className="flex grow flex-col items-center">
-              <div className="flex">
-                {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
-              </div>
+              <label className="">
+                {"("}All fields with <span className="mb-2 items-start px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
+              </label>
               <div className="flex flex-col items-start">
                 {/* <div className="p-2">Volunteer ID: {(latestVolunteerID?.data?.volunteerID ?? 0) + 1}</div> */}
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
@@ -1936,10 +2155,10 @@ const Volunteer: NextPage = () => {
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-start pt-4">
+                      <label className="mb-2">
+                        Preferred Communication Channel<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1972,9 +2191,9 @@ const Volunteer: NextPage = () => {
                   <div className="flex flex-col divide-y-2 divide-gray-300">
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-4">
-                        <div className="flex">
-                          Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
-                        </div>
+                        <label className="">
+                          Greater Area(s)<span className="text-lg text-main-orange">*</span>:{" "}
+                        </label>
                       </div>
 
                       {/* Old code. before checkboxes */}
@@ -2120,9 +2339,9 @@ const Volunteer: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
-                      <div className="flex">
-                        Role<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                      <label className="">
+                        Role(s)<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
 
                     {/* <div className="flex flex-col items-center">
@@ -2218,10 +2437,10 @@ const Volunteer: NextPage = () => {
                   <Input label="Collaborator Organisation" placeholder="Type here: e.g. Tears" value={collaboratorOrg} onChange={setCollaboratorOrg} />
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Status<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label className="">
+                        Status<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -2252,10 +2471,10 @@ const Volunteer: NextPage = () => {
                   {/*Clinics attended*/}
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Clinics Attended: {clinicList.length} in Total </div>
+                      <div className=" flex">Clinic(s) Attended: </div>
                     </div>
                     {/*Show list of all the clinics attended */}
-                    <div className="flex flex-col items-center">
+                    {/* <div className="flex flex-col items-center">
                       <button
                         onClick={handleShowClinicsAttended}
                         className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -2271,7 +2490,7 @@ const Volunteer: NextPage = () => {
                           ))}
                         </ul>
                       )}
-                    </div>
+                    </div> */}
 
                     <div className="flex flex-col">
                       <button
@@ -2286,8 +2505,55 @@ const Volunteer: NextPage = () => {
                         </svg>
                       </button>
                       {clinicsAttended && (
-                        <div ref={clinicsAttendedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                        <div ref={clinicsAttendedRef} className="z-10 w-52 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key={1}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="1"
+                                  type="checkbox"
+                                  checked={clinicSelection?.allSelected}
+                                  onChange={(e) => handleClinicsAttended(0, "", "", e.target.checked, "allSelected")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                  Select All
+                                </label>
+                              </div>
+                            </li>
+                            <li key={2}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="2"
+                                  type="checkbox"
+                                  checked={clinicSelection?.clear}
+                                  onChange={(e) => handleClinicsAttended(0, "", "", e.target.checked, "clear")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                  Clear All
+                                </label>
+                              </div>
+                            </li>
+                            {clinicListOptions?.map((option) => (
+                              <li key={option.id}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.id)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleClinicsAttended(option.id, option.area, option.date, e.target.checked, "normal")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.date.toString()} {option.area}
+                                  </label>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+
+                          {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {clinicsAttendedOptions.map((option) => (
                               <li
                                 key={option.clinicID}
@@ -2314,7 +2580,7 @@ const Volunteer: NextPage = () => {
                                 </button>
                               </li>
                             ))}
-                          </ul>
+                          </ul> */}
                         </div>
                       )}
                     </div>
@@ -2324,9 +2590,9 @@ const Volunteer: NextPage = () => {
 
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
-                    <div className=" flex">
-                      Starting Date<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
+                    <label className="">
+                      Starting Date<span className="text-lg text-main-orange">*</span>:{" "}
+                    </label>
                     <div className="p-4">
                       <DatePicker
                         selected={startingDate}
@@ -2391,7 +2657,7 @@ const Volunteer: NextPage = () => {
               </div>
             </div>
             <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex w-[40%] min-w-[38rem] max-w-xl flex-col items-start">
+              <div className="print-div mt-6 flex w-[40%] min-w-[38rem] max-w-xl flex-col items-start">
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <div className="absolute left-0 top-0">
                     <Image
@@ -2438,7 +2704,11 @@ const Volunteer: NextPage = () => {
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea.area).join("; ")}
+                    <b className="mr-3">Greater Area:</b>{" "}
+                    {greaterAreaList
+                      .sort((a, b) => a.id - b.id)
+                      .map((greaterArea) => greaterArea.area)
+                      .join("; ")}
                   </div>
                   <div className="flex items-start divide-x-2 divide-gray-300">
                     <div className="flex w-96 flex-col pr-2">
@@ -2477,7 +2747,11 @@ const Volunteer: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Role:</b> {roleList.map((role) => role).join("; ")}
+                    <b className="mr-3">Role:</b>{" "}
+                    {roleList
+                      .sort((a, b) => a.localeCompare(b))
+                      .map((role) => role)
+                      .join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-center">

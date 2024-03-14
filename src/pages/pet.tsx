@@ -326,6 +326,24 @@ const Pet: NextPage = () => {
     date: string;
     area: string;
   };
+
+  type ClinicOptions = {
+    id: number;
+    date: string;
+    area: string;
+    state: boolean;
+  };
+
+  type ClinicSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
+  // //-------------------------------CLINICS ATTENDED-----------------------------------------
+  // type Clinic = {
+  //   id: number;
+  //   date: string;
+  //   area: string;
+  // };
   //The list of clinics that the user has attended
   const [clinicList, setClinicList] = useState<Clinic[]>([]);
   //const [clinicIDList, setClinicIDList] = useState<number[]>([]);
@@ -506,7 +524,7 @@ const Pet: NextPage = () => {
 
   const pet = router.asPath.includes("petID")
     ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) })
-    : api.pet.getPetByID.useQuery({ petID: 0 });
+    : api.pet.getPetByID.useQuery({ petID: 1000100 });
 
   // const pet = router.asPath.includes("petID")
   //   ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) })
@@ -954,9 +972,9 @@ const Pet: NextPage = () => {
 
   // CustomInput component with explicit types for the props
   const CustomSterilisationStatusInput: React.FC<CustomInput> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
+    <button className="form-input z-0 flex items-center rounded-md border px-1 py-2" onClick={onClick}>
       <svg
-        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        className=" mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"
@@ -1155,9 +1173,9 @@ const Pet: NextPage = () => {
 
   // CustomInput component with explicit types for the props
   const CustomVaccine1Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-1 py-2 " onClick={onClick}>
+    <button className="form-input z-0 flex items-center rounded-md border px-1 py-2" onClick={onClick}>
       <svg
-        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
+        className=" mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         fill="currentColor"
@@ -1480,6 +1498,8 @@ const Pet: NextPage = () => {
   };
 
   //CLINICSATTENDED
+  const [clinicListOptions, setClinicListOptions] = useState<ClinicOptions[]>([]);
+  const [clinicSelection, setClinicSelection] = useState<ClinicSelect>();
   const [showClinicMessage, setShowClinicMessage] = useState(false);
   //All clinics in petClinic table
   const clinicsAttendedOptions = api.petClinic.getAllClinics.useQuery().data ?? [];
@@ -1503,6 +1523,65 @@ const Pet: NextPage = () => {
     if ((yearA ?? 0) !== (yearB ?? 0)) return (yearB ?? 0) - (yearA ?? 0);
     if (monthA !== monthB) return (monthB ?? 0) - (monthA ?? 0);
     return (dayB ?? 0) - (dayA ?? 0);
+  };
+
+  const handleClinicsAttended = (id: number, area: SetStateAction<string>, date: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setClinicsAttendedOption("Select All");
+      setClinicSelection({ allSelected: state, clear: false });
+
+      const clinics = clinicListOptions.map((clinic) => ({
+        id: clinic.id,
+        date: clinic.date,
+        area: clinic.area,
+      }));
+
+      console.log("Clinics!!!!: ", clinics);
+      setClinicList(clinics);
+      //order the greaterAreaList from smallest to largest id
+      //setClinicList(clinicList.sort((a, b) => a.id - b.id));
+      setClinicListOptions(clinicListOptions.map((clinic) => ({ ...clinic, state: true })));
+    } else if (selectionCategory === "clear") {
+      setClinicsAttendedOption("Clear All");
+      setClinicSelection({ allSelected: false, clear: state });
+
+      setClinicList([]);
+      setClinicListOptions(clinicListOptions.map((clinic) => ({ ...clinic, state: false })));
+    } else if (selectionCategory === "normal") {
+      setClinicsAttendedOption(date);
+      setClinicSelection({ allSelected: false, clear: false });
+      if (state) {
+        const clinic: Clinic = {
+          id: id,
+          date: String(date),
+          area: String(area),
+        };
+        const clinicIDList = clinicList.map((clinic) => clinic.id);
+        if (!clinicIDList.includes(id)) {
+          setClinicList([...clinicList, clinic]);
+
+          //order the greaterAreaList from smallest to largest id
+          // console.log(
+          //   "Sorted Greater Areas!!!: ",
+          //   greaterAreaList.sort((a, b) => a.id - b.id),
+          // );
+          // setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        }
+        setClinicListOptions(clinicListOptions.map((clinic) => (clinic.id === id ? { ...clinic, state: true } : clinic)));
+
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedClinicList = clinicList.filter((clinic) => clinic.id !== id);
+        setClinicList(updatedClinicList);
+
+        //order the greaterAreaList from smallest to largest id
+        setClinicList(clinicList.sort((a, b) => a.id - b.id));
+        setClinicListOptions(clinicListOptions.map((clinic) => (clinic.id === id ? { ...clinic, state: false } : clinic)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
   };
 
   const handleClinicsAttendedOption = (optionID: number, option: SetStateAction<string>, optionArea: string) => {
@@ -1813,8 +1892,16 @@ const Pet: NextPage = () => {
       setSurname(userData?.owner?.surname ?? "");
       setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
       setArea(userData?.owner?.addressArea.area ?? "");
-    }
 
+      setClinicListOptions(
+        clinicsAttendedOptions.map((clinic) => ({
+          id: clinic.clinicID,
+          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+          area: clinic.area.area,
+          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
+    }
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
     //isCreate ? setIsCreate(false) : setIsCreate(false);
     setIsUpdate(true);
@@ -1923,6 +2010,15 @@ const Pet: NextPage = () => {
       setSurname(userData?.owner?.surname ?? "");
       setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
       setArea(userData?.owner?.addressArea.area ?? "");
+
+      setClinicListOptions(
+        clinicsAttendedOptions.map((clinic) => ({
+          id: clinic.clinicID,
+          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+          area: clinic.area.area,
+          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
   //[user, isUpdate, isCreate];
@@ -1978,6 +2074,16 @@ const Pet: NextPage = () => {
     setLastDeworming(new Date());
     setComments("");
     setClinicList([]);
+    setClinicsAttendedOption("Select here");
+    // const clinics = clinicsAttendedOptions.map((clinic) => { id: clinic.clinicID, date: clinic.date, area: clinic.area.area, state: false });
+    const clinics = clinicsAttendedOptions.map((clinic) => ({
+      id: clinic.clinicID,
+      date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+      area: clinic.area.area,
+      state: false,
+    }));
+    setClinicListOptions(clinics);
+
     setTreatmentList([]);
     setShowClinicMessage(false);
     setIsUpdate(false);
@@ -1988,6 +2094,15 @@ const Pet: NextPage = () => {
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
+    //const query = router.asPath.split("?")[1] ?? "";
+
+    console.log("OwnerID!!!: ", (router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]);
+    console.log("FirstName!!!: ", (router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]);
+    console.log("Surname!!!: ", (router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]);
+    // setOwnerID(Number(router.asPath.split("=")[1]));
+    setOwnerID(Number((router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]));
+    setFirstName(String((router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]?.replaceAll("+", " ")));
+    setSurname(String((router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]?.replaceAll("+", " ")));
     setPetName("");
     setSpeciesOption("Select one");
     setSexOption("Select one");
@@ -2015,6 +2130,14 @@ const Pet: NextPage = () => {
     setComments("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
+    setClinicsAttendedOption("Select here");
+    const clinics = clinicsAttendedOptions.map((clinic) => ({
+      id: clinic.clinicID,
+      date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+      area: clinic.area.area,
+      state: false,
+    }));
+    setClinicListOptions(clinics);
     setTreatmentList([]);
     setIsCreate(true);
     setIsUpdate(false);
@@ -2025,9 +2148,10 @@ const Pet: NextPage = () => {
     setIsLoading(true);
     console.log("Owner ID for pet creation: ", ownerID);
     const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
+
     // console.log("All clinics attended: ", clinicIDList);
     const newUser_ = await newPet.mutateAsync({
-      ownerID: Number(router.asPath.split("=")[1]),
+      ownerID: Number((router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]),
       petName: petName,
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
@@ -2183,91 +2307,16 @@ const Pet: NextPage = () => {
       setSurname(userData?.owner?.surname ?? "");
       setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
       setArea(userData?.owner?.addressArea.area ?? "");
+
+      setClinicListOptions(
+        clinicsAttendedOptions.map((clinic) => ({
+          id: clinic.clinicID,
+          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+          area: clinic.area.area,
+          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
     }
-    // else {
-    //   //alternate method to get pet data
-    //   // Assuming userQuery.data contains the user object
-    //   const userData = pet.data;
-    //   //Get all the clinic dates and put in a string array
-    //   const clinicData = pet?.data?.clinic_data;
-    //   const clinicDates: Clinic[] =
-    //     clinicData?.map((clinic) => ({
-    //       id: clinic.clinicID,
-    //       date:
-    //         clinic.clinic.date.getDate().toString() +
-    //         "/" +
-    //         ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
-    //         "/" +
-    //         clinic.clinic.date.getFullYear().toString(),
-    //       area: clinic.clinic.area,
-    //     })) ?? [];
-    //   //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
-
-    //   //treatments
-    //   const treatmentData: Treatment[] =
-    //     pet?.data?.treatment_data.map((treatment) => ({
-    //       treatmentID: treatment.treatmentID,
-    //       date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
-    //       category: treatment.category,
-    //       type: treatment.type,
-    //     })) ?? [];
-
-    //   console.log("Treatment data: ", treatmentData);
-
-    //   const petData = userData?.pet_data;
-    //   setPetName(petData?.petName ?? "");
-    //   setSpeciesOption(petData?.species ?? "");
-    //   setSexOption(petData?.sex ?? "");
-    //   setAgeOption(petData?.age ?? "");
-    //   setBreedOption(petData?.breed ?? "");
-    //   setColourList(petData?.colour ?? [""]);
-    //   setMarkings(petData?.markings ?? "");
-    //   setStatusOption(petData?.status ?? "");
-    //   setSterilisationStatusOption(petData?.sterilisedStatus ?? "");
-    //   setSterilisationRequestedOption(petData?.sterilisedRequested ?? "");
-    //   setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "");
-
-    //   if (petData?.vaccinationShot1.getFullYear() !== 1970) {
-    //     setVaccinationShot1Option("Yes");
-    //   } else {
-    //     setVaccinationShot1Option("Not yet");
-    //   }
-
-    //   if (petData?.vaccinationShot2?.getFullYear() !== 1970) {
-    //     setVaccinationShot2Option("Yes");
-    //   } else {
-    //     setVaccinationShot2Option("Not yet");
-    //   }
-
-    //   if (petData?.vaccinationShot3?.getFullYear() !== 1970) {
-    //     setVaccinationShot3Option("Yes");
-    //   } else {
-    //     setVaccinationShot3Option("Not yet");
-    //   }
-
-    //   // setVaccinationShot1Option(userData?.vaccinationShot1 != new Date(0) ? "Yes" : "Not yet");
-    //   // setVaccinationShot2Option(userData?.vaccinationShot2 != new Date(0) ? "Yes" : "Not yet");
-    //   // setVaccinationShot3Option(userData?.vaccinationShot3 != new Date(0) ? "Yes" : "Not yet");
-    //   setVaccinationShot1Date(petData?.vaccinationShot1 ?? new Date());
-    //   setVaccinationShot2Date(petData?.vaccinationShot2 ?? new Date());
-    //   setVaccinationShot3Date(petData?.vaccinationShot3 ?? new Date());
-    //   setMembershipTypeOption(petData?.membership ?? "");
-    //   setCardStatusOption(petData?.cardStatus ?? "");
-    //   setKennelList(petData?.kennelReceived ?? []);
-    //   setLastDeworming(petData?.lastDeworming ?? new Date());
-    //   setComments(petData?.comments ?? "");
-    //   setClinicList(clinicDates);
-    //   setTreatmentList(treatmentData);
-    //   console.log("Treatment list: ", treatmentList);
-
-    //   // setClinicIDList(clinicIDs ?? []);
-    //   const ownerData = userData?.owner_data;
-
-    //   setFirstName(ownerData?.firstName ?? "");
-    //   setSurname(ownerData?.surname ?? "");
-    //   setGreaterArea(ownerData?.addressGreaterArea ?? "");
-    //   setArea(ownerData?.addressArea ?? "");
-    // }
 
     setIsUpdate(false);
     setIsCreate(false);
@@ -2448,6 +2497,18 @@ const Pet: NextPage = () => {
             ? "No"
             : "Yes",
       );
+
+      setClinicList(clinicDates);
+      setTreatmentList(treatmentData);
+
+      setClinicListOptions(
+        clinicsAttendedOptions.map((clinic) => ({
+          id: clinic.clinicID,
+          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+          area: clinic.area.area,
+          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
     }
     if (isViewProfilePage) {
       setPetName(petData?.petName ?? "");
@@ -2484,39 +2545,6 @@ const Pet: NextPage = () => {
       );
     }
 
-    // if (petData?.vaccinationShot1.getFullYear() !== 1970) {
-    //   setVaccinationShot1Option("Yes");
-    // } else {
-    //   setVaccinationShot1Option("Not yet");
-    // }
-
-    // if (petData?.vaccinationShot2?.getFullYear() !== 1970) {
-    //   setVaccinationShot2Option("Yes");
-    // } else {
-    //   setVaccinationShot2Option("Not yet");
-    // }
-
-    // if (petData?.vaccinationShot3?.getFullYear() !== 1970) {
-    //   setVaccinationShot3Option("Yes");
-    // } else {
-    //   setVaccinationShot3Option("Not yet");
-    // }
-
-    // if (petData?.sterilisedStatus?.getFullYear() !== 1970) {
-    //   setSterilisationStatusOption("Yes");
-    // } else {
-    //   setSterilisationStatusOption("Not yet");
-    // }
-
-    // if (petData?.sterilisedRequested?.getFullYear() !== 1970) {
-    //   setSterilisationRequestedOption("Yes");
-    // } else {
-    //   setSterilisationRequestedOption("Not yet");
-    // }
-
-    // setVaccinationShot1Option(userData?.vaccinationShot1 != new Date(0) ? "Yes" : "Not yet");
-    // setVaccinationShot2Option(userData?.vaccinationShot2 != new Date(0) ? "Yes" : "Not yet");
-    // setVaccinationShot3Option(userData?.vaccinationShot3 != new Date(0) ? "Yes" : "Not yet");
     setVaccinationShot1Date(petData?.vaccinationShot1 ?? new Date());
     setVaccinationShot2Date(petData?.vaccinationShot2 ?? new Date());
     setVaccinationShot3Date(petData?.vaccinationShot3 ?? new Date());
@@ -2528,7 +2556,15 @@ const Pet: NextPage = () => {
     setComments(petData?.comments ?? "");
     setClinicList(clinicDates);
     setTreatmentList(treatmentData);
-    console.log("Treatment list: ", treatmentList);
+
+    setClinicListOptions(
+      clinicsAttendedOptions.map((clinic) => ({
+        id: clinic.clinicID,
+        date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+        area: clinic.area.area,
+        state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+      })),
+    );
 
     // setClinicIDList(clinicIDs ?? []);
     const ownerData = userData?.owner_data;
@@ -2590,6 +2626,7 @@ const Pet: NextPage = () => {
     setClinicList([]);
     setTreatmentList([]);
     setShowClinicMessage(false);
+    setClinicSelection({ allSelected: false, clear: false });
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -3074,7 +3111,7 @@ const Pet: NextPage = () => {
                                           ref={clinicRef}
                                           className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
                                         >
-                                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                          {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                             {todayClinicList.map((option) => (
                                               <li key={option.id} onClick={() => handleAddTodaysClinic(pet.petID, option.id)}>
                                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
@@ -3085,6 +3122,26 @@ const Pet: NextPage = () => {
                                                 </button>
                                               </li>
                                             ))}
+                                          </ul> */}
+
+                                          <ul
+                                            className="rounded-lg border-2 border-black py-2 text-sm text-gray-700 dark:text-gray-200"
+                                            aria-labelledby="dropdownHoverButton"
+                                          >
+                                            {todayClinicList.length > 0 ? (
+                                              todayClinicList.map((option) => (
+                                                <li key={option.id} onClick={() => handleAddTodaysClinic(pet.petID, option.id)}>
+                                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                    {
+                                                      //Give the date and in brackets the area
+                                                      option.date + " (" + option.area + ")"
+                                                    }
+                                                  </button>
+                                                </li>
+                                              ))
+                                            ) : (
+                                              <li className="px-2">There are no clinics today</li>
+                                            )}
                                           </ul>
                                         </div>
                                       )}
@@ -3131,9 +3188,9 @@ const Pet: NextPage = () => {
               </div>
             </div>
             <div className="flex grow flex-col items-center">
-              <div className="flex">
-                {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
-              </div>
+              <label>
+                {"("}All fields with <span className="px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
+              </label>
               <div className="flex w-[47%] flex-col items-start">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -3172,10 +3229,10 @@ const Pet: NextPage = () => {
                   {petNameErrorMessage && <div className="text-sm text-red-500">{petNameErrorMessage}</div>}
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Species<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Species<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -3204,10 +3261,10 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Sex<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Sex<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -3236,10 +3293,10 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Age Category<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Age Category<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -3269,10 +3326,10 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Breed<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Breed<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -3341,11 +3398,19 @@ const Pet: NextPage = () => {
                     />
                   </div>
 
-                  {isUpdate && (
+                  {isUpdate ? (
                     <div className="mt-3 flex items-start">
                       <div className="mr-3">Owner: </div>
                       <div>
                         {firstName} {surname} N{ownerID}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-3 flex items-start">
+                      <div className="mr-3">Owner: </div>
+                      <div>
+                        {(router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]} {(router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]}{" "}
+                        N{(router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]}
                       </div>
                     </div>
                   )}
@@ -3355,10 +3420,10 @@ const Pet: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Pet Health Data</b>
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Pet Status<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Pet Status<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -3387,10 +3452,10 @@ const Pet: NextPage = () => {
                   </div>
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Sterilised?<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Sterilised?<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -3421,13 +3486,13 @@ const Pet: NextPage = () => {
                         <div className="mr-3 flex items-center pt-5">
                           <div className=" flex pl-3">Sterilisation Date: </div>
                         </div>
-                        <div className="z-50 pt-2">
+                        <div className=" pt-2">
                           <DatePicker
                             selected={sterilisationStatusDate}
                             onChange={(date) => setSterilisationStatusDate(date!)}
                             dateFormat="dd/MM/yyyy"
                             customInput={<CustomSterilisationStatusInput />}
-                            className="form-input z-40 rounded-md border py-2"
+                            className="form-input z-30 rounded-md border py-2"
                           />
                         </div>
                       </div>
@@ -3468,13 +3533,13 @@ const Pet: NextPage = () => {
                           <div className="mr-3 flex items-center pt-5">
                             <div className=" flex pl-3">Sterilisation Requested Date: </div>
                           </div>
-                          <div className="z-50 pt-2">
+                          <div className=" pt-2">
                             <DatePicker
                               selected={sterilisationRequestedDate}
                               onChange={(date) => setSterilisationRequestedDate(date!)}
                               dateFormat="dd/MM/yyyy"
                               customInput={<CustomSterilisationRequestedInput />}
-                              className="form-input rounded-md border py-2"
+                              className="form-input z-30 rounded-md border py-2"
                             />
                           </div>
                         </div>
@@ -3547,10 +3612,10 @@ const Pet: NextPage = () => {
                   )}
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Vaccination Shot 1<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Vaccination Shot 1<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -3581,7 +3646,7 @@ const Pet: NextPage = () => {
                         <div className="mr-3 flex items-center pt-5">
                           <div className=" flex pl-3">Vaccination Shot 1 Date: </div>
                         </div>
-                        <div className="z-40 pt-2">
+                        <div className="z-20 pt-2">
                           <DatePicker
                             selected={vaccinationShot1Date}
                             onChange={(date) => setVaccinationShot1Date(date!)}
@@ -3628,7 +3693,7 @@ const Pet: NextPage = () => {
                           <div className="mr-3 flex items-center pt-5">
                             <div className=" flex pl-3">Vaccination Shot 2 Date: </div>
                           </div>
-                          <div className="z-40 pt-2">
+                          <div className="z-10 pt-2">
                             <DatePicker
                               selected={vaccinationShot2Date}
                               onChange={(date) => setVaccinationShot2Date(date!)}
@@ -3676,7 +3741,7 @@ const Pet: NextPage = () => {
                           <div className="mr-3 flex items-center pt-5">
                             <div className=" flex pl-3">Vaccination Shot 3 Date: </div>
                           </div>
-                          <div className="z-40 pt-2">
+                          <div className="z-0 pt-2">
                             <DatePicker
                               selected={vaccinationShot3Date}
                               onChange={(date) => setVaccinationShot3Date(date!)}
@@ -3700,9 +3765,9 @@ const Pet: NextPage = () => {
                     <div className="mb-2 flex items-start">
                       <div className="mr-3">Treatments:</div>{" "}
                       <div className="flex flex-col items-start">
-                        {treatmentList.map((treatment, index) => (
+                        {treatmentList.map((treatment) => (
                           <button key={treatment?.treatmentID} className="underline hover:text-blue-400">
-                            {(index + 1).toString() + ". " + (treatment?.type ?? "") + " (" + (treatment?.category ?? "") + ")"}
+                            {treatment.date.toString() + " - " + (treatment?.type ?? "") + " (" + (treatment?.category ?? "") + ")"}
                           </button>
                         ))}
                       </div>
@@ -3715,10 +3780,10 @@ const Pet: NextPage = () => {
                   {/*Clinics attended*/}
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Clinics Attended: {clinicList.length} in Total </div>
+                      <div className=" flex">Clinic(s) Attended: </div>
                     </div>
                     {/*Show list of all the clinics attended */}
-                    <div className="flex flex-col items-center">
+                    {/* <div className="flex flex-col items-center">
                       <button
                         onClick={handleShowClinicsAttended}
                         className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -3734,7 +3799,7 @@ const Pet: NextPage = () => {
                           ))}
                         </ul>
                       )}
-                    </div>
+                    </div> */}
 
                     <div className="flex flex-col">
                       <button
@@ -3750,7 +3815,53 @@ const Pet: NextPage = () => {
                       </button>
                       {clinicsAttended && (
                         <div ref={clinicsAttendedRef} className="z-10 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="w-full rounded-lg bg-white px-2 py-2 text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <ul className="w-52 py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key={1}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="1"
+                                  type="checkbox"
+                                  checked={clinicSelection?.allSelected}
+                                  onChange={(e) => handleClinicsAttended(0, "", "", e.target.checked, "allSelected")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                  Select All
+                                </label>
+                              </div>
+                            </li>
+                            <li key={2}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="2"
+                                  type="checkbox"
+                                  checked={clinicSelection?.clear}
+                                  onChange={(e) => handleClinicsAttended(0, "", "", e.target.checked, "clear")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                  Clear All
+                                </label>
+                              </div>
+                            </li>
+                            {clinicListOptions?.map((option) => (
+                              <li key={option.id}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.id)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleClinicsAttended(option.id, option.area, option.date, e.target.checked, "normal")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.date.toString()} {option.area}
+                                  </label>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                          {/* <ul className="w-full rounded-lg bg-white px-2 py-2 text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {clinicsAttendedOptions.map((option) => (
                               <li
                                 key={option.clinicID}
@@ -3777,7 +3888,7 @@ const Pet: NextPage = () => {
                                 </button>
                               </li>
                             ))}
-                          </ul>
+                          </ul> */}
                         </div>
                       )}
                     </div>
@@ -3788,9 +3899,9 @@ const Pet: NextPage = () => {
                   {/*LAST DEWORMING*/}
 
                   <div className="flex items-center">
-                    <div className=" flex">
-                      Last Deworming<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
+                    <label>
+                      Last Deworming<span className="text-lg text-main-orange">*</span>:{" "}
+                    </label>
                     <div className="py-4">
                       <DatePicker
                         selected={lastDeworming}
@@ -3835,10 +3946,10 @@ const Pet: NextPage = () => {
                   </div> */}
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Membership Type<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Membership Type<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -4020,7 +4131,7 @@ const Pet: NextPage = () => {
                   </div>
                 </div>
                 <div ref={printComponentRef} className="flex grow flex-col items-center">
-                  <div className="mt-6 flex w-[40%] min-w-[38rem] max-w-xl flex-col items-start">
+                  <div className="print-div mt-6 flex w-[40%] min-w-[38rem] max-w-xl flex-col items-start">
                     <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                       <div className="absolute left-0 top-0">
                         <Image
@@ -4157,11 +4268,11 @@ const Pet: NextPage = () => {
                         <b className="mr-3">Treatments:</b> {treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join("; ")}
                       </div> */}
                       <div className="mb-2 flex items-start">
-                        <div className="mr-3">Treatments:</div>{" "}
+                        <b className="mr-3">Treatments:</b>{" "}
                         <div className="flex flex-col items-start">
-                          {treatmentList.map((treatment, index) => (
+                          {treatmentList.map((treatment) => (
                             <button key={treatment?.treatmentID} className="underline hover:text-blue-400">
-                              {(index + 1).toString() + ". " + (treatment?.type ?? "") + " (" + (treatment?.category ?? "") + ")"}
+                              {treatment?.date.toString() + " - " + (treatment?.type ?? "") + " - " + (treatment?.category ?? "")}
                             </button>
                           ))}
                         </div>

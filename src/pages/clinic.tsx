@@ -1003,9 +1003,9 @@ const Clinic: NextPage = () => {
                   </div>
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
-                    <div className=" flex">
-                      Date<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
+                    <label>
+                      Date<span className="text-lg text-main-orange">*</span>:{" "}
+                    </label>
 
                     <DatePicker
                       selected={startingDate}
@@ -1018,9 +1018,9 @@ const Clinic: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
-                      <div className="flex">
-                        Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                      <label>
+                        Greater Area<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1082,10 +1082,10 @@ const Clinic: NextPage = () => {
 
                   {/*CONDITIONS*/}
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Conditions<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label>
+                        Conditions<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1154,7 +1154,7 @@ const Clinic: NextPage = () => {
               </div>
             </div>
             <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="mt-6 flex w-[40%] max-w-xl flex-col items-start">
+              <div className="print-div mt-6 flex w-[40%] max-w-xl flex-col items-start">
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <div className="absolute left-0 top-0">
                     <Image

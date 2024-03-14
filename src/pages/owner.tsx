@@ -1383,10 +1383,10 @@ const Owner: NextPage = () => {
 
   //------------------------------------CREATE A NEW PET FOR OWNER--------------------------------------
   //When button is pressed the browser needs to go to the pet's page. The pet's page needs to know the owner's ID
-  const handleCreateNewPet = async (id: number) => {
+  const handleCreateNewPet = async (id: number, firstName: string, surname: string) => {
     await router.push({
       pathname: "/pet",
-      query: { ownerID: id },
+      query: { ownerID: id, firstName: firstName, surname: surname },
     });
   };
 
@@ -1620,7 +1620,7 @@ const Owner: NextPage = () => {
 
                               <div className="relative flex items-center justify-center">
                                 <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Dog size={24} className="block" onClick={() => handleCreateNewPet(user.ownerID)} />
+                                  <Dog size={24} className="block" onClick={() => handleCreateNewPet(user.ownerID, user.firstName, user.surname)} />
                                   <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Add new pet to owner
                                   </span>
@@ -1672,9 +1672,9 @@ const Owner: NextPage = () => {
               </div>
             </div>
             <div className="flex grow flex-col items-center">
-              <div className="flex">
-                {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
-              </div>
+              <label>
+                {"("}All fields with <span className="px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
+              </label>
               <div className="flex flex-col">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
@@ -1716,10 +1716,10 @@ const Owner: NextPage = () => {
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Preferred Communication Channel<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label className="">
+                        Preferred Communication Channel<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1752,9 +1752,9 @@ const Owner: NextPage = () => {
                   <div className="flex flex-col divide-y-2 divide-gray-300">
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-4">
-                        <div className="flex">
-                          Greater Area<div className="text-lg text-main-orange">*</div>:{" "}
-                        </div>
+                        <label className="">
+                          Greater Area<span className="text-lg text-main-orange">*</span>:{" "}
+                        </label>
                       </div>
                       <div className="flex flex-col">
                         <button
@@ -1787,10 +1787,10 @@ const Owner: NextPage = () => {
                     <div className="flex items-start divide-x-2 divide-gray-300">
                       <div className="flex flex-col pr-2">
                         <div className="flex items-start">
-                          <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">
-                              Area<div className="text-lg text-main-orange">*</div>:{" "}
-                            </div>
+                          <div className="mr-3 flex items-center pt-4">
+                            <label className="">
+                              Area<span className="text-lg text-main-orange">*</span>:{" "}
+                            </label>
                           </div>
                           <div className="flex flex-col">
                             <button
@@ -1819,10 +1819,10 @@ const Owner: NextPage = () => {
                         </div>
 
                         <div className="flex items-start">
-                          <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">
-                              Street<div className="text-lg text-main-orange">*</div>:{" "}
-                            </div>
+                          <div className="mr-3 flex items-center pt-4">
+                            <label className="">
+                              Street<span className="text-lg text-main-orange">*</span>:{" "}
+                            </label>
                           </div>
                           <div className="flex flex-col">
                             <button
@@ -1907,10 +1907,10 @@ const Owner: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
                   <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">
-                        Status<div className="text-lg text-main-orange">*</div>:{" "}
-                      </div>
+                    <div className="mr-3 flex items-center pt-4">
+                      <label className="">
+                        Status<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1940,9 +1940,9 @@ const Owner: NextPage = () => {
 
                   {/*DATEPICKER*/}
                   <div className="flex items-center">
-                    <div className=" flex">
-                      Starting Date<div className="text-lg text-main-orange">*</div>:{" "}
-                    </div>
+                    <label className="">
+                      Starting Date<span className="text-lg text-main-orange">*</span>:{" "}
+                    </label>
                     <div className="p-4">
                       <DatePicker
                         selected={startingDate}
@@ -1976,9 +1976,18 @@ const Owner: NextPage = () => {
                     // </div>
                     <div className="mb-2 flex items-center">
                       <span className="mr-3">Pets:</span>{" "}
-                      <div className="flex flex-wrap gap-2">
+                      {/* <div className="flex flex-wrap gap-2">
                         {petsCombined.map((pet) => (
                           <div>{(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}</div>
+                        ))}
+                      </div> */}
+                      <div className="flex flex-col">
+                        {petsCombined.map((pet) => (
+                          <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
+                            {pet?.breed === "Not Applicable"
+                              ? (pet?.name ?? "") + "(Cat, P" + (pet?.id ?? "") + ")"
+                              : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -2048,7 +2057,7 @@ const Owner: NextPage = () => {
                   </div>
                 </div>
                 <div ref={printComponentRef} className="flex grow flex-col items-center">
-                  <div className="mt-6 flex w-[40%] max-w-xl flex-col items-start">
+                  <div className="print-div mt-6 flex w-[40%] max-w-xl flex-col items-start">
                     <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                       <div className="absolute left-0 top-0">
                         <Image
@@ -2152,11 +2161,11 @@ const Owner: NextPage = () => {
                       <div className="mb-2 flex items-start">
                         <b className="mr-3">Pets:</b>{" "}
                         <div className="flex flex-col items-start">
-                          {petsCombined.map((pet, index) => (
+                          {petsCombined.map((pet) => (
                             <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
                               {pet?.breed === "Not Applicable"
-                                ? index + 1 + ". " + (pet?.name ?? "") + "(Cat, P" + (pet?.id ?? "") + ")"
-                                : index + 1 + ". " + (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                                ? (pet?.name ?? "") + "(Cat, P" + (pet?.id ?? "") + ")"
+                                : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
                             </button>
                           ))}
                         </div>

@@ -50,14 +50,37 @@ const Communication: NextPage = () => {
     updatedAt: string;
   };
 
+  //-------------------------------GREATER AREA-----------------------------------------
   type GreaterArea = {
     id: number;
     name: string;
   };
 
+  type GreaterAreaOptions = {
+    id: number;
+    name: string;
+    state: boolean;
+  };
+
+  type GreaterAreaSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
+
   type Area = {
     id: number;
     name: string;
+  };
+
+  type AreaOptions = {
+    id: number;
+    name: string;
+    state: boolean;
+  };
+
+  type AreaSelect = {
+    allSelected: boolean;
+    clear: boolean;
   };
 
   const newCommunication = api.communication.create.useMutation();
@@ -266,12 +289,12 @@ const Communication: NextPage = () => {
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
-  const [greaterAreaOption, setGreaterAreaOption] = useState("Select one");
+  const [greaterAreaOption, setGreaterAreaOption] = useState("Select here");
   const greaterAreaRef = useRef<HTMLDivElement>(null);
   const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
 
   const [isAreaOpen, setIsAreaOpen] = useState(false);
-  const [areaOption, setAreaOption] = useState("Select one");
+  const [areaOption, setAreaOption] = useState("Select here");
   const areaRef = useRef<HTMLDivElement>(null);
   const btnAreaRef = useRef<HTMLButtonElement>(null);
 
@@ -282,9 +305,73 @@ const Communication: NextPage = () => {
 
   //GREATER AREA USERS
   //to select multiple areas
+  // const [greaterAreaList, setGreaterAreaList] = useState<GreaterArea[]>([]);
+  // const handleToggleGreaterArea = () => {
+  //   setIsGreaterAreaOpen(!isGreaterAreaOpen);
+  // };
+
   const [greaterAreaList, setGreaterAreaList] = useState<GreaterArea[]>([]);
+
+  const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+  const [greaterAreaSelection, setGreaterAreaSelection] = useState<GreaterAreaSelect>();
+
   const handleToggleGreaterArea = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
+  };
+
+  const handleGreaterArea = (id: number, option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setGreaterAreaOption("Select All");
+      setGreaterAreaSelection({ allSelected: state, clear: false });
+
+      const greaterAreas = greaterAreaListOptions.map((area) => ({
+        id: area.id,
+        name: area.name,
+      }));
+      setGreaterAreaList(greaterAreas);
+      //order the greaterAreaList from smallest to largest id
+      //setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+      setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: true })));
+    } else if (selectionCategory === "clear") {
+      setGreaterAreaOption("Clear All");
+      setGreaterAreaSelection({ allSelected: false, clear: state });
+
+      setGreaterAreaList([]);
+      setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: false })));
+    } else if (selectionCategory === "normal") {
+      setGreaterAreaOption(option);
+      setGreaterAreaSelection({ allSelected: false, clear: false });
+      if (state) {
+        const area: GreaterArea = {
+          id: id,
+          name: String(option),
+        };
+        const greaterAreaIDList = greaterAreaList.map((area) => area.id);
+        if (!greaterAreaIDList.includes(id)) {
+          setGreaterAreaList([...greaterAreaList, area]);
+
+          //order the greaterAreaList from smallest to largest id
+          // console.log(
+          //   "Sorted Greater Areas!!!: ",
+          //   greaterAreaList.sort((a, b) => a.id - b.id),
+          // );
+          // setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        }
+        setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: true } : area)));
+
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedGreaterAreaList = greaterAreaList.filter((area) => area.id !== id);
+        setGreaterAreaList(updatedGreaterAreaList);
+
+        //order the greaterAreaList from smallest to largest id
+        //setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: false } : area)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
   };
 
   const handleGreaterAreaOption = (option: SetStateAction<string>, id: number) => {
@@ -332,7 +419,8 @@ const Communication: NextPage = () => {
     return { id: area.greaterAreaID, name: area.greaterArea };
   });
   //add the first option as "All greater areas" with id 0
-  const greaterAreaOptions = [{ id: 0, name: "All greater areas" }, ...(allGreaterAreas ?? [])];
+  //const greaterAreaOptions = [{ id: 0, name: "All greater areas" }, ...(allGreaterAreas ?? [])];
+  const greaterAreaOptions = allGreaterAreas ?? [];
 
   //Area
   //const getAllAreas = api.geographic.getAllAreas.useQuery().data;
@@ -356,7 +444,7 @@ const Communication: NextPage = () => {
 
   //console.log("Here are all the areas2: ", allAreas);
   //add the first option as "All areas" with id 0
-  const areaOptions = [{ id: 0, name: "All areas" }, ...(allAreas ?? [])];
+  const areaOptions = allAreas ?? [];
 
   // //Street
   // const getAllStreets = api.geographic.getAllStreets.useQuery().data;
@@ -378,6 +466,73 @@ const Communication: NextPage = () => {
   const handleToggleArea = () => {
     setIsAreaOpen(!isAreaOpen);
   };
+
+  const [areaListOptions, setAreaListOptions] = useState<AreaOptions[]>([]);
+  const [areaSelection, setAreaSelection] = useState<AreaSelect>();
+
+  const handleArea = (id: number, option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setAreaOption("Select All");
+      setAreaSelection({ allSelected: state, clear: false });
+
+      const areas = areaListOptions.map((area) => ({
+        id: area.id,
+        name: area.name,
+      }));
+      setAreaList(areas);
+      //order the greaterAreaList from smallest to largest id
+      //setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+      setAreaListOptions(areaListOptions.map((area) => ({ ...area, state: true })));
+    } else if (selectionCategory === "clear") {
+      setAreaOption("Clear All");
+      setAreaSelection({ allSelected: false, clear: state });
+
+      setAreaList([]);
+      setAreaListOptions(areaListOptions.map((area) => ({ ...area, state: false })));
+    } else if (selectionCategory === "normal") {
+      setAreaOption(option);
+      setAreaSelection({ allSelected: false, clear: false });
+      if (state) {
+        const area: Area = {
+          id: id,
+          name: String(option),
+        };
+        const areaIDList = areaList.map((area) => area.id);
+        if (!areaIDList.includes(id)) {
+          setAreaList([...areaList, area]);
+
+          //order the greaterAreaList from smallest to largest id
+          // console.log(
+          //   "Sorted Greater Areas!!!: ",
+          //   greaterAreaList.sort((a, b) => a.id - b.id),
+          // );
+          // setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        }
+        setAreaListOptions(areaListOptions.map((area) => (area.id === id ? { ...area, state: true } : area)));
+
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedAreaList = areaList.filter((area) => area.id !== id);
+        setAreaList(updatedAreaList);
+
+        //order the greaterAreaList from smallest to largest id
+        //setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        setAreaListOptions(areaListOptions.map((area) => (area.id === id ? { ...area, state: false } : area)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const areaIDList = areaList.map((area) => area.id);
+    setAreaListOptions(
+      areaOptions.map((area) => {
+        return { ...area, state: areaIDList.includes(area.id) };
+      }),
+    );
+  }, [areaOptions, greaterAreaList]);
 
   const handleAreaOption = (option: SetStateAction<string>, id: number) => {
     setAreaOption(option);
@@ -472,8 +627,20 @@ const Communication: NextPage = () => {
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
+    setGreaterAreaOption("Select here");
+    setAreaOption("Select here");
+    setGreaterAreaListOptions(
+      greaterAreaOptions.map((area) => {
+        return { ...area, state: false };
+      }),
+    );
+    setAreaListOptions(
+      areaOptions.map((area) => {
+        return { ...area, state: false };
+      }),
+    );
+    setGreaterAreaList([]);
+    setAreaList([]);
 
     // setStartingDate(new Date());
     setMessage("");
@@ -705,15 +872,22 @@ const Communication: NextPage = () => {
     }
 
     setMessage("");
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
+    setGreaterAreaOption("Select here");
+    setAreaOption("Select here");
     setPreferredCommunicationOption("Select one");
     setSuccess("No");
     setRecipients([]);
     setGreaterAreaList([]);
     setAreaList([]);
+    setGreaterAreaListOptions([]);
+    setAreaListOptions([]);
     setQuery("");
     setID(0);
+    setAreaSelection({ allSelected: false, clear: false });
+    setGreaterAreaSelection({ allSelected: false, clear: false });
+    setIncludePetOwner(false);
+    setIncludeUser(false);
+    setIncludeVolunteer(false);
 
     setIsLoading(false);
   };
@@ -745,6 +919,26 @@ const Communication: NextPage = () => {
       setRecipients(userData.recipients ?? []);
       setGreaterAreaList(greaterAreas ?? []);
       setAreaList(areas ?? []);
+
+      const greaterAreasIDs = greaterAreas.map((area) => area.id);
+
+      setGreaterAreaListOptions(
+        greaterAreaOptions.map((area) => ({
+          id: area.id,
+          name: area.name,
+          state: greaterAreasIDs.includes(area.id),
+        })),
+      );
+
+      const areasIDs = areas.map((area) => area.id);
+
+      setAreaListOptions(
+        areaOptions.map((area) => ({
+          id: area.id,
+          name: area.name,
+          state: areasIDs.includes(area.id),
+        })),
+      );
     }
     setIsCreate(false);
     setIsViewProfilePage(true);
@@ -772,13 +966,18 @@ const Communication: NextPage = () => {
     setIsViewProfilePage(false);
     setID(0);
     setMessage("");
-    setGreaterAreaOption("Select one");
-    setAreaOption("Select one");
+    setGreaterAreaOption("Select here");
+    setAreaOption("Select here");
     setPreferredCommunicationOption("Select one");
     setSuccess("No");
     setRecipients([]);
     setGreaterAreaList([]);
     setAreaList([]);
+    setAreaSelection({ allSelected: false, clear: false });
+    setGreaterAreaSelection({ allSelected: false, clear: false });
+    setIncludePetOwner(false);
+    setIncludeUser(false);
+    setIncludeVolunteer(false);
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -947,6 +1146,7 @@ const Communication: NextPage = () => {
                             <td className="max-w-[10rem] border px-2 py-1">
                               {user.greaterArea.length > 7
                                 ? user.greaterArea
+                                    .sort((a, b) => a.greaterArea.greaterAreaID - b.greaterArea.greaterAreaID)
                                     .slice(0, 7)
                                     .map((greaterArea) => greaterArea.greaterArea.greaterArea)
                                     .join("; ") + "..."
@@ -955,6 +1155,7 @@ const Communication: NextPage = () => {
                             <td className="max-w-[15rem] border px-2 py-1">
                               {user.area.length > 7
                                 ? user.area
+                                    .sort((a, b) => a.area.areaID - b.area.areaID)
                                     .slice(0, 7)
                                     .map((area) => area.area.area)
                                     .join("; ") + "..."
@@ -1126,7 +1327,7 @@ const Communication: NextPage = () => {
                           </label>
                         </div>
 
-                        <div className="flex flex-col items-center">
+                        {/* <div className="flex flex-col items-center">
                           <button
                             onClick={handleShowGreaterArea}
                             className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -1142,9 +1343,72 @@ const Communication: NextPage = () => {
                               ))}
                             </ul>
                           )}
-                        </div>
+                        </div> */}
 
                         <div className="flex flex-col">
+                          <button
+                            ref={btnGreaterAreaRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                            type="button"
+                            onClick={handleToggleGreaterArea}
+                          >
+                            {greaterAreaOption}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {isGreaterAreaOpen && (
+                            <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                              <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                <li key={1}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="1"
+                                      type="checkbox"
+                                      checked={greaterAreaSelection?.allSelected}
+                                      onChange={(e) => handleGreaterArea(0, "", e.target.checked, "allSelected")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                      Select All
+                                    </label>
+                                  </div>
+                                </li>
+                                <li key={2}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="2"
+                                      type="checkbox"
+                                      checked={greaterAreaSelection?.clear}
+                                      onChange={(e) => handleGreaterArea(0, "", e.target.checked, "clear")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                      Clear All
+                                    </label>
+                                  </div>
+                                </li>
+                                {greaterAreaListOptions?.map((option) => (
+                                  <li key={option.id}>
+                                    <div className="flex items-center px-4">
+                                      <input
+                                        id={String(option.id)}
+                                        type="checkbox"
+                                        checked={option.state}
+                                        onChange={(e) => handleGreaterArea(option.id, option.name, e.target.checked, "normal")}
+                                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                      />
+                                      <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
+                                        {option.name}
+                                      </label>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                        {/* <div className="flex flex-col">
                           <button
                             ref={btnGreaterAreaRef}
                             className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -1167,7 +1431,7 @@ const Communication: NextPage = () => {
                               </ul>
                             </div>
                           )}
-                        </div>
+                        </div> */}
                       </div>
 
                       {/* Area */}
@@ -1178,7 +1442,7 @@ const Communication: NextPage = () => {
                           </label>
                         </div>
 
-                        <div className="flex flex-col items-center">
+                        {/* <div className="flex flex-col items-center">
                           <button
                             onClick={handleShowArea}
                             className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -1194,7 +1458,7 @@ const Communication: NextPage = () => {
                               ))}
                             </ul>
                           )}
-                        </div>
+                        </div> */}
 
                         <div className="flex flex-col">
                           <button
@@ -1211,12 +1475,59 @@ const Communication: NextPage = () => {
                           {isAreaOpen && (
                             <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                               <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                <li key={1}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="1"
+                                      type="checkbox"
+                                      checked={areaSelection?.allSelected}
+                                      onChange={(e) => handleArea(0, "", e.target.checked, "allSelected")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                      Select All
+                                    </label>
+                                  </div>
+                                </li>
+                                <li key={2}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="2"
+                                      type="checkbox"
+                                      checked={areaSelection?.clear}
+                                      onChange={(e) => handleArea(0, "", e.target.checked, "clear")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                      Clear All
+                                    </label>
+                                  </div>
+                                </li>
+                                {areaListOptions?.map((option) => (
+                                  <li key={option.id}>
+                                    <div className="flex items-center px-4">
+                                      <input
+                                        id={String(option.id)}
+                                        type="checkbox"
+                                        checked={option.state}
+                                        onChange={(e) => handleArea(option.id, option.name, e.target.checked, "normal")}
+                                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                      />
+                                      <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
+                                        {option.name}
+                                      </label>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+
+                              {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                 {areaOptions.map((option) => (
                                   <li key={option.id} onClick={() => handleAreaOption(option.name, option.id)}>
                                     <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.name}</button>
                                   </li>
                                 ))}
-                              </ul>
+                              </ul> */}
                             </div>
                           )}
                         </div>
@@ -1323,11 +1634,19 @@ const Communication: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaList.map((greaterArea) => greaterArea.name).join("; ")}
+                    <b className="mr-3">Greater Area:</b>{" "}
+                    {greaterAreaList
+                      .sort((a, b) => a.id - b.id)
+                      .map((greaterArea) => greaterArea.name)
+                      .join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {areaList.map((area) => area.name).join("; ")}
+                    <b className="mr-3">Area:</b>{" "}
+                    {areaList
+                      .sort((a, b) => a.id - b.id)
+                      .map((area) => area.name)
+                      .join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-center">

@@ -22,7 +22,7 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 
 //Icons
-import { AddressBook, FirstAidKit, Pencil, Printer, Trash, UserCircle, Users, Bed } from "phosphor-react";
+import { AddressBook, FirstAidKit, Pencil, Printer, Trash, UserCircle, Users, Bed, Info } from "phosphor-react";
 
 //Date picker
 import DatePicker from "react-datepicker";
@@ -1393,7 +1393,7 @@ const Pet: NextPage = () => {
   };
 
   const membershipStatus = (): string => {
-    if (membershipTypeOption !== "Non-card holder") {
+    if (membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder") {
       const currentDate = new Date();
 
       // Convert clinicList dates to Date objects
@@ -1482,10 +1482,9 @@ const Pet: NextPage = () => {
   useEffect(() => {
     if (membershipStatus() === "(Lapsed)" && cardStatusOption !== "Lapsed card holder") {
       setCardStatusOption("Lapsed card holder");
+    } else if (membershipStatus() === "(Active)" && cardStatusOption === "Lapsed card holder") {
+      setCardStatusOption("Select one");
     }
-    // else if (membershipStatus() === "(Active)" && cardStatusOption !== "Active card holder") {
-    //   setCardStatusOption("Active card holder");
-    // }
   }, [membershipStatus, clinicList]);
 
   //VET FEES
@@ -3594,7 +3593,7 @@ const Pet: NextPage = () => {
                     <div className="mt-3 flex items-start">
                       <div className="mr-3">Owner: </div>
                       <div>
-                        {firstName} {surname} N{ownerID}
+                        {firstName} {surname} (N{ownerID})
                       </div>
                     </div>
                   ) : (
@@ -3602,7 +3601,7 @@ const Pet: NextPage = () => {
                       <div className="mr-3">Owner: </div>
                       <div>
                         {(router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]} {(router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]}{" "}
-                        N{(router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]}
+                        (N{(router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]})
                       </div>
                     </div>
                   )}
@@ -4170,7 +4169,21 @@ const Pet: NextPage = () => {
                     {/* {membershipTypeOption && membershipMessage(membershipTypeOption) && (
                       <div className="pl-4 pt-5 text-red-600">({membershipMessage(membershipTypeOption)})</div>
                     )} */}
-                    {membershipTypeOption !== "Non-card holder" && <div className="pl-4 pt-5 text-red-600">{membershipStatus()}</div>}
+                    {membershipTypeOption !== "Non-card holder" &&
+                      (membershipStatus() === "(Lapsed)" ? (
+                        <div className="pl-4 pt-5 text-red-600">{membershipStatus()}</div>
+                      ) : (
+                        <div className="pl-4 pt-5 text-black">{membershipStatus()}</div>
+                      ))}
+                    {membershipTypeOption !== "Non-card holder" && membershipStatus() !== "" && (
+                      <div className="group relative mx-[5px] mt-5 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                        <Info size={24} className="block" />
+                        <span className="absolute left-[90%] top-[90%] hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                          The status of a card holder lapses if the pet has not attended a pet clinic for 3 months in a row. A lapsed card holder can become
+                          active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {membershipTypeOption !== "Non-card holder" && membershipTypeOption !== "Select one" && (
@@ -4208,15 +4221,8 @@ const Pet: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center py-3">
                       <div className=" flex">
-                        Veterinary Fees Covered?: <b className="pl-3">{VetFees()}</b>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center py-3">
-                      <div className=" flex">
-                        Qualify For Kennel?: <b className="pl-3">{qualifiesForKennel()}</b>
+                        Veterinary Fees Covered?:{" "}
+                        {VetFees() === "No" ? <span className="pl-3 text-red-600">{VetFees()}</span> : <span className="pl-3 text-black">{VetFees()}</span>}
                       </div>
                     </div>
                   </div>
@@ -4316,6 +4322,19 @@ const Pet: NextPage = () => {
                     </div>
 
                     {/* <div className="pl-2 pt-5 text-base text-red-600">{kennelMessage(kennelList)}</div> */}
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center py-3">
+                      <div className=" flex">
+                        Qualifies For Kennel?:{" "}
+                        {qualifiesForKennel() === "No" ? (
+                          <span className="pl-3 text-red-600">{qualifiesForKennel()}</span>
+                        ) : (
+                          <span className="pl-3 text-black">{VetFees()}</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {/*DATEPICKER*/}
@@ -4588,7 +4607,12 @@ const Pet: NextPage = () => {
                         {/* {membershipTypeOption && membershipMessage(membershipTypeOption) && (
                           <div className="ml-3 text-red-600">({membershipMessage(membershipTypeOption)})</div>
                         )} */}
-                        {membershipTypeOption !== "Non-card holder" && <div className="ml-3 text-red-600">{membershipStatus()}</div>}
+                        {membershipTypeOption !== "Non-card holder" &&
+                          (membershipStatus() === "(Lapsed)" ? (
+                            <div className="ml-3 text-red-600">{membershipStatus()}</div>
+                          ) : (
+                            <div className="ml-3 text-black">{membershipStatus()}</div>
+                          ))}
                       </div>
 
                       <div className="mb-2 flex items-center">
@@ -4596,11 +4620,13 @@ const Pet: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Veterinary Fees Covered?:</b> {VetFees()}
+                        <b className="mr-3">Veterinary Fees Covered?:</b>{" "}
+                        {VetFees() === "No" ? <span className=" text-red-600">{VetFees()}</span> : <span className=" text-black">{VetFees()}</span>}
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Qualifies For Kennel?:</b> {qualifiesForKennel()}
+                        <b className="mr-3">Qualifies For Kennel?:</b>{" "}
+                        {VetFees() === "No" ? <span className=" text-red-600">{VetFees()}</span> : <span className=" text-black">{VetFees()}</span>}
                       </div>
 
                       <div className="mb-2 flex items-center">

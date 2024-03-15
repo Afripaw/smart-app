@@ -30,6 +30,7 @@ import Input from "~/components/Base/Input";
 import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 import { router } from "@trpc/server";
+import Pet from "./pet";
 
 const Clinic: NextPage = () => {
   useSession({ required: true });
@@ -267,6 +268,10 @@ const Clinic: NextPage = () => {
   //---------------------------------EDIT BOXES----------------------------------
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
+
+  //--------------------------------UNEDITABLE-------------------------------------
+  const [dogVisits, setDogVisits] = useState(0);
+  const [catVisits, setCatVisits] = useState(0);
   //const [image, setImage] = useState("");
 
   //userID
@@ -452,6 +457,9 @@ const Clinic: NextPage = () => {
       if (userData.area.area === "") {
         setAreaOption({ area: "Select one", id: 0 });
       }
+
+      setDogVisits(userData.pet.filter((pet) => pet.pet.species === "Dog").length);
+      setCatVisits(userData.pet.filter((pet) => pet.pet.species === "Cat").length);
     }
 
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
@@ -487,6 +495,9 @@ const Clinic: NextPage = () => {
         console.log("Area option is select one");
         setAreaOption({ area: "Select one", id: 0 });
       }
+
+      setDogVisits(userData.pet.filter((pet) => pet.pet.species === "Dog").length);
+      setCatVisits(userData.pet.filter((pet) => pet.pet.species === "Cat").length);
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
@@ -583,6 +594,9 @@ const Clinic: NextPage = () => {
 
       setGreaterAreaID(userData.greaterAreaID ?? 0);
       setAreaID(userData.areaID ?? 0);
+
+      setDogVisits(userData.pet.filter((pet) => pet.pet.species === "Dog").length);
+      setCatVisits(userData.pet.filter((pet) => pet.pet.species === "Cat").length);
     }
 
     setIsUpdate(false);
@@ -620,6 +634,9 @@ const Clinic: NextPage = () => {
       if (userData.areaID === 0 || (userData.areaID === undefined && isUpdate)) {
         setAreaOption({ area: "Select one", id: 0 });
       }
+
+      setDogVisits(userData.pet.filter((pet) => pet.pet.species === "Dog").length);
+      setCatVisits(userData.pet.filter((pet) => pet.pet.species === "Cat").length);
     }
   }, [isViewProfilePage]); // Effect runs when userQuery.data changes
 
@@ -642,6 +659,9 @@ const Clinic: NextPage = () => {
     setGreaterAreaOption({ area: "Select one", id: 0 });
     setAreaOption({ area: "Select one", id: 0 });
     setComments("");
+
+    setDogVisits(0);
+    setCatVisits(0);
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -1048,6 +1068,15 @@ const Clinic: NextPage = () => {
                     </div>
                   </div>
 
+                  {/* Dog visits */}
+                  <div className="flex py-2">
+                    Dog Visits: <div className="px-3">{dogVisits}</div>
+                  </div>
+
+                  <div className="flex py-2">
+                    Cat Visits: <div className="px-3">{catVisits}</div>
+                  </div>
+
                   {/* <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
@@ -1178,6 +1207,16 @@ const Clinic: NextPage = () => {
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Greater Area:</b> {greaterAreaOption.area}
+                  </div>
+
+                  {/* {user.pet.filter((pet) => pet.pet.species === "Dog").length} */}
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Dog visits:</b> {dogVisits}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Cat visits:</b> {catVisits}
                   </div>
 
                   {/* <div className="mb-2 flex items-center">

@@ -320,6 +320,17 @@ const Pet: NextPage = () => {
   //Order fields
   const [order, setOrder] = useState("petName");
 
+  //------------------------------KENNELS-----------------------------------------
+  type KennelOptions = {
+    year: string;
+    state: boolean;
+  };
+
+  type KennelSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
+
   //-------------------------------CLINICS ATTENDED-----------------------------------------
   type Clinic = {
     id: number;
@@ -650,7 +661,7 @@ const Pet: NextPage = () => {
   const btnCardStatusRef = useRef<HTMLButtonElement>(null);
 
   const [kennelsReceived, setKennelsReceived] = useState(false);
-  const [kennelsReceivedOption, setKennelsReceivedOption] = useState("Select one");
+  const [kennelsReceivedOption, setKennelsReceivedOption] = useState("Select here");
   const kennelsReceivedRef = useRef<HTMLDivElement>(null);
   const btnKennelsReceivedRef = useRef<HTMLButtonElement>(null);
 
@@ -1381,6 +1392,42 @@ const Pet: NextPage = () => {
     }
   };
 
+  const membershipStatus = (): string => {
+    if (membershipTypeOption !== "Non-card holder") {
+      const currentDate = new Date();
+
+      // Convert clinicList dates to Date objects
+      const clinicDates = clinicList.map((clinicDate) => {
+        const [day, month, year] = clinicDate.date.split("/").map(Number);
+        return new Date(year ?? 0, (month ?? 0) - 1, day);
+      });
+
+      // Filter clinics within the last 'time' months
+      const filteredClinicsLapsedMember = clinicDates.filter((clinicDate) => {
+        const pastDate = new Date(currentDate);
+        pastDate.setMonth(currentDate.getMonth() - 3);
+        return clinicDate >= pastDate;
+      });
+
+      const filteredClinicsActiveMember = clinicDates.filter((clinicDate) => {
+        const pastDate = new Date(currentDate);
+        pastDate.setMonth(currentDate.getMonth() - 6);
+        return clinicDate >= pastDate;
+      });
+
+      if (filteredClinicsLapsedMember.length < 1) {
+        //setCardStatusOption("Lapsed card holder");
+        return "(Lapsed)";
+      } else if (filteredClinicsActiveMember.length >= 3) {
+        return "(Active)";
+      } else {
+        return "";
+      }
+    } else {
+      return "";
+    }
+  };
+
   // Example Usage
   console.log(qualifiesWithAttendance(6)); // Check for standard card
   console.log(qualifiesWithAttendance(24)); // Check for gold card
@@ -1424,8 +1471,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const cardStatusOptions =
-    membershipTypeOption == "Non-card holder" ? ["Not applicable"] : ["Not applicable", "Collect", "Issued", "Re-print", "Lapsed card holder"];
+  const cardStatusOptions = membershipTypeOption == "Non-card holder" ? ["Not applicable"] : ["Not applicable", "Collect", "Issued", "Re-print"];
 
   useEffect(() => {
     if (membershipTypeOption != "Select one" && cardStatusOption == "") {
@@ -1433,8 +1479,71 @@ const Pet: NextPage = () => {
     }
   }, [membershipTypeOption]);
 
+  useEffect(() => {
+    if (membershipStatus() === "(Lapsed)" && cardStatusOption !== "Lapsed card holder") {
+      setCardStatusOption("Lapsed card holder");
+    }
+    // else if (membershipStatus() === "(Active)" && cardStatusOption !== "Active card holder") {
+    //   setCardStatusOption("Active card holder");
+    // }
+  }, [membershipStatus, clinicList]);
+
+  //VET FEES
+  const VetFees = (): string => {
+    if (membershipStatus() === "(Active)" && membershipTypeOption !== "Non-card holder") {
+      return "Yes";
+    }
+    return "No";
+  };
+
   //KENNELS RECEIVED
+
+  const [kennelListOptions, setKennelListOptions] = useState<KennelOptions[]>([]);
+  const [kennelSelection, setKennelSelection] = useState<KennelSelect>();
+  //to select multiple kennels
   const [kennelList, setKennelList] = useState<string[]>([]);
+
+  const handleKennel = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setKennelsReceivedOption("Select All");
+      setKennelSelection({ allSelected: state, clear: false });
+
+      const kennels = kennelListOptions.map((kennel) => kennel.year);
+      setKennelList(kennels);
+      //order the roleList in alphabetical order
+      // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      setKennelListOptions(kennelListOptions.map((kennel) => ({ ...kennel, state: true })));
+    } else if (selectionCategory === "clear") {
+      setKennelsReceivedOption("Clear All");
+      setKennelSelection({ allSelected: false, clear: state });
+
+      setKennelList([]);
+      setKennelListOptions(kennelListOptions.map((kennel) => ({ ...kennel, state: false })));
+    } else if (selectionCategory === "normal") {
+      setKennelsReceivedOption(option);
+      setKennelSelection({ allSelected: false, clear: false });
+      if (state) {
+        if (!kennelList.includes(String(option))) {
+          setKennelList([...kennelList, String(option)]);
+          //order the roleList in alphabetical order
+          // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        }
+
+        setKennelListOptions(kennelListOptions.map((kennel) => (kennel.year === option ? { ...kennel, state: true } : kennel)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedKennelList = kennelList.filter((kennel) => kennel !== option);
+        setKennelList(updatedKennelList);
+        //order the roleList in alphabetical order
+        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        setKennelListOptions(kennelListOptions.map((kennel) => (kennel.year === option ? { ...kennel, state: false } : kennel)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
+  };
+  // const [kennelList, setKennelList] = useState<string[]>([]);
   //show all available options
   const kennelsReceivedOptions = [
     "No kennels received",
@@ -1488,14 +1597,43 @@ const Pet: NextPage = () => {
     setKennelList(sortedYears);
   }, [kennelsReceived]);
 
-  //qualifies for a kennel message
-  const kennelMessage = (kennels: string[]): string => {
-    if (kennels.length === 0 && membershipTypeOption == "Gold card holder") {
-      return "(Qualifies for kennel)";
+  //Qualify for kennel
+  const qualifiesForKennel = (): string => {
+    const currentDate = new Date();
+    const clinicDates = clinicList.map((clinicDate) => {
+      const [day, month, year] = clinicDate.date.split("/").map(Number);
+      return new Date(year ?? 0, (month ?? 0) - 1, day);
+    });
+
+    // Filter clinics within the last 12 months
+    const filteredClinics = clinicDates.filter((clinicDate) => {
+      const pastDate = new Date(currentDate);
+      pastDate.setMonth(currentDate.getMonth() - 12);
+      return clinicDate >= pastDate;
+    });
+
+    const receivedKennelInLast3Years = kennelList.some((year) => {
+      const pastDate = new Date(currentDate);
+      pastDate.setFullYear(currentDate.getFullYear() - 3);
+      return parseInt(year.slice(19, 23)) >= pastDate.getFullYear();
+    });
+
+    console.log("receivedKennelInLast3Years!!!!: ", receivedKennelInLast3Years);
+    if (membershipTypeOption !== "Non-card holder" && filteredClinics.length >= 9 && !receivedKennelInLast3Years) {
+      return "Yes";
     } else {
-      return "";
+      return "No";
     }
   };
+
+  //qualifies for a kennel message
+  // const kennelMessage = (kennels: string[]): string => {
+  //   if (kennels.length === 0 && membershipTypeOption == "Gold card holder") {
+  //     return "(Qualifies for kennel)";
+  //   } else {
+  //     return "";
+  //   }
+  // };
 
   //CLINICSATTENDED
   const [clinicListOptions, setClinicListOptions] = useState<ClinicOptions[]>([]);
@@ -1901,6 +2039,13 @@ const Pet: NextPage = () => {
           state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
         })),
       );
+
+      setKennelListOptions(
+        kennelsReceivedOptions.map((kennel) => ({
+          year: kennel,
+          state: userData.kennelReceived.includes(kennel),
+        })),
+      );
     }
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
     //isCreate ? setIsCreate(false) : setIsCreate(false);
@@ -2019,6 +2164,13 @@ const Pet: NextPage = () => {
           state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
         })),
       );
+
+      setKennelListOptions(
+        kennelsReceivedOptions.map((kennel) => ({
+          year: kennel,
+          state: userData.kennelReceived.includes(kennel),
+        })),
+      );
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
   //[user, isUpdate, isCreate];
@@ -2070,7 +2222,7 @@ const Pet: NextPage = () => {
     setVaccinationShot3Date(new Date());
     setMembershipTypeOption("Select one");
     setCardStatusOption("Select one");
-    setKennelsReceivedOption("Select one");
+    setKennelsReceivedOption("Select here");
     setLastDeworming(new Date());
     setComments("");
     setClinicList([]);
@@ -2082,7 +2234,15 @@ const Pet: NextPage = () => {
       area: clinic.area.area,
       state: false,
     }));
+
+    setKennelListOptions(
+      kennelsReceivedOptions.map((kennel) => ({
+        year: kennel,
+        state: false,
+      })),
+    );
     setClinicListOptions(clinics);
+    setKennelList([]);
 
     setTreatmentList([]);
     setShowClinicMessage(false);
@@ -2124,7 +2284,7 @@ const Pet: NextPage = () => {
     setVaccinationShot3Date(new Date());
     setMembershipTypeOption("Select one");
     setCardStatusOption("Select one");
-    setKennelsReceivedOption("Select one");
+    setKennelsReceivedOption("Select here");
     setStartingDate(new Date());
     setLastDeworming(new Date());
     setComments("");
@@ -2137,6 +2297,13 @@ const Pet: NextPage = () => {
       area: clinic.area.area,
       state: false,
     }));
+    setKennelListOptions(
+      kennelsReceivedOptions.map((kennel) => ({
+        year: kennel,
+        state: false,
+      })),
+    );
+    setKennelList([]);
     setClinicListOptions(clinics);
     setTreatmentList([]);
     setIsCreate(true);
@@ -2314,6 +2481,13 @@ const Pet: NextPage = () => {
           date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
           area: clinic.area.area,
           state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
+
+      setKennelListOptions(
+        kennelsReceivedOptions.map((kennel) => ({
+          year: kennel,
+          state: userData.kennelReceived.includes(kennel),
         })),
       );
     }
@@ -2509,6 +2683,15 @@ const Pet: NextPage = () => {
           state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
         })),
       );
+
+      setKennelListOptions(
+        kennelsReceivedOptions.map((kennel) => ({
+          year: kennel,
+          state: petData?.kennelReceived.includes(kennel) ?? false,
+        })),
+      );
+
+      setKennelList(petData?.kennelReceived ?? []);
     }
     if (isViewProfilePage) {
       setPetName(petData?.petName ?? "");
@@ -2563,6 +2746,13 @@ const Pet: NextPage = () => {
         date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
         area: clinic.area.area,
         state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+      })),
+    );
+
+    setKennelListOptions(
+      kennelsReceivedOptions.map((kennel) => ({
+        year: kennel,
+        state: petData?.kennelReceived.includes(kennel) ?? false,
       })),
     );
 
@@ -2621,12 +2811,14 @@ const Pet: NextPage = () => {
     setClinicsAttendedOption("Select here");
     setMembershipTypeOption("Select one");
     setCardStatusOption("Select one");
-    setKennelsReceivedOption("Select one");
+    setKennelsReceivedOption("Select here");
     setComments("");
     setClinicList([]);
     setTreatmentList([]);
     setShowClinicMessage(false);
     setClinicSelection({ allSelected: false, clear: false });
+    setKennelList([]);
+    setKennelSelection({ allSelected: false, clear: false });
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -3893,7 +4085,7 @@ const Pet: NextPage = () => {
                       )}
                     </div>
 
-                    {showClinicMessage && <div className="ml-2 mt-5 text-red-600">(Veterinary fees covered)</div>}
+                    {/* {showClinicMessage && <div className="ml-2 mt-5 text-red-600">(Veterinary fees covered)</div>} */}
                   </div>
 
                   {/*LAST DEWORMING*/}
@@ -3975,9 +4167,10 @@ const Pet: NextPage = () => {
                         </div>
                       )}
                     </div>
-                    {membershipTypeOption && membershipMessage(membershipTypeOption) && (
+                    {/* {membershipTypeOption && membershipMessage(membershipTypeOption) && (
                       <div className="pl-4 pt-5 text-red-600">({membershipMessage(membershipTypeOption)})</div>
-                    )}
+                    )} */}
+                    {membershipTypeOption !== "Non-card holder" && <div className="pl-4 pt-5 text-red-600">{membershipStatus()}</div>}
                   </div>
 
                   {membershipTypeOption !== "Non-card holder" && membershipTypeOption !== "Select one" && (
@@ -4013,11 +4206,27 @@ const Pet: NextPage = () => {
                   )}
 
                   <div className="flex items-start">
+                    <div className="mr-3 flex items-center py-3">
+                      <div className=" flex">
+                        Veterinary Fees Covered?: <b className="pl-3">{VetFees()}</b>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center py-3">
+                      <div className=" flex">
+                        Qualify For Kennel?: <b className="pl-3">{qualifiesForKennel()}</b>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Kennels Received: {kennelList.length} in Total</div>
+                      <div className=" flex">Kennel(s) Received: </div>
                     </div>
 
-                    <div className="flex flex-col items-center">
+                    {/* <div className="flex flex-col items-center">
                       <button
                         onClick={handleShowKennelsReceived}
                         className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
@@ -4033,7 +4242,7 @@ const Pet: NextPage = () => {
                           ))}
                         </ul>
                       )}
-                    </div>
+                    </div> */}
 
                     <div className="flex flex-col">
                       <button
@@ -4048,11 +4257,57 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {kennelsReceived && (
-                        <div ref={kennelsReceivedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={kennelsReceivedRef} className="z-10 w-52 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {kennelsReceivedOptions.map((option) => (
                               <li key={option} onClick={() => handleKennelsReceivedOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul> */}
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key={1}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="1"
+                                  type="checkbox"
+                                  checked={kennelSelection?.allSelected}
+                                  onChange={(e) => handleKennel("", e.target.checked, "allSelected")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                  Select All
+                                </label>
+                              </div>
+                            </li>
+                            <li key={2}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="2"
+                                  type="checkbox"
+                                  checked={kennelSelection?.clear}
+                                  onChange={(e) => handleKennel("", e.target.checked, "clear")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                  Clear All
+                                </label>
+                              </div>
+                            </li>
+                            {kennelListOptions?.map((option) => (
+                              <li key={option.year}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.year)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleKennel(option.year, e.target.checked, "normal")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.year)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.year}
+                                  </label>
+                                </div>
                               </li>
                             ))}
                           </ul>
@@ -4060,7 +4315,7 @@ const Pet: NextPage = () => {
                       )}
                     </div>
 
-                    <div className="pl-2 pt-5 text-base text-red-600">{kennelMessage(kennelList)}</div>
+                    {/* <div className="pl-2 pt-5 text-base text-red-600">{kennelMessage(kennelList)}</div> */}
                   </div>
 
                   {/*DATEPICKER*/}
@@ -4312,7 +4567,7 @@ const Pet: NextPage = () => {
                                   )}
                                   {showClinicMessage && isLast && (
                                     <React.Fragment>
-                                      <span className="ml-2 text-red-600">(Veterinary fees covered)</span>
+                                      <span className="ml-2 text-gray-200">(Veterinary fees covered)</span>
                                     </React.Fragment>
                                   )}
                                 </React.Fragment>
@@ -4330,9 +4585,10 @@ const Pet: NextPage = () => {
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Membership Type:</b> {membershipTypeOption === "Select one" ? user?.membership : membershipTypeOption}
-                        {membershipTypeOption && membershipMessage(membershipTypeOption) && (
+                        {/* {membershipTypeOption && membershipMessage(membershipTypeOption) && (
                           <div className="ml-3 text-red-600">({membershipMessage(membershipTypeOption)})</div>
-                        )}
+                        )} */}
+                        {membershipTypeOption !== "Non-card holder" && <div className="ml-3 text-red-600">{membershipStatus()}</div>}
                       </div>
 
                       <div className="mb-2 flex items-center">
@@ -4340,9 +4596,17 @@ const Pet: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
+                        <b className="mr-3">Veterinary Fees Covered?:</b> {VetFees()}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Qualifies For Kennel?:</b> {qualifiesForKennel()}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
                         <b className="mr-3">Kennels Received:</b> {kennelList.length} in Total{" "}
                         {kennelList.length > 0 && <>({kennelList.map((kennel, index) => (kennelList.length - 1 === index ? kennel : kennel + "; "))})</>}
-                        <div className="pl-3 text-base text-red-600">{kennelMessage(kennelList)}</div>
+                        {/* <div className="pl-3 text-base text-red-600">{kennelMessage(kennelList)}</div> */}
                       </div>
 
                       <div className="mb-2 flex items-start">

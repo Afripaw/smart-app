@@ -2,6 +2,11 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
+type Visits = {
+  date: Date;
+  species: string;
+};
+
 export const petClinicRouter = createTRPCRouter({
   create: publicProcedure
     .input(
@@ -287,6 +292,78 @@ export const petClinicRouter = createTRPCRouter({
     return {
       transformedData: transformedData,
       clinics: clinics,
+    };
+  }),
+
+  //GET CLINIC VISITS OF LAST 5 YEARS FOR DOGS AND CATS
+  getClinicVisits: protectedProcedure.query(async ({ ctx }) => {
+    const currentYear = new Date().getFullYear();
+    const clinicVisits: Record<number, number> = {};
+
+    const clinics = await ctx.db.petClinic.findMany({});
+
+    for (let year = currentYear - 4; year <= currentYear; year++) {
+      const clinicsInYear = clinics.filter((clinic) => clinic.date.getFullYear() === year);
+      clinicVisits[year] = clinicsInYear.length;
+    }
+
+    const transformedData = Object.entries(clinicVisits).map(([category, value]) => ({
+      category: Number(category),
+      value,
+    }));
+
+    return {
+      transformedData: transformedData,
+      clinicVisits: clinicVisits,
+    };
+  }),
+
+  getClinicVisitsBySpecies: protectedProcedure.query(async ({ ctx }) => {
+    const currentYear = new Date().getFullYear();
+
+    const clinicsVisited = await ctx.db.petClinic.findMany({
+      // where: {
+      //   date: {
+      //     gte: new Date(new Date().getFullYear() - 4),
+      //   },
+      // },
+      include: {
+        pet: {
+          include: {
+            pet: {
+              select: {
+                species: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const visits: Visits[] = clinicsVisited.map((clinic) => clinic.pet.map((pet) => ({ date: clinic.date, species: pet.pet.species }))).flat();
+    // Extract all the dogs and cats
+    const dogs = visits.filter((visit) => visit.species === "Dog");
+    const cats = visits.filter((visit) => visit.species === "Cat");
+
+    const clinicVisitsDogs = {
+      [currentYear - 4]: dogs.filter((pet) => pet.date.getFullYear() === currentYear - 4).length,
+      [currentYear - 3]: dogs.filter((pet) => pet.date.getFullYear() === currentYear - 3).length,
+      [currentYear - 2]: dogs.filter((pet) => pet.date.getFullYear() === currentYear - 2).length,
+      [currentYear - 1]: dogs.filter((pet) => pet.date.getFullYear() === currentYear - 1).length,
+      [currentYear]: dogs.filter((pet) => pet.date.getFullYear() === currentYear).length,
+    };
+
+    const clinicVisitsCats = {
+      [currentYear - 4]: cats.filter((pet) => pet.date.getFullYear() === currentYear - 4).length,
+      [currentYear - 3]: cats.filter((pet) => pet.date.getFullYear() === currentYear - 3).length,
+      [currentYear - 2]: cats.filter((pet) => pet.date.getFullYear() === currentYear - 2).length,
+      [currentYear - 1]: cats.filter((pet) => pet.date.getFullYear() === currentYear - 1).length,
+      [currentYear]: cats.filter((pet) => pet.date.getFullYear() === currentYear).length,
+    };
+
+    return {
+      data: dogs,
+      visits: { dogs: clinicVisitsDogs, cats: clinicVisitsCats },
     };
   }),
 

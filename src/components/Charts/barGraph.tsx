@@ -7,16 +7,19 @@ interface BarGraphProps {
 }
 
 const BarGraph: React.FC<BarGraphProps> = ({ type }) => {
-  if (type === "activePets") {
-    const activePets = api.petOwner.getActivePets.useQuery();
-    const response = activePets?.data ?? { dogs: {}, cats: {} };
+  if (type === "clinicsVisited") {
+    const activePets = api.petClinic.getClinicVisitsBySpecies.useQuery();
+    const visits_data = activePets?.data?.data;
+    const response = activePets?.data?.visits ?? { dogs: {}, cats: {} };
 
     // const transformedData = Object.entries(response).map(([category, value]) => ({
     //   category: String(category),
     //   value: value,
     // }));
 
-    console.log("dogs: ", response.dogs, "cats: ", response.cats);
+    console.log("Visits!!!: ", visits_data);
+
+    console.log("dogs!!: ", response.dogs, "cats!!: ", response.cats);
 
     const years = [...new Set([...Object.keys(response.dogs), ...Object.keys(response.cats)])];
 

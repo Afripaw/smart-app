@@ -30,30 +30,30 @@ const Dashboard: NextPage = () => {
         <div className="grid h-full grid-cols-3 grid-rows-3">
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="activeOwners" />
-            <div className="pl-14">
+            <div className="pl-12">
               <div>New Pet Owners per Greater Area (Last 5 Years)</div>
             </div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
-            <BarGraph type="activePets" />
-            <div className="pl-14">Active Pets (All Areas, Last 5 Years)</div>
+            <BarGraph type="clinicsVisited" />
+            <div className="pl-12">Clinic Visits by Pets (All Areas, Last 5 Years)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="activeVolunteers" />
-            <div className="pl-14">New Volunteers per Greater Area (Last 5 Years)</div>
+            <div className="pl-12">New Volunteers per Greater Area (Last 5 Years)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="kennels" />
-            <div className="pl-14">Kennels Provided per Greater Area (Last 5 Years)</div>
+            <div className="pl-12">Kennels Provided per Greater Area (Last 5 Years)</div>
           </div>
 
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <BarGraph type="sterilisedPets" />
-            <div className="pl-14">Pets Sterilised (All Areas, Last 5 Years)</div>
+            <div className="pl-12">Pets Sterilised (All Areas, Last 5 Years)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="clinics" />
-            <div className="pl-14">Pet Clinics Held per Greater Area (Last 5 Years)</div>
+            <div className="pl-12">Pet Clinics Held per Greater Area (Last 5 Years)</div>
           </div>
           <div className="flex flex-col items-center justify-center border border-gray-300">
             <PieGraph type="ClinicVisits" />

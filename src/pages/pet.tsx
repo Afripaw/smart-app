@@ -4223,6 +4223,14 @@ const Pet: NextPage = () => {
                       <div className=" flex">
                         Veterinary Fees Covered?:{" "}
                         {VetFees() === "No" ? <span className="pl-3 text-red-600">{VetFees()}</span> : <span className="pl-3 text-black">{VetFees()}</span>}
+                        {
+                          <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                            <Info size={24} className="block" />
+                            <span className="absolute left-[90%] top-[90%] hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              Veterinary fees are covered for active card holders only.
+                            </span>
+                          </div>
+                        }
                       </div>
                     </div>
                   </div>
@@ -4331,8 +4339,16 @@ const Pet: NextPage = () => {
                         {qualifiesForKennel() === "No" ? (
                           <span className="pl-3 text-red-600">{qualifiesForKennel()}</span>
                         ) : (
-                          <span className="pl-3 text-black">{VetFees()}</span>
+                          <span className="pl-3 text-black">{qualifiesForKennel()}</span>
                         )}
+                        {
+                          <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                            <Info size={24} className="block" />
+                            <span className="absolute left-[90%] top-[90%] hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              A kennel is earned if an active card holder has attended at least 9 out of any 12 consecutive pet clinics.
+                            </span>
+                          </div>
+                        }
                       </div>
                     </div>
                   </div>
@@ -4566,7 +4582,7 @@ const Pet: NextPage = () => {
                       </div>
                     )}
                   </div> */}
-                      <div className="mb-2 flex items-start gap-2">
+                      {/* <div className="mb-2 flex items-start gap-2">
                         <b className="mr-1">Clinics Attended:</b> <div className="min-w-[4rem]">{clinicList.length} in Total</div>
                         {clinicList.length > 0 && (
                           <div className={""}>
@@ -4594,6 +4610,16 @@ const Pet: NextPage = () => {
                             })}
                           </div>
                         )}
+                      </div> */}
+                      <div className="mb-2 flex items-start gap-2">
+                        <b className="mr-1">Clinics Attended:</b> <div className="min-w-[4rem]">{clinicList.length} in Total</div>
+                        {clinicList.length > 0 && (
+                          <div className="flex flex-col">
+                            {clinicList.map((clinic, index) => (
+                              <div key={index}>{clinic.date + " " + clinic.area}</div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       <div className="mb-2 flex items-center">
@@ -4613,6 +4639,15 @@ const Pet: NextPage = () => {
                           ) : (
                             <div className="ml-3 text-black">{membershipStatus()}</div>
                           ))}
+                        {membershipTypeOption !== "Non-card holder" && membershipStatus() !== "" && (
+                          <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                            <Info size={24} className="block" />
+                            <span className="absolute left-[90%] top-[90%] hidden w-[14rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              The status of a card holder lapses if the pet has not attended a pet clinic for 3 months in a row. A lapsed card holder can become
+                              active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="mb-2 flex items-center">
@@ -4622,11 +4657,27 @@ const Pet: NextPage = () => {
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Veterinary Fees Covered?:</b>{" "}
                         {VetFees() === "No" ? <span className=" text-red-600">{VetFees()}</span> : <span className=" text-black">{VetFees()}</span>}
+                        {
+                          <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                            <Info size={24} className="block" />
+                            <span className="absolute left-[90%] top-[90%] hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              Veterinary fees are covered for active card holders only.
+                            </span>
+                          </div>
+                        }
                       </div>
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Qualifies For Kennel?:</b>{" "}
                         {VetFees() === "No" ? <span className=" text-red-600">{VetFees()}</span> : <span className=" text-black">{VetFees()}</span>}
+                        {
+                          <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                            <Info size={24} className="block" />
+                            <span className="absolute left-[90%] top-[90%] hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                              A kennel is earned if an active card holder has attended at least 9 out of any 12 consecutive pet clinics.
+                            </span>
+                          </div>
+                        }
                       </div>
 
                       <div className="mb-2 flex items-center">

@@ -2,11 +2,11 @@ import React from "react";
 
 interface TreatmentButtonModalProps {
   isOpen: boolean;
-  Treatment: { id: number; category: string; type: string[] };
+  treatment: { id: number; category: string; type: string; date: string; comments: string };
   onClose: () => void;
 }
 
-const CreateButtonModal: React.FC<TreatmentButtonModalProps> = ({ isOpen, Treatment, onClose }) => {
+const CreateButtonModal: React.FC<TreatmentButtonModalProps> = ({ isOpen, treatment, onClose }) => {
   if (!isOpen) return null;
 
   return (
@@ -17,13 +17,19 @@ const CreateButtonModal: React.FC<TreatmentButtonModalProps> = ({ isOpen, Treatm
         </div>
         <div className="flex flex-col justify-start">
           <span>
-            Treatment ID: <span>{Treatment.id}</span>
+            Treatment ID: <span>{treatment.id}</span>
           </span>
           <span>
-            Treatment Category: <span>{Treatment.category}</span>
+            Category: <span>{treatment.category}</span>
           </span>
           <span>
-            Treatment Type: <span>{Treatment.type}</span>
+            Type: <span>{treatment.type}</span>
+          </span>
+          <span>
+            Date: <span>{treatment.date}</span>
+          </span>
+          <span>
+            Comments: <span>{treatment.comments}</span>
           </span>
         </div>
 

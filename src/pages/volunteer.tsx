@@ -2762,7 +2762,7 @@ const Volunteer: NextPage = () => {
                     <b className="mr-3">Status:</b> {statusOption}
                   </div>
 
-                  <div className="mb-2 flex items-center">
+                  {/* <div className="mb-2 flex items-center">
                     <b className="mr-3">Clinics Attended:</b> {clinicList.length} in Total{" "}
                     {clinicList.length > 0 && (
                       <>
@@ -2772,6 +2772,16 @@ const Volunteer: NextPage = () => {
                         )}
                         )
                       </>
+                    )}
+                  </div> */}
+                  <div className="mb-2 flex items-start gap-2">
+                    <b className="mr-1">Clinics Attended:</b> <div className="min-w-[4rem]">{clinicList.length} in Total</div>
+                    {clinicList.length > 0 && (
+                      <div className="flex flex-col">
+                        {clinicList.map((clinic, index) => (
+                          <div key={index}>{clinic.date + " " + clinic.area}</div>
+                        ))}
+                      </div>
                     )}
                   </div>
 

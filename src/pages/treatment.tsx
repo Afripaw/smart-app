@@ -9,6 +9,7 @@ import { useRouter } from "next/router";
 import Navbar from "../components/navbar";
 import CreateButtonModal from "../components/createButtonModal";
 import DeleteButtonModal from "~/components/deleteButtonModal";
+import TreatmentModal from "~/components/treatmentModal";
 import { areaOptions } from "~/components/GeoLocation/areaOptions";
 
 //Excel
@@ -39,6 +40,8 @@ const Treatment: NextPage = () => {
     id: number;
     type: string;
     category: string;
+    date: string;
+    comments: string;
   };
 
   const newTreatment = api.petTreatment.create.useMutation();
@@ -390,7 +393,14 @@ const Treatment: NextPage = () => {
       setGreaterArea(String(query?.split("&")[5]?.split("=")[1]?.replaceAll("+", " ")));
 
       setPreviousTreatments(
-        prevTreatments.data?.map((treatment) => ({ id: treatment.treatmentID ?? 0, type: treatment.type ?? "", category: treatment.category ?? "" })) ?? [],
+        prevTreatments.data?.map((treatment) => ({
+          id: treatment.treatmentID ?? 0,
+          type: treatment.type ?? "",
+          category: treatment.category ?? "",
+          date:
+            treatment.date.getDate().toString() ?? "" + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString() ?? "",
+          comments: treatment.comments ?? "",
+        })) ?? [],
       );
 
       console.log("Previous treatments: ", prevTreatments.data);
@@ -406,8 +416,20 @@ const Treatment: NextPage = () => {
   //fetch previous treatments
   useEffect(() => {
     void prevTreatments.refetch();
+    console.log(
+      "Treatment Dates!!!: ",
+      prevTreatments?.data?.map(
+        (treatment) => treatment.date.getDate.toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear.toString(),
+      ),
+    );
     setPreviousTreatments(
-      prevTreatments.data?.map((treatment) => ({ id: treatment.treatmentID ?? 0, type: treatment.type ?? "", category: treatment.category ?? "" })) ?? [],
+      prevTreatments.data?.map((treatment) => ({
+        id: treatment.treatmentID ?? 0,
+        type: treatment.type ?? "",
+        category: treatment.category ?? "",
+        date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+        comments: treatment.comments ?? "",
+      })) ?? [],
     );
   }, [petID, router.asPath, isCreate]);
 
@@ -759,6 +781,14 @@ const Treatment: NextPage = () => {
     setIsDeleteModalOpen(true);
   };
 
+  //TREATMENT MODAL
+  const [isTreatmentModalOpen, setIsTreatmentModalOpen] = useState(false);
+  const [treatmentModal, setTreatmentModal] = useState<previousTreatment>();
+  const handleTreatmentModal = (id: number, category: string, type: string, date: string, comments: string) => {
+    setTreatmentModal({ id: id, category: category, type: type, date: date, comments: comments });
+    setIsTreatmentModalOpen(true);
+  };
+
   //----------------------------------ORDER FIELDS----------------------------------
   const handleOrderFields = (field: string) => {
     setOrder(field);
@@ -904,6 +934,7 @@ const Treatment: NextPage = () => {
                 userName={deleteModalName}
                 onDelete={() => handleDeleteRow(deleteUserID)}
               />
+
               <div className="sticky top-20 z-20 bg-white py-4">
                 <div className="relative flex justify-center">
                   <button
@@ -1092,6 +1123,11 @@ const Treatment: NextPage = () => {
                   errorFields={errorFields}
                   onClose={() => setIsCreateButtonModalOpen(false)}
                 />
+                <TreatmentModal
+                  isOpen={isTreatmentModalOpen}
+                  onClose={() => setIsTreatmentModalOpen(false)}
+                  treatment={treatmentModal ?? { id: 0, category: "", type: "", date: "", comments: "" }}
+                />
               </div>
             </div>
             <div className="flex grow flex-col items-center">
@@ -1135,7 +1171,11 @@ const Treatment: NextPage = () => {
                       <div className="mr-3">Previous Treatments:</div>{" "}
                       <div className="flex flex-col items-start">
                         {previousTreatments.map((treatment, index) => (
-                          <button key={treatment?.id} className="underline hover:text-blue-400">
+                          <button
+                            key={treatment?.id}
+                            className="underline hover:text-blue-400"
+                            onClick={() => handleTreatmentModal(treatment?.id, treatment?.category, treatment?.type, treatment?.date, treatment?.comments)}
+                          >
                             {index + 1 + ". " + (treatment?.type ?? "") + " (" + (treatment?.category ?? "") + ")"}
                           </button>
                         ))}

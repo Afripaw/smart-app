@@ -356,6 +356,7 @@ export const volunteerRouter = createTRPCRouter({
             select: {
               area: true,
               date: true,
+              greaterArea: true,
             },
             // select: {
             //   date: true,
@@ -507,6 +508,7 @@ export const volunteerRouter = createTRPCRouter({
   //delete all volunteers
   deleteAllVolunteers: publicProcedure.mutation(async ({ ctx }) => {
     //delete all volunteer clinic
+    await ctx.db.greaterAreaOnVolunteer.deleteMany({});
     await ctx.db.volunteerOnPetClinic.deleteMany({});
     return await ctx.db.volunteer.deleteMany({});
   }),

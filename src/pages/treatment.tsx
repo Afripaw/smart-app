@@ -37,11 +37,21 @@ const Treatment: NextPage = () => {
 
   //TYPES
   type previousTreatment = {
-    id: number;
-    type: string;
+    treatmentID: number;
+    type: string[];
     category: string;
     date: string;
     comments: string;
+  };
+
+  type TypeOptions = {
+    type: string;
+    state: boolean;
+  };
+
+  type TypeSelect = {
+    allSelected: boolean;
+    clear: boolean;
   };
 
   const newTreatment = api.petTreatment.create.useMutation();
@@ -86,7 +96,7 @@ const Treatment: NextPage = () => {
         petID: number;
         category: string;
         date: Date; // Or string if you are handling date as a string before conversion.
-        type: string;
+        type: string[];
         comments: string;
       };
 
@@ -111,6 +121,8 @@ const Treatment: NextPage = () => {
         } else {
           obj.date = new Date(obj.date);
         }
+
+        obj.type = [String(obj.type)];
 
         //comments
         obj.comments = "";
@@ -264,7 +276,7 @@ const Treatment: NextPage = () => {
       ownerID: treatment?.pet?.ownerID ?? 0,
       surname: treatment?.pet?.owner?.surname ?? "",
       firstName: treatment?.pet?.owner?.firstName ?? "",
-      area: treatment?.pet?.owner?.addressArea.area ?? "",
+      area: treatment?.pet?.owner?.addressArea?.area ?? "",
       greaterArea: treatment?.pet?.owner?.addressGreaterArea.greaterArea ?? "",
       petName: treatment?.pet?.petName ?? "",
       petID: treatment?.pet?.petID ?? 0,
@@ -394,7 +406,7 @@ const Treatment: NextPage = () => {
 
       setPreviousTreatments(
         prevTreatments.data?.map((treatment) => ({
-          id: treatment.treatmentID ?? 0,
+          treatmentID: treatment.treatmentID ?? 0,
           type: treatment.type ?? "",
           category: treatment.category ?? "",
           date:
@@ -411,7 +423,19 @@ const Treatment: NextPage = () => {
       // console.log("Owner ID: ", ownerID);
       setIsCreate(true);
     }
+
+    if (router.asPath.includes("treatmentID")) {
+      setID(Number(router.asPath.split("=")[1]));
+
+      // setIsViewProfilePage(true);
+      void handleViewProfilePage(Number(router.asPath.split("=")[1]));
+    }
   }, [router.asPath]);
+
+  //get treatment by id. Specifically for the view profile page
+  const treatmentByID = router.asPath.includes("treatmentID")
+    ? api.petTreatment.getTreatmentByID.useQuery({ treatmentID: Number(router.asPath.split("=")[1]) })
+    : api.petTreatment.getTreatmentByID.useQuery({ treatmentID: 1000001 });
 
   //fetch previous treatments
   useEffect(() => {
@@ -424,7 +448,7 @@ const Treatment: NextPage = () => {
     );
     setPreviousTreatments(
       prevTreatments.data?.map((treatment) => ({
-        id: treatment.treatmentID ?? 0,
+        treatmentID: treatment.treatmentID ?? 0,
         type: treatment.type ?? "",
         category: treatment.category ?? "",
         date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
@@ -457,7 +481,7 @@ const Treatment: NextPage = () => {
   const btnCategoryRef = useRef<HTMLButtonElement>(null);
 
   const [isTypeOpen, setIsTypeOpen] = useState(false);
-  const [typeOption, setTypeOption] = useState("Select one");
+  const [typeOption, setTypeOption] = useState("Select here");
   const typeRef = useRef<HTMLDivElement>(null);
   const btnTypeRef = useRef<HTMLButtonElement>(null);
 
@@ -500,6 +524,52 @@ const Treatment: NextPage = () => {
   const handleTypeOption = (option: string) => {
     setTypeOption(option);
     setIsTypeOpen(false);
+  };
+
+  const [typeListOptions, setTypeListOptions] = useState<TypeOptions[]>([]);
+  const [typeSelection, setTypeSelection] = useState<TypeSelect>();
+  //to select multiple roles
+  const [typeList, setTypeList] = useState<string[]>([]);
+
+  const handleType = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setTypeOption("Select All");
+      setTypeSelection({ allSelected: state, clear: false });
+
+      const types = typeListOptions.map((type) => type.type);
+      setTypeList(types);
+      //order the roleList in alphabetical order
+      // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      setTypeListOptions(typeListOptions.map((type) => ({ ...type, state: true })));
+    } else if (selectionCategory === "clear") {
+      setTypeOption("Clear All");
+      setTypeSelection({ allSelected: false, clear: state });
+
+      setTypeList([]);
+      setTypeListOptions(typeListOptions.map((type) => ({ ...type, state: false })));
+    } else if (selectionCategory === "normal") {
+      setTypeOption(option);
+      setTypeSelection({ allSelected: false, clear: false });
+      if (state) {
+        if (!typeList.includes(String(option))) {
+          setTypeList([...typeList, String(option)]);
+          //order the roleList in alphabetical order
+          // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        }
+
+        setTypeListOptions(typeListOptions.map((type) => (type.type === option ? { ...type, state: true } : type)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedTypeList = typeList.filter((type) => type !== option);
+        setTypeList(updatedTypeList);
+        //order the roleList in alphabetical order
+        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        setTypeListOptions(typeListOptions.map((type) => (type.type === option ? { ...type, state: false } : type)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
   };
 
   useEffect(() => {
@@ -568,9 +638,17 @@ const Treatment: NextPage = () => {
       // Assuming userQuery.data contains the user object
       const userData = treatment;
       setCategoryOption(userData.category ?? "Select one");
-      setTypeOption(userData.type ?? "Select one");
+      setTypeList(userData.type ?? "Select here");
+      //setTypeOption(userData.type ?? "Select one");
       setStartingDate(userData?.date ?? new Date());
       setComments(userData.comments ?? "");
+
+      setTypeListOptions(
+        typeOptions.map((type) => ({
+          type: type,
+          state: userData.type.includes(type),
+        })),
+      );
 
       // //Make sure thet area and street options have a value
       // if (userData.area === "") {
@@ -590,9 +668,17 @@ const Treatment: NextPage = () => {
       // Assuming userQuery.data contains the user object
       const userData = treatment;
       setCategoryOption(userData.category ?? "Select one");
-      setTypeOption(userData.type ?? "");
+      //setTypeOption(userData.type ?? "");
+      setTypeList(userData.type ?? "Select here");
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
+
+      setTypeListOptions(
+        typeOptions.map((type) => ({
+          type: type,
+          state: userData.type.includes(type),
+        })),
+      );
 
       // if (userData.area === "") {
       //   console.log("Area option is select one");
@@ -606,13 +692,20 @@ const Treatment: NextPage = () => {
     await updateTreatment.mutateAsync({
       treatmentID: id,
       category: categoryOption === "Select one" ? "" : categoryOption,
-      type: typeOption === "Select one" ? "" : typeOption,
+      type: typeList,
       date: startingDate,
       comments: comments,
     });
     //After the newUser has been created make sure to set the fields back to empty
     setCategoryOption("Select one");
-    setTypeOption("Select one");
+    setTypeOption("Select here");
+    setTypeList([]);
+    setTypeListOptions(
+      typeOptions.map((type) => ({
+        type: type,
+        state: false,
+      })),
+    );
     setComments("");
     setIsUpdate(false);
     setIsCreate(false);
@@ -631,6 +724,41 @@ const Treatment: NextPage = () => {
     setIsCreate(true);
     setIsUpdate(false);
   };
+
+  //get previous treatments
+  // useEffect(() => {
+  //   void prevTreatments.refetch();
+  //   setPreviousTreatments(
+  //     prevTreatments.data?.map((treatment) => ({
+  //       id: treatment.treatmentID ?? 0,
+  //       type: treatment.type ?? "",
+  //       category: treatment.category ?? "",
+  //       date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+  //       comments: treatment.comments ?? "",
+  //     })) ?? [],
+  //   );
+  // }, [petID, router.asPath, isCreate]);
+
+  const [getPreviousTreatments, setGetPreviousTreatments] = useState(false);
+  const [numberOfFetches, setNumberOfFetches] = useState(0);
+  useEffect(() => {
+    if (router.asPath.includes("petID") && (petID === 0 || (previousTreatments.length === 0 && numberOfFetches < 400))) {
+      setNumberOfFetches(numberOfFetches + 1);
+      void prevTreatments.refetch();
+      getPreviousTreatments ? setGetPreviousTreatments(false) : setGetPreviousTreatments(true);
+    }
+
+    setPreviousTreatments(
+      prevTreatments.data?.map((treatment) => ({
+        treatmentID: treatment.treatmentID ?? 0,
+        type: treatment.type ?? "",
+        category: treatment.category ?? "",
+        date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+        comments: treatment.comments ?? "",
+      })) ?? [],
+    );
+  }, [getPreviousTreatments]);
+
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
@@ -639,7 +767,7 @@ const Treatment: NextPage = () => {
     const newUser_ = await newTreatment.mutateAsync({
       petID: petID === 0 ? Number(query?.split("&")[0]?.split("=")[1]) : petID,
       category: categoryOption === "Select one" ? "" : categoryOption,
-      type: typeOption === "Select one" ? "" : typeOption,
+      type: typeList.sort((a, b) => a.localeCompare(b)),
       date: startingDate,
       comments: comments,
     });
@@ -677,9 +805,16 @@ const Treatment: NextPage = () => {
       setArea(userData.area ?? "");
       setGreaterArea(userData.greaterArea ?? "");
       setCategoryOption(userData.category ?? "");
-      setTypeOption(userData.type ?? "");
+      setTypeList(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
+
+      setTypeListOptions(
+        typeOptions.map((type) => ({
+          type: type,
+          state: userData.type.includes(type),
+        })),
+      );
 
       // //Make sure thet area and street options have a value
       // if (userData.area === "Select one") {
@@ -701,7 +836,7 @@ const Treatment: NextPage = () => {
     if (treatment) {
       const userData = treatment;
       setCategoryOption(userData.category ?? "");
-      setTypeOption(userData.type ?? "");
+      setTypeList(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
       //console.log("Select one");
@@ -714,6 +849,35 @@ const Treatment: NextPage = () => {
       // }
     }
   }, [isViewProfilePage]); // Effect runs when userQuery.data changes
+
+  const [getTreatment, setGetTreatment] = useState(false);
+  useEffect(() => {
+    if (router.asPath.includes("treatmentID") && (categoryOption === "" || categoryOption === "Select one" || petID === 0)) {
+      void treatmentByID.refetch();
+      getTreatment ? setGetTreatment(false) : setGetTreatment(true);
+    }
+    //void owner?.refetch();
+
+    //const user = user_data?.find((user) => user.ownerID === id);
+    const user = treatmentByID?.data;
+    console.log("View profile page: ", JSON.stringify(user));
+    if (user) {
+      // Assuming userQuery.data contains the user object
+      const userData = user;
+      setPetID(petID === 0 ? userData.petID ?? 0 : petID);
+      setPetName(userData.pet.petName ?? "");
+      setFirstName(userData.pet.owner.firstName ?? "");
+      setSurname(userData.pet.owner.surname ?? "");
+      setOwnerID(userData.pet.ownerID ?? 0);
+      setArea(userData.pet.owner.addressArea?.area ?? "");
+      setGreaterArea(userData.pet.owner.addressGreaterArea.greaterArea ?? "");
+
+      setCategoryOption(userData.category ?? "");
+      setTypeList(userData.type ?? "");
+      setStartingDate(userData.date ?? new Date());
+      setComments(userData.comments ?? "");
+    }
+  }, [getTreatment]);
 
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {
@@ -735,7 +899,15 @@ const Treatment: NextPage = () => {
     setIsViewProfilePage(false);
     setID(0);
     setCategoryOption("Select one");
-    setTypeOption("Select one");
+    setTypeOption("Select here");
+    setTypeList([]);
+    setTypeListOptions(
+      typeOptions.map((type) => ({
+        type: type,
+        state: false,
+      })),
+    );
+    setTypeSelection({ allSelected: false, clear: false });
     setComments("");
   };
 
@@ -753,7 +925,8 @@ const Treatment: NextPage = () => {
 
     if (categoryOption === "Select one") mandatoryFields.push("Category");
     if (startingDate === null) mandatoryFields.push("Date");
-    if (typeOption === "Select one") mandatoryFields.push("Type");
+    //if (typeOption === "Select one") mandatoryFields.push("Type");
+    if (typeList.length === 0) mandatoryFields.push("Type");
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -784,8 +957,8 @@ const Treatment: NextPage = () => {
   //TREATMENT MODAL
   const [isTreatmentModalOpen, setIsTreatmentModalOpen] = useState(false);
   const [treatmentModal, setTreatmentModal] = useState<previousTreatment>();
-  const handleTreatmentModal = (id: number, category: string, type: string, date: string, comments: string) => {
-    setTreatmentModal({ id: id, category: category, type: type, date: date, comments: comments });
+  const handleTreatmentModal = (id: number, category: string, type: string[], date: string, comments: string) => {
+    setTreatmentModal({ treatmentID: id, category: category, type: type, date: date, comments: comments });
     setIsTreatmentModalOpen(true);
   };
 
@@ -1126,7 +1299,7 @@ const Treatment: NextPage = () => {
                 <TreatmentModal
                   isOpen={isTreatmentModalOpen}
                   onClose={() => setIsTreatmentModalOpen(false)}
-                  treatment={treatmentModal ?? { id: 0, category: "", type: "", date: "", comments: "" }}
+                  treatment={treatmentModal ?? { treatmentID: 0, category: "", type: [""], date: "", comments: "" }}
                 />
               </div>
             </div>
@@ -1170,13 +1343,15 @@ const Treatment: NextPage = () => {
                     <div className="mb-2 flex items-start py-2">
                       <div className="mr-3">Previous Treatments:</div>{" "}
                       <div className="flex flex-col items-start">
-                        {previousTreatments.map((treatment, index) => (
+                        {previousTreatments.map((treatment) => (
                           <button
-                            key={treatment?.id}
+                            key={treatment?.treatmentID}
                             className="underline hover:text-blue-400"
-                            onClick={() => handleTreatmentModal(treatment?.id, treatment?.category, treatment?.type, treatment?.date, treatment?.comments)}
+                            onClick={() =>
+                              handleTreatmentModal(treatment?.treatmentID, treatment?.category, treatment?.type, treatment?.date, treatment?.comments)
+                            }
                           >
-                            {index + 1 + ". " + (treatment?.type ?? "") + " (" + (treatment?.category ?? "") + ")"}
+                            {(treatment?.type[0] ?? "") + " (" + (treatment?.category ?? "") + ")"}
                           </button>
                         ))}
                       </div>
@@ -1222,7 +1397,7 @@ const Treatment: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Type: </div>
+                      <div className=" flex">Type(s): </div>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -1238,10 +1413,57 @@ const Treatment: NextPage = () => {
                       </button>
                       {isTypeOpen && (
                         <div ref={typeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {typeOptions.map((option) => (
                               <li key={option} onClick={() => handleTypeOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul> */}
+
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key={1}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="1"
+                                  type="checkbox"
+                                  checked={typeSelection?.allSelected}
+                                  onChange={(e) => handleType("", e.target.checked, "allSelected")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                  Select All
+                                </label>
+                              </div>
+                            </li>
+                            <li key={2}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="2"
+                                  type="checkbox"
+                                  checked={typeSelection?.clear}
+                                  onChange={(e) => handleType("", e.target.checked, "clear")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                  Clear All
+                                </label>
+                              </div>
+                            </li>
+                            {typeListOptions?.map((option) => (
+                              <li key={option.type}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.type)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleType(option.type, e.target.checked, "normal")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.type)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.type}
+                                  </label>
+                                </div>
                               </li>
                             ))}
                           </ul>
@@ -1280,96 +1502,109 @@ const Treatment: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="flex justify-center">
-              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
-                <div className=" text-2xl">Pet Treatment Profile</div>
+            {categoryOption === "" || categoryOption === "Select one" ? (
+              <div className=" sticky left-[28rem] top-96 z-30">
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
                 <div className="flex justify-center">
-                  <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back To Treatment Table
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div ref={printComponentRef} className="flex grow flex-col items-center">
-              <div className="print-div mt-6 flex w-[40%] max-w-xl flex-col items-start">
-                <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <div className="absolute left-0 top-0">
-                    <Image
-                      src={"/afripaw-logo.jpg"}
-                      alt="Afripaw Logo"
-                      className="m-3  aspect-square h-max rounded-full border-2 border-gray-200"
-                      width={80}
-                      height={80}
-                    />
-                  </div>
-
-                  <b className="mb-14 text-center text-xl">Pet Treatment Data</b>
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Treatment ID:</b> {id}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Date:</b>{" "}
-                    {startingDate?.getDate() + "/" + ((startingDate?.getMonth() ?? 0) + 1) + "/" + startingDate?.getFullYear() ?? ""}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet ID:</b> P{petID}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Pet Name:</b>{" "}
-                    <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(petID)}>
-                      {petName}
-                    </button>
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Owner:</b>{" "}
-                    <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(ownerID)}>
-                      {firstName} {surname} (N{ownerID})
-                    </button>
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterArea}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b> {area}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Category:</b> {categoryOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Type:</b> {typeOption}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Comments:</b> {comments}
+                  <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+                    <div className=" text-2xl">Pet Treatment Profile</div>
+                    <div className="flex justify-center">
+                      <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
+                        Back To Treatment Table
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div className="my-6 flex justify-center">
-              <button
-                className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
-                onClick={() => void handleUpdateFromViewProfilePage()}
-              >
-                Update profile
-              </button>
-              <ReactToPrint
-                trigger={() => (
-                  <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">
-                    <Printer size={24} className="mr-1" />
-                    Print
+                <div ref={printComponentRef} className="flex grow flex-col items-center">
+                  <div className="print-div mt-6 flex w-[40%] max-w-xl flex-col items-start">
+                    <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
+                      <div className="absolute left-0 top-0">
+                        <Image
+                          src={"/afripaw-logo.jpg"}
+                          alt="Afripaw Logo"
+                          className="m-3  aspect-square h-max rounded-full border-2 border-gray-200"
+                          width={80}
+                          height={80}
+                        />
+                      </div>
+
+                      <b className="mb-14 text-center text-xl">Pet Treatment Data</b>
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Treatment ID:</b> {id}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Date:</b>{" "}
+                        {startingDate?.getDate() + "/" + ((startingDate?.getMonth() ?? 0) + 1) + "/" + startingDate?.getFullYear() ?? ""}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Pet ID:</b> P{petID}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Pet Name:</b>{" "}
+                        <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(petID)}>
+                          {petName}
+                        </button>
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Owner:</b>{" "}
+                        <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(ownerID)}>
+                          {firstName} {surname} (N{ownerID})
+                        </button>
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Greater Area:</b> {greaterArea}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Area:</b> {area}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Category:</b> {categoryOption}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Type(s):</b> {typeList.join("; ")}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Comments:</b> {comments}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="my-6 flex justify-center">
+                  <button
+                    className="mr-4 flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white"
+                    onClick={() => void handleUpdateFromViewProfilePage()}
+                  >
+                    Update profile
                   </button>
-                )}
-                content={() => printComponentRef.current}
-              />
-            </div>
+                  <ReactToPrint
+                    trigger={() => (
+                      <button className="flex w-24 items-center justify-center rounded-lg bg-main-orange p-3 text-white">
+                        <Printer size={24} className="mr-1" />
+                        Print
+                      </button>
+                    )}
+                    content={() => printComponentRef.current}
+                  />
+                </div>
+              </>
+            )}
           </>
         )}
       </main>

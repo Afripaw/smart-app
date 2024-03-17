@@ -898,7 +898,7 @@ const Volunteer: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area.area,
+          area: clinic.clinic.greaterArea.greaterArea,
         })) ?? [];
 
       const greaterAreaData = user?.greaterAreas;
@@ -923,7 +923,7 @@ const Volunteer: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
-      setRoleList(userData.role ?? "Select one");
+      setRoleList(userData.role ?? "Select here");
       setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
 
@@ -948,7 +948,7 @@ const Volunteer: NextPage = () => {
         clinicsAttendedOptions.map((clinic) => ({
           id: clinic.clinicID,
           date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
-          area: clinic.area.area,
+          area: clinic.greaterArea.greaterArea,
           state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
         })),
       );
@@ -976,7 +976,7 @@ const Volunteer: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area.area,
+          area: clinic.clinic.greaterArea.greaterArea,
         })) ?? [];
 
       const greaterAreaData = user?.greaterAreas;
@@ -1044,7 +1044,7 @@ const Volunteer: NextPage = () => {
         clinicsAttendedOptions.map((clinic) => ({
           id: clinic.clinicID,
           date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
-          area: clinic.area.area,
+          area: clinic.greaterArea.greaterArea,
           state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
         })),
       );
@@ -1053,7 +1053,7 @@ const Volunteer: NextPage = () => {
         clinicsAttendedOptions.map((clinic) => ({
           id: clinic.clinicID,
           date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
-          area: clinic.area.area,
+          area: clinic.area?.area ?? "",
           state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
         })),
       );
@@ -1174,7 +1174,7 @@ const Volunteer: NextPage = () => {
       clinicsAttendedOptions.map((clinic) => ({
         id: clinic.clinicID,
         date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
-        area: clinic.area.area,
+        area: clinic.greaterArea.greaterArea,
         state: false,
       })),
     );
@@ -1290,7 +1290,7 @@ const Volunteer: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area.area,
+          area: clinic.clinic.greaterArea.greaterArea,
         })) ?? [];
 
       const greaterAreaData = user?.greaterAreas;
@@ -1343,7 +1343,7 @@ const Volunteer: NextPage = () => {
         clinicsAttendedOptions.map((clinic) => ({
           id: clinic.clinicID,
           date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
-          area: clinic.area.area,
+          area: clinic.greaterArea.greaterArea,
           state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
         })),
       );
@@ -1372,7 +1372,7 @@ const Volunteer: NextPage = () => {
             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
             "/" +
             clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.area.area,
+          area: clinic.clinic.greaterArea.greaterArea,
         })) ?? [];
 
       const greaterAreaData = user?.greaterAreas;
@@ -1450,7 +1450,7 @@ const Volunteer: NextPage = () => {
       clinicsAttendedOptions.map((clinic) => ({
         id: clinic.clinicID,
         date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
-        area: clinic.area.area,
+        area: clinic.greaterArea.greaterArea,
         state: false,
       })),
     );
@@ -1746,7 +1746,7 @@ const Volunteer: NextPage = () => {
           ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
           "/" +
           clinic.clinic.date.getFullYear().toString(),
-        area: clinic.clinic.area.area,
+        area: clinic.clinic.greaterArea.greaterArea,
       })) ?? [];
     setClinicList(clinicDates);
 
@@ -1766,7 +1766,7 @@ const Volunteer: NextPage = () => {
     //Search for the clinic's of today in the clinic list
     for (const clinic of option) {
       const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
-      clinicTodayList.push({ id: clinic?.clinicID ?? 0, date: date, area: clinic?.area.area ?? "" });
+      clinicTodayList.push({ id: clinic?.clinicID ?? 0, date: date, area: clinic?.greaterArea.greaterArea ?? "" });
 
       // //if (!clinicIDList.includes(clinic?.clinicID)) {
       // const date = clinic?.date.getDate().toString() + "/" + (clinic?.date.getMonth() + 1).toString() + "/" + clinic?.date.getFullYear().toString();
@@ -2704,7 +2704,7 @@ const Volunteer: NextPage = () => {
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b>{" "}
+                    <b className="mr-3">Greater Area(s):</b>{" "}
                     {greaterAreaList
                       .sort((a, b) => a.id - b.id)
                       .map((greaterArea) => greaterArea.area)
@@ -2747,7 +2747,7 @@ const Volunteer: NextPage = () => {
                   <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Role:</b>{" "}
+                    <b className="mr-3">Role(s):</b>{" "}
                     {roleList
                       .sort((a, b) => a.localeCompare(b))
                       .map((role) => role)
@@ -2775,12 +2775,14 @@ const Volunteer: NextPage = () => {
                     )}
                   </div> */}
                   <div className="mb-2 flex items-start gap-2">
-                    <b className="mr-1">Clinics Attended:</b> <div className="min-w-[4rem]">{clinicList.length} in Total</div>
+                    <b className="mr-1">Clinic(s) Attended:</b> <div className="min-w-[4rem]">{clinicList.length} in Total</div>
                     {clinicList.length > 0 && (
                       <div className="flex flex-col">
-                        {clinicList.map((clinic, index) => (
-                          <div key={index}>{clinic.date + " " + clinic.area}</div>
-                        ))}
+                        {clinicList
+                          .sort((a, b) => a.id - b.id)
+                          .map((clinic, index) => (
+                            <div key={index}>{clinic.date + " " + clinic.area}</div>
+                          ))}
                       </div>
                     )}
                   </div>

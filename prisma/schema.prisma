@@ -106,10 +106,10 @@ model petOwner {
     mobile                 String?
     addressGreaterArea     greaterArea @relation(fields: [addressGreaterAreaID], references: [greaterAreaID])
     addressGreaterAreaID   Int
-    addressArea            area        @relation(fields: [addressAreaID], references: [areaID])
-    addressAreaID          Int
-    addressStreet          street      @relation(fields: [addressStreetID], references: [streetID])
-    addressStreetID        Int
+    addressArea            area?       @relation(fields: [addressAreaID], references: [areaID])
+    addressAreaID          Int?
+    addressStreet          street?     @relation(fields: [addressStreetID], references: [streetID])
+    addressStreetID        Int?
     addressStreetCode      String?
     addressStreetNumber    String
     addressFreeForm        String?
@@ -165,9 +165,9 @@ model petClinic {
     date          DateTime               @default(now())
     greaterArea   greaterArea            @relation(fields: [greaterAreaID], references: [greaterAreaID])
     greaterAreaID Int
-    area          area                   @relation(fields: [areaID], references: [areaID])
-    areaID        Int
-    conditions    String
+    area          area?                  @relation(fields: [areaID], references: [areaID])
+    areaID        Int?
+    conditions    String[]
     comments      String?
     createdAt     DateTime               @default(now())
     updatedAt     DateTime               @updatedAt
@@ -199,7 +199,7 @@ model petTreatment {
     petID Int
 
     category  String
-    type      String
+    type      String[]
     comments  String?
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt

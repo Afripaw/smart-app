@@ -206,6 +206,11 @@ export const geographicRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.street.deleteMany({
+        where: {
+          areaID: input.areaID,
+        },
+      });
       return await ctx.db.area.delete({
         where: {
           areaID: input.areaID,
@@ -240,6 +245,13 @@ export const geographicRouter = createTRPCRouter({
       const greaterArea = await ctx.db.greaterArea.findUnique({
         where: {
           greaterAreaID: input.greaterAreaID,
+        },
+        include: {
+          area: {
+            include: {
+              street: true,
+            },
+          },
         },
       });
       return greaterArea;

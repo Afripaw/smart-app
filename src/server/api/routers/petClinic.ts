@@ -12,8 +12,8 @@ export const petClinicRouter = createTRPCRouter({
     .input(
       z.object({
         greaterAreaID: z.number(),
-        areaID: z.number(),
-        conditions: z.string(),
+        //areaID: z.number(),
+        conditions: z.string().array(),
         comments: z.string(),
         date: z.date(),
       }),
@@ -23,7 +23,7 @@ export const petClinicRouter = createTRPCRouter({
         data: {
           date: input.date,
           greaterArea: { connect: { greaterAreaID: input.greaterAreaID } },
-          area: { connect: { areaID: input.areaID } },
+          // area: { connect: { areaID: input.areaID } },
           conditions: input.conditions,
           comments: input.comments,
           createdAt: new Date(),
@@ -40,8 +40,8 @@ export const petClinicRouter = createTRPCRouter({
       z.object({
         clinicID: z.number(),
         greaterAreaID: z.number(),
-        areaID: z.number(),
-        conditions: z.string(),
+        // areaID: z.number(),
+        conditions: z.string().array(),
         comments: z.string(),
         date: z.date(),
       }),
@@ -53,7 +53,7 @@ export const petClinicRouter = createTRPCRouter({
         },
         data: {
           greaterArea: { connect: { greaterAreaID: input.greaterAreaID } },
-          area: { connect: { areaID: input.areaID } },
+          // area: { connect: { areaID: input.areaID } },
           conditions: input.conditions,
           comments: input.comments,
           date: input.date,
@@ -92,8 +92,8 @@ export const petClinicRouter = createTRPCRouter({
             OR: [
               { clinicID: { equals: Number(term.substring(1)) } },
               { greaterArea: { greaterArea: { contains: term } } },
-              { area: { area: { contains: term } } },
-              { conditions: { contains: term } },
+              // { area: { area: { contains: term } } },
+              { conditions: { hasSome: [term] } },
               { comments: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
@@ -101,8 +101,8 @@ export const petClinicRouter = createTRPCRouter({
           return {
             OR: [
               { greaterArea: { greaterArea: { contains: term } } },
-              { area: { area: { contains: term } } },
-              { conditions: { contains: term } },
+              // { area: { area: { contains: term } } },
+              { conditions: { hasSome: [term] } },
               { comments: { contains: term } },
               // dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
@@ -128,7 +128,7 @@ export const petClinicRouter = createTRPCRouter({
         cursor: input.cursor ? { clinicID: input.cursor } : undefined,
         include: {
           greaterArea: true,
-          area: true,
+          //area: true,
           pet: {
             include: {
               pet: {
@@ -219,7 +219,7 @@ export const petClinicRouter = createTRPCRouter({
         z.object({
           greaterAreaID: z.number(),
           areaID: z.number(),
-          conditions: z.string(),
+          conditions: z.string().array(),
           comments: z.string(),
           date: z.date(),
         }),
@@ -428,7 +428,7 @@ export const petClinicRouter = createTRPCRouter({
               { clinicID: { equals: Number(term.substring(1)) } },
               //  { greaterArea: { contains: term } },
               //  { area: { contains: term } },
-              { conditions: { contains: term } },
+              { conditions: { hasSome: [term] } },
               { comments: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
@@ -437,7 +437,7 @@ export const petClinicRouter = createTRPCRouter({
             OR: [
               // { greaterArea: { contains: term } },
               // { area: { contains: term } },
-              { conditions: { contains: term } },
+              { conditions: { hasSome: [term] } },
               { comments: { contains: term } },
               // dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions

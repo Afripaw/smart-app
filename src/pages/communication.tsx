@@ -527,12 +527,12 @@ const Communication: NextPage = () => {
 
   useEffect(() => {
     const areaIDList = areaList.map((area) => area.id);
-    setAreaListOptions(
-      areaOptions.map((area) => {
-        return { ...area, state: areaIDList.includes(area.id) };
-      }),
-    );
-  }, [areaOptions, greaterAreaList]);
+    const areas = areaOptions.map((area) => {
+      return { ...area, state: areaIDList.includes(area.id) };
+    });
+    setAreaListOptions(areas);
+  }, [greaterAreaList]);
+  //areaOptions
 
   const handleAreaOption = (option: SetStateAction<string>, id: number) => {
     setAreaOption(option);
@@ -1272,7 +1272,7 @@ const Communication: NextPage = () => {
                   {/*Make checkboxes to select a user */}
                   <div className="flex flex-col items-center">
                     <label>
-                      Select Recipients<span className="text-lg text-main-orange">*</span>
+                      Select Recipient(s)<span className="text-lg text-main-orange">*</span>
                     </label>
                     <div className="flex items-center justify-around">
                       <div className="flex flex-col">
@@ -1323,7 +1323,7 @@ const Communication: NextPage = () => {
                       <div className="flex items-start">
                         <div className="mr-3 flex items-center pt-4">
                           <label>
-                            Greater Area<span className="text-lg text-main-orange">*</span>:{" "}
+                            Greater Area(s)<span className="text-lg text-main-orange">*</span>:{" "}
                           </label>
                         </div>
 
@@ -1438,7 +1438,7 @@ const Communication: NextPage = () => {
                       <div className="flex items-start">
                         <div className="mr-3 flex items-center pt-4">
                           <label>
-                            Area<span className="text-lg text-main-orange">*</span>:{" "}
+                            Area(s)<span className="text-lg text-main-orange">*</span>:{" "}
                           </label>
                         </div>
 
@@ -1630,11 +1630,11 @@ const Communication: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Recipients:</b> {recipients.map((recipient) => recipient).join("; ")}
+                    <b className="mr-3">Recipient(s):</b> {recipients.map((recipient) => recipient).join("; ")}
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b>{" "}
+                    <b className="mr-3">Greater Area(s):</b>{" "}
                     {greaterAreaList
                       .sort((a, b) => a.id - b.id)
                       .map((greaterArea) => greaterArea.name)
@@ -1642,7 +1642,7 @@ const Communication: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Area:</b>{" "}
+                    <b className="mr-3">Area(s):</b>{" "}
                     {areaList
                       .sort((a, b) => a.id - b.id)
                       .map((area) => area.name)

@@ -653,11 +653,11 @@ const Owner: NextPage = () => {
 
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: userData.addressArea.area ?? "Select one", id: userData.addressAreaID ?? 0 };
+      const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
-      const street: Street = { street: userData.addressStreet.street ?? "Select one", id: userData.addressStreetID ?? 0 };
+      const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
 
@@ -745,11 +745,11 @@ const Owner: NextPage = () => {
 
         setGreaterAreaOption(greaterArea);
 
-        const area: Area = { area: userData.addressArea.area ?? "Select one", id: userData.addressAreaID ?? 0 };
+        const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
         setAreaOption(area);
 
-        const street: Street = { street: userData.addressStreet.street ?? "Select one", id: userData.addressStreetID ?? 0 };
+        const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
         setStreetOption(street);
 
@@ -767,11 +767,11 @@ const Owner: NextPage = () => {
 
         setGreaterAreaOption(greaterArea);
 
-        const area: Area = { area: userData.addressArea.area ?? "", id: userData.addressAreaID ?? 0 };
+        const area: Area = { area: userData.addressArea?.area ?? "", id: userData.addressAreaID ?? 0 };
 
         setAreaOption(area);
 
-        const street: Street = { street: userData.addressStreet.street ?? "", id: userData.addressStreetID ?? 0 };
+        const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
 
         setStreetOption(street);
 
@@ -1032,11 +1032,11 @@ const Owner: NextPage = () => {
 
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: userData.addressArea.area ?? "", id: userData.addressAreaID ?? 0 };
+      const area: Area = { area: userData.addressArea?.area ?? "", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
-      const street: Street = { street: userData.addressStreet.street ?? "", id: userData.addressStreetID ?? 0 };
+      const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
 
@@ -1063,11 +1063,11 @@ const Owner: NextPage = () => {
   //Go to update page from the view profile page
   const [getOwner, setGetOwner] = useState(false);
   useEffect(() => {
-    if (router.asPath.includes("ownerID") && firstName === "") {
+    if (router.asPath.includes("ownerID") && firstName === "" && email === "" && surname === "" && mobile === "") {
       void owner.refetch();
       getOwner ? setGetOwner(false) : setGetOwner(true);
     }
-    void owner?.refetch();
+    //void owner?.refetch();
 
     //const user = user_data?.find((user) => user.ownerID === id);
     const user = owner?.data;
@@ -1121,11 +1121,11 @@ const Owner: NextPage = () => {
 
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: userData.addressArea.area ?? "", id: userData.addressAreaID ?? 0 };
+      const area: Area = { area: userData.addressArea?.area ?? "", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
-      const street: Street = { street: userData.addressStreet.street ?? "", id: userData.addressStreetID ?? 0 };
+      const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
 
@@ -1501,8 +1501,8 @@ const Owner: NextPage = () => {
                     Upload
                     <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
                   </div> */}
-
-                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  {/* 
+                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
                 </div>
@@ -1533,7 +1533,7 @@ const Owner: NextPage = () => {
                         <th className="px-4 py-2">Area</th>
                         <th className="px-4 py-2">Address</th>
                         <th className="px-4 py-2">Status</th>
-                        <th className="px-4 py-2">Pets</th>
+                        <th className="px-4 py-2">Pet(s)</th>
                         <th className="w-[35px] px-4 py-2">
                           <span className="group relative inline-block">
                             <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
@@ -1559,9 +1559,9 @@ const Owner: NextPage = () => {
                             <td className="border px-2 py-1">{user.email}</td>
                             <td className="border px-2 py-1">{user.mobile}</td>
                             <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
-                            <td className="border px-2 py-1">{user.addressArea.area}</td>
+                            <td className="border px-2 py-1">{user.addressArea?.area ?? ""}</td>
                             <td className="border px-2 py-1">
-                              {user.addressStreetNumber} {user.addressStreet.street}
+                              {user.addressStreetNumber} {user.addressStreet?.street ?? ""}
                             </td>
                             <td className="border px-2 py-1">{user.status}</td>
                             <td className="border px-2 py-1">
@@ -1839,6 +1839,11 @@ const Owner: NextPage = () => {
                             {isStreetOpen && (
                               <div ref={streetRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                  <li>
+                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                      None of the above
+                                    </button>
+                                  </li>
                                   {streetOptions.map((option) => (
                                     <li key={option.streetID} onClick={() => handleStreetOption(option.street, option.streetID)}>
                                       <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
@@ -1981,13 +1986,15 @@ const Owner: NextPage = () => {
                           <div>{(pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}</div>
                         ))}
                       </div> */}
-                      <div className="flex flex-col">
+                      <div className="flex flex-col items-start">
                         {petsCombined.map((pet) => (
-                          <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
+                          // <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
+                          <div>
                             {pet?.breed === "Not Applicable"
                               ? (pet?.name ?? "") + "(Cat, P" + (pet?.id ?? "") + ")"
                               : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
-                          </button>
+                          </div>
+                          // </button>
                         ))}
                       </div>
                     </div>
@@ -2159,11 +2166,11 @@ const Owner: NextPage = () => {
                     {petsCombined.map((pet) => (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")").join("; ")}
                   </div> */}
                       <div className="mb-2 flex items-start">
-                        <b className="mr-3">Pets:</b>{" "}
+                        <b className="mr-3">Pet(s):</b>{" "}
                         <div className="flex flex-col items-start">
                           {petsCombined.map((pet) => (
                             <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
-                              {pet?.breed === "Not Applicable"
+                              {pet?.breed === "Not Applicable" || pet?.breed === "Not applicable"
                                 ? (pet?.name ?? "") + "(Cat, P" + (pet?.id ?? "") + ")"
                                 : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
                             </button>

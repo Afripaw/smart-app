@@ -242,7 +242,7 @@ export const petRouter = createTRPCRouter({
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
-              { petTreatments: { some: { type: { contains: term } } } },
+              { petTreatments: { some: { type: { hasSome: [term] } } } },
               // { vaccinatedStatus: { contains: term } },
               //{ treatments: { contains: term } },
               { membership: { contains: term } },
@@ -272,7 +272,9 @@ export const petRouter = createTRPCRouter({
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
-              { petTreatments: { some: { type: { contains: term } } } },
+              //{ petTreatments: { some: { type: { contains: term } } } },
+              // { petTreatments: { type: { hasSome: [term] } } },
+              { petTreatments: { some: { type: { hasSome: [term] } } } },
               // { vaccinatedStatus: { contains: term } },
               //{ treatments: { contains: term } },
               { membership: { contains: term } },
@@ -300,7 +302,7 @@ export const petRouter = createTRPCRouter({
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
-              { petTreatments: { some: { type: { contains: term } } } },
+              { petTreatments: { some: { type: { hasSome: [term] } } } },
               // { vaccinatedStatus: { contains: term } },
               //{ treatments: { contains: term } },
               { membership: { contains: term } },
@@ -371,6 +373,7 @@ export const petRouter = createTRPCRouter({
             select: {
               date: true,
               area: true,
+              greaterArea: true,
             },
           },
         },
@@ -530,7 +533,7 @@ export const petRouter = createTRPCRouter({
       if (input.petID === 0) {
         // Return some default response or error
         //throw new Error("Invalid pet ID");
-        return;
+        return {};
       }
 
       const pet = await ctx.db.pet.findUnique({
@@ -570,6 +573,7 @@ export const petRouter = createTRPCRouter({
             select: {
               date: true,
               area: true,
+              greaterArea: true,
             },
           },
         },
@@ -1127,7 +1131,7 @@ export const petRouter = createTRPCRouter({
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
-              { petTreatments: { some: { type: { contains: term } } } },
+              //{ petTreatments: { some: { type: { contains: term } } } },
               // { vaccinatedStatus: { contains: term } },
               //{ treatments: { contains: term } },
               { membership: { contains: term } },
@@ -1149,7 +1153,7 @@ export const petRouter = createTRPCRouter({
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
-              { petTreatments: { some: { type: { contains: term } } } },
+              //{ petTreatments: { some: { type: { contains: term } } } },
               // { vaccinatedStatus: { contains: term } },
               //{ treatments: { contains: term } },
               { membership: { contains: term } },

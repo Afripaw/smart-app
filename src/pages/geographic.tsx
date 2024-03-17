@@ -53,7 +53,12 @@ const Geographic: NextPage = () => {
   const [isLoadingGreaterArea, setIsLoadingGreaterArea] = useState(false);
   const [isLoadingArea, setIsLoadingArea] = useState(false);
   const [isLoadingStreet, setIsLoadingStreet] = useState(false);
+  const [isLoadingStreetDelete, setIsLoadingStreetDelete] = useState(false);
+  const [isLoadingAreaDelete, setIsLoadingAreaDelete] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  //variable to refresh the lists when data is changed
+  const [dataChanges, setDataChanges] = useState(false);
 
   const [order, setOrder] = useState("updatedAt");
 
@@ -159,6 +164,9 @@ const Geographic: NextPage = () => {
 
   const geographic = geographic_data?.find((geo) => geo.greaterAreaID === (greaterArea?.id ?? 0));
 
+  //-------------------------------GET GREATER AREA BY ID-----------------------------------------
+  // const getGreaterAreaByID = api.geographic.getGreaterAreaByID.useQuery({ greaterAreaID: greaterArea?.id ?? 0});
+
   //-------------------------------CREATE-----------------------------------------
   const newGreaterArea = api.geographic.createGreaterArea.useMutation();
   const newArea = api.geographic.createArea.useMutation();
@@ -182,31 +190,75 @@ const Geographic: NextPage = () => {
   };
 
   //AREA
+  const [areaDeselect, setAreaDeselect] = useState("No");
+  const areaRef = useRef<HTMLDivElement>(null);
+  const btnAreaRef = useRef<HTMLButtonElement>(null);
+
   const [showArea, setShowArea] = useState(false);
   const handleShowArea = () => {
     setShowArea(!showArea);
   };
 
   const handleAreaInput = (name: string) => {
-    setAreaOption({ id: 0, name: name, greaterAreaID: greaterArea?.id ?? 0, selected: true });
+    //setAreaOption({ id: 0, name: name, greaterAreaID: greaterArea?.id ?? 0, selected: true });
+    setAreaOption({ id: areaOption?.id ?? 0, name: name, greaterAreaID: areaOption?.greaterAreaID ?? 0, selected: areaOption?.selected ?? true });
+    console.log("Area option: ", areaOption);
   };
 
-  const handleSelectedArea = (id: number) => {
-    areaList.map((area) => {
-      if (area.id === id) {
-        area.selected = true;
-      } else {
+  const handleSelectedArea = (id: number, deselect: string) => {
+    if (deselect === "Yes") {
+      setAreaDeselect("Yes");
+      areaList.map((area) => {
         area.selected = false;
-      }
-    });
-    setAreaOption(areaList.find((area) => area.id === id));
+      });
+      streetList.map((street) => {
+        street.selected = false;
+      });
+      setAreaOption({ id: 0, name: "", greaterAreaID: 0, selected: false });
+      setStreetOption({ id: 0, name: "", areaID: 0, selected: false });
+      setStreetDeselect("Yes");
+      //setAreaList(areaList);
+      //setAreaOption({ id: 0, name: "", greaterAreaID: 0, selected: false });
+    } else if (deselect === "No") {
+      setAreaDeselect("No");
+      areaList.map((area) => {
+        if (area.id === id) {
+          area.selected = true;
+        } else {
+          area.selected = false;
+        }
+      });
+      setAreaOption(areaList.find((area) => area.id === id));
 
-    //set the street list to the selected area
-    const selectedStreet = streetList.filter((street) => street.areaID === id);
-    setSelectedStreetList(selectedStreet);
+      streetList.map((street) => {
+        street.selected = false;
+      });
+
+      setStreetOption({ id: 0, name: "", areaID: 0, selected: false });
+      setStreetDeselect("Yes");
+      //set the street list to the selected area
+      const selectedStreet = streetList.filter((street) => street.areaID === id);
+      setSelectedStreetList(selectedStreet);
+    }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (areaRef.current && !areaRef.current.contains(event.target as Node) && btnAreaRef.current && !btnAreaRef.current.contains(event.target as Node)) {
+        setShowArea(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   //STREET
+  const [streetDeselect, setStreetDeselect] = useState("No");
+  const streetRef = useRef<HTMLDivElement>(null);
+  const btnStreetRef = useRef<HTMLButtonElement>(null);
 
   //Show all streets
   const [showStreet, setShowStreet] = useState(false);
@@ -237,19 +289,48 @@ const Geographic: NextPage = () => {
 
   //street edit box
   const handleStreetInput = (name: string) => {
-    setStreetOption({ id: 0, name: name, areaID: areaOption?.id ?? 0, selected: true });
+    //setStreetOption({ id: 0, name: name, areaID: areaOption?.id ?? 0, selected: true });
+    setStreetOption({ id: streetOption?.id ?? 0, name: name, areaID: streetOption?.areaID ?? 0, selected: streetOption?.selected ?? true });
+    console.log("Street option: ", streetOption);
   };
 
-  const handleSelectedStreet = (id: number) => {
-    selectedStreetList.map((street) => {
-      if (street.id === id) {
-        street.selected = true;
-      } else {
+  const handleSelectedStreet = (id: number, deselect: string) => {
+    if (deselect === "Yes") {
+      setStreetDeselect("Yes");
+      streetList.map((street) => {
         street.selected = false;
-      }
-    });
-    setStreetOption(selectedStreetList.find((street) => street.id === id));
+      });
+      setStreetOption({ id: 0, name: "", areaID: 0, selected: false });
+    } else if (deselect === "No") {
+      setStreetDeselect("No");
+      selectedStreetList.map((street) => {
+        if (street.id === id) {
+          street.selected = true;
+        } else {
+          street.selected = false;
+        }
+      });
+      setStreetOption(selectedStreetList.find((street) => street.id === id));
+    }
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        streetRef.current &&
+        !streetRef.current.contains(event.target as Node) &&
+        btnStreetRef.current &&
+        !btnStreetRef.current.contains(event.target as Node)
+      ) {
+        setShowStreet(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   //------------------------------------CREATE, UPDATE, VIEW PROFILE OPERATIONS-------------------------------------
   //-------------------------------NEW USER PAGE-----------------------------------------
@@ -285,6 +366,10 @@ const Geographic: NextPage = () => {
       });
     }
 
+    dataChanges ? setDataChanges(false) : setDataChanges(true);
+
+    //getGreaterAreaByID.refetch();
+
     setIsLoadingGreaterArea(false);
   };
 
@@ -302,6 +387,11 @@ const Geographic: NextPage = () => {
     setAreaList([...areaList, area_]);
 
     setAreaOption({ id: 0, name: "", greaterAreaID: 0, selected: false });
+
+    console.log("AreaList!!!!!: ", areaList);
+
+    dataChanges ? setDataChanges(false) : setDataChanges(true);
+    //getGreaterAreaByID.refetch();
     setIsLoadingArea(false);
   };
 
@@ -319,6 +409,12 @@ const Geographic: NextPage = () => {
     setStreetList([...streetList, street_]);
 
     setStreetOption({ id: 0, name: "", areaID: 0, selected: false });
+
+    console.log("StreetList!!!!!: ", streetList);
+
+    dataChanges ? setDataChanges(false) : setDataChanges(true);
+
+    //getGreaterAreaByID.refetch();
 
     setIsLoadingStreet(false);
   };
@@ -360,6 +456,11 @@ const Geographic: NextPage = () => {
   };
 
   useEffect(() => {
+    void refetch();
+
+    const geographic_data = queryData?.pages.flatMap((page) => page.geographic_data);
+    const geographic = geographic_data?.find((geo) => geo.greaterAreaID === (greaterArea?.id ?? 0));
+
     if (geographic) {
       const userData = geographic;
 
@@ -385,10 +486,19 @@ const Geographic: NextPage = () => {
       setAreaList(areas);
       setStreetList(flatStreets);
     }
+
+    setAreaList(areaList.map((area) => ({ ...area, selected: areaOption?.id === area.id })));
+    setStreetList(streetList.map((street) => ({ ...street, selected: streetOption?.id === street.id })));
     // setIsCreate(false);
     // setIsUpdate(false);
     // setIsViewProfilePage(true);
-  }, [isUpdate]); // Effect runs when userQuery.data changes
+  }, [isUpdate, geographic, dataChanges]); // Effect runs when userQuery.data changes
+
+  // //when creating, updating or deleting the getGreaterAreaByID.refetch() is called
+  // useEffect(() => {
+  //   void getGreaterAreaByID.refetch();
+
+  // }, []);
 
   //-------------------------------UPDATE USER IN DATABASE-----------------------------------------
   //UPDATE GREATER AREA
@@ -401,6 +511,9 @@ const Geographic: NextPage = () => {
     });
 
     setGreaterArea({ id: area.greaterAreaID, name: area.greaterArea });
+
+    dataChanges ? setDataChanges(false) : setDataChanges(true);
+
     setIsLoadingGreaterArea(false);
   };
 
@@ -409,11 +522,28 @@ const Geographic: NextPage = () => {
     setIsLoadingArea(true);
     //get selected area
     const selectedArea = areaList.find((area) => area.selected === true);
+
+    const id = selectedArea?.id ?? 0;
+    const name = areaOption?.name ?? "";
+    const greaterAreaID = selectedArea?.greaterAreaID ?? 0;
     //Update area
     await updateArea.mutateAsync({
       areaID: selectedArea?.id ?? 0,
       area: areaOption?.name ?? "",
     });
+
+    if (updateArea.isSuccess) {
+      const newAreaList = areaList.map((area) => {
+        if (area.id === selectedArea?.id) {
+          return { id: id, name: name ?? "", greaterAreaID: greaterAreaID, selected: false };
+        } else {
+          return area;
+        }
+      });
+      setAreaList(newAreaList);
+    }
+
+    dataChanges ? setDataChanges(false) : setDataChanges(true);
 
     setIsLoadingArea(false);
   };
@@ -423,6 +553,10 @@ const Geographic: NextPage = () => {
     setIsLoadingStreet(true);
     //get selected street
     const selectedStreet = streetList.find((street) => street.selected === true);
+
+    const id = selectedStreet?.id ?? 0;
+    const name = streetOption?.name ?? "";
+    const areaID = selectedStreet?.areaID ?? 0;
     //Update street
     //console.log("Selected street: ", selectedStreet);
     await updateStreet.mutateAsync({
@@ -430,7 +564,53 @@ const Geographic: NextPage = () => {
       street: streetOption?.name ?? "",
     });
 
+    if (updateStreet.isSuccess) {
+      const newStreetList = streetList.map((street) => {
+        if (street.id === selectedStreet?.id) {
+          return { id: id, name: name ?? "", areaID: areaID, selected: false };
+        } else {
+          return street;
+        }
+      });
+      setStreetList(newStreetList);
+    }
+
+    dataChanges ? setDataChanges(false) : setDataChanges(true);
+
     setIsLoadingStreet(false);
+  };
+
+  //-------------------------------DELETE USER IN DATABASE-----------------------------------------
+  //delete area
+  const deleteArea = api.geographic.deleteArea.useMutation();
+  const handleDeleteArea = async (id: number) => {
+    if (id !== 0) {
+      setIsLoadingAreaDelete(true);
+      await deleteArea.mutateAsync({ areaID: id });
+      if (deleteArea.isSuccess) {
+        const newAreaList = areaList.filter((area) => area.id !== id);
+        setAreaList(newAreaList);
+      }
+
+      dataChanges ? setDataChanges(false) : setDataChanges(true);
+      setIsLoadingAreaDelete(false);
+    }
+  };
+
+  //delete street
+  const deleteStreet = api.geographic.deleteStreet.useMutation();
+  const handleDeleteStreet = async (id: number) => {
+    if (id !== 0) {
+      setIsLoadingStreetDelete(true);
+      await deleteStreet.mutateAsync({ streetID: id });
+      if (deleteStreet.isSuccess) {
+        const newStreetList = streetList.filter((street) => street.id !== id);
+        setStreetList(newStreetList);
+      }
+
+      dataChanges ? setDataChanges(false) : setDataChanges(true);
+      setIsLoadingStreetDelete(false);
+    }
   };
 
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
@@ -510,6 +690,37 @@ const Geographic: NextPage = () => {
     // setIsViewProfilePage(true);
   }, [isViewProfilePage]); // Effect runs when userQuery.data changes
 
+  // useEffect(() => {
+  //   void refetch();
+  //   const geographic_data = queryData?.pages.flatMap((page) => page.geographic_data);
+  //   const geographic = geographic_data?.find((geo) => geo.greaterAreaID === (greaterArea?.id ?? 0));
+
+  //   if (geographic) {
+  //     const userData = geographic;
+
+  //     const greaterAreas = { id: userData.greaterAreaID, name: userData.greaterArea };
+  //     // map((area) => {
+  //     //   return { id: area.greaterArea.greaterAreaID, name: area.greaterArea.greaterArea };
+  //     // });
+
+  //     const areas = userData.area.map((area) => {
+  //       return { id: area.areaID, name: area.area, greaterAreaID: area.greaterAreaID, selected: false };
+  //     });
+
+  //     const streets = userData.area.map((street) => {
+  //       return street.street.map((street) => {
+  //         return { id: street.streetID, name: street.street, areaID: street.areaID, selected: false };
+  //       });
+  //     });
+
+  //     //flatmap the streets
+  //     const flatStreets = streets.flat();
+
+  //     setGreaterArea(greaterAreas);
+  //     setAreaList(areas);
+  //     setStreetList(flatStreets);
+  //   }
+  // }, []);
   //------------------------------BACK BUTTON-----------------------------------------
   const handleBackButton = () => {
     setIsCreate(false);
@@ -521,6 +732,9 @@ const Geographic: NextPage = () => {
     setStreetList([]);
     setAreaOption({ id: 0, name: "", greaterAreaID: 0, selected: false });
     setStreetOption({ id: 0, name: "", areaID: 0, selected: false });
+
+    setAreaDeselect("No");
+    setStreetDeselect("No");
 
     setShowArea(false);
     setShowStreet(false);
@@ -567,9 +781,9 @@ const Geographic: NextPage = () => {
 
     if (mandatoryFields.length > 0 || errorFields.length > 0) {
       setIsCreateButtonModalOpen(true);
-    } else if (isUpdate) {
+    } else if (areaDeselect !== "Yes" && areaOption?.id !== 0) {
       void handleUpdateArea();
-    } else {
+    } else if (areaOption?.id === 0) {
       void handleNewArea();
     }
   };
@@ -589,9 +803,9 @@ const Geographic: NextPage = () => {
 
     if (mandatoryFields.length > 0 || errorFields.length > 0) {
       setIsCreateButtonModalOpen(true);
-    } else if (isUpdate) {
+    } else if (streetDeselect !== "Yes" && streetOption?.id !== 0) {
       void handleUpdateStreet();
-    } else {
+    } else if (streetOption?.id === 0) {
       void handleNewStreets();
     }
   };
@@ -969,28 +1183,43 @@ const Geographic: NextPage = () => {
 
                       <div className="flex flex-col items-center">
                         <button
+                          ref={btnAreaRef}
                           onClick={handleShowArea}
                           className="mb-2 mr-3 mt-5 inline-flex items-center rounded-lg bg-main-orange px-4 py-2 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         >
                           Show all areas
                         </button>
                         {showArea && (
-                          <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
-                            {areaList.map((area) => (
-                              <li key={area.id} className=" py-2">
+                          <div ref={areaRef}>
+                            <ul className="mr-3 flex w-full flex-col items-start rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                              <li key="0">
                                 <label className="flex justify-center">
                                   <input
                                     type="radio"
                                     name="area"
+                                    checked={areaDeselect === "Yes"}
                                     className="mr-1 checked:bg-main-orange"
-                                    value={areaOption?.name}
-                                    onChange={() => handleSelectedArea(area.id)}
+                                    onChange={() => handleSelectedArea(0, "Yes")}
                                   />
-                                  {area.name}
+                                  Deselect Area
                                 </label>
                               </li>
-                            ))}
-                          </ul>
+                              {areaList.map((area) => (
+                                <li key={area.id} className=" py-2">
+                                  <label className="flex justify-center">
+                                    <input
+                                      type="radio"
+                                      name="area"
+                                      checked={area.selected}
+                                      className="mr-1 checked:bg-main-orange"
+                                      onChange={() => handleSelectedArea(area.id, "No")}
+                                    />
+                                    {area.name}
+                                  </label>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                       </div>
 
@@ -1007,9 +1236,25 @@ const Geographic: NextPage = () => {
                               role="status"
                             />
                           ) : (
-                            <div>{isUpdate ? "Edit Area" : "Add Area to Greater Area"}</div>
+                            <div>{areaDeselect !== "Yes" && areaOption?.id !== 0 ? "Edit Area" : "Add Area to Greater Area"}</div>
                           )}
                         </button>
+
+                        {areaDeselect !== "Yes" && areaOption?.id !== 0 && (
+                          <button
+                            className="m-2 mt-5 rounded-lg bg-main-orange px-2 py-1 text-white hover:bg-orange-500"
+                            onClick={() => handleDeleteArea(areaOption?.id ?? 0)}
+                          >
+                            {isLoadingAreaDelete ? (
+                              <div
+                                className="mx-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                role="status"
+                              />
+                            ) : (
+                              <div>Delete Area</div>
+                            )}
+                          </button>
+                        )}
                       </div>
                       {/* <button
                       className="my-1 rounded-md bg-main-orange px-2 py-1 text-lg text-white hover:bg-orange-500"
@@ -1029,7 +1274,7 @@ const Geographic: NextPage = () => {
 
                   {/* Street */}
                   {areaOption?.id !== 0 && (
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-4">
                         <label>
                           Street<span className="text-lg text-main-orange">*</span>:{" "}
@@ -1038,48 +1283,82 @@ const Geographic: NextPage = () => {
 
                       <div className="flex flex-col items-center">
                         <button
+                          ref={btnStreetRef}
                           onClick={handleShowStreet}
                           className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                         >
                           Show all streets
                         </button>
                         {showStreet && (
-                          <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
-                            {selectedStreetList.map((street) => (
-                              <li key={street.id} className=" py-2">
+                          <div ref={streetRef}>
+                            <ul className="mr-3 flex w-full flex-col items-start rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                              <li key="0">
                                 <label className="flex justify-center">
                                   <input
                                     type="radio"
+                                    name="street"
                                     className="mr-1 checked:bg-main-orange"
-                                    name="area"
-                                    value={street.name}
-                                    onChange={() => handleSelectedStreet(street.id)}
+                                    checked={streetDeselect === "Yes"}
+                                    onChange={() => handleSelectedStreet(0, "Yes")}
                                   />
-                                  {street.name}
+                                  Deselect Street
                                 </label>
                               </li>
-                            ))}
-                          </ul>
+                              {selectedStreetList.map((street) => (
+                                <li key={street.id} className=" py-2">
+                                  <label className="flex justify-center">
+                                    <input
+                                      type="radio"
+                                      className="mr-1 checked:bg-main-orange"
+                                      name="street"
+                                      checked={street.selected}
+                                      onChange={() => handleSelectedStreet(street.id, "No")}
+                                    />
+                                    {street.name}
+                                  </label>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         )}
                       </div>
 
                       <div className="flex items-center">
                         <input
-                          className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                          className="m-2 mt-3 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                           onChange={(e) => handleStreetInput(e.target.value)}
                           value={streetOption?.name}
                         />
-                        <button className="m-2 rounded-lg bg-main-orange px-2 py-1 text-white hover:bg-orange-500" onClick={handleCreateStreetsButtonModal}>
+                        <button
+                          className="m-2 mt-3 rounded-lg bg-main-orange px-2 py-1 text-white hover:bg-orange-500"
+                          onClick={handleCreateStreetsButtonModal}
+                        >
                           {isLoadingStreet ? (
                             <div
                               className="mx-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                               role="status"
                             />
                           ) : (
-                            <div>{isUpdate ? "Edit Street" : "Add Street to Area"}</div>
+                            <div>{streetDeselect !== "Yes" && streetOption?.id !== 0 ? "Edit Street" : "Add Street to Area"}</div>
                           )}
                         </button>
                       </div>
+
+                      {streetDeselect !== "Yes" && streetOption?.id !== 0 && (
+                        <button
+                          className="m-2 mt-3 rounded-lg bg-main-orange px-2 py-1 text-white hover:bg-orange-500"
+                          onClick={() => handleDeleteStreet(streetOption?.id ?? 0)}
+                        >
+                          {isLoadingStreetDelete ? (
+                            <div
+                              className="mx-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                              role="status"
+                            />
+                          ) : (
+                            <div>Delete Street</div>
+                          )}
+                        </button>
+                      )}
 
                       {/* <button
                       className="my-1 rounded-md bg-main-orange px-2 py-1 text-lg text-white hover:bg-orange-500"

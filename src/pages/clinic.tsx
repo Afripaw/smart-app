@@ -47,6 +47,17 @@ const Clinic: NextPage = () => {
     area: string;
   };
 
+  //------------------------------CONDITIONS-----------------------------------------
+  type ConditionOptions = {
+    condition: string;
+    state: boolean;
+  };
+
+  type ConditionSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
+
   const newClinic = api.petClinic.create.useMutation();
   const updateClinic = api.petClinic.update.useMutation();
   const [isUpdate, setIsUpdate] = useState(false);
@@ -90,7 +101,7 @@ const Clinic: NextPage = () => {
         greaterArea: string;
         areaID: number;
         area: string;
-        conditions: string;
+        conditions: string[];
         comments: string;
         date: Date; // Or string if you are handling date as a string before conversion.
       };
@@ -98,6 +109,21 @@ const Clinic: NextPage = () => {
       //change the data so that it gives me the correct format for each column as in the petOwnerData type
       for (const obj of data as petClinicData[]) {
         console.log("Object: ", obj);
+
+        //obj.conditions = [obj.conditions];
+        // // Ensuring conditions is always an array of strings
+        // if (!Array.isArray(obj.conditions)) {
+        //   obj.conditions = [obj.conditions];
+        // } else {
+        //   // If conditions is already an array, ensure all its elements are strings
+        //   obj.conditions = obj.conditions.map((condition) => String(condition));
+        // }
+        // // Convert conditions to an array of strings if it's not already
+        // if (typeof obj.conditions === "string") {
+        //   obj.conditions = [obj.conditions];
+        // }
+        //obj.conditions = [String(obj.conditions)];
+        //obj.conditions = obj.conditions.;
 
         //Change the format of the date
         obj.date = new Date(obj.date);
@@ -117,6 +143,9 @@ const Clinic: NextPage = () => {
 
         //add a comments column
         obj.comments = "";
+
+        //make conditions an array
+        obj.conditions = [String(obj.conditions)];
       }
 
       //Turn the data into this type of object: {firstName: "John", surname: "Doe", email: "xxxxxxx@xxxxx", mobile: "0712345678", address: "1 Main Road, Observatory, Cape Town, 7925", comments: "None"}
@@ -300,7 +329,7 @@ const Clinic: NextPage = () => {
   const btnAreaRef = useRef<HTMLButtonElement>(null);
 
   const [conditions, setConditions] = useState(false);
-  const [conditionOption, setConditionOption] = useState("Select one");
+  const [conditionOption, setConditionOption] = useState("Select here");
   const conditionRef = useRef<HTMLDivElement>(null);
   const btnConditionRef = useRef<HTMLButtonElement>(null);
 
@@ -386,6 +415,53 @@ const Clinic: NextPage = () => {
     setConditions(false);
   };
 
+  //const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+  const [conditionListOptions, setConditionListOptions] = useState<ConditionOptions[]>([]);
+  const [conditionSelection, setConditionSelection] = useState<ConditionSelect>();
+  //to select multiple roles
+  const [conditionList, setConditionList] = useState<string[]>([]);
+
+  const handleCondition = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setConditionOption("Select All");
+      setConditionSelection({ allSelected: state, clear: false });
+
+      const conditions = conditionListOptions.map((condition) => condition.condition);
+      setConditionList(conditions);
+      //order the roleList in alphabetical order
+      // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      setConditionListOptions(conditionListOptions.map((condition) => ({ ...condition, state: true })));
+    } else if (selectionCategory === "clear") {
+      setConditionOption("Clear All");
+      setConditionSelection({ allSelected: false, clear: state });
+
+      setConditionList([]);
+      setConditionListOptions(conditionListOptions.map((condition) => ({ ...condition, state: false })));
+    } else if (selectionCategory === "normal") {
+      setConditionOption(option);
+      setConditionSelection({ allSelected: false, clear: false });
+      if (state) {
+        if (!conditionList.includes(String(option))) {
+          setConditionList([...conditionList, String(option)]);
+          //order the roleList in alphabetical order
+          // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        }
+
+        setConditionListOptions(conditionListOptions.map((condition) => (condition.condition === option ? { ...condition, state: true } : condition)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedConditionList = conditionList.filter((condition) => condition !== option);
+        setConditionList(updatedConditionList);
+        //order the roleList in alphabetical order
+        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        setConditionListOptions(conditionListOptions.map((condition) => (condition.condition === option ? { ...condition, state: false } : condition)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -448,15 +524,22 @@ const Clinic: NextPage = () => {
 
       setStartingDate(userData?.date ?? new Date());
       setComments(userData.comments ?? "");
-      setConditionOption(userData.conditions ?? "Select one");
+      setConditionList(userData.conditions ?? "Select here");
+
+      setConditionListOptions(
+        conditionOptions.map((condition) => ({
+          condition: condition,
+          state: userData.conditions.includes(condition),
+        })),
+      );
 
       setGreaterAreaID(userData.greaterAreaID ?? 0);
       setAreaID(userData.areaID ?? 0);
 
       //Make sure thet area and street options have a value
-      if (userData.area.area === "") {
-        setAreaOption({ area: "Select one", id: 0 });
-      }
+      // if (userData.area?.area === "") {
+      //   setAreaOption({ area: "Select one", id: 0 });
+      // }
 
       setDogVisits(userData.pet.filter((pet) => pet.pet.species === "Dog").length);
       setCatVisits(userData.pet.filter((pet) => pet.pet.species === "Cat").length);
@@ -486,15 +569,22 @@ const Clinic: NextPage = () => {
       }
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
-      setConditionOption(userData.conditions ?? "Select one");
+      setConditionList(userData.conditions ?? "Select here");
+
+      setConditionListOptions(
+        conditionOptions.map((condition) => ({
+          condition: condition,
+          state: userData.conditions.includes(condition),
+        })),
+      );
 
       setGreaterAreaID(userData.greaterAreaID ?? 0);
       setAreaID(userData.areaID ?? 0);
 
-      if (userData.area.area === "") {
-        console.log("Area option is select one");
-        setAreaOption({ area: "Select one", id: 0 });
-      }
+      // if ((userData.area?.area ?? "") === "") {
+      //   console.log("Area option is select one");
+      //   setAreaOption({ area: "Select one", id: 0 });
+      // }
 
       setDogVisits(userData.pet.filter((pet) => pet.pet.species === "Dog").length);
       setCatVisits(userData.pet.filter((pet) => pet.pet.species === "Cat").length);
@@ -506,16 +596,17 @@ const Clinic: NextPage = () => {
     await updateClinic.mutateAsync({
       clinicID: id,
       greaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
-      areaID: areaOption.area === "Select one" ? 0 : areaOption.id,
+      //areaID: areaOption.area === "Select one" ? 0 : areaOption.id,
       date: startingDate,
-      conditions: conditionOption === "Select one" ? "" : conditionOption,
+      conditions: conditionList.sort((a, b) => a.localeCompare(b)),
       comments: comments,
     });
     //After the newUser has been created make sure to set the fields back to empty
     setGreaterAreaOption({ area: "Select one", id: 0 });
     //setGreaterAreaID(0);
     setAreaOption({ area: "Select one", id: 0 });
-    setConditionOption("Select one");
+    setConditionOption("Select here");
+    setConditionList([]);
     //setGreaterAreaID(0);
     //setAreaID(0);
     setComments("");
@@ -532,7 +623,8 @@ const Clinic: NextPage = () => {
     setAreaOption({ area: "Select one", id: 0 });
     setStartingDate(new Date());
     setComments("");
-    setConditionOption("Select one");
+    setConditionOption("Select here");
+    setConditionListOptions(conditionOptions.map((condition) => ({ condition: condition, state: false })));
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setIsCreate(true);
     setIsUpdate(false);
@@ -543,10 +635,10 @@ const Clinic: NextPage = () => {
     setIsLoading(true);
     const newUser_ = await newClinic.mutateAsync({
       greaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
-      areaID: areaOption.area === "Select one" ? 0 : areaOption.id,
+      //  areaID: areaOption.area === "Select one" ? 0 : areaOption.id,
       date: startingDate,
       comments: comments,
-      conditions: conditionOption === "Select one" ? "" : conditionOption,
+      conditions: conditionList.sort((a, b) => a.localeCompare(b)),
     });
 
     setIsCreate(false);
@@ -590,7 +682,16 @@ const Clinic: NextPage = () => {
       }
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
-      setConditionOption(userData.conditions ?? "Select one");
+      //setConditionOption(userData.conditions ?? "Select here");
+
+      setConditionList(userData.conditions ?? "");
+
+      setConditionListOptions(
+        conditionOptions.map((condition) => ({
+          condition: condition,
+          state: userData.conditions.includes(condition),
+        })),
+      );
 
       setGreaterAreaID(userData.greaterAreaID ?? 0);
       setAreaID(userData.areaID ?? 0);
@@ -618,6 +719,8 @@ const Clinic: NextPage = () => {
       const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
 
       setAreaOption(area);
+
+      setConditionList(userData.conditions ?? "");
 
       //setGreaterAreaOption(userData.greaterArea.greaterArea ?? "");
       //setAreaOption(userData.area.area ?? "");
@@ -659,6 +762,10 @@ const Clinic: NextPage = () => {
     setGreaterAreaOption({ area: "Select one", id: 0 });
     setAreaOption({ area: "Select one", id: 0 });
     setComments("");
+    setConditionList([]);
+    setConditionOption("Select here");
+    setConditionListOptions(conditionOptions.map((condition) => ({ condition: condition, state: false })));
+    setConditionSelection({ allSelected: false, clear: false });
 
     setDogVisits(0);
     setCatVisits(0);
@@ -678,8 +785,8 @@ const Clinic: NextPage = () => {
 
     if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
     if (startingDate === null) mandatoryFields.push("Date");
-    if (areaOption.area === "Select one") mandatoryFields.push("Area");
-    if (conditionOption === "Select one") mandatoryFields.push("Condition");
+    //if (areaOption.area === "Select one") mandatoryFields.push("Area");
+    if (conditionOption === "Select here") mandatoryFields.push("Condition");
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -879,14 +986,15 @@ const Clinic: NextPage = () => {
 
                         <th className="px-4 py-2">Greater Area</th>
                         {/* <th className="px-4 py-2">Area</th> */}
-                        <th className="max-w-[60px] px-4 py-2">Dog visits</th>
-                        <th className="max-w-[60px] px-4 py-2">Cat visits</th>
+
                         <th className="min-w-[20rem] px-4 py-2">
                           Conditions
                           {/* <button className={`${order == "condition" ? "underline" : ""}`} onClick={() => handleOrderFields("condition")}>
                           Conditions
                         </button> */}
                         </th>
+                        <th className="max-w-[60px] px-4 py-2">Dog visits</th>
+                        <th className="max-w-[60px] px-4 py-2">Cat visits</th>
                         <th className="w-[35px] px-4 py-2">
                           <span className="group relative inline-block">
                             <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
@@ -916,13 +1024,14 @@ const Clinic: NextPage = () => {
                             </td>
                             <td className="border px-2 py-1">{user.greaterArea.greaterArea}</td>
                             {/* <td className="border px-2 py-1">{user.area.area}</td> */}
+
+                            <td className="border px-2 py-1">{user.conditions}</td>
                             <td className=" border px-2 py-1">
                               <div className="flex justify-center">{user.pet.filter((pet) => pet.pet.species === "Dog").length}</div>
                             </td>
                             <td className=" border px-2 py-1">
                               <div className="flex justify-center">{user.pet.filter((pet) => pet.pet.species === "Cat").length}</div>
                             </td>
-                            <td className="border px-2 py-1">{user.conditions}</td>
                             <td className=" border px-2 py-1">
                               {user?.updatedAt?.getDate()?.toString() ?? ""}
                               {"/"}
@@ -1068,15 +1177,6 @@ const Clinic: NextPage = () => {
                     </div>
                   </div>
 
-                  {/* Dog visits */}
-                  <div className="flex py-2">
-                    Dog Visits: <div className="px-3">{dogVisits}</div>
-                  </div>
-
-                  <div className="flex py-2">
-                    Cat Visits: <div className="px-3">{catVisits}</div>
-                  </div>
-
                   {/* <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
                       <div className=" flex">
@@ -1113,7 +1213,7 @@ const Clinic: NextPage = () => {
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
                       <label>
-                        Conditions<span className="text-lg text-main-orange">*</span>:{" "}
+                        Condition(s)<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                     </div>
                     <div className="flex flex-col">
@@ -1130,10 +1230,57 @@ const Clinic: NextPage = () => {
                       </button>
                       {conditions && (
                         <div ref={conditionRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {conditionOptions.map((option) => (
                               <li key={option} onClick={() => handleConditionOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul> */}
+
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key={1}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="1"
+                                  type="checkbox"
+                                  checked={conditionSelection?.allSelected}
+                                  onChange={(e) => handleCondition("", e.target.checked, "allSelected")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                  Select All
+                                </label>
+                              </div>
+                            </li>
+                            <li key={2}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="2"
+                                  type="checkbox"
+                                  checked={conditionSelection?.clear}
+                                  onChange={(e) => handleCondition("", e.target.checked, "clear")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                  Clear All
+                                </label>
+                              </div>
+                            </li>
+                            {conditionListOptions?.map((option) => (
+                              <li key={option.condition}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.condition)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleCondition(option.condition, e.target.checked, "normal")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.condition)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.condition}
+                                  </label>
+                                </div>
                               </li>
                             ))}
                           </ul>
@@ -1141,6 +1288,18 @@ const Clinic: NextPage = () => {
                       )}
                     </div>
                   </div>
+
+                  {isUpdate && (
+                    <>
+                      <div className="flex py-2">
+                        Dog Visits: <div className="px-3">{dogVisits}</div>
+                      </div>
+
+                      <div className="flex py-2">
+                        Cat Visits: <div className="px-3">{catVisits}</div>
+                      </div>
+                    </>
+                  )}
 
                   <div className="flex items-start">
                     <div className="w-32 pt-3">Comments: </div>
@@ -1211,20 +1370,24 @@ const Clinic: NextPage = () => {
 
                   {/* {user.pet.filter((pet) => pet.pet.species === "Dog").length} */}
 
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Dog visits:</b> {dogVisits}
-                  </div>
-
-                  <div className="mb-2 flex items-center">
-                    <b className="mr-3">Cat visits:</b> {catVisits}
-                  </div>
-
                   {/* <div className="mb-2 flex items-center">
                     <b className="mr-3">Area:</b> {areaOption.area}
                   </div> */}
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Conditions:</b> {conditionOption}
+                    <b className="mr-3">Condition(s):</b>{" "}
+                    {conditionList
+                      .sort((a, b) => a.localeCompare(b))
+                      .map((condition) => condition)
+                      .join("; ")}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Dog Visits:</b> {dogVisits}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">Cat Visits:</b> {catVisits}
                   </div>
 
                   <div className="mb-2 flex items-center">

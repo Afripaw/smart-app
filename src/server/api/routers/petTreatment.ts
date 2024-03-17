@@ -9,7 +9,7 @@ export const petTreatmentRouter = createTRPCRouter({
         petID: z.number(),
         category: z.string(),
         date: z.date(),
-        type: z.string(),
+        type: z.string().array(),
         comments: z.string(),
       }),
     )
@@ -36,7 +36,7 @@ export const petTreatmentRouter = createTRPCRouter({
       z.object({
         treatmentID: z.number(),
         category: z.string(),
-        type: z.string(),
+        type: z.string().array(),
         comments: z.string(),
         date: z.date(),
       }),
@@ -81,7 +81,7 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { treatmentID: { equals: Number(term.substring(1)) } },
               { category: { contains: term } },
-              { type: { contains: term } },
+              { type: { hasSome: [term] } },
               { comments: { contains: term } },
               //pet
               { pet: { petName: { contains: term } } },
@@ -99,7 +99,7 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { pet: { petID: { equals: Number(term.substring(1)) } } },
               { category: { contains: term } },
-              { type: { contains: term } },
+              { type: { hasSome: [term] } },
               { comments: { contains: term } },
               //pet
               { pet: { petName: { contains: term } } },
@@ -117,7 +117,7 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { ownerID: { equals: Number(term.substring(1)) } },
               { category: { contains: term } },
-              { type: { contains: term } },
+              { type: { hasSome: [term] } },
               { comments: { contains: term } },
               //pet
               { pet: { petName: { contains: term } } },
@@ -134,7 +134,7 @@ export const petTreatmentRouter = createTRPCRouter({
           return {
             OR: [
               { category: { contains: term } },
-              { type: { contains: term } },
+              { type: { hasSome: [term] } },
               { comments: { contains: term } },
               //pet
               { pet: { petName: { contains: term } } },
@@ -390,13 +390,25 @@ export const petTreatmentRouter = createTRPCRouter({
         where: {
           treatmentID: input.treatmentID,
         },
-        select: {
-          category: true,
-          type: true,
-          comments: true,
-          petID: true,
-          date: true,
-          treatmentID: true,
+        // select: {
+        //   category: true,
+        //   type: true,
+        //   comments: true,
+        //   petID: true,
+        //   date: true,
+        //   treatmentID: true,
+        // },
+        include: {
+          pet: {
+            include: {
+              owner: {
+                include: {
+                  addressArea: true,
+                  addressGreaterArea: true,
+                },
+              },
+            },
+          },
         },
       });
       return petTreatment;
@@ -436,7 +448,7 @@ export const petTreatmentRouter = createTRPCRouter({
           petID: z.number(),
           category: z.string(),
           date: z.date(),
-          type: z.string(),
+          type: z.string().array(),
           comments: z.string(),
         }),
       ),
@@ -498,13 +510,13 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { treatmentID: { equals: Number(term.substring(1)) } },
               { category: { contains: term } },
-              { type: { contains: term } },
+              { type: { hasSome: [term] } },
               { comments: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
-            OR: [{ category: { contains: term } }, { type: { contains: term } }, { comments: { contains: term } }].filter(
+            OR: [{ category: { contains: term } }, { type: { hasSome: [term] } }, { comments: { contains: term } }].filter(
               (condition) => Object.keys(condition).length > 0,
             ), // Filter out empty conditions
           };

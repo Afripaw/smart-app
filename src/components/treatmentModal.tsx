@@ -2,7 +2,7 @@ import React from "react";
 
 interface TreatmentButtonModalProps {
   isOpen: boolean;
-  treatment: { id: number; category: string; type: string; date: string; comments: string };
+  treatment: { treatmentID: number; category: string; type: string[]; date: string; comments: string };
   onClose: () => void;
 }
 
@@ -10,20 +10,20 @@ const CreateButtonModal: React.FC<TreatmentButtonModalProps> = ({ isOpen, treatm
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-20 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50 text-normal">
-      <div className=" flex flex-col rounded-lg bg-white p-4 shadow-md">
+    <div className="fixed inset-0 z-50 flex h-full w-full items-center justify-center overflow-y-auto bg-gray-600 bg-opacity-50 text-normal">
+      <div className=" flex w-[38%] flex-col rounded-lg bg-white p-4 shadow-md">
         <div className="flex justify-center">
           <h1 className="mb-3 text-3xl font-semibold">Treatment</h1>
         </div>
         <div className="flex flex-col justify-start">
           <span>
-            Treatment ID: <span>{treatment.id}</span>
+            Treatment ID: <span>{treatment.treatmentID}</span>
           </span>
           <span>
             Category: <span>{treatment.category}</span>
           </span>
           <span>
-            Type: <span>{treatment.type}</span>
+            Type: <span>{treatment.type.map((type) => type).join("; ")}</span>
           </span>
           <span>
             Date: <span>{treatment.date}</span>

@@ -113,20 +113,31 @@ export const UserRouter = createTRPCRouter({
                 greaterAreaID: input.addressGreaterAreaID,
               },
             },
+            // addressArea: input.addressAreaID
+            //   ? {
+            //       connect: {
+            //         areaID: input.addressAreaID,
+            //       },
+            //     }
+            //   : undefined,
             addressArea: input.addressAreaID
               ? {
                   connect: {
                     areaID: input.addressAreaID,
                   },
                 }
-              : undefined,
+              : {
+                  disconnect: true,
+                },
             addressStreet: input.addressStreetID
               ? {
                   connect: {
                     streetID: input.addressStreetID,
                   },
                 }
-              : undefined,
+              : {
+                  disconnect: true,
+                },
             addressStreetCode: input.addressStreetCode,
             addressStreetNumber: input.addressStreetNumber,
             addressSuburb: input.addressSuburb,
@@ -163,14 +174,18 @@ export const UserRouter = createTRPCRouter({
                     areaID: input.addressAreaID,
                   },
                 }
-              : undefined,
+              : {
+                  disconnect: true,
+                },
             addressStreet: input.addressStreetID
               ? {
                   connect: {
                     streetID: input.addressStreetID,
                   },
                 }
-              : undefined,
+              : {
+                  disconnect: true,
+                },
             addressStreetCode: input.addressStreetCode,
             addressStreetNumber: input.addressStreetNumber,
             addressSuburb: input.addressSuburb,

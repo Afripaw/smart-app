@@ -42,16 +42,52 @@ const User: NextPage = () => {
     area: string;
   };
 
+  type GreaterAreaOptions = {
+    id: number;
+    area: string;
+    state: boolean;
+  };
+
   //---------------------------------AREA-----------------------------------------------
   type Area = {
     id: number;
     area: string;
   };
 
+  type AreaOptions = {
+    id: number;
+    area: string;
+    state: boolean;
+  };
+
   //---------------------------------STREET-----------------------------------------------
   type Street = {
     id: number;
     street: string;
+  };
+
+  type StreetOptions = {
+    id: number;
+    street: string;
+    state: boolean;
+  };
+
+  //---------------------------------PREFERRED COMMUNICATION-----------------------------------------------
+  type PreferredCommunication = {
+    communication: string;
+    state: boolean;
+  };
+
+  //---------------------------------ROLE-----------------------------------------------
+  type Role = {
+    role: string;
+    state: boolean;
+  };
+
+  //---------------------------------STATUS-----------------------------------------------
+  type Status = {
+    status: string;
+    state: boolean;
   };
 
   const newUser = api.user.create.useMutation();
@@ -370,6 +406,7 @@ const User: NextPage = () => {
   const btnStatusRef = useRef<HTMLButtonElement>(null);
 
   //GREATER AREA
+  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
   const handleToggleGreaterArea = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
   };
@@ -378,6 +415,28 @@ const User: NextPage = () => {
     const greaterArea: GreaterArea = { area: String(option), id: id };
     setGreaterAreaOption(greaterArea);
     setIsGreaterAreaOpen(false);
+  };
+
+  const [deselectGreaterArea, setDeselectGreaterArea] = useState("No");
+  const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+
+  useEffect(() => {
+    if (greaterAreaOptions.length > 0) {
+      setGreaterAreaListOptions(greaterAreaOptions.map((item) => ({ area: item.greaterArea, id: item.greaterAreaID, state: false })));
+    }
+  }, [isCreate]);
+
+  const handleGreaterArea = (id: number, area: SetStateAction<string>, deselect: string) => {
+    if (deselect === "Yes") {
+      setDeselectGreaterArea("Yes");
+      setGreaterAreaOption({ area: "Select one", id: 0 });
+      setGreaterAreaListOptions(greaterAreaListOptions.map((item) => ({ ...item, state: false })));
+    } else if (deselect === "No") {
+      setDeselectGreaterArea("No");
+      setGreaterAreaListOptions(greaterAreaListOptions.map((item) => (item.area === area ? { ...item, state: true } : { ...item, state: false })));
+      const greaterArea = { area: String(area), id: id };
+      setGreaterAreaOption(greaterArea);
+    }
   };
 
   useEffect(() => {
@@ -399,9 +458,10 @@ const User: NextPage = () => {
   }, []);
 
   //const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
-  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+  // const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
 
   //AREA
+  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
   const handleToggleArea = () => {
     setIsAreaOpen(!isAreaOpen);
     setStreetOption({ street: "Select one", id: 0 });
@@ -412,19 +472,33 @@ const User: NextPage = () => {
     const area: Area = { area: String(option), id: id };
     setAreaOption(area);
     setIsAreaOpen(false);
+  };
 
-    //Makes the options one word for the key of the areaStreetMapping
-    // if (option === "Coniston Park") option = "ConistonPark";
-    // if (option === "Grassy Park") option = "GrassyPark";
-    // if (option === "Lavendar Hill") option = "LavendarHill";
-    // if (option === "Costa da Gamma") option = "CostaDaGamma";
-    // if (option === "Marina Da Gamma") option = "MarinaDaGamma";
-    // if (option === "Montagu V") option = "MontaguV";
-    // if (option === "Overcome Heights") option = "OvercomeHeights";
-    // if (option === "Pelican Park") option = "PelicanPark";
-    // if (option === "Seekoei vlei") option = "Seekoeivlei";
-    // if (option === "St Ruth") option = "StRuth";
-    // setStreetOptions(areaStreetMapping[option] ?? []);
+  const [deselectArea, setDeselectArea] = useState("No");
+  const [areaListOptions, setAreaListOptions] = useState<AreaOptions[]>([]);
+
+  useEffect(() => {
+    if (areaOptions.length > 0) {
+      setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: areaOption.id === item.areaID ? true : false })));
+    }
+    if (greaterAreaOption.area === "Select one") {
+      setAreaListOptions([]);
+    }
+  }, [isCreate, areaOptions, greaterAreaOption]);
+
+  const handleArea = (id: number, area: SetStateAction<string>, deselect: string) => {
+    if (deselect === "Yes") {
+      setDeselectArea("Yes");
+      setAreaOption({ area: "Select one", id: 0 });
+      const areas = areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false }));
+      setAreaListOptions(areas);
+      //setAreaListOptions(areaListOptions.map((item) => ({ ...item, state: false })));
+    } else if (deselect === "No") {
+      setDeselectArea("No");
+      setAreaListOptions(areaListOptions.map((item) => (item.area === area ? { ...item, state: true } : { ...item, state: false })));
+      const area_ = { area: String(area), id: id };
+      setAreaOption(area_);
+    }
   };
 
   useEffect(() => {
@@ -440,9 +514,9 @@ const User: NextPage = () => {
     };
   }, []);
 
-  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
-
   //STREET
+  const streetOptions = api.geographic.getStreetsByAreaID.useQuery({ areaID: areaOption.id })?.data ?? [];
+
   const handleToggleStreet = () => {
     setIsStreetOpen(!isStreetOpen);
   };
@@ -451,6 +525,33 @@ const User: NextPage = () => {
     const street: Street = { street: String(option), id: id };
     setStreetOption(street);
     setIsStreetOpen(false);
+  };
+
+  const [deselectStreet, setDeselectStreet] = useState("No");
+  const [streetListOptions, setStreetListOptions] = useState<StreetOptions[]>([]);
+
+  useEffect(() => {
+    if (streetOptions.length > 0) {
+      setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: streetOption.id === item.streetID ? true : false })));
+    }
+    if (areaOption.area === "Select one") {
+      setStreetListOptions([]);
+    }
+  }, [isCreate, streetOptions, areaOption]);
+
+  const handleStreet = (id: number, street: SetStateAction<string>, deselect: string) => {
+    if (deselect === "Yes") {
+      setDeselectStreet("Yes");
+      setStreetOption({ street: "Select one", id: 0 });
+      const streets = streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false }));
+      setStreetListOptions(streets);
+      //setAreaListOptions(areaListOptions.map((item) => ({ ...item, state: false })));
+    } else if (deselect === "No") {
+      setDeselectStreet("No");
+      setStreetListOptions(streetListOptions.map((item) => (item.street === street ? { ...item, state: true } : { ...item, state: false })));
+      const street_ = { street: String(street), id: id };
+      setStreetOption(street_);
+    }
   };
 
   useEffect(() => {
@@ -471,9 +572,12 @@ const User: NextPage = () => {
     };
   }, []);
 
-  const streetOptions = api.geographic.getStreetsByAreaID.useQuery({ areaID: areaOption.id })?.data ?? [];
-
   //PREFERRED COMMUNICATION
+  const [deselectPreferredCommunication, setDeselectPreferredCommunication] = useState("No");
+  const [preferredCommunicationListOptions, setPreferredCommunicationListOptions] = useState<PreferredCommunication[]>([
+    { communication: "SMS", state: false },
+  ]);
+
   const handleTogglePreferredCommunication = () => {
     setPreferredCommunication(!preferredCommunication);
   };
@@ -481,6 +585,31 @@ const User: NextPage = () => {
   const handlePreferredCommunicationOption = (option: SetStateAction<string>) => {
     setPreferredCommunicationOption(option);
     setPreferredCommunication(false);
+  };
+
+  useEffect(() => {
+    if (email === "") {
+      setPreferredCommunicationListOptions([{ communication: "SMS", state: false }]);
+    } else if (email != "") {
+      setPreferredCommunicationListOptions([
+        { communication: "Email", state: false },
+        { communication: "SMS", state: false },
+      ]);
+    }
+  }, [email]);
+
+  const handlePreferredCommunication = (option: SetStateAction<string>, deselect: string) => {
+    if (deselect === "Yes") {
+      setDeselectPreferredCommunication("Yes");
+      setPreferredCommunicationOption("Select one");
+      setPreferredCommunicationListOptions(preferredCommunicationListOptions.map((item) => ({ ...item, state: false })));
+    } else if (deselect === "No") {
+      setDeselectPreferredCommunication("No");
+      setPreferredCommunicationListOptions(
+        preferredCommunicationListOptions.map((item) => (item.communication === option ? { ...item, state: true } : { ...item, state: false })),
+      );
+      setPreferredCommunicationOption(option);
+    }
   };
 
   useEffect(() => {
@@ -501,6 +630,7 @@ const User: NextPage = () => {
     };
   }, []);
 
+  //old code
   const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState(["SMS"]);
   useEffect(() => {
     if (email === "") {
@@ -518,6 +648,27 @@ const User: NextPage = () => {
   const handleRoleOption = (option: SetStateAction<string>) => {
     setRoleOption(option);
     setRole(false);
+  };
+
+  const [deselectRole, setDeselectRole] = useState("No");
+  const [roleListOptions, setRoleListOptions] = useState<Role[]>([
+    { role: "System Administrator", state: false },
+    { role: "Data Analyst", state: false },
+    { role: "Data Consumer", state: false },
+    { role: "Treatment Data Capturer", state: false },
+    { role: "General Data Capturer", state: false },
+  ]);
+
+  const handleRole = (option: SetStateAction<string>, deselect: string) => {
+    if (deselect === "Yes") {
+      setDeselectRole("Yes");
+      setRoleOption("Select one");
+      setRoleListOptions(roleListOptions.map((item) => ({ ...item, state: false })));
+    } else if (deselect === "No") {
+      setDeselectRole("No");
+      setRoleListOptions(roleListOptions.map((item) => (item.role === option ? { ...item, state: true } : { ...item, state: false })));
+      setRoleOption(option);
+    }
   };
 
   useEffect(() => {
@@ -543,6 +694,24 @@ const User: NextPage = () => {
   const handleStatusOption = (option: SetStateAction<string>) => {
     setStatusOption(option);
     setStatus(false);
+  };
+
+  const [deselectStatus, setDeselectStatus] = useState("No");
+  const [statusListOptions, setStatusListOptions] = useState<Status[]>([
+    { status: "Active", state: false },
+    { status: "Passive", state: false },
+  ]);
+
+  const handleStatus = (option: SetStateAction<string>, deselect: string) => {
+    if (deselect === "Yes") {
+      setDeselectStatus("Yes");
+      setStatusOption("Select one");
+      setStatusListOptions(statusListOptions.map((item) => ({ ...item, state: false })));
+    } else if (deselect === "No") {
+      setDeselectStatus("No");
+      setStatusListOptions(statusListOptions.map((item) => (item.status === option ? { ...item, state: true } : { ...item, state: false })));
+      setStatusOption(option);
+    }
   };
 
   useEffect(() => {
@@ -606,13 +775,58 @@ const User: NextPage = () => {
 
       setGreaterAreaOption(greaterArea);
 
+      const greaterAreas = greaterAreaOptions.map((item) => ({
+        area: item.greaterArea,
+        id: item.greaterAreaID,
+        state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
+      }));
+      setGreaterAreaListOptions(greaterAreas);
+
       const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
+      const areas = areaOptions.map((item) => ({
+        area: item.area,
+        id: item.areaID,
+        state: item.area === userData.addressArea?.area ? true : false,
+      }));
+      setAreaListOptions(areas);
+
       const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
+
+      const streets = streetOptions.map((item) => ({
+        street: item.street,
+        id: item.streetID,
+        state: item.street === userData.addressStreet?.street ? true : false,
+      }));
+      setStreetListOptions(streets);
+
+      if (userData.email === "") {
+        setPreferredCommunicationListOptions([{ communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false }]);
+      } else if (userData.email != "") {
+        setPreferredCommunicationListOptions([
+          { communication: "Email", state: userData.preferredCommunication === "Email" ? true : false },
+          { communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false },
+        ]);
+      }
+
+      setRoleListOptions(roleListOptions.map((item) => (item.role === userData.role ? { ...item, state: true } : { ...item, state: false })));
+
+      setStatusListOptions(statusListOptions.map((item) => (item.status === userData.status ? { ...item, state: true } : { ...item, state: false })));
+
+      setDeselectGreaterArea("No");
+      setDeselectArea("No");
+      setDeselectPreferredCommunication("No");
+      setDeselectStreet("No");
+      setDeselectRole("No");
+      setDeselectStatus("No");
+
+      // setPreferredCommunicationListOptions(
+      //   preferredCommunicationListOptions.map((item) => (item.communication === userData.preferredCommunication ? { ...item, state: "Yes" } : { ...item, state: "No" })),
+      // );
 
       //Make sure thet area and street options have a value
       if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
@@ -658,13 +872,51 @@ const User: NextPage = () => {
 
       setGreaterAreaOption(greaterArea);
 
+      const greaterAreas = greaterAreaOptions.map((item) => ({
+        area: item.greaterArea,
+        id: item.greaterAreaID,
+        state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
+      }));
+      setGreaterAreaListOptions(greaterAreas);
+
       const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
+      const areas = areaOptions.map((item) => ({
+        area: item.area,
+        id: item.areaID,
+        state: item.area === userData.addressArea?.area ? true : false,
+      }));
+      setAreaListOptions(areas);
+
       const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
+
+      const streets = streetOptions.map((item) => ({
+        street: item.street,
+        id: item.streetID,
+        state: item.street === userData.addressStreet?.street ? true : false,
+      }));
+      setStreetListOptions(streets);
+
+      if (userData.email === "") {
+        setPreferredCommunicationListOptions([{ communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false }]);
+      } else if (userData.email != "") {
+        setPreferredCommunicationListOptions([
+          { communication: "Email", state: userData.preferredCommunication === "Email" ? true : false },
+          { communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false },
+        ]);
+      }
+
+      setRoleListOptions(roleListOptions.map((item) => (item.role === userData.role ? { ...item, state: true } : { ...item, state: false })));
+
+      setStatusListOptions(statusListOptions.map((item) => (item.status === userData.status ? { ...item, state: true } : { ...item, state: false })));
+
+      // setPreferredCommunicationListOptions(
+      //   preferredCommunicationListOptions.map((item) => (item.communication === userData.preferredCommunication ? { ...item, state: "Yes" } : { ...item, state: "No" })),
+      // );
 
       //Make sure thet area and street options have a value
       if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
@@ -678,6 +930,7 @@ const User: NextPage = () => {
 
   const handleUpdateUser = async () => {
     setIsLoading(true);
+
     const user = await updateUser.mutateAsync({
       id: id,
       firstName: firstName,
@@ -757,7 +1010,19 @@ const User: NextPage = () => {
     setIsUpdate(false);
     setIsCreate(false);
     setIsUpdatePassword(false);
+    setPreferredCommunicationListOptions([{ communication: "SMS", state: false }]);
+    setGreaterAreaListOptions(greaterAreaOptions.map((item) => ({ area: item.greaterArea, id: item.greaterAreaID, state: false })));
+    setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
+    setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
+    setRoleListOptions(roleListOptions.map((item) => ({ role: item.role, state: false })));
+    setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
 
+    setDeselectStatus("No");
+    setDeselectArea("No");
+    setDeselectStreet("No");
+    setDeselectGreaterArea("No");
+    setDeselectPreferredCommunication("No");
+    setDeselectRole("No");
     setIsLoading(false);
   };
 
@@ -791,6 +1056,18 @@ const User: NextPage = () => {
     setIsCreate(true);
     setIsUpdate(false);
     setIsUpdatePassword(false);
+    setPreferredCommunicationListOptions([{ communication: "SMS", state: false }]);
+    setDeselectGreaterArea("No");
+    setDeselectPreferredCommunication("No");
+    setDeselectArea("No");
+    setDeselectStreet("No");
+    setDeselectRole("No");
+    setDeselectStatus("No");
+    setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
+    setRoleListOptions(roleListOptions.map((item) => ({ role: item.role, state: false })));
+    setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
+    setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
+    setGreaterAreaListOptions(greaterAreaOptions.map((item) => ({ area: item.greaterArea, id: item.greaterAreaID, state: false })));
   };
   //-------------------------------NEW USER-----------------------------------------
 
@@ -921,13 +1198,50 @@ const User: NextPage = () => {
 
       setGreaterAreaOption(greaterArea);
 
+      const greaterAreas = greaterAreaOptions.map((item) => ({
+        area: item.greaterArea,
+        id: item.greaterAreaID,
+        state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
+      }));
+      setGreaterAreaListOptions(greaterAreas);
+
       const area: Area = { area: userData.addressArea?.area ?? "", id: userData.addressAreaID ?? 0 };
 
       setAreaOption(area);
 
+      const areas = areaOptions.map((item) => ({
+        area: item.area,
+        id: item.areaID,
+        state: item.area === userData.addressArea?.area ? true : false,
+      }));
+      setAreaListOptions(areas);
+
       const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
+
+      const streets = streetOptions.map((item) => ({
+        street: item.street,
+        id: item.streetID,
+        state: item.street === userData.addressStreet?.street ? true : false,
+      }));
+      setStreetListOptions(streets);
+
+      if (userData.email === "") {
+        setPreferredCommunicationListOptions([{ communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false }]);
+      } else if (userData.email != "") {
+        setPreferredCommunicationListOptions([
+          { communication: "Email", state: userData.preferredCommunication === "Email" ? true : false },
+          { communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false },
+        ]);
+      }
+
+      setRoleListOptions(roleListOptions.map((item) => (item.role === userData.role ? { ...item, state: true } : { ...item, state: false })));
+
+      setStatusListOptions(statusListOptions.map((item) => (item.status === userData.status ? { ...item, state: true } : { ...item, state: false })));
+      // setPreferredCommunicationListOptions(
+      //   preferredCommunicationListOptions.map((item) => (item.communication === userData.preferredCommunication ? { ...item, state: "Yes" } : { ...item, state: "No" })),
+      // );
 
       //Make sure thet area and street options have a value
       // if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
@@ -975,31 +1289,89 @@ const User: NextPage = () => {
       console.log("Image: ", userData.image);
       console.log("Image: ", image);
 
+      // setPreferredCommunicationListOptions(
+      //   preferredCommunicationListOptions.map((item) => (item.communication === userData.preferredCommunication ? { ...item, state: "Yes" } : { ...item, state: "No" })),
+      // );
+
+      if (userData.email === "") {
+        setPreferredCommunicationListOptions([{ communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false }]);
+      } else if (userData.email != "") {
+        setPreferredCommunicationListOptions([
+          { communication: "Email", state: userData.preferredCommunication === "Email" ? true : false },
+          { communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false },
+        ]);
+      }
+
+      setRoleListOptions(roleListOptions.map((item) => (item.role === userData.role ? { ...item, state: true } : { ...item, state: false })));
+
+      setStatusListOptions(statusListOptions.map((item) => (item.status === userData.status ? { ...item, state: true } : { ...item, state: false })));
       if (isUpdate) {
         const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
 
         setGreaterAreaOption(greaterArea);
 
+        const greaterAreas = greaterAreaOptions.map((item) => ({
+          area: item.greaterArea,
+          id: item.greaterAreaID,
+          state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
+        }));
+        setGreaterAreaListOptions(greaterAreas);
+
         const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
         setAreaOption(area);
 
+        const areas = areaOptions.map((item) => ({
+          area: item.area,
+          id: item.areaID,
+          state: item.area === userData.addressArea?.area ? true : false,
+        }));
+        setAreaListOptions(areas);
+
         const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
         setStreetOption(street);
+
+        const streets = streetOptions.map((item) => ({
+          street: item.street,
+          id: item.streetID,
+          state: item.street === userData.addressStreet?.street ? true : false,
+        }));
+        setStreetListOptions(streets);
       }
       if (isViewProfilePage) {
         const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "", id: userData.addressGreaterAreaID ?? 0 };
 
         setGreaterAreaOption(greaterArea);
 
+        const greaterAreas = greaterAreaOptions.map((item) => ({
+          area: item.greaterArea,
+          id: item.greaterAreaID,
+          state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
+        }));
+        setGreaterAreaListOptions(greaterAreas);
+
         const area: Area = { area: userData.addressArea?.area ?? "", id: userData.addressAreaID ?? 0 };
 
         setAreaOption(area);
 
+        const areas = areaOptions.map((item) => ({
+          area: item.area,
+          id: item.areaID,
+          state: item.area === userData.addressArea?.area ? true : false,
+        }));
+        setAreaListOptions(areas);
+
         const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
 
         setStreetOption(street);
+
+        const streets = streetOptions.map((item) => ({
+          street: item.street,
+          id: item.streetID,
+          state: item.street === userData.addressStreet?.street ? true : false,
+        }));
+        setStreetListOptions(streets);
       }
 
       //console.log("Select one");
@@ -1077,6 +1449,19 @@ const User: NextPage = () => {
     setStatusOption("Select one");
     setComments("");
     setImage("");
+    setPreferredCommunicationListOptions([{ communication: "SMS", state: false }]);
+    setGreaterAreaListOptions(greaterAreaOptions.map((item) => ({ area: item.greaterArea, id: item.greaterAreaID, state: false })));
+    setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
+    setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
+    setRoleListOptions(roleListOptions.map((item) => ({ role: item.role, state: false })));
+    setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
+
+    setDeselectStatus("No");
+    setDeselectGreaterArea("No");
+    setDeselectPreferredCommunication("No");
+    setDeselectArea("No");
+    setDeselectStreet("No");
+    setDeselectRole("No");
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -1171,6 +1556,7 @@ const User: NextPage = () => {
     if (startingDate === null) mandatoryFields.push("Starting Date");
     if (password === "" && !isUpdate) mandatoryFields.push("Password");
     if (confirmPassword === "" && !isUpdate) mandatoryFields.push("Confirm Password");
+    if (preferredOption === "Email" && email === "") mandatoryFields.push("Email is preferred communication but is empty");
 
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
     //if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
@@ -1577,6 +1963,35 @@ const User: NextPage = () => {
                               </li>
                             ))}
                           </ul>
+
+                          {/* <ul className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key="0">
+                              <label className="flex">
+                                <input
+                                  type="radio"
+                                  name="preferredCommunication"
+                                  checked={deselectPreferredCommunication === "Yes"}
+                                  className="mr-1 checked:bg-main-orange"
+                                  onChange={() => handlePreferredCommunication("", "Yes")}
+                                />
+                                Deselect
+                              </label>
+                            </li>
+                            {preferredCommunicationListOptions.map((option) => (
+                              <li key={option.communication} className=" py-2">
+                                <label className="flex justify-center">
+                                  <input
+                                    type="radio"
+                                    name="preferredCommunication"
+                                    checked={option.state}
+                                    className="mr-1 checked:bg-main-orange"
+                                    onChange={() => handlePreferredCommunication(option.communication, "No")}
+                                  />
+                                  {option.communication}
+                                </label>
+                              </li>
+                            ))}
+                          </ul> */}
                         </div>
                       )}
                     </div>
@@ -1614,6 +2029,35 @@ const User: NextPage = () => {
                                 </li>
                               ))}
                             </ul>
+
+                            {/* <ul className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              <li key="0">
+                                <label className="flex">
+                                  <input
+                                    type="radio"
+                                    name="greaterArea"
+                                    checked={deselectGreaterArea === "Yes"}
+                                    className="mr-1 checked:bg-main-orange"
+                                    onChange={() => handleGreaterArea(0, "", "Yes")}
+                                  />
+                                  Deselect
+                                </label>
+                              </li>
+                              {greaterAreaListOptions.map((option) => (
+                                <li key={option.id} className=" py-2">
+                                  <label className="flex justify-center">
+                                    <input
+                                      type="radio"
+                                      name="greaterArea"
+                                      checked={option.state}
+                                      className="mr-1 checked:bg-main-orange"
+                                      onChange={() => handleGreaterArea(option.id, option.area, "No")}
+                                    />
+                                    {option.area}
+                                  </label>
+                                </li>
+                              ))}
+                            </ul> */}
                           </div>
                         )}
                       </div>
@@ -1639,10 +2083,41 @@ const User: NextPage = () => {
                             </button>
                             {isAreaOpen && (
                               <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                                <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                   {areaOptions.map((option) => (
                                     <li key={option.areaID} onClick={() => handleAreaOption(option.area, option.areaID)}>
                                       <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.area}</button>
+                                    </li>
+                                  ))}
+                                </ul> */}
+                                <ul
+                                  className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200"
+                                  aria-labelledby="dropdownHoverButton"
+                                >
+                                  <li key="0">
+                                    <label className="flex">
+                                      <input
+                                        type="radio"
+                                        name="area"
+                                        checked={deselectArea === "Yes"}
+                                        className="mr-1 checked:bg-main-orange"
+                                        onChange={() => handleArea(0, "", "Yes")}
+                                      />
+                                      Deselect
+                                    </label>
+                                  </li>
+                                  {areaListOptions.map((option) => (
+                                    <li key={option.id} className=" py-2">
+                                      <label className="flex justify-center">
+                                        <input
+                                          type="radio"
+                                          name="area"
+                                          checked={option.state}
+                                          className="mr-1 checked:bg-main-orange"
+                                          onChange={() => handleArea(option.id, option.area, "No")}
+                                        />
+                                        {option.area}
+                                      </label>
                                     </li>
                                   ))}
                                 </ul>
@@ -1669,12 +2144,43 @@ const User: NextPage = () => {
                             </button>
                             {isStreetOpen && (
                               <div ref={streetRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                                <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                   {streetOptions.map((option) => (
                                     <li key={option.streetID} onClick={() => handleStreetOption(option.street, option.streetID)}>
                                       <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                         {option.street}
                                       </button>
+                                    </li>
+                                  ))}
+                                </ul> */}
+                                <ul
+                                  className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200"
+                                  aria-labelledby="dropdownHoverButton"
+                                >
+                                  <li key="0">
+                                    <label className="flex">
+                                      <input
+                                        type="radio"
+                                        name="street"
+                                        checked={deselectStreet === "Yes"}
+                                        className="mr-1 checked:bg-main-orange"
+                                        onChange={() => handleStreet(0, "", "Yes")}
+                                      />
+                                      Deselect
+                                    </label>
+                                  </li>
+                                  {streetListOptions.map((option) => (
+                                    <li key={option.id} className=" py-2">
+                                      <label className="flex justify-center">
+                                        <input
+                                          type="radio"
+                                          name="street"
+                                          checked={option.state}
+                                          className="mr-1 checked:bg-main-orange"
+                                          onChange={() => handleStreet(option.id, option.street, "No")}
+                                        />
+                                        {option.street}
+                                      </label>
                                     </li>
                                   ))}
                                 </ul>
@@ -1763,6 +2269,35 @@ const User: NextPage = () => {
                               </li>
                             ))}
                           </ul>
+
+                          {/* <ul className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key="0">
+                              <label className="flex">
+                                <input
+                                  type="radio"
+                                  name="role"
+                                  checked={deselectRole === "Yes"}
+                                  className="mr-1 checked:bg-main-orange"
+                                  onChange={() => handleRole("", "Yes")}
+                                />
+                                Deselect
+                              </label>
+                            </li>
+                            {roleListOptions.map((option) => (
+                              <li key={option.role} className=" py-2">
+                                <label className="flex justify-center">
+                                  <input
+                                    type="radio"
+                                    name="role"
+                                    checked={option.state}
+                                    className="mr-1 checked:bg-main-orange"
+                                    onChange={() => handleRole(option.role, "No")}
+                                  />
+                                  {option.role}
+                                </label>
+                              </li>
+                            ))}
+                          </ul> */}
                         </div>
                       )}
                     </div>
@@ -1795,6 +2330,35 @@ const User: NextPage = () => {
                               </li>
                             ))}
                           </ul>
+
+                          {/* <ul className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key="0">
+                              <label className="flex">
+                                <input
+                                  type="radio"
+                                  name="status"
+                                  checked={deselectStatus === "Yes"}
+                                  className="mr-1 checked:bg-main-orange"
+                                  onChange={() => handleStatus("", "Yes")}
+                                />
+                                Deselect
+                              </label>
+                            </li>
+                            {statusListOptions.map((option) => (
+                              <li key={option.status} className=" py-2">
+                                <label className="flex justify-center">
+                                  <input
+                                    type="radio"
+                                    name="status"
+                                    checked={option.state}
+                                    className="mr-1 checked:bg-main-orange"
+                                    onChange={() => handleStatus(option.status, "No")}
+                                  />
+                                  {option.status}
+                                </label>
+                              </li>
+                            ))}
+                          </ul> */}
                         </div>
                       )}
                     </div>

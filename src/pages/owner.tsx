@@ -1305,8 +1305,8 @@ const Owner: NextPage = () => {
     if (surname === "") mandatoryFields.push("Surname");
     if (mobile === "") mandatoryFields.push("Mobile");
     if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
-    if (areaOption.area === "Select one") mandatoryFields.push("Area");
-    if (streetOption.street === "Select one") mandatoryFields.push("Street");
+    // if (areaOption.area === "Select one") mandatoryFields.push("Area");
+    // if (streetOption.street === "Select one") mandatoryFields.push("Street");
     if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
     if (statusOption === "Select one") mandatoryFields.push("Status");
     if (startingDate === null) mandatoryFields.push("Starting Date");
@@ -1788,9 +1788,7 @@ const Owner: NextPage = () => {
                       <div className="flex flex-col pr-2">
                         <div className="flex items-start">
                           <div className="mr-3 flex items-center pt-4">
-                            <label className="">
-                              Area<span className="text-lg text-main-orange">*</span>:{" "}
-                            </label>
+                            <label className="">Area: </label>
                           </div>
                           <div className="flex flex-col">
                             <button
@@ -1820,9 +1818,7 @@ const Owner: NextPage = () => {
 
                         <div className="flex items-start">
                           <div className="mr-3 flex items-center pt-4">
-                            <label className="">
-                              Street<span className="text-lg text-main-orange">*</span>:{" "}
-                            </label>
+                            <label className="">Street: </label>
                           </div>
                           <div className="flex flex-col">
                             <button

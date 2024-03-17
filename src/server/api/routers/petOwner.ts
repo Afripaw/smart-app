@@ -30,8 +30,22 @@ export const petOwnerRouter = createTRPCRouter({
           surname: input.surname,
           mobile: input.mobile,
           addressGreaterArea: { connect: { greaterAreaID: input.addressGreaterAreaID } },
-          addressArea: { connect: { areaID: input.addressAreaID } },
-          addressStreet: { connect: { streetID: input.addressStreetID } },
+          addressArea: input.addressAreaID
+            ? {
+                connect: {
+                  areaID: input.addressAreaID,
+                },
+              }
+            : undefined,
+          addressStreet: input.addressStreetID
+            ? {
+                connect: {
+                  streetID: input.addressStreetID,
+                },
+              }
+            : undefined,
+          //addressArea: { connect: { areaID: input.addressAreaID } },
+          //addressStreet: { connect: { streetID: input.addressStreetID } },
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
           addressFreeForm: input.addressFreeForm,
@@ -83,8 +97,22 @@ export const petOwnerRouter = createTRPCRouter({
           mobile: input.mobile,
           addressGreaterArea: { connect: { greaterAreaID: input.addressGreaterAreaID } },
           addressFreeForm: input.addressFreeForm,
-          addressArea: { connect: { areaID: input.addressAreaID } },
-          addressStreet: { connect: { streetID: input.addressStreetID } },
+          addressArea: input.addressAreaID
+            ? {
+                connect: {
+                  areaID: input.addressAreaID,
+                },
+              }
+            : undefined,
+          addressStreet: input.addressStreetID
+            ? {
+                connect: {
+                  streetID: input.addressStreetID,
+                },
+              }
+            : undefined,
+          //addressArea: { connect: { areaID: input.addressAreaID } },
+          //addressStreet: { connect: { streetID: input.addressStreetID } },
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
           preferredCommunication: input.preferredCommunication,

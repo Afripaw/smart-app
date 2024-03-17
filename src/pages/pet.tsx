@@ -2962,9 +2962,9 @@ const Pet: NextPage = () => {
     setKennelList([]);
     setKennelSelection({ allSelected: false, clear: false });
 
-    await router.push({
-      pathname: "/pet",
-    });
+    // await router.push({
+    //   pathname: "/pet",
+    // });
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------

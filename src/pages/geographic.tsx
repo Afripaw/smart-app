@@ -25,8 +25,10 @@ import * as FileSaver from "file-saver";
 import { Area } from "recharts";
 import { set } from "date-fns";
 import React from "react";
+import { useSession } from "next-auth/react";
 
 const Geographic: NextPage = () => {
+  useSession({ required: true });
   type GreaterArea = {
     id: number;
     name: string;

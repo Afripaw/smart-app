@@ -53,10 +53,22 @@ const Owner: NextPage = () => {
     area: string;
   };
 
+  type AreaOptions = {
+    id: number;
+    area: string;
+    state: boolean;
+  };
+
   //---------------------------------STREET-----------------------------------------------
   type Street = {
     id: number;
     street: string;
+  };
+
+  type StreetOptions = {
+    id: number;
+    street: string;
+    state: boolean;
   };
 
   //-----------------------------------TYPES FOR PET DATA-----------------------------------------
@@ -477,29 +489,44 @@ const Owner: NextPage = () => {
   const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
 
   //AREA
+  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
   const handleToggleArea = () => {
     setIsAreaOpen(!isAreaOpen);
     setStreetOption({ street: "Select one", id: 0 });
   };
+
+  // const [deselectArea, setDeselectArea] = useState("No");
+  // const [areaListOptions, setAreaListOptions] = useState<AreaOptions[]>([]);
+
+  // useEffect(() => {
+  //   if (areaOptions.length > 0) {
+  //     setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: areaOption.id === item.areaID ? true : false })));
+  //   }
+  //   if (greaterAreaOption.area === "Select one") {
+  //     setAreaListOptions([]);
+  //   }
+  // }, [isCreate, areaOptions, greaterAreaOption]);
+
+  // const handleArea = (id: number, area: SetStateAction<string>, deselect: string) => {
+  //   if (deselect === "Yes") {
+  //     setDeselectArea("Yes");
+  //     setAreaOption({ area: "Select one", id: 0 });
+  //     const areas = areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false }));
+  //     setAreaListOptions(areas);
+  //     //setAreaListOptions(areaListOptions.map((item) => ({ ...item, state: false })));
+  //   } else if (deselect === "No") {
+  //     setDeselectArea("No");
+  //     setAreaListOptions(areaListOptions.map((item) => (item.area === area ? { ...item, state: true } : { ...item, state: false })));
+  //     const area_ = { area: String(area), id: id };
+  //     setAreaOption(area_);
+  //   }
+  // };
 
   //SetStateAction<string>
   const handleAreaOption = (option: string, id: number) => {
     const area: Area = { area: String(option), id: id };
     setAreaOption(area);
     setIsAreaOpen(false);
-
-    //Makes the options one word for the key of the areaStreetMapping
-    // if (option === "Coniston Park") option = "ConistonPark";
-    // if (option === "Grassy Park") option = "GrassyPark";
-    // if (option === "Lavendar Hill") option = "LavendarHill";
-    // if (option === "Costa da Gamma") option = "CostaDaGamma";
-    // if (option === "Marina Da Gamma") option = "MarinaDaGamma";
-    // if (option === "Montagu V") option = "MontaguV";
-    // if (option === "Overcome Heights") option = "OvercomeHeights";
-    // if (option === "Pelican Park") option = "PelicanPark";
-    // if (option === "Seekoei vlei") option = "Seekoeivlei";
-    // if (option === "St Ruth") option = "StRuth";
-    // setStreetOptions(areaStreetMapping[option] ?? []);
   };
 
   useEffect(() => {
@@ -515,12 +542,38 @@ const Owner: NextPage = () => {
     };
   }, []);
 
-  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
-
-  //STREET
+  //
+  const streetOptions = api.geographic.getStreetsByAreaID.useQuery({ areaID: areaOption.id })?.data ?? [];
   const handleToggleStreet = () => {
     setIsStreetOpen(!isStreetOpen);
   };
+
+  // const [deselectStreet, setDeselectStreet] = useState("No");
+  // const [streetListOptions, setStreetListOptions] = useState<StreetOptions[]>([]);
+
+  // useEffect(() => {
+  //   if (streetOptions.length > 0) {
+  //     setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: streetOption.id === item.streetID ? true : false })));
+  //   }
+  //   if (areaOption.area === "Select one") {
+  //     setStreetListOptions([]);
+  //   }
+  // }, [isCreate, streetOptions, areaOption]);
+
+  // const handleStreet = (id: number, street: SetStateAction<string>, deselect: string) => {
+  //   if (deselect === "Yes") {
+  //     setDeselectStreet("Yes");
+  //     setStreetOption({ street: "Select one", id: 0 });
+  //     const streets = streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false }));
+  //     setStreetListOptions(streets);
+  //     //setAreaListOptions(areaListOptions.map((item) => ({ ...item, state: false })));
+  //   } else if (deselect === "No") {
+  //     setDeselectStreet("No");
+  //     setStreetListOptions(streetListOptions.map((item) => (item.street === street ? { ...item, state: true } : { ...item, state: false })));
+  //     const street_ = { street: String(street), id: id };
+  //     setStreetOption(street_);
+  //   }
+  // };
 
   const handleStreetOption = (option: string, id: number) => {
     const street: Street = { street: String(option), id: id };
@@ -545,8 +598,6 @@ const Owner: NextPage = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const streetOptions = api.geographic.getStreetsByAreaID.useQuery({ areaID: areaOption.id })?.data ?? [];
 
   //PREFERRED COMMUNICATION
   const handleTogglePreferredCommunication = () => {
@@ -657,9 +708,26 @@ const Owner: NextPage = () => {
 
       setAreaOption(area);
 
+      // const areas = areaOptions.map((item) => ({
+      //   area: item.area,
+      //   id: item.areaID,
+      //   state: item.area === userData.addressArea?.area ? true : false,
+      // }));
+      // setAreaListOptions(areas);
+
       const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
+
+      // const streets = streetOptions.map((item) => ({
+      //   street: item.street,
+      //   id: item.streetID,
+      //   state: item.street === userData.addressStreet?.street ? true : false,
+      // }));
+      // setStreetListOptions(streets);
+
+      // setDeselectArea("No");
+      // setDeselectStreet("No");
 
       //Make sure thet area and street options have a value
       if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
@@ -749,9 +817,23 @@ const Owner: NextPage = () => {
 
         setAreaOption(area);
 
+        // const areas = areaOptions.map((item) => ({
+        //   area: item.area,
+        //   id: item.areaID,
+        //   state: item.area === userData.addressArea?.area ? true : false,
+        // }));
+        // setAreaListOptions(areas);
+
         const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
         setStreetOption(street);
+
+        // const streets = streetOptions.map((item) => ({
+        //   street: item.street,
+        //   id: item.streetID,
+        //   state: item.street === userData.addressStreet?.street ? true : false,
+        // }));
+        // setStreetListOptions(streets);
 
         //Make sure thet area and street options have a value
         if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
@@ -771,9 +853,23 @@ const Owner: NextPage = () => {
 
         setAreaOption(area);
 
+        // const areas = areaOptions.map((item) => ({
+        //   area: item.area,
+        //   id: item.areaID,
+        //   state: item.area === userData.addressArea?.area ? true : false,
+        // }));
+        // setAreaListOptions(areas);
+
         const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
 
         setStreetOption(street);
+
+        // const streets = streetOptions.map((item) => ({
+        //   street: item.street,
+        //   id: item.streetID,
+        //   state: item.street === userData.addressStreet?.street ? true : false,
+        // }));
+        // setStreetListOptions(streets);
 
         //Make sure thet area and street options have a value
         if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
@@ -871,6 +967,12 @@ const Owner: NextPage = () => {
     setIsCreate(false);
     setPetsCombined([]);
 
+    // setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
+    // setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
+
+    // setDeselectArea("No");
+    // setDeselectStreet("No");
+
     setGreaterAreaID(0);
     setAreaID(0);
     setStreetID(0);
@@ -898,6 +1000,13 @@ const Owner: NextPage = () => {
     setAddressPostalCode("");
     setAddressFreeForm("");
     setPetsCombined([]);
+
+    // setDeselectArea("No");
+    // setDeselectStreet("No");
+
+    // setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
+    // setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
+
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setIsCreate(true);
     setIsUpdate(false);
@@ -1036,9 +1145,23 @@ const Owner: NextPage = () => {
 
       setAreaOption(area);
 
+      // const areas = areaOptions.map((item) => ({
+      //   area: item.area,
+      //   id: item.areaID,
+      //   state: item.area === userData.addressArea?.area ? true : false,
+      // }));
+      // setAreaListOptions(areas);
+
       const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
+
+      // const streets = streetOptions.map((item) => ({
+      //   street: item.street,
+      //   id: item.streetID,
+      //   state: item.street === userData.addressStreet?.street ? true : false,
+      // }));
+      // setStreetListOptions(streets);
 
       //Make sure thet area and street options have a value
       if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
@@ -1125,9 +1248,23 @@ const Owner: NextPage = () => {
 
       setAreaOption(area);
 
+      // const areas = areaOptions.map((item) => ({
+      //   area: item.area,
+      //   id: item.areaID,
+      //   state: item.area === userData.addressArea?.area ? true : false,
+      // }));
+      // setAreaListOptions(areas);
+
       const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
 
       setStreetOption(street);
+
+      // const streets = streetOptions.map((item) => ({
+      //   street: item.street,
+      //   id: item.streetID,
+      //   state: item.street === userData.addressStreet?.street ? true : false,
+      // }));
+      // setStreetListOptions(streets);
 
       //Make sure thet area and street options have a value
       if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
@@ -1249,6 +1386,11 @@ const Owner: NextPage = () => {
     setStatusOption("Select one");
     setComments("");
     setPetsCombined([]);
+
+    // setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
+    // setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
+    // setDeselectArea("No");
+    // setDeselectStreet("No");
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -1811,6 +1953,38 @@ const Owner: NextPage = () => {
                                     </li>
                                   ))}
                                 </ul>
+
+                                {/* <ul
+                                  className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200"
+                                  aria-labelledby="dropdownHoverButton"
+                                >
+                                  <li key="0">
+                                    <label className="flex">
+                                      <input
+                                        type="radio"
+                                        name="area"
+                                        checked={deselectArea === "Yes"}
+                                        className="mr-1 checked:bg-main-orange"
+                                        onChange={() => handleArea(0, "", "Yes")}
+                                      />
+                                      Deselect
+                                    </label>
+                                  </li>
+                                  {areaListOptions.map((option) => (
+                                    <li key={option.id} className=" py-2">
+                                      <label className="flex justify-center">
+                                        <input
+                                          type="radio"
+                                          name="area"
+                                          checked={option.state}
+                                          className="mr-1 checked:bg-main-orange"
+                                          onChange={() => handleArea(option.id, option.area, "No")}
+                                        />
+                                        {option.area}
+                                      </label>
+                                    </li>
+                                  ))}
+                                </ul> */}
                               </div>
                             )}
                           </div>
@@ -1848,6 +2022,38 @@ const Owner: NextPage = () => {
                                     </li>
                                   ))}
                                 </ul>
+
+                                {/* <ul
+                                  className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200"
+                                  aria-labelledby="dropdownHoverButton"
+                                >
+                                  <li key="0">
+                                    <label className="flex">
+                                      <input
+                                        type="radio"
+                                        name="street"
+                                        checked={deselectStreet === "Yes"}
+                                        className="mr-1 checked:bg-main-orange"
+                                        onChange={() => handleStreet(0, "", "Yes")}
+                                      />
+                                      Deselect
+                                    </label>
+                                  </li>
+                                  {streetListOptions.map((option) => (
+                                    <li key={option.id} className=" py-2">
+                                      <label className="flex justify-center">
+                                        <input
+                                          type="radio"
+                                          name="street"
+                                          checked={option.state}
+                                          className="mr-1 checked:bg-main-orange"
+                                          onChange={() => handleStreet(option.id, option.street, "No")}
+                                        />
+                                        {option.street}
+                                      </label>
+                                    </li>
+                                  ))}
+                                </ul> */}
                               </div>
                             )}
                           </div>

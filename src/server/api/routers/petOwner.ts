@@ -103,14 +103,18 @@ export const petOwnerRouter = createTRPCRouter({
                   areaID: input.addressAreaID,
                 },
               }
-            : undefined,
+            : {
+                disconnect: true,
+              },
           addressStreet: input.addressStreetID
             ? {
                 connect: {
                   streetID: input.addressStreetID,
                 },
               }
-            : undefined,
+            : {
+                disconnect: true,
+              },
           //addressArea: { connect: { areaID: input.addressAreaID } },
           //addressStreet: { connect: { streetID: input.addressStreetID } },
           addressStreetCode: input.addressStreetCode,

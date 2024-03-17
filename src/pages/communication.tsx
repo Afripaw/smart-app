@@ -36,7 +36,7 @@ import { set } from "date-fns";
 import { router } from "@trpc/server";
 
 const Communication: NextPage = () => {
-  //useSession({ required: true });
+  useSession({ required: true });
 
   //Types
   type Communication = {

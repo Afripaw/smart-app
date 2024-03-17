@@ -470,7 +470,8 @@ const Pet: NextPage = () => {
   //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order, clinicList, isDoneUploading]);
+  }, [isUpdate, isDeleted, isCreate, query, order]);
+  //clinicList,  isDoneUploading
   //[isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]
 
   const user = pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
@@ -563,12 +564,18 @@ const Pet: NextPage = () => {
   }, [isCreate]);
 
   //-------------------------------NAVIGATING BY CLICKING ON THE TAB---------------------
-  useEffect(() => {
-    if (!isCreate) {
-      setOwnerID(Number(user?.ownerID ?? 0));
-    }
-  }, [router.asPath]);
-
+  // useEffect(() => {
+  //   if (!isCreate) {
+  //     setOwnerID(Number(user?.ownerID ?? 0));
+  //   }
+  // }, [router.asPath]);
+  if (router.asPath.includes("petID")) {
+    useEffect(() => {
+      if (!isCreate) {
+        setOwnerID(Number(user?.ownerID ?? 0));
+      }
+    }, [router?.asPath]);
+  }
   const owner = api.petOwner.getOwnerByID.useQuery({ ownerID: ownerID });
 
   useEffect(() => {
@@ -857,6 +864,41 @@ const Pet: NextPage = () => {
   const [colourListOptions, setColourListOptions] = useState<ColourOptions[]>([]);
   const [colourSelection, setColourSelection] = useState<ColourSelect>();
 
+  const colourDogOptions = ["Black", "Brindle", "Brown", "Chocolate Brown", "Grey", "Tan", "White"];
+
+  const colourCatOptions = [
+    "Black",
+    "Brindle",
+    "Brown",
+    "Calico (Tri-Colour)",
+    "Charcoal",
+    "Chocolate Brown",
+    "Ginger",
+    "Grey",
+    "Tabby",
+    "Tan",
+    "Tortoiseshell",
+    "White",
+  ];
+
+  const [colourOptions, setColourOptions] = useState([""]);
+
+  useEffect(() => {
+    console.group("Species: ", speciesOption);
+    console.log("colourOptions before: ", colourOptions);
+    if (speciesOption == "Cat") {
+      //setColourOption("Select one");
+      setColourOptions(colourCatOptions);
+      // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+    } else if (speciesOption == "Dog") {
+      //setColourOption("Select one");
+      setColourOptions(colourDogOptions);
+      // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+    }
+    console.log("colourListOptions after: ", colourListOptions);
+    console.log("colourOptions after: ", colourOptions);
+  }, [speciesOption, isUpdate, colourList]);
+
   const handleColour = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
     if (selectionCategory === "allSelected") {
       setColourOption("Select All");
@@ -915,35 +957,6 @@ const Pet: NextPage = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
-  const colourDogOptions = ["Black", "Brindle", "Brown", "Chocolate Brown", "Grey", "Tan", "White"];
-
-  const colourCatOptions = [
-    "Black",
-    "Brindle",
-    "Brown",
-    "Calico (Tri-Colour)",
-    "Charcoal",
-    "Chocolate Brown",
-    "Ginger",
-    "Grey",
-    "Tabby",
-    "Tan",
-    "Tortoiseshell",
-    "White",
-  ];
-
-  const [colourOptions, setColourOptions] = useState([""]);
-
-  useEffect(() => {
-    if (speciesOption == "Cat") {
-      //setColourOption("Select one");
-      setColourOptions(colourCatOptions);
-    } else if (speciesOption == "Dog") {
-      //setColourOption("Select one");
-      setColourOptions(colourDogOptions);
-    }
-  }, [speciesOption]);
 
   //show all the clinics that the volunteer attended
   const [showColour, setShowColour] = useState(false);
@@ -1889,8 +1902,8 @@ const Pet: NextPage = () => {
     //     console.log("No last 3", showClinicMessage);
     //   }
     // });
-    console.log("ClinicList", clinicList);
-    console.log("Show clinic message", showClinicMessage);
+    // console.log("ClinicList", clinicList);
+    //  console.log("Show clinic message", showClinicMessage);
   }, [clinicList, isViewProfilePage]);
 
   //LAST DEWORMING
@@ -2002,12 +2015,28 @@ const Pet: NextPage = () => {
       setStatusOption(userData?.status ?? "Select one");
       setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
 
-      setColourListOptions(
-        colourOptions.map((colour) => ({
-          colour: colour,
-          state: userData.colour.includes(colour),
-        })),
-      );
+      if (userData?.species == "Cat") {
+        //setColourOption("Select one");
+        setColourOptions(colourCatOptions);
+        setColourListOptions(
+          colourCatOptions.map((colour) => ({
+            colour: colour,
+            state: userData.colour.includes(colour),
+          })),
+        );
+        // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      } else if (userData?.species == "Dog") {
+        //setColourOption("Select one");
+        setColourOptions(colourDogOptions);
+        setColourListOptions(
+          colourDogOptions.map((colour) => ({
+            colour: colour,
+            state: userData.colour.includes(colour),
+          })),
+        );
+        // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      }
+
       // setSterilisationStatusOption(userData?.sterilisedStatus.getFullYear() === 1970 ? "Select one" : "Yes");
       // setSterilisationRequestedOption(userData?.sterilisedRequested?.getFullYear() === 1970 ? "Select one" : "Yes");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
@@ -2230,12 +2259,27 @@ const Pet: NextPage = () => {
         })),
       );
 
-      setColourListOptions(
-        colourOptions.map((colour) => ({
-          colour: colour,
-          state: userData.colour.includes(colour),
-        })),
-      );
+      if (userData?.species == "Cat") {
+        //setColourOption("Select one");
+        setColourOptions(colourCatOptions);
+        setColourListOptions(
+          colourCatOptions.map((colour) => ({
+            colour: colour,
+            state: userData.colour.includes(colour),
+          })),
+        );
+        // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      } else if (userData?.species == "Dog") {
+        //setColourOption("Select one");
+        setColourOptions(colourDogOptions);
+        setColourListOptions(
+          colourDogOptions.map((colour) => ({
+            colour: colour,
+            state: userData.colour.includes(colour),
+          })),
+        );
+        // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      }
 
       setKennelListOptions(
         kennelsReceivedOptions.map((kennel) => ({
@@ -2573,12 +2617,27 @@ const Pet: NextPage = () => {
         })),
       );
 
-      setColourListOptions(
-        colourOptions.map((colour) => ({
-          colour: colour,
-          state: userData.colour.includes(colour),
-        })),
-      );
+      if (userData?.species == "Cat") {
+        //setColourOption("Select one");
+        setColourOptions(colourCatOptions);
+        setColourListOptions(
+          colourCatOptions.map((colour) => ({
+            colour: colour,
+            state: userData.colour.includes(colour),
+          })),
+        );
+        // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      } else if (userData?.species == "Dog") {
+        //setColourOption("Select one");
+        setColourOptions(colourDogOptions);
+        setColourListOptions(
+          colourDogOptions.map((colour) => ({
+            colour: colour,
+            state: userData.colour.includes(colour),
+          })),
+        );
+        // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      }
 
       setKennelListOptions(
         kennelsReceivedOptions.map((kennel) => ({
@@ -2610,7 +2669,7 @@ const Pet: NextPage = () => {
       getPet ? setGetPet(false) : setGetPet(true);
     }
 
-    if (ownerID === 0 && rerenders < 600) {
+    if (ownerID === 0 && rerenders < 600 && router.asPath.includes("petID")) {
       setRerenders(rerenders + 1);
       setOwnerID(pet?.data?.owner_data?.ownerID ?? 0);
       getPet ? setGetPet(false) : setGetPet(true);
@@ -2720,12 +2779,27 @@ const Pet: NextPage = () => {
           })),
         );
 
-        setColourListOptions(
-          colourOptions?.map((colour) => ({
-            colour: colour,
-            state: petData?.colour?.includes(colour) ?? false,
-          })),
-        );
+        if (petData?.species == "Cat") {
+          //setColourOption("Select one");
+          setColourOptions(colourCatOptions);
+          setColourListOptions(
+            colourCatOptions.map((colour) => ({
+              colour: colour,
+              state: petData.colour.includes(colour) ?? false,
+            })),
+          );
+          // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+        } else if (petData?.species == "Dog") {
+          //setColourOption("Select one");
+          setColourOptions(colourDogOptions);
+          setColourListOptions(
+            colourDogOptions.map((colour) => ({
+              colour: colour,
+              state: petData.colour.includes(colour) ?? false,
+            })),
+          );
+          // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+        }
 
         setKennelListOptions(
           kennelsReceivedOptions.map((kennel) => ({
@@ -2792,12 +2866,27 @@ const Pet: NextPage = () => {
         })),
       );
 
-      setColourListOptions(
-        colourOptions.map((colour) => ({
-          colour: colour,
-          state: petData?.colour?.includes(colour) ?? false,
-        })),
-      );
+      if (petData?.species == "Cat") {
+        //setColourOption("Select one");
+        setColourOptions(colourCatOptions);
+        setColourListOptions(
+          colourCatOptions.map((colour) => ({
+            colour: colour,
+            state: petData.colour.includes(colour) ?? false,
+          })),
+        );
+        // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      } else if (petData?.species == "Dog") {
+        //setColourOption("Select one");
+        setColourOptions(colourDogOptions);
+        setColourListOptions(
+          colourDogOptions.map((colour) => ({
+            colour: colour,
+            state: petData.colour.includes(colour) ?? false,
+          })),
+        );
+        // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      }
 
       setKennelListOptions(
         kennelsReceivedOptions.map((kennel) => ({
@@ -2872,6 +2961,10 @@ const Pet: NextPage = () => {
     setClinicSelection({ allSelected: false, clear: false });
     setKennelList([]);
     setKennelSelection({ allSelected: false, clear: false });
+
+    await router.push({
+      pathname: "/pet",
+    });
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
@@ -4604,7 +4697,11 @@ const Pet: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Colour(s):</b> {colourList.map((colour) => colour).join("; ")}
+                        <b className="mr-3">Colour(s):</b>{" "}
+                        {colourList
+                          .slice(1, colourList.length)
+                          .map((colour) => colour)
+                          .join("; ")}
                       </div>
 
                       <div className="mb-2 flex items-center">

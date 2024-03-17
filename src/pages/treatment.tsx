@@ -1211,7 +1211,7 @@ const Treatment: NextPage = () => {
                             <td className="border px-2 py-1">{treatment.greaterArea}</td>
                             <td className="border px-2 py-1">{treatment.area}</td>
                             <td className="border px-2 py-1">{treatment.category}</td>
-                            <td className="border px-2 py-1">{treatment.type}</td>
+                            <td className="border px-2 py-1">{treatment.type.slice(0, 8).join("; ")}</td>
                             <td className=" border px-2 py-1">
                               {treatment?.updatedAt?.getDate()?.toString() ?? ""}
                               {"/"}

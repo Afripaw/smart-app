@@ -1025,7 +1025,7 @@ const Clinic: NextPage = () => {
                             <td className="border px-2 py-1">{user.greaterArea.greaterArea}</td>
                             {/* <td className="border px-2 py-1">{user.area.area}</td> */}
 
-                            <td className="border px-2 py-1">{user.conditions}</td>
+                            <td className="border px-2 py-1">{user.conditions.join("; ")}</td>
                             <td className=" border px-2 py-1">
                               <div className="flex justify-center">{user.pet.filter((pet) => pet.pet.species === "Dog").length}</div>
                             </td>

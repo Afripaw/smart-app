@@ -1794,7 +1794,23 @@ const Volunteer: NextPage = () => {
     // }
   };
 
+  useEffect(() => {
+    if (!isUpdate && !isCreate && !isViewProfilePage) {
+      const clinics = volunteer_data_with_clinics?.find((volunteer) => volunteer.volunteerID === volunteerIDForClinic)?.clinics;
+      const clinics_ =
+        clinics?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
+            clinic.clinic.date.getDate().toString() + "/" + (clinic.clinic.date.getMonth() + 1).toString() + "/" + clinic.clinic.date.getFullYear().toString(),
+          area: clinic.clinic.greaterArea.greaterArea,
+        })) ?? [];
+      setClinicList(clinics_);
+      console.log("Clinic list: ", clinics_);
+    }
+  }, [todayClinicList]);
+
   const handleAddTodaysClinic = async (volunteerID: number, clinicID: number) => {
+    if (addClinic.isLoading) return;
     setIsClinicLoading(true);
 
     const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));

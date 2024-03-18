@@ -2429,18 +2429,66 @@ const Pet: NextPage = () => {
       })),
     );
 
-    setColourListOptions(
-      colourOptions.map((colour) => ({
-        colour: colour,
-        state: false,
-      })),
-    );
+    if (speciesOption == "Cat") {
+      //setColourOption("Select one");
+      setColourOptions(colourCatOptions);
+      setColourListOptions(
+        colourCatOptions.map((colour) => ({
+          colour: colour,
+          state: false,
+        })),
+      );
+      // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+    } else if (speciesOption == "Dog") {
+      //setColourOption("Select one");
+      setColourOptions(colourDogOptions);
+      setColourListOptions(
+        colourDogOptions.map((colour) => ({
+          colour: colour,
+          state: false,
+        })),
+      );
+      // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+    }
+
+    // setColourListOptions(
+    //   colourOptions.map((colour) => ({
+    //     colour: colour,
+    //     state: false,
+    //   })),
+    // );
     setKennelList([]);
     setClinicListOptions(clinics);
     setTreatmentList([]);
     setIsCreate(true);
     setIsUpdate(false);
   };
+
+  useEffect(() => {
+    if (isCreate) {
+      if (speciesOption == "Cat") {
+        //setColourOption("Select one");
+        setColourOptions(colourCatOptions);
+        setColourListOptions(
+          colourCatOptions.map((colour) => ({
+            colour: colour,
+            state: false,
+          })),
+        );
+        // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      } else if (speciesOption == "Dog") {
+        //setColourOption("Select one");
+        setColourOptions(colourDogOptions);
+        setColourListOptions(
+          colourDogOptions.map((colour) => ({
+            colour: colour,
+            state: false,
+          })),
+        );
+        // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      }
+    }
+  }, [speciesOption]);
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
@@ -2669,7 +2717,7 @@ const Pet: NextPage = () => {
       getPet ? setGetPet(false) : setGetPet(true);
     }
 
-    if (ownerID === 0 && rerenders < 600 && router.asPath.includes("petID")) {
+    if (ownerID === 0 && rerenders < 800 && router.asPath.includes("petID")) {
       setRerenders(rerenders + 1);
       setOwnerID(pet?.data?.owner_data?.ownerID ?? 0);
       getPet ? setGetPet(false) : setGetPet(true);
@@ -3209,12 +3257,32 @@ const Pet: NextPage = () => {
     // }
   };
 
+  useEffect(() => {
+    if (!isUpdate && !isCreate && !isViewProfilePage) {
+      const clinics = pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === petIDForClinic)?.clinic_data;
+      const clinics_ =
+        clinics?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
+            clinic.clinic.date.getDate().toString() + "/" + (clinic.clinic.date.getMonth() + 1).toString() + "/" + clinic.clinic.date.getFullYear().toString(),
+          area: clinic.clinic.greaterArea.greaterArea,
+        })) ?? [];
+      setClinicList(clinics_);
+      console.log("Clinic list: ", clinics_);
+    }
+  }, [todayClinicList]);
+
   const handleAddTodaysClinic = async (petID: number, clinicID: number) => {
+    if (addClinic.isLoading) return;
     setIsClinicLoading(true);
 
     const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
 
+    console.log("Clinic ID list!!!: ", clinicIDList);
+    console.log("Clinic ID!!!: ", clinicID);
+
     if (!clinicIDList.includes(clinicID)) {
+      console.log("This is not added twice");
       setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }]);
       //setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID)?.date ?? ""]);
       //setClinicIDList([...clinicIDList, clinicID]);
@@ -4917,9 +4985,18 @@ const Pet: NextPage = () => {
                         }
                       </div>
 
-                      <div className="mb-2 flex items-center">
+                      <div className="mb-2 flex items-start">
                         <b className="mr-3">Kennels Received:</b> {kennelList.length} in Total{" "}
-                        {kennelList.length > 0 && <>({kennelList.map((kennel, index) => (kennelList.length - 1 === index ? kennel : kennel + "; "))})</>}
+                        {kennelList.length > 0 && (
+                          <div className="flex flex-col px-4">
+                            {kennelList
+                              .sort((a, b) => Number(a.slice(19, 23)) - Number(b.slice(19, 23)))
+                              .map((kennel, index) => (
+                                <div key={index}>{kennel}</div>
+                              ))}
+                          </div>
+                        )}
+                        {/* {kennelList.length > 0 && <>({kennelList.map((kennel, index) => (kennelList.length - 1 === index ? kennel : kennel + "; "))})</>} */}
                         {/* <div className="pl-3 text-base text-red-600">{kennelMessage(kennelList)}</div> */}
                       </div>
 

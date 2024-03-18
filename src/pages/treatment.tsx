@@ -637,6 +637,15 @@ const Treatment: NextPage = () => {
     if (treatment) {
       // Assuming userQuery.data contains the user object
       const userData = treatment;
+
+      setPetID(userData.petID ?? 0);
+      setPetName(userData.petName ?? "");
+      setFirstName(userData.firstName ?? "");
+      setSurname(userData.surname ?? "");
+      setOwnerID(userData.ownerID ?? 0);
+      setArea(userData.area ?? "");
+      setGreaterArea(userData.greaterArea ?? "");
+
       setCategoryOption(userData.category ?? "Select one");
       setTypeList(userData.type ?? "Select here");
       //setTypeOption(userData.type ?? "Select one");
@@ -756,6 +765,13 @@ const Treatment: NextPage = () => {
         date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
         comments: treatment.comments ?? "",
       })) ?? [],
+    );
+
+    setTypeListOptions(
+      typeOptions.map((type) => ({
+        type: type,
+        state: false,
+      })),
     );
   }, [getPreviousTreatments]);
 

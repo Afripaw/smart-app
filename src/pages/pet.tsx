@@ -297,6 +297,7 @@ const Pet: NextPage = () => {
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
   const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getQueryFromSearchPhrase = (searchPhrase: string) => {
     // dirk b, jack -> (+dirk +b) (+jack)
@@ -470,7 +471,7 @@ const Pet: NextPage = () => {
   //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order]);
+  }, [isUpdate, isDeleted, isCreate, query, order, clinicList]);
   //clinicList,  isDoneUploading
   //[isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]
 
@@ -1911,19 +1912,19 @@ const Pet: NextPage = () => {
   //const lastClinic = clinicList[clinicList.length - 1];
   //const lastClinicDate = lastClinic?.split("/").map(Number);
   const [lastDeworming, setLastDeworming] = useState(new Date());
-  useEffect(() => {
-    const dateString = clinicDates[0] ?? "";
-    // const [day, month, year] = dateString.split("/");
-    // const formattedDate = `${year}-${month}-${day}`;
-    // setLastDeworming(new Date(formattedDate));
-    const [day, month, year] = dateString.split("/").map((part) => parseInt(part, 10));
-    if (!Number.isNaN(day) && !Number.isNaN(month) && !Number.isNaN(year)) {
-      // JavaScript's Date month is 0-indexed, so subtract 1 from the month.
-      const dateObject = new Date(year ?? 0, (month ?? 0) - 1, day ?? 0);
-      setLastDeworming(dateObject);
-      console.log("Last deworming", dateObject);
-    }
-  }, []);
+  // useEffect(() => {
+  //   const dateString = clinicDates[0] ?? "";
+  //   // const [day, month, year] = dateString.split("/");
+  //   // const formattedDate = `${year}-${month}-${day}`;
+  //   // setLastDeworming(new Date(formattedDate));
+  //   const [day, month, year] = dateString.split("/").map((part) => parseInt(part, 10));
+  //   if (!Number.isNaN(day) && !Number.isNaN(month) && !Number.isNaN(year)) {
+  //     // JavaScript's Date month is 0-indexed, so subtract 1 from the month.
+  //     const dateObject = new Date(year ?? 0, (month ?? 0) - 1, day ?? 0);
+  //     setLastDeworming(dateObject);
+  //     console.log("Last deworming", dateObject);
+  //   }
+  // }, []);
 
   //checks if deworming was more than 6 months ago
   const isMoreThanSixMonthsAgo = (date: Date): boolean => {
@@ -2288,7 +2289,7 @@ const Pet: NextPage = () => {
         })),
       );
     }
-  }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
+  }, [isUpdate]); // Effect runs when userQuery.data changes
   //[user, isUpdate, isCreate];
   const handleUpdateUser = async () => {
     setIsLoading(true);
@@ -2394,7 +2395,7 @@ const Pet: NextPage = () => {
     setBreedOption("Select one");
     setColourOption("Select here");
     setMarkings("");
-    setStatusOption("Select one");
+    setStatusOption("Active");
     setSterilisationStatusOption("Select one");
     setSterilisationRequestedOption("Select one");
     setSterilisationStatusDate(new Date());
@@ -2406,9 +2407,9 @@ const Pet: NextPage = () => {
     setVaccinationShot1Date(new Date());
     setVaccinationShot2Date(new Date());
     setVaccinationShot3Date(new Date());
-    setMembershipTypeOption("Select one");
-    setCardStatusOption("Select one");
-    setKennelsReceivedOption("Select here");
+    setMembershipTypeOption("Non-Card Holder");
+    setCardStatusOption("Not Applicable");
+    setKennelsReceivedOption("No kennels received");
     setStartingDate(new Date());
     setLastDeworming(new Date());
     setComments("");
@@ -2765,7 +2766,7 @@ const Pet: NextPage = () => {
 
       const petData = userData?.pet_data;
 
-      if (isCreate || isUpdate) {
+      if (isUpdate) {
         setPetName(petData?.petName ?? "");
         setSpeciesOption(petData?.species ?? "Select one");
         setSexOption(petData?.sex ?? "Select one");
@@ -2972,7 +2973,7 @@ const Pet: NextPage = () => {
     //   await router.push(`/owner`);
     // }
 
-    setQuery("");
+    // setQuery("");
 
     setIsUpdate(false);
     setIsCreate(false);
@@ -3172,8 +3173,12 @@ const Pet: NextPage = () => {
   const [showTodayClinics, setShowTodayClinics] = useState(false);
   const clinicRef = useRef<HTMLDivElement>(null);
   const [petIDForClinic, setPetIDForClinic] = useState(0);
+  const [petIDsForClinics, setPetIDsForClinics] = useState([0]);
   const [isClinicLoading, setIsClinicLoading] = useState(false);
   // const btnClinicRef = useRef<HTMLButtonElement>(null);
+
+  //Key value pair of the petID that is the key and a clinicList that is value
+  const [petClinicList, setPetClinicList] = useState<Record<number, Clinic[]>>({});
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -3211,11 +3216,35 @@ const Pet: NextPage = () => {
           clinic.clinic.date.getFullYear().toString(),
         area: clinic.clinic.greaterArea.greaterArea,
       })) ?? [];
+    //if (clinicList.length > clinicDates.length && id === petIDForClinic) return;
+
+    console.log("Pet Clinic list: ", petClinicList);
+    console.log("Pet ID: ", id);
+    console.log("Clinic Dates: ", clinicDates);
+
+    if (petClinicList[id] && (petClinicList[id]?.length ?? 0) > clinicDates.length) return;
+
+    //take away the petClinicInstance from the petClinicList if it matches the petID and all the clinicDates
+    // if (petClinicList[id] && petClinicList[id]?.length === clinicDates.length) {
+    //   //setPetClinicList({ ...petClinicList, [id]: [] });
+    //   //filter out the petClinicInstance that matches the petID
+    //   const petClinicInstances = Object.keys(petClinicList).filter((petID) => Number(petID) !== id);
+    //   const newPetClinicList: Record<number, Clinic[]> = {};
+    //   for (const petID of petClinicInstances) {
+    //     newPetClinicList[Number(petID)] = petClinicList[Number(petID)] ?? [];
+    //   }
+    //   setPetClinicList(newPetClinicList);
+    //   //return;
+    // }
+
     setClinicList(clinicDates);
 
     setShowTodayClinics(true);
 
     setPetIDForClinic(id);
+
+    //setPetClinicList({ ...petClinicList, [id]: clinicDates });
+
     //get today's date
     const today = new Date();
     //add to the clinic list and ID list and then add it to the table
@@ -3257,20 +3286,48 @@ const Pet: NextPage = () => {
     // }
   };
 
-  useEffect(() => {
-    if (!isUpdate && !isCreate && !isViewProfilePage) {
-      const clinics = pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === petIDForClinic)?.clinic_data;
-      const clinics_ =
-        clinics?.map((clinic) => ({
-          id: clinic.clinicID,
-          date:
-            clinic.clinic.date.getDate().toString() + "/" + (clinic.clinic.date.getMonth() + 1).toString() + "/" + clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.greaterArea.greaterArea,
-        })) ?? [];
-      setClinicList(clinics_);
-      console.log("Clinic list: ", clinics_);
-    }
-  }, [todayClinicList]);
+  // useEffect(() => {
+  //   if (!isUpdate && !isCreate && !isViewProfilePage) {
+  //     const clinics = pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === petIDForClinic)?.clinic_data;
+  //     const clinics_ =
+  //       clinics?.map((clinic) => ({
+  //         id: clinic.clinicID,
+  //         date:
+  //           clinic.clinic.date.getDate().toString() + "/" + (clinic.clinic.date.getMonth() + 1).toString() + "/" + clinic.clinic.date.getFullYear().toString(),
+  //         area: clinic.clinic.greaterArea.greaterArea,
+  //       })) ?? [];
+  //     setClinicList(clinics_);
+  //     console.log("Clinic list: ", clinics_);
+  //   }
+  // }, [todayClinicList]);
+
+  // //take out the petID and clinics from the petClinicList where the length of the clinics is the same as the clinics from DB
+  // useEffect(() => {
+  //   if (!isUpdate && !isCreate && !isViewProfilePage) {
+  //     const petClinicInstances = Object.keys(petClinicList).filter((petID) => petClinicList[Number(petID)]?.length === clinicList.length);
+  //     const newPetClinicList: Record<number, Clinic[]> = {};
+  //     for (const petID of petClinicInstances) {
+  //       const clinicData = pet_data_with_clinics_and_treatments?.find((pet) => pet.petID === Number(petID))?.clinic_data;
+  //       const clinicDates: Clinic[] =
+  //         clinicData?.map((clinic) => ({
+  //           id: clinic.clinicID,
+  //           date:
+  //             clinic.clinic.date.getDate().toString() +
+  //             "/" +
+  //             ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+  //             "/" +
+  //             clinic.clinic.date.getFullYear().toString(),
+  //           area: clinic.clinic.greaterArea.greaterArea,
+  //         })) ?? [];
+
+  //       if (clinicDates.length < petClinicList[Number(petID)]?.length ?? 0) {
+  //         newPetClinicList[Number(petID)] = petClinicList[Number(petID)] ?? [];
+  //       }
+  //     }
+  //     console.log("New pet clinic list: ", newPetClinicList);
+  //     setPetClinicList(newPetClinicList);
+  //   }
+  // }, [clinicList]);
 
   const handleAddTodaysClinic = async (petID: number, clinicID: number) => {
     if (addClinic.isLoading) return;
@@ -3278,10 +3335,15 @@ const Pet: NextPage = () => {
 
     const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
 
+    const petClinicIDList = petClinicList[petID]?.map((clinic) => clinic.id) ?? [];
+
     console.log("Clinic ID list!!!: ", clinicIDList);
     console.log("Clinic ID!!!: ", clinicID);
+    console.log("Pet ID!!!: ", petID);
+    console.log("Pet Clinic ID list!!!: ", petClinicIDList);
+    console.log("Pet Clinic List!!!: ", petClinicList);
 
-    if (!clinicIDList.includes(clinicID)) {
+    if (!clinicIDList.includes(clinicID) && !petClinicIDList.includes(clinicID)) {
       console.log("This is not added twice");
       setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }]);
       //setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID)?.date ?? ""]);
@@ -3291,12 +3353,22 @@ const Pet: NextPage = () => {
         petID: petID,
         clinicID: clinicID,
       });
+
+      setPetClinicList({
+        ...petClinicList,
+        [petID]: [...(petClinicList[petID] ?? []), todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }],
+      });
     }
     setShowTodayClinics(false);
     setTodayClinicList([]);
-    setPetIDForClinic(0);
+    //setPetIDForClinic(0);
     setIsClinicLoading(false);
   };
+
+  //retrieves the data from the table again when the clinicsAttended is updated
+  useEffect(() => {
+    void refetch();
+  }, [isClinicLoading, clinicList, todayClinicList, addClinic.isSuccess]);
 
   // ----------------------------------------Uploading Image----------------------------------------
   useEffect(() => {
@@ -3366,7 +3438,11 @@ const Pet: NextPage = () => {
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
-                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setQuery(getQueryFromSearchPhrase(e.target.value));
+                      setSearchQuery(e.target.value);
+                    }}
                   />
 
                   {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
@@ -3398,7 +3474,9 @@ const Pet: NextPage = () => {
                         </th>
                         <th className="px-4 py-2">Owner</th>
 
-                        <th className="px-4 py-2">Greater Area</th>
+                        {/* <th className="px-4 py-2">Greater Area</th> */}
+                        <th className="px-4 py-2">Membership</th>
+                        <th className="px-4 py-2">Card Status</th>
                         <th className="px-4 py-2">Area</th>
                         <th className="px-4 py-2">Address</th>
                         <th className="px-4 py-2">Sterilised?</th>
@@ -3435,7 +3513,9 @@ const Pet: NextPage = () => {
                               </button>
                             </td>
 
-                            <td className="border px-2 py-1">{pet.owner.addressGreaterArea.greaterArea}</td>
+                            {/* <td className="border px-2 py-1">{pet.owner.addressGreaterArea.greaterArea}</td> */}
+                            <td className="border px-2 py-1">{pet.membership}</td>
+                            <td className="border px-2 py-1">{pet.cardStatus}</td>
                             <td className="border px-2 py-1">{pet.owner.addressArea?.area ?? ""}</td>
                             <td className="border px-2 py-1">
                               {pet.owner.addressStreetNumber} {pet.owner.addressStreet?.street ?? ""}
@@ -4257,7 +4337,7 @@ const Pet: NextPage = () => {
                   )}
                 </div>
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                  <b className="mb-3 text-center text-xl">AfriPaw Association Data</b>
 
                   {/*Clinics attended*/}
                   <div className="flex items-start">
@@ -4878,7 +4958,7 @@ const Pet: NextPage = () => {
                     </div>
 
                     <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                      <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                      <b className="mb-3 text-center text-xl">AfriPaw Association Data</b>
 
                       {/* <div className="mb-2 flex items-start gap-1">
                    

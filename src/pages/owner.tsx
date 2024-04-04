@@ -251,6 +251,7 @@ const Owner: NextPage = () => {
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
   const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getQueryFromSearchPhrase = (searchPhrase: string) => {
     // dirk b, jack -> (+dirk +b) (+jack)
@@ -987,7 +988,7 @@ const Owner: NextPage = () => {
     setAreaOption({ area: "Select one", id: 0 });
     setStreetOption({ street: "Select one", id: 0 });
     setPreferredCommunicationOption("Select one");
-    setStatusOption("Select one");
+    setStatusOption("Active");
     setStartingDate(new Date());
     setComments("");
     setFirstName("");
@@ -1364,7 +1365,7 @@ const Owner: NextPage = () => {
     // }
 
     //set Query to empty
-    setQuery("");
+    // setQuery("");
 
     setIsUpdate(false);
     setIsCreate(false);
@@ -1408,6 +1409,19 @@ const Owner: NextPage = () => {
       setMobileMessage("");
     }
   }, [mobile]);
+
+  //Street code
+  //Should allow only letters
+  const [streetCodeMessage, setStreetCodeMessage] = useState("");
+  useEffect(() => {
+    if (addressStreetCode.match(/^[A-Za-z]+$/) == null && addressStreetCode.length != 0) {
+      setStreetCodeMessage("Street code must only contain letters");
+    } else if (addressStreetCode.length > 4 && addressStreetCode.length != 0) {
+      setStreetCodeMessage("Street code must be 4 characters or less");
+    } else {
+      setStreetCodeMessage("");
+    }
+  }, [addressStreetCode]);
 
   //Street number
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
@@ -1454,7 +1468,7 @@ const Owner: NextPage = () => {
     if (startingDate === null) mandatoryFields.push("Starting Date");
 
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
-    //if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
+    if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
 
@@ -1631,7 +1645,11 @@ const Owner: NextPage = () => {
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
-                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setQuery(getQueryFromSearchPhrase(e.target.value));
+                      setSearchQuery(e.target.value);
+                    }}
                   />
                   <button
                     className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
@@ -2059,7 +2077,8 @@ const Owner: NextPage = () => {
                           </div>
                         </div>
 
-                        <Input label="Street Code" placeholder="Type here: e.g. C3" value={addressStreetCode} onChange={setAddressStreetCode} />
+                        <Input label="Street Code" placeholder="Type here: e.g. OH" value={addressStreetCode} onChange={setAddressStreetCode} />
+                        {streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}
 
                         <div className="flex items-center">
                           <div className="">Street Number: </div>
@@ -2111,7 +2130,7 @@ const Owner: NextPage = () => {
                   </div>
                 </div>
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                  <b className="mb-3 text-center text-xl">AfriPaw Association Data</b>
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
@@ -2193,7 +2212,7 @@ const Owner: NextPage = () => {
                           // <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
                           <div>
                             {pet?.breed === "Not Applicable"
-                              ? (pet?.name ?? "") + "(Cat, P" + (pet?.id ?? "") + ")"
+                              ? (pet?.name ?? "") + " (Cat, P" + (pet?.id ?? "") + ")"
                               : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
                           </div>
                           // </button>
@@ -2353,7 +2372,7 @@ const Owner: NextPage = () => {
                     </div>
 
                     <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                      <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                      <b className="mb-3 text-center text-xl">AfriPaw Association Data</b>
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Status:</b> {statusOption}
@@ -2373,7 +2392,7 @@ const Owner: NextPage = () => {
                           {petsCombined.map((pet) => (
                             <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
                               {pet?.breed === "Not Applicable" || pet?.breed === "Not applicable"
-                                ? (pet?.name ?? "") + "(Cat, P" + (pet?.id ?? "") + ")"
+                                ? (pet?.name ?? "") + " (Cat, P" + (pet?.id ?? "") + ")"
                                 : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
                             </button>
                           ))}

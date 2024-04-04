@@ -81,7 +81,8 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { treatmentID: { equals: Number(term.substring(1)) } },
               { category: { contains: term } },
-              { type: { hasSome: [term] } },
+
+              // { type: { hasSome: [term] } },
               { comments: { contains: term } },
               //pet
               { pet: { petName: { contains: term } } },
@@ -149,6 +150,13 @@ export const petTreatmentRouter = createTRPCRouter({
           };
         }
       });
+
+      //       const typeSearchResults = await ctx.db.$queryRaw`SELECT "treatmentID" FROM "PetTreatment"
+      // WHERE "type" @> ARRAY[${terms.join(",")}::varchar[]]`;
+      // const typeSearchResults = await ctx.db.$queryRaw`SELECT "treatmentID" FROM "PetTreatment" WHERE "type" @> ARRAY[${terms
+      //   .map((term) => `'${term}'`)
+      //   .join(",")}]::varchar[]`;
+
       //------------------------------------------ORIGNAL CODE-------------------------------------
 
       //-----------------------------------------ORIGNAL CODE-------------------------------------
@@ -161,15 +169,19 @@ export const petTreatmentRouter = createTRPCRouter({
       }
       //-----------------------------------------ORIGNAL CODE-------------------------------------
 
+      //  const treatmentIDsFromTypeSearch: number[] = (typeSearchResults as { treatmentID: number }[]).map((result) => result.treatmentID);
+
       // Fetch all the treatments based on the search conditions of treatments
       const treatment = await ctx.db.petTreatment.findMany({
-        where:
-          // input.searchQuery === ""
-          //   ? {}
-          //   :
-          {
-            AND: searchConditions,
-          },
+        where: {
+          // AND: searchConditions,
+          AND: searchConditions,
+
+          // category: {
+          //   contains: input.searchQuery,
+          //   mode: "insensitive",
+          // },
+        },
         orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { treatmentID: input.cursor } : undefined,
@@ -186,128 +198,6 @@ export const petTreatmentRouter = createTRPCRouter({
           },
         },
       });
-
-      // //Fetch all the treatments based on the search conditions of pets
-      // const treatment_pet = await ctx.db.petTreatment.findMany({
-      //   where:
-      //     // input.searchQuery === ""
-      //     //   ? {}
-      //     //   :
-      //     {
-      //       AND: [
-      //         {
-      //           pet: {
-      //             OR: searchConditionsPet,
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   orderBy: order,
-      //   take: input.limit + 1,
-      //   cursor: input.cursor ? { treatmentID: input.cursor } : undefined,
-      //   include: {
-      //     pet: {
-      //       include: {
-      //         owner: true,
-      //       },
-      //     },
-      //   },
-      // });
-
-      // //Fetch all the treatments based on the search conditions of owners
-      // const treatment_owner = await ctx.db.petTreatment.findMany({
-      //   where:
-      //     // input.searchQuery === ""
-      //     //   ? {}
-      //     //   :
-      //     {
-      //       AND: [
-      //         {
-      //           pet: {
-      //             owner: {
-      //               OR: searchConditionsOwner,
-      //             },
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   orderBy: order,
-      //   take: input.limit + 1,
-      //   cursor: input.cursor ? { treatmentID: input.cursor } : undefined,
-      //   include: {
-      //     pet: {
-      //       include: {
-      //         owner: true,
-      //       },
-      //     },
-      //   },
-      // });
-
-      // //Combine all the treatments together
-      // const treatments = treatment.concat(treatment_pet, treatment_owner);
-
-      // //now order the data
-      // treatments.sort((a, b) => {
-      //   if (input.order === "date") {
-      //     return a.date.getTime() - b.date.getTime();
-      //   } else {
-      //     return a.updatedAt.getTime() - b.updatedAt.getTime();
-      //   }
-      // });
-
-      // // search for all the pets that could be searched for
-      // const pet = await ctx.db.pet.findMany({
-      //   where: {
-      //     AND: searchConditionsPet,
-      //   },
-      //   include: {
-      //     owner: true,
-      //   },
-      // });
-
-      // // search for all the owners that could be searched for
-      // const owner = await ctx.db.petOwner.findMany({
-      //   where: {
-      //     AND: searchConditionsOwner,
-      //   },
-      // });
-
-      // // create a new object array that aggregates the pet and owner data and treatment data as well as orders it correctly
-      // const treatments = treatment.map((treatment) => {
-      //   // if a petID is not in the treatment data, then add that pets data to the treatment data
-      //   pet.forEach((pet) => {
-      //     if (treatment.petID !== pet.petID) {
-
-      //     }
-      //   });
-
-      //   // if a ownerID is not in the treatment data, then add that owners data to the treatment data
-      //   owner.forEach((owner) => {
-      //     if (treatment.pet.owner.ownerID !== owner.ownerID) {
-
-      //     }
-      //   });
-      // });
-
-      //Add all the data together. So that the pet data and owner data is included in the treatment data
-      // const treatments = treatment.map((treatment) => {
-      //   const petData = pet.filter((pet) => pet.petID !== treatment.petID);
-      //   const ownerData = owner.filter((owner) => owner.ownerID !== treatment?.pet?.ownerID);
-      //   return {
-      //     ...treatment,
-      //     pet: petData,
-      //     owner: ownerData,
-      //   };
-      // });
-
-      // //Order the data correctly
-      // treatments.sort((a, b) => {
-      //   if (input.order === "date") {
-      //     return a.date.getTime() - b.date.getTime();
-      //   } else {
-      //     return a.updatedAt.getTime() - b.updatedAt.getTime();
-      //   }
-      // });
 
       let newNextCursor: typeof input.cursor | undefined = undefined;
       if (treatment.length > input.limit) {

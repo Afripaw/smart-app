@@ -103,6 +103,7 @@ const User: NextPage = () => {
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
   const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getQueryFromSearchPhrase = (searchPhrase: string) => {
     // dirk b, jack -> (+dirk +b) (+jack)
@@ -931,6 +932,8 @@ const User: NextPage = () => {
   const handleUpdateUser = async () => {
     setIsLoading(true);
 
+    console.log("Search Query!!!!: ", query);
+
     const user = await updateUser.mutateAsync({
       id: id,
       firstName: firstName,
@@ -955,16 +958,16 @@ const User: NextPage = () => {
 
     //Send user details
     //Email
-    if (preferredOption === "Email" && sendUserDetails && user?.userID) {
+    if (preferredOption === "Email" && sendUserDetails && user?.userID && password !== "") {
       await sendEmail(firstName, email, String(user.userID), password, "user");
     }
 
-    if (preferredOption === "SMS" && sendUserDetails && user?.userID) {
+    if (preferredOption === "SMS" && sendUserDetails && user?.userID && password !== "") {
       const messageContent =
         "Dear " +
         firstName +
         ",\n" +
-        "Your AfriPaw Smart App (afripaw.app) user ID is: " +
+        "Your AfriPaw Smart App (https://afripaw.app) user ID is: " +
         "U" +
         user?.userID +
         "\n" +
@@ -974,7 +977,7 @@ const User: NextPage = () => {
         "Your password is: " +
         password +
         "\n" +
-        "Regards, Afripaw Team";
+        "Regards, AfriPaw Team";
       //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
       const destinationNumber = mobile;
       try {
@@ -1037,7 +1040,7 @@ const User: NextPage = () => {
     // setStreetID(0);
     setPreferredCommunicationOption("Select one");
     setRoleOption("Select one");
-    setStatusOption("Select one");
+    setStatusOption("Active");
     setStartingDate(new Date());
     setComments("");
     setUserID(0);
@@ -1063,7 +1066,9 @@ const User: NextPage = () => {
     setDeselectStreet("No");
     setDeselectRole("No");
     setDeselectStatus("No");
-    setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
+    //set Status to Active
+    setStatusListOptions(statusListOptions.map((item) => (item.status === "Active" ? { ...item, state: true } : { ...item, state: false })));
+    //setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
     setRoleListOptions(roleListOptions.map((item) => ({ role: item.role, state: false })));
     setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
     setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
@@ -1107,7 +1112,7 @@ const User: NextPage = () => {
           "Dear " +
           firstName +
           ",\n" +
-          "Your AfriPaw Smart App (afripaw.app) user ID is: " +
+          "Your AfriPaw Smart App (https://afripaw.app) user ID is: " +
           "U" +
           newUser_?.userID +
           "\n" +
@@ -1117,7 +1122,7 @@ const User: NextPage = () => {
           "Your password is: " +
           password +
           "\n" +
-          "Regards, Afripaw Team";
+          "Regards, AfriPaw Team";
         //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
         const destinationNumber = mobile;
         try {
@@ -1423,7 +1428,7 @@ const User: NextPage = () => {
   const handleBackButton = () => {
     //console.log("Back button pressed");
 
-    setQuery("");
+    // setQuery("");
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);
@@ -1479,6 +1484,19 @@ const User: NextPage = () => {
       setMobileMessage("");
     }
   }, [mobile]);
+
+  //Street code
+  //Should allow only letters
+  const [streetCodeMessage, setStreetCodeMessage] = useState("");
+  useEffect(() => {
+    if (addressStreetCode.match(/^[A-Za-z]+$/) == null && addressStreetCode.length != 0) {
+      setStreetCodeMessage("Street code must only contain letters");
+    } else if (addressStreetCode.length > 4 && addressStreetCode.length != 0) {
+      setStreetCodeMessage("Street code must be 4 characters or less");
+    } else {
+      setStreetCodeMessage("");
+    }
+  }, [addressStreetCode]);
 
   //Street number
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
@@ -1561,6 +1579,7 @@ const User: NextPage = () => {
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
     //if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
+    if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
     if (passwordMessage !== "") errorFields.push({ field: "Password", message: passwordMessage });
     if (confirmPasswordMessage !== "") errorFields.push({ field: "Confirm Password", message: confirmPasswordMessage });
@@ -1721,7 +1740,11 @@ const User: NextPage = () => {
                   <input
                     className="mt-4 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
-                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setQuery(getQueryFromSearchPhrase(e.target.value));
+                      setSearchQuery(e.target.value);
+                    }}
                   />
                   <button
                     className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
@@ -1749,9 +1772,10 @@ const User: NextPage = () => {
                 </div>
               </div>
               {user_data ? (
-                <article className="my-5 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                  <table className="table-auto scroll-smooth">
-                    <thead className="">
+                <article className="my-5 flex max-h-[60%] w-full flex-col items-center justify-center overflow-auto rounded-md shadow-inner">
+                  <table className="">
+                    {/* table-auto scroll-smooth */}
+                    <thead className=" z-20">
                       <tr>
                         <th className="px-4 py-2"></th>
                         {/* <th className="px-4 py-2">ID</th> */}
@@ -2189,7 +2213,8 @@ const User: NextPage = () => {
                           </div>
                         </div>
 
-                        <Input label="Street Code" placeholder="Type here: e.g. C3" value={addressStreetCode} onChange={setAddressStreetCode} />
+                        <Input label="Street Code" placeholder="Type here: e.g. OH" value={addressStreetCode} onChange={setAddressStreetCode} />
+                        {streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}
 
                         <div className="flex items-center">
                           <div className="">Street Number: </div>
@@ -2241,7 +2266,7 @@ const User: NextPage = () => {
                   </div>
                 </div>
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                  <b className="mb-3 text-center text-xl">AfriPaw Association Data</b>
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
                       <label>
@@ -2568,7 +2593,7 @@ const User: NextPage = () => {
                 </div>
 
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                  <b className="mb-3 text-center text-xl">AfriPaw Association Data</b>
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Role:</b> {roleOption}
                   </div>

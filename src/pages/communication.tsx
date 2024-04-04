@@ -145,6 +145,7 @@ const Communication: NextPage = () => {
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
   const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getQueryFromSearchPhrase = (searchPhrase: string) => {
     // dirk b, jack -> (+dirk +b) (+jack)
@@ -961,7 +962,7 @@ const Communication: NextPage = () => {
   const handleBackButton = () => {
     //console.log("Back button pressed");
 
-    setQuery("");
+    // setQuery("");
     setIsCreate(false);
     setIsViewProfilePage(false);
     setID(0);
@@ -1083,7 +1084,11 @@ const Communication: NextPage = () => {
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
-                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setQuery(getQueryFromSearchPhrase(e.target.value));
+                      setSearchQuery(e.target.value);
+                    }}
                   />
                   <button
                     className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"

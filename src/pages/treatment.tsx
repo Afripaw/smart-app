@@ -169,6 +169,7 @@ const Treatment: NextPage = () => {
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
   const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getQueryFromSearchPhrase = (searchPhrase: string) => {
     // dirk b, jack -> (+dirk +b) (+jack)
@@ -621,11 +622,24 @@ const Treatment: NextPage = () => {
     "TVT",
     "Urinary",
     "Vaccinations (ad hoc)",
-    "Vomiting and diarrhea",
+    "Vomiting",
+    "Diarrhoea",
     "Wound shave and clean",
     "Wound stitch-up",
     "Other",
   ];
+
+  //the type of options depending on the category
+  useEffect(() => {
+    const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
+    if (categoryOption === "Pet clinic, Infield" || categoryOption === "Pet clinic (Infield)") {
+      //remove the Vaccinations (ad hoc) option
+      const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
+      setTypeListOptions(newTypeOptions.map((type) => ({ type: type, state: treatment?.type.includes(type) ?? false })));
+    } else {
+      setTypeListOptions(typeOptions.map((type) => ({ type: type, state: treatment?.type.includes(type) ?? false })));
+    }
+  }, [categoryOption]);
 
   //-------------------------------UPDATE USER-----------------------------------------
   //Update the user's details in fields
@@ -652,12 +666,24 @@ const Treatment: NextPage = () => {
       setStartingDate(userData?.date ?? new Date());
       setComments(userData.comments ?? "");
 
-      setTypeListOptions(
-        typeOptions.map((type) => ({
-          type: type,
-          state: userData.type.includes(type),
-        })),
-      );
+      if (userData.category === "Pet clinic, Infield" || userData.category === "Pet clinic (Infield)") {
+        console.log("!!!!Category is Pet clinic, Infield!!!!");
+        //remove the Vaccinations (ad hoc) option
+        const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
+        setTypeListOptions(
+          newTypeOptions.map((type: string) => ({
+            type: type,
+            state: userData.type.includes(type),
+          })),
+        );
+      } else {
+        setTypeListOptions(
+          typeOptions.map((type: string) => ({
+            type: type,
+            state: userData.type.includes(type),
+          })),
+        );
+      }
 
       // //Make sure thet area and street options have a value
       // if (userData.area === "") {
@@ -682,12 +708,23 @@ const Treatment: NextPage = () => {
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
 
-      setTypeListOptions(
-        typeOptions.map((type) => ({
-          type: type,
-          state: userData.type.includes(type),
-        })),
-      );
+      if (userData.category === "Pet clinic, Infield" || userData.category === "Pet clinic (Infield)") {
+        //remove the Vaccinations (ad hoc) option
+        const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
+        setTypeListOptions(
+          newTypeOptions.map((type: string) => ({
+            type: type,
+            state: userData.type.includes(type),
+          })),
+        );
+      } else {
+        setTypeListOptions(
+          typeOptions.map((type: string) => ({
+            type: type,
+            state: userData.type.includes(type),
+          })),
+        );
+      }
 
       // if (userData.area === "") {
       //   console.log("Area option is select one");
@@ -698,10 +735,16 @@ const Treatment: NextPage = () => {
 
   const handleUpdateUser = async () => {
     setIsLoading(true);
+
+    const typeList_ =
+      categoryOption === "Pet clinic, Infield" || categoryOption === "Pet clinic (Infield)"
+        ? typeList.filter((type) => type !== "Vaccinations (ad hoc)")
+        : typeList;
+
     await updateTreatment.mutateAsync({
       treatmentID: id,
       category: categoryOption === "Select one" ? "" : categoryOption,
-      type: typeList,
+      type: typeList_,
       date: startingDate,
       comments: comments,
     });
@@ -767,12 +810,23 @@ const Treatment: NextPage = () => {
       })) ?? [],
     );
 
-    setTypeListOptions(
-      typeOptions.map((type) => ({
-        type: type,
-        state: false,
-      })),
-    );
+    if (categoryOption === "Pet clinic, Infield") {
+      //remove the Vaccinations (ad hoc) option
+      const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
+      setTypeListOptions(
+        newTypeOptions.map((type: string) => ({
+          type: type,
+          state: false,
+        })),
+      );
+    } else {
+      setTypeListOptions(
+        typeOptions.map((type: string) => ({
+          type: type,
+          state: false,
+        })),
+      );
+    }
   }, [getPreviousTreatments]);
 
   //-------------------------------NEW USER-----------------------------------------
@@ -909,7 +963,7 @@ const Treatment: NextPage = () => {
     }
     //console.log("Back button pressed");
 
-    setQuery("");
+    //setQuery("");
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);
@@ -1142,7 +1196,11 @@ const Treatment: NextPage = () => {
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
-                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setQuery(getQueryFromSearchPhrase(e.target.value));
+                      setSearchQuery(e.target.value);
+                    }}
                   />
                   {/* <div className="border-2 bg-gray-300 p-3 text-blue-500">
                     Upload

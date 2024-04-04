@@ -217,6 +217,7 @@ const Volunteer: NextPage = () => {
   //-------------------------------SEARCH BAR------------------------------------
   //Query the users table
   const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getQueryFromSearchPhrase = (searchPhrase: string) => {
     // dirk b, jack -> (+dirk +b) (+jack)
@@ -632,6 +633,12 @@ const Volunteer: NextPage = () => {
     "Vet Nurse",
     "Walker",
     "Ward Councillor",
+    "Ambassador",
+    "Pet Clinic Administrator",
+    "Pet Clinic Cats",
+    "Pet Clinic General",
+    "Pet Clinic Hospital",
+    "Young Ambassador",
     "Other",
   ];
 
@@ -1106,7 +1113,7 @@ const Volunteer: NextPage = () => {
         "\n" +
         // "You indicated that your preferred means of communication is: SMS" +
         // "\n" +
-        "Regards, Afripaw Team";
+        "Regards, AfriPaw Team";
       //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
       const destinationNumber = mobile;
       try {
@@ -1152,7 +1159,7 @@ const Volunteer: NextPage = () => {
     setClinicsAttendedOption("Select here");
     setStreet("");
     setPreferredCommunicationOption("Select one");
-    setStatusOption("Select one");
+    setStatusOption("Active");
     setStartingDate(new Date());
     setComments("");
     setCollaboratorOrg("");
@@ -1227,7 +1234,7 @@ const Volunteer: NextPage = () => {
           "\n" +
           "You indicated that your preferred means of communication is: SMS" +
           "\n" +
-          "Regards, Afripaw Team";
+          "Regards, AfriPaw Team";
         //const messageContent = "Afripaw Smart App Login Credentials"+"\n\n"+"Dear "+firstName+". Congratulations! You have been registered as a user on the Afripaw Smart App.";
         const destinationNumber = mobile;
         try {
@@ -1416,7 +1423,7 @@ const Volunteer: NextPage = () => {
   const handleBackButton = () => {
     //console.log("Back button pressed");
 
-    setQuery("");
+    // setQuery("");
     setIsUpdate(false);
     setIsCreate(false);
     setIsViewProfilePage(false);
@@ -1476,6 +1483,19 @@ const Volunteer: NextPage = () => {
     }
   }, [mobile]);
 
+  //Street code
+  //Should allow only letters
+  const [streetCodeMessage, setStreetCodeMessage] = useState("");
+  useEffect(() => {
+    if (addressStreetCode.match(/^[A-Za-z]+$/) == null && addressStreetCode.length != 0) {
+      setStreetCodeMessage("Street code must only contain letters");
+    } else if (addressStreetCode.length > 4 && addressStreetCode.length != 0) {
+      setStreetCodeMessage("Street code must be 4 characters or less");
+    } else {
+      setStreetCodeMessage("");
+    }
+  }, [addressStreetCode]);
+
   //Street number
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
   useEffect(() => {
@@ -1519,7 +1539,7 @@ const Volunteer: NextPage = () => {
     if (startingDate === null) mandatoryFields.push("Starting Date");
 
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
-    //if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
+    if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
     if (roleList.length === 0) mandatoryFields.push("Role");
@@ -1712,6 +1732,9 @@ const Volunteer: NextPage = () => {
   const [isClinicLoading, setIsClinicLoading] = useState(false);
   // const btnClinicRef = useRef<HTMLButtonElement>(null);
 
+  //Key value pair of the petID that is the key and a clinicList that is value
+  const [volunteerClinicList, setVolunteerClinicList] = useState<Record<number, Clinic[]>>({});
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -1732,6 +1755,8 @@ const Volunteer: NextPage = () => {
     };
   }, []);
 
+  //VolunteerID for clinic to be added
+  //const [clinicVolunteerID, setClinicVolunteerID] = useState(0);
   //Search for a clinic date and clinic ID given today's date. Todays date needs to match up with the clinic date for the clinic to be added to the pet
   const handleAddClinic = async (id: number) => {
     const user = volunteer_data_with_clinics?.find((volunteer) => volunteer.volunteerID === id);
@@ -1748,6 +1773,13 @@ const Volunteer: NextPage = () => {
           clinic.clinic.date.getFullYear().toString(),
         area: clinic.clinic.greaterArea.greaterArea,
       })) ?? [];
+
+    console.log("Clinic list from DB: ", clinicDates);
+    console.log("Clinic list from frontend: ", clinicList);
+    //if (clinicList.length > clinicDates.length && id === volunteerIDForClinic) return;
+    if (volunteerClinicList[id] && (volunteerClinicList[id]?.length ?? 0) > clinicDates.length) return;
+
+    // setClinicVolunteerID(id);
     setClinicList(clinicDates);
 
     setShowTodayClinics(true);
@@ -1794,29 +1826,44 @@ const Volunteer: NextPage = () => {
     // }
   };
 
-  useEffect(() => {
-    if (!isUpdate && !isCreate && !isViewProfilePage) {
-      const clinics = volunteer_data_with_clinics?.find((volunteer) => volunteer.volunteerID === volunteerIDForClinic)?.clinics;
-      const clinics_ =
-        clinics?.map((clinic) => ({
-          id: clinic.clinicID,
-          date:
-            clinic.clinic.date.getDate().toString() + "/" + (clinic.clinic.date.getMonth() + 1).toString() + "/" + clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.greaterArea.greaterArea,
-        })) ?? [];
-      setClinicList(clinics_);
-      console.log("Clinic list: ", clinics_);
-    }
-  }, [todayClinicList]);
+  // useEffect(() => {
+  //   if (!isUpdate && !isCreate && !isViewProfilePage) {
+  //     const clinics = volunteer_data_with_clinics?.find((volunteer) => volunteer.volunteerID === volunteerIDForClinic)?.clinics;
+  //     const clinics_ =
+  //       clinics?.map((clinic) => ({
+  //         id: clinic.clinicID,
+  //         date:
+  //           clinic.clinic.date.getDate().toString() + "/" + (clinic.clinic.date.getMonth() + 1).toString() + "/" + clinic.clinic.date.getFullYear().toString(),
+  //         area: clinic.clinic.greaterArea.greaterArea,
+  //       })) ?? [];
+  //     console.log("UseEffect - Clinic list from DB: ", clinics_);
+  //     console.log("UseEffect - Clinic list from frontend: ", clinicList);
+  //     //if (clinicList.length === clinics_.length+1 && volunteerIDForClinic === ) return;
+  //     setClinicList(clinics_);
+  //   }
+  // }, [todayClinicList]);
 
   const handleAddTodaysClinic = async (volunteerID: number, clinicID: number) => {
     if (addClinic.isLoading) return;
     setIsClinicLoading(true);
 
     const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
-    console.log("Clinic ID List: ", clinicList);
+    console.log("Clinic ID List: ", clinicIDList);
     console.log("Clinic ID: ", clinicID);
-    if (!clinicIDList.includes(clinicID)) {
+
+    const volunteerClinicIDList = volunteerClinicList[volunteerID]?.map((clinic) => clinic.id) ?? [];
+
+    // const clinics = volunteer_data_with_clinics?.find((volunteer) => volunteer.volunteerID === volunteerID)?.clinics;
+    // const clinics_ =
+    //   clinics?.map((clinic) => ({
+    //     id: clinic.clinicID,
+    //     date:
+    //       clinic.clinic.date.getDate().toString() + "/" + (clinic.clinic.date.getMonth() + 1).toString() + "/" + clinic.clinic.date.getFullYear().toString(),
+    //     area: clinic.clinic.greaterArea.greaterArea,
+    //   })) ?? [];
+
+    if (!clinicIDList.includes(clinicID) && !volunteerClinicIDList.includes(clinicID)) {
+      // if (!clinics_.map((clinic) => clinic.id).includes(clinicID)) {
       setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }]);
       //setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID)?.date ?? ""]);
       //setClinicIDList([...clinicIDList, clinicID]);
@@ -1825,12 +1872,22 @@ const Volunteer: NextPage = () => {
         volunteerID: volunteerID,
         clinicID: clinicID,
       });
+
+      setVolunteerClinicList({
+        ...volunteerClinicList,
+        [volunteerID]: [...(volunteerClinicList[volunteerID] ?? []), todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }],
+      });
     }
     setShowTodayClinics(false);
     setTodayClinicList([]);
-    setVolunteerIDForClinic(0);
+    // setVolunteerIDForClinic(0);
     setIsClinicLoading(false);
   };
+
+  //retrieves the data from the table again when the clinicsAttended is updated
+  useEffect(() => {
+    void refetch();
+  }, [isClinicLoading, clinicList, todayClinicList]);
 
   // ----------------------------------------Uploading Image----------------------------------------
   useEffect(() => {
@@ -1907,7 +1964,11 @@ const Volunteer: NextPage = () => {
                   <input
                     className="mt-3 flex w-1/3 rounded-lg border-2 border-zinc-800 px-2"
                     placeholder="Search..."
-                    onChange={(e) => setQuery(getQueryFromSearchPhrase(e.target.value))}
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setQuery(getQueryFromSearchPhrase(e.target.value));
+                      setSearchQuery(e.target.value);
+                    }}
                   />
                   <button
                     className="absolute right-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
@@ -2300,7 +2361,8 @@ const Volunteer: NextPage = () => {
                       <div className="flex flex-col pr-2">
                         <Input label="Street" placeholder="Type here: e.g. Marina Str" value={street} onChange={setStreet} />
 
-                        <Input label="Street Code" placeholder="Type here: e.g. C3" value={addressStreetCode} onChange={setAddressStreetCode} />
+                        <Input label="Street Code" placeholder="Type here: e.g. OH" value={addressStreetCode} onChange={setAddressStreetCode} />
+                        {streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}
 
                         <div className="flex items-center">
                           <div className="">Street Number: </div>
@@ -2351,7 +2413,7 @@ const Volunteer: NextPage = () => {
                   </div>
                 </div>
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                  <b className="mb-3 text-center text-xl">AfriPaw Association Data</b>
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
@@ -2760,7 +2822,7 @@ const Volunteer: NextPage = () => {
                 </div>
 
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
-                  <b className="mb-3 text-center text-xl">Afripaw Association Data</b>
+                  <b className="mb-3 text-center text-xl">AfriPaw Association Data</b>
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Role(s):</b>{" "}

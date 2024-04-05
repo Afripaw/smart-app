@@ -87,7 +87,7 @@ export const petTreatmentRouter = createTRPCRouter({
               //pet
               { pet: { petName: { contains: term } } },
               { pet: { species: { contains: term } } },
-              { pet: { breed: { contains: term } } },
+              { pet: { breed: { hasSome: [term] } } },
               //owner
               { pet: { owner: { firstName: { contains: term } } } },
               { pet: { owner: { surname: { contains: term } } } },
@@ -105,7 +105,7 @@ export const petTreatmentRouter = createTRPCRouter({
               //pet
               { pet: { petName: { contains: term } } },
               { pet: { species: { contains: term } } },
-              { pet: { breed: { contains: term } } },
+              { pet: { breed: { hasSome: [term] } } },
               //owner
               { pet: { owner: { firstName: { contains: term } } } },
               { pet: { owner: { surname: { contains: term } } } },
@@ -123,7 +123,7 @@ export const petTreatmentRouter = createTRPCRouter({
               //pet
               { pet: { petName: { contains: term } } },
               { pet: { species: { contains: term } } },
-              { pet: { breed: { contains: term } } },
+              { pet: { breed: { hasSome: [term] } } },
               //owner
               { pet: { owner: { firstName: { contains: term } } } },
               { pet: { owner: { surname: { contains: term } } } },
@@ -140,7 +140,7 @@ export const petTreatmentRouter = createTRPCRouter({
               //pet
               { pet: { petName: { contains: term } } },
               { pet: { species: { contains: term } } },
-              { pet: { breed: { contains: term } } },
+              { pet: { breed: { hasSome: [term] } } },
               //owner
               { pet: { owner: { firstName: { contains: term } } } },
               { pet: { owner: { surname: { contains: term } } } },
@@ -338,7 +338,7 @@ export const petTreatmentRouter = createTRPCRouter({
           petID: z.number(),
           category: z.string(),
           date: z.date(),
-          type: z.string().array(),
+          // type: z.string().array(),
           comments: z.string(),
         }),
       ),
@@ -424,12 +424,12 @@ export const petTreatmentRouter = createTRPCRouter({
               { petID: { equals: Number(term.substring(1)) } },
               { petName: { contains: term } },
               { species: { contains: term } },
-              { breed: { contains: term } },
+              { breed: { hasSome: [term] } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
-            OR: [{ petName: { contains: term } }, { species: { contains: term } }, { breed: { contains: term } }].filter(
+            OR: [{ petName: { contains: term } }, { species: { contains: term } }, { breed: { hasSome: [term] } }].filter(
               (condition) => Object.keys(condition).length > 0,
             ), // Filter out empty conditions
           };

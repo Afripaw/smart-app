@@ -80,6 +80,17 @@ const Pet: NextPage = () => {
     clear: boolean;
   };
 
+  //-------------------------------BREEDS-----------------------------------------
+  type BreedOptions = {
+    breed: string;
+    state: boolean;
+  };
+
+  type BreedSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
+
   const [treatmentList, setTreatmentList] = useState<Treatment[]>([]);
 
   //Excel upload
@@ -107,8 +118,9 @@ const Pet: NextPage = () => {
         species: string;
         sex: string;
         age: string;
-        breed: string;
+        breed: string[];
         colour: string[];
+        size: string;
         markings: string;
         status: string;
         sterilisedStatus: Date;
@@ -163,6 +175,8 @@ const Pet: NextPage = () => {
 
         //kennelReceived
         obj.kennelReceived = [""];
+
+        obj.size = obj.size ?? "";
 
         //sterilisationStatus
         console.log("Sterilisation status from data: ", obj.sterilisedStatus);
@@ -254,6 +268,9 @@ const Pet: NextPage = () => {
 
         //make colour an array
         obj.colour = [String(obj.colour)];
+
+        //make breed an array
+        obj.breed = [String(obj.breed)];
       }
 
       //Turn the data into this type of object: {firstName: "John", surname: "Doe", email: "xxxxxxx@xxxxx", mobile: "0712345678", address: "1 Main Road, Observatory, Cape Town, 7925", comments: "None"}
@@ -625,6 +642,11 @@ const Pet: NextPage = () => {
   const colourRef = useRef<HTMLDivElement>(null);
   const btnColourRef = useRef<HTMLButtonElement>(null);
 
+  const [size, setSize] = useState(false);
+  const [sizeOption, setSizeOption] = useState("Select one");
+  const sizeRef = useRef<HTMLDivElement>(null);
+  const btnSizeRef = useRef<HTMLButtonElement>(null);
+
   const [status, setStatus] = useState(false);
   const [statusOption, setStatusOption] = useState("Select one");
   const statusRef = useRef<HTMLDivElement>(null);
@@ -777,6 +799,8 @@ const Pet: NextPage = () => {
   }, [speciesOption]);
 
   //BREED
+  const [breedList, setBreedList] = useState<string[]>([]);
+
   const handleToggleBreed = () => {
     setIsBreedOpen(!isBreedOpen);
   };
@@ -784,20 +808,14 @@ const Pet: NextPage = () => {
   const handleBreedOption = (option: SetStateAction<string>) => {
     setBreedOption(option);
     setIsBreedOpen(false);
+    if (!breedList.includes(String(option))) {
+      setBreedList([...breedList, String(option)]);
+    }
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (breedRef.current && !breedRef.current.contains(event.target as Node) && btnBreedRef.current && !btnBreedRef.current.contains(event.target as Node)) {
-        setIsBreedOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  //const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+  const [breedListOptions, setBreedListOptions] = useState<BreedOptions[]>([]);
+  const [breedSelection, setBreedSelection] = useState<BreedSelect>();
 
   const breedDogOptions = [
     "Africanis",
@@ -835,17 +853,134 @@ const Pet: NextPage = () => {
     "Not Applicable",
   ];
 
+  const breedCatOptions = ["Not Applicable"];
+
   const [breedOptions, setBreedOptions] = useState([""]);
 
   useEffect(() => {
+    console.group("Species: ", speciesOption);
+    console.log("breedOptions before: ", breedOptions);
     if (speciesOption == "Cat") {
-      setBreedOption("Not Applicable");
-      setBreedOptions(["Not Applicable"]);
+      //setColourOption("Select one");
+      setBreedOptions(breedCatOptions);
+      // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
     } else if (speciesOption == "Dog") {
-      //setBreedOption("Select one");
+      //setColourOption("Select one");
       setBreedOptions(breedDogOptions);
+      // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
     }
-  }, [speciesOption]);
+    console.log("breedListOptions after: ", breedListOptions);
+    console.log("breedOptions after: ", breedOptions);
+  }, [speciesOption, isUpdate, breedList]);
+
+  const handleBreed = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setBreedOption("Select All");
+      setBreedSelection({ allSelected: state, clear: false });
+
+      const breeds = breedListOptions.map((breed) => breed.breed);
+      setBreedList(breeds);
+      //order the roleList in alphabetical order
+      // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      setBreedListOptions(breedListOptions.map((breed) => ({ ...breed, state: true })));
+    } else if (selectionCategory === "clear") {
+      setBreedOption("Clear All");
+      setBreedSelection({ allSelected: false, clear: state });
+
+      setBreedList([]);
+      setBreedListOptions(breedListOptions.map((breed) => ({ ...breed, state: false })));
+    } else if (selectionCategory === "normal") {
+      setBreedOption(option);
+      setBreedSelection({ allSelected: false, clear: false });
+      if (state) {
+        if (!breedList.includes(String(option))) {
+          setBreedList([...breedList, String(option)]);
+          //order the roleList in alphabetical order
+          // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        }
+
+        setBreedListOptions(breedListOptions.map((breed) => (breed.breed === option ? { ...breed, state: true } : breed)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedBreedList = breedList.filter((breed) => breed !== option);
+        setBreedList(updatedBreedList);
+        //order the roleList in alphabetical order
+        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        setBreedListOptions(breedListOptions.map((breed) => (breed.breed === option ? { ...breed, state: false } : breed)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
+
+    console.log("BREED LIST: ", breedList);
+  };
+
+  // const handleBreedOption = (option: SetStateAction<string>) => {
+  //   setBreedOption(option);
+  //   setIsBreedOpen(false);
+  // };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (breedRef.current && !breedRef.current.contains(event.target as Node) && btnBreedRef.current && !btnBreedRef.current.contains(event.target as Node)) {
+        setIsBreedOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // const breedDogOptions = [
+  //   "Africanis",
+  //   "Basset",
+  //   "Beagle",
+  //   "Boerboel",
+  //   "Bouvier",
+  //   "Boxer",
+  //   "Bull Terrier",
+  //   "Chihuahua",
+  //   "Chow",
+  //   "Collie",
+  //   "Corgi",
+  //   "Dachshund",
+  //   "Dalmation",
+  //   "Doberman",
+  //   "Fox Terrier",
+  //   "German Shepherd",
+  //   "Husky",
+  //   "Jack Russell",
+  //   "Labrador",
+  //   "Malinois",
+  //   "Maltese Poodle",
+  //   "Pinscher",
+  //   "Pitbull",
+  //   "Ridgeback",
+  //   "Rottweilier",
+  //   "Saint Bernard",
+  //   "Schnauzer",
+  //   "Sharpei",
+  //   "Shepherd",
+  //   "Staffie",
+  //   "Wire Haired Terrier",
+  //   "X-Breed",
+  //   "Not Applicable",
+  // ];
+
+  // const [breedOptions, setBreedOptions] = useState([""]);
+
+  // useEffect(() => {
+  //   if (speciesOption == "Cat") {
+  //     setBreedOption("Not Applicable");
+  //     setBreedOptions(["Not Applicable"]);
+  //   } else if (speciesOption == "Dog") {
+  //     //setBreedOption("Select one");
+  //     setBreedOptions(breedDogOptions);
+  //   }
+  // }, [speciesOption]);
 
   //COLOUR
   const [colourList, setColourList] = useState<string[]>([]);
@@ -964,6 +1099,31 @@ const Pet: NextPage = () => {
   const handleShowColour = () => {
     setShowColour(!showColour);
   };
+
+  //SIZE
+  const handleToggleSize = () => {
+    setSize(!size);
+  };
+
+  const handleSizeOption = (option: SetStateAction<string>) => {
+    setSizeOption(option);
+    setSize(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sizeRef.current && !sizeRef.current.contains(event.target as Node) && btnSizeRef.current && !btnSizeRef.current.contains(event.target as Node)) {
+        setStatus(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const sizeOptions = ["Small", "Medium", "Large"];
 
   //STATUS
   const handleToggleStatus = () => {
@@ -2010,8 +2170,10 @@ const Pet: NextPage = () => {
       setSpeciesOption(userData?.species ?? "Select one");
       setSexOption(userData?.sex ?? "Select one");
       setAgeOption(userData?.age ?? "Select one");
-      setBreedOption(userData?.breed ?? "Select one");
+      // setBreedOption(userData?.breed ?? "Select one");
+      setBreedList(userData?.breed ?? "Select here");
       setColourList(userData?.colour ?? "Select here");
+      setSizeOption(userData?.size ?? "Select one");
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
       setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
@@ -2025,6 +2187,14 @@ const Pet: NextPage = () => {
             state: userData.colour.includes(colour),
           })),
         );
+
+        setBreedOptions(breedCatOptions);
+        setBreedListOptions(
+          breedCatOptions.map((breed) => ({
+            breed: breed,
+            state: userData.breed.includes(breed),
+          })),
+        );
         // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
       } else if (userData?.species == "Dog") {
         //setColourOption("Select one");
@@ -2033,6 +2203,14 @@ const Pet: NextPage = () => {
           colourDogOptions.map((colour) => ({
             colour: colour,
             state: userData.colour.includes(colour),
+          })),
+        );
+
+        setBreedOptions(breedDogOptions);
+        setBreedListOptions(
+          breedDogOptions.map((breed) => ({
+            breed: breed,
+            state: userData.breed.includes(breed),
           })),
         );
         // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
@@ -2181,8 +2359,10 @@ const Pet: NextPage = () => {
       setSpeciesOption(userData?.species ?? "Select one");
       setSexOption(userData?.sex ?? "Select one");
       setAgeOption(userData?.age ?? "Select one");
-      setBreedOption(userData?.breed ?? "Select one");
+      // setBreedOption(userData?.breed ?? "Select one");
+      setBreedList(userData?.breed ?? "Select here");
       setColourList(userData?.colour ?? "Select here");
+      setSizeOption(userData?.size ?? "Select one");
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
       //setSterilisationStatusOption(userData?.sterilisedStatus ?? "Select one");
@@ -2269,6 +2449,14 @@ const Pet: NextPage = () => {
             state: userData.colour.includes(colour),
           })),
         );
+
+        // setBreedOptions(breedCatOptions);
+        // setBreedListOptions(
+        //   breedCatOptions.map((breed) => ({
+        //     breed: breed,
+        //     state: userData.breed.includes(breed),
+        //   })),
+        // );
         // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
       } else if (userData?.species == "Dog") {
         //setColourOption("Select one");
@@ -2279,6 +2467,14 @@ const Pet: NextPage = () => {
             state: userData.colour.includes(colour),
           })),
         );
+
+        // setBreedOptions(breedDogOptions);
+        // setBreedListOptions(
+        //   breedDogOptions.map((breed) => ({
+        //     breed: breed,
+        //     state: userData.breed.includes(breed),
+        //   })),
+        // );
         // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
       }
 
@@ -2300,8 +2496,9 @@ const Pet: NextPage = () => {
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
-      breed: breedOption === "Select one" ? "" : breedOption,
+      breed: breedList,
       colour: colourList,
+      size: speciesOption === "Dog" ? (sizeOption === "Select one" ? "" : sizeOption) : "",
       markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
       sterilisedStatus: sterilisationStatusOption === "Yes" ? sterilisationStatusDate : new Date(0),
@@ -2324,8 +2521,9 @@ const Pet: NextPage = () => {
     setSpeciesOption("Select one");
     setSexOption("Select one");
     setAgeOption("Select one");
-    setBreedOption("Select one");
+    setBreedOption("Select here");
     setColourOption("Select here");
+    setSizeOption("Select one");
     setMarkings("");
     setStatusOption("Select one");
     setSterilisationStatusOption("Select one");
@@ -2359,6 +2557,13 @@ const Pet: NextPage = () => {
       })),
     );
 
+    setBreedListOptions(
+      breedOptions.map((breed) => ({
+        breed: breed,
+        state: false,
+      })),
+    );
+
     setKennelListOptions(
       kennelsReceivedOptions.map((kennel) => ({
         year: kennel,
@@ -2368,6 +2573,7 @@ const Pet: NextPage = () => {
     setClinicListOptions(clinics);
     setKennelList([]);
     setColourList([]);
+    setBreedList([]);
 
     setTreatmentList([]);
     setShowClinicMessage(false);
@@ -2392,8 +2598,9 @@ const Pet: NextPage = () => {
     setSpeciesOption("Select one");
     setSexOption("Select one");
     setAgeOption("Select one");
-    setBreedOption("Select one");
+    setBreedOption("Select here");
     setColourOption("Select here");
+    setSizeOption("Select one");
     setMarkings("");
     setStatusOption("Active");
     setSterilisationStatusOption("Select one");
@@ -2416,6 +2623,7 @@ const Pet: NextPage = () => {
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
     setColourList([]);
+    setBreedList([]);
     setClinicsAttendedOption("Select here");
     const clinics = clinicsAttendedOptions.map((clinic) => ({
       id: clinic.clinicID,
@@ -2439,6 +2647,14 @@ const Pet: NextPage = () => {
           state: false,
         })),
       );
+
+      setBreedOptions(breedCatOptions);
+      setBreedListOptions(
+        breedCatOptions.map((breed) => ({
+          breed: breed,
+          state: false,
+        })),
+      );
       // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
     } else if (speciesOption == "Dog") {
       //setColourOption("Select one");
@@ -2446,6 +2662,14 @@ const Pet: NextPage = () => {
       setColourListOptions(
         colourDogOptions.map((colour) => ({
           colour: colour,
+          state: false,
+        })),
+      );
+
+      setBreedOptions(breedDogOptions);
+      setBreedListOptions(
+        breedDogOptions.map((breed) => ({
+          breed: breed,
           state: false,
         })),
       );
@@ -2476,6 +2700,14 @@ const Pet: NextPage = () => {
             state: false,
           })),
         );
+
+        setBreedOptions(breedCatOptions);
+        setBreedListOptions(
+          breedCatOptions.map((breed) => ({
+            breed: breed,
+            state: false,
+          })),
+        );
         // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
       } else if (speciesOption == "Dog") {
         //setColourOption("Select one");
@@ -2486,9 +2718,56 @@ const Pet: NextPage = () => {
             state: false,
           })),
         );
+
+        setBreedOptions(breedDogOptions);
+        setBreedListOptions(
+          breedDogOptions.map((breed) => ({
+            breed: breed,
+            state: false,
+          })),
+        );
         // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
       }
     }
+    // else if (isUpdate) {
+    //   if (speciesOption == "Cat") {
+    //     //setColourOption("Select one");
+    //     setColourOptions(colourCatOptions);
+    //     setColourListOptions(
+    //       colourCatOptions.map((colour) => ({
+    //         colour: colour,
+    //         state: colourList.includes(colour),
+    //       })),
+    //     );
+
+    //     setBreedOptions(breedCatOptions);
+    //     setBreedListOptions(
+    //       breedCatOptions.map((breed) => ({
+    //         breed: breed,
+    //         state: breedList.includes(breed),
+    //       })),
+    //     );
+    //     // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+    //   } else if (speciesOption == "Dog") {
+    //     //setColourOption("Select one");
+    //     setColourOptions(colourDogOptions);
+    //     setColourListOptions(
+    //       colourDogOptions.map((colour) => ({
+    //         colour: colour,
+    //         state: colourList.includes(colour),
+    //       })),
+    //     );
+
+    //     setBreedOptions(breedDogOptions);
+    //     setBreedListOptions(
+    //       breedDogOptions.map((breed) => ({
+    //         breed: breed,
+    //         state: breedList.includes(breed),
+    //       })),
+    //     );
+    //     // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+    //   }
+    // }
   }, [speciesOption]);
   //-------------------------------NEW USER-----------------------------------------
 
@@ -2504,8 +2783,9 @@ const Pet: NextPage = () => {
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
-      breed: breedOption === "Select one" ? "" : breedOption,
+      breed: breedList,
       colour: colourList,
+      size: speciesOption === "Dog" ? (sizeOption === "Select one" ? "" : sizeOption) : "",
       markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
       sterilisedStatus: sterilisationStatusOption === "Yes" ? sterilisationStatusDate : new Date(0),
@@ -2592,8 +2872,10 @@ const Pet: NextPage = () => {
       setSpeciesOption(userData?.species ?? "");
       setSexOption(userData?.sex ?? "");
       setAgeOption(userData?.age ?? "");
-      setBreedOption(userData?.breed ?? "");
+      //  setBreedOption(userData?.breed ?? "");
+      setBreedList(userData?.breed ?? "");
       setColourList(userData?.colour ?? "");
+      setSizeOption(userData?.size ?? "");
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "");
       //setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
@@ -2675,6 +2957,14 @@ const Pet: NextPage = () => {
             state: userData.colour.includes(colour),
           })),
         );
+
+        setBreedOptions(breedCatOptions);
+        setBreedListOptions(
+          breedCatOptions.map((breed) => ({
+            breed: breed,
+            state: userData.breed.includes(breed),
+          })),
+        );
         // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
       } else if (userData?.species == "Dog") {
         //setColourOption("Select one");
@@ -2683,6 +2973,14 @@ const Pet: NextPage = () => {
           colourDogOptions.map((colour) => ({
             colour: colour,
             state: userData.colour.includes(colour),
+          })),
+        );
+
+        setBreedOptions(breedDogOptions);
+        setBreedListOptions(
+          breedDogOptions.map((breed) => ({
+            breed: breed,
+            state: userData.breed.includes(breed),
           })),
         );
         // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
@@ -2766,13 +3064,15 @@ const Pet: NextPage = () => {
 
       const petData = userData?.pet_data;
 
-      if (isUpdate) {
+      if (isUpdate && router.asPath.includes("petID")) {
         setPetName(petData?.petName ?? "");
         setSpeciesOption(petData?.species ?? "Select one");
         setSexOption(petData?.sex ?? "Select one");
         setAgeOption(petData?.age ?? "Select one");
-        setBreedOption(petData?.breed ?? "Select one");
+        //setBreedOption(petData?.breed ?? "Select one");
+        setBreedList(petData?.breed ?? ["Select here"]);
         setColourList(petData?.colour ?? ["Select here"]);
+        setSizeOption(petData?.size ?? "Select one");
         setMarkings(petData?.markings ?? "");
         setStatusOption(petData?.status ?? "Select one");
         setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "Select one");
@@ -2837,6 +3137,14 @@ const Pet: NextPage = () => {
               state: petData.colour.includes(colour) ?? false,
             })),
           );
+
+          setBreedOptions(breedCatOptions);
+          setBreedListOptions(
+            breedCatOptions.map((breed) => ({
+              breed: breed,
+              state: petData.breed.includes(breed) ?? false,
+            })),
+          );
           // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
         } else if (petData?.species == "Dog") {
           //setColourOption("Select one");
@@ -2845,6 +3153,14 @@ const Pet: NextPage = () => {
             colourDogOptions.map((colour) => ({
               colour: colour,
               state: petData.colour.includes(colour) ?? false,
+            })),
+          );
+
+          setBreedOptions(breedDogOptions);
+          setBreedListOptions(
+            breedDogOptions.map((breed) => ({
+              breed: breed,
+              state: petData.breed.includes(breed) ?? false,
             })),
           );
           // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
@@ -2864,8 +3180,10 @@ const Pet: NextPage = () => {
         setSpeciesOption(petData?.species ?? "");
         setSexOption(petData?.sex ?? "");
         setAgeOption(petData?.age ?? "");
-        setBreedOption(petData?.breed ?? "");
-        setColourList(petData?.colour ?? ["Select one"]);
+        //setBreedOption(petData?.breed ?? "");
+        setBreedList(petData?.breed ?? ["Select here"]);
+        setColourList(petData?.colour ?? ["Select here"]);
+        setSizeOption(petData?.size ?? "");
         setMarkings(petData?.markings ?? "");
         setStatusOption(petData?.status ?? "");
         setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "");
@@ -2924,6 +3242,14 @@ const Pet: NextPage = () => {
             state: petData.colour.includes(colour) ?? false,
           })),
         );
+
+        setBreedOptions(breedCatOptions);
+        setBreedListOptions(
+          breedCatOptions.map((breed) => ({
+            breed: breed,
+            state: petData.breed.includes(breed) ?? false,
+          })),
+        );
         // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
       } else if (petData?.species == "Dog") {
         //setColourOption("Select one");
@@ -2932,6 +3258,14 @@ const Pet: NextPage = () => {
           colourDogOptions.map((colour) => ({
             colour: colour,
             state: petData.colour.includes(colour) ?? false,
+          })),
+        );
+
+        setBreedOptions(breedDogOptions);
+        setBreedListOptions(
+          breedDogOptions.map((breed) => ({
+            breed: breed,
+            state: petData.breed.includes(breed) ?? false,
           })),
         );
         // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
@@ -2984,8 +3318,9 @@ const Pet: NextPage = () => {
     setSpeciesOption("Select one");
     setSexOption("Select one");
     setAgeOption("Select one");
-    setBreedOption("Select one");
+    setBreedOption("Select here");
     setColourOption("Select here");
+    setSizeOption("Select one");
     setMarkings("");
     setStatusOption("Select one");
     setSterilisationStatusOption("Select one");
@@ -3004,6 +3339,7 @@ const Pet: NextPage = () => {
     setComments("");
     setClinicList([]);
     setColourList([]);
+    setBreedList([]);
     setTreatmentList([]);
     setShowClinicMessage(false);
     setColourSelection({ allSelected: false, clear: false });
@@ -3041,7 +3377,8 @@ const Pet: NextPage = () => {
     if (speciesOption === "Select one") mandatoryFields.push("Species");
     if (sexOption === "Select one") mandatoryFields.push("Sex");
     if (ageOption === "Select one") mandatoryFields.push("Age");
-    if (breedOption === "Select one") mandatoryFields.push("Breed");
+    if (breedList.length === 0) mandatoryFields.push("Breed");
+    //if (breedOption === "Select one") mandatoryFields.push("Breed");
     // if (colourOption === "Select one") mandatoryFields.push("Colour");
     // if (markings === "") mandatoryFields.push("Markings");
     if (statusOption === "Select one") mandatoryFields.push("Status");
@@ -3505,7 +3842,7 @@ const Pet: NextPage = () => {
                             </td>
                             {/* <td className="border px-4 py-2">P{pet.petID}</td> */}
                             <td className="border px-2 py-1">
-                              {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed})
+                              {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed[0]})
                             </td>
                             <td className="border px-2 py-1">
                               <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(pet.ownerID)}>
@@ -3834,7 +4171,7 @@ const Pet: NextPage = () => {
                       )}
                     </div>
                   </div>
-
+                  {/* 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
                       <label>
@@ -3859,6 +4196,82 @@ const Pet: NextPage = () => {
                             {breedOptions.map((option) => (
                               <li key={option} onClick={() => handleBreedOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div> */}
+
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">Breed(s): </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnBreedRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleBreed}
+                      >
+                        {breedOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isBreedOpen && (
+                        <div ref={breedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {colourOptions.map((option) => (
+                              <li key={option} onClick={() => handleColourOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul> */}
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <li key={1}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="1"
+                                  type="checkbox"
+                                  checked={breedSelection?.allSelected}
+                                  onChange={(e) => handleBreed("", e.target.checked, "allSelected")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                  Select All
+                                </label>
+                              </div>
+                            </li>
+                            <li key={2}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="2"
+                                  type="checkbox"
+                                  checked={breedSelection?.clear}
+                                  onChange={(e) => handleBreed("", e.target.checked, "clear")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                  Clear All
+                                </label>
+                              </div>
+                            </li>
+                            {breedListOptions?.map((option) => (
+                              <li key={option.breed}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.breed)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleBreed(option.breed, e.target.checked, "normal")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.breed)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.breed}
+                                  </label>
+                                </div>
                               </li>
                             ))}
                           </ul>
@@ -3942,6 +4355,38 @@ const Pet: NextPage = () => {
                       )}
                     </div>
                   </div>
+
+                  {speciesOption === "Dog" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-4">
+                        <label>Size: </label>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnSizeRef}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleToggleSize}
+                        >
+                          {sizeOption + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {size && (
+                          <div ref={sizeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {sizeOptions.map((option) => (
+                                <li key={option} onClick={() => handleSizeOption(option)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex items-start">
                     <div className="w-36 pt-3">Markings: </div>
@@ -4840,17 +5285,30 @@ const Pet: NextPage = () => {
                         <b className="mr-3">Age:</b> {ageOption === "Select one" ? user?.age : ageOption}
                       </div>
 
-                      <div className="mb-2 flex items-center">
+                      {/* <div className="mb-2 flex items-center">
                         <b className="mr-3">Breed:</b> {breedOption === "Select one" ? user?.breed : breedOption}
+                      </div> */}
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">Breed(s):</b>{" "}
+                        {breedList
+                          // .slice(1, breedList.length)
+                          .map((breed) => breed)
+                          .join("; ")}
                       </div>
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Colour(s):</b>{" "}
                         {colourList
-                          .slice(1, colourList.length)
+                          // .slice(1, colourList.length)
                           .map((colour) => colour)
                           .join("; ")}
                       </div>
+
+                      {speciesOption === "Dog" && (
+                        <div className="mb-2 flex items-center">
+                          <b className="mr-3">Size:</b> {sizeOption}
+                        </div>
+                      )}
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Markings:</b> {markings}

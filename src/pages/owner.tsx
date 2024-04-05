@@ -117,6 +117,7 @@ const Owner: NextPage = () => {
       //This is the format that the insertExcelData mutation expects
 
       type petOwnerData = {
+        southAfricanID: string;
         firstName: string;
         email: string;
         surname: string;
@@ -150,8 +151,15 @@ const Owner: NextPage = () => {
         //change the  format of the addressPostalCode
         // obj.addressPostalCode = obj.addressPostalCode.toString();
 
+        obj.southAfricanID = obj.southAfricanID ?? "";
+        // obj.addressAreaID = obj.addressAreaID ?? 0;
+        // obj.addressStreetID = obj.addressStreetID ?? 0;
+        // obj.addressGreaterAreaID = obj.addressGreaterAreaID ?? 0;
+
         //add an addressFreeForm column
         obj.addressFreeForm = "";
+
+        //obj.southAfricanID = obj.southAfricanID.toString();
 
         //add an addressPostalCode column
         // obj.addressPostalCode = "";
@@ -367,6 +375,8 @@ const Owner: NextPage = () => {
   //---------------------------------EDIT BOXES----------------------------------
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
+  const [southAfricanID, setSouthAfricanID] = useState("");
+
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   const [addressFreeForm, setAddressFreeForm] = useState("");
@@ -457,6 +467,11 @@ const Owner: NextPage = () => {
   const [statusOption, setStatusOption] = useState("Select one");
   const statusRef = useRef<HTMLDivElement>(null);
   const btnStatusRef = useRef<HTMLButtonElement>(null);
+
+  const [isSouthAfricanIDOpen, setIsSouthAfricanIDOpen] = useState(false);
+  const [southAfricanIDOption, setSouthAfricanIDOption] = useState("Select one");
+  const southAfricanIDRef = useRef<HTMLDivElement>(null);
+  const btnSouthAfricanIDRef = useRef<HTMLButtonElement>(null);
 
   const handleToggleGreaterArea = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
@@ -667,6 +682,36 @@ const Owner: NextPage = () => {
 
   const statusOptions = ["Active", "Passive"];
 
+  //SOUTH AFRICAN ID
+  const handleToggleSouthAfricanID = () => {
+    setIsSouthAfricanIDOpen(!isSouthAfricanIDOpen);
+  };
+
+  const handleSouthAfricanIDOption = (option: SetStateAction<string>) => {
+    setSouthAfricanIDOption(option);
+    setIsSouthAfricanIDOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        southAfricanIDRef.current &&
+        !southAfricanIDRef.current.contains(event.target as Node) &&
+        btnSouthAfricanIDRef.current &&
+        !btnSouthAfricanIDRef.current.contains(event.target as Node)
+      ) {
+        setIsSouthAfricanIDOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const southAfricanIDOptions = ["Yes", "Unknown", "No ID"];
+
   //----------------------------COMMUNICATION OF USER DETAILS---------------------------
   //Send user's details to user
   // const [sendUserDetails, setSendUserDetails] = useState(false);
@@ -700,6 +745,16 @@ const Owner: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+      } else if (userData.southAfricanID !== null ? userData.southAfricanID.match(/^\d{13}$/) : false) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData.southAfricanID ?? "");
+      }
 
       const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
 
@@ -760,7 +815,7 @@ const Owner: NextPage = () => {
     const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
     const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
     const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
-    const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
+    const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed[0]))[0] ?? [];
 
     const combined = petsID.map((id, index) => {
       return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
@@ -798,6 +853,17 @@ const Owner: NextPage = () => {
       setStartingDate(userData.startingDate ?? new Date());
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
+
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+        //}else if (userData?.southAfricanID?.match(/^\d{13}$/)){
+      } else if (userData.southAfricanID?.match(/^\d{13}$/)) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData?.southAfricanID ?? "");
+      }
 
       // const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
       // const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
@@ -887,6 +953,7 @@ const Owner: NextPage = () => {
     setIsLoading(true);
     const owner = await updateOwner.mutateAsync({
       petOwnerID: id,
+      southAfricanID: southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
       firstName: firstName,
       email: email,
       surname: surname,
@@ -946,6 +1013,8 @@ const Owner: NextPage = () => {
     }
 
     //After the newUser has been created make sure to set the fields back to empty
+    setSouthAfricanIDOption("Select one");
+    setSouthAfricanID("");
     setFirstName("");
     setEmail("");
     setSurname("");
@@ -991,6 +1060,8 @@ const Owner: NextPage = () => {
     setStatusOption("Active");
     setStartingDate(new Date());
     setComments("");
+    setSouthAfricanIDOption("Select one");
+    setSouthAfricanID("");
     setFirstName("");
     setEmail("");
     setSurname("");
@@ -1018,6 +1089,7 @@ const Owner: NextPage = () => {
     setIsLoading(true);
     try {
       const newUser_ = await newOwner.mutateAsync({
+        southAfricanID: southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
         firstName: firstName,
         email: email,
         surname: surname,
@@ -1124,6 +1196,16 @@ const Owner: NextPage = () => {
       setImage(userData.image ?? "");
       console.log("Select one");
 
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+      } else if (userData.southAfricanID?.match(/^\d{13}$/)) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData.southAfricanID ?? "");
+      }
+
       // setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
       // setAreaID(userData.addressAreaID ?? 0);
       // setStreetID(userData.addressStreetID ?? 0);
@@ -1131,7 +1213,7 @@ const Owner: NextPage = () => {
       const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
       const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
       const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
-      const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed))[0] ?? [];
+      const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed[0]))[0] ?? [];
 
       const combined = petsID.map((id, index) => {
         return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
@@ -1216,6 +1298,16 @@ const Owner: NextPage = () => {
       setImage(userData.image ?? "");
       console.log("Select one");
 
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+      } else if (userData.southAfricanID?.match(/^\d{13}$/)) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData.southAfricanID ?? "");
+      }
+
       // userData.pets?.map((pet) => {
       //   console.log("Pet: ", pet);
       // });
@@ -1224,7 +1316,7 @@ const Owner: NextPage = () => {
         userData.pets?.map((pet) => ({
           id: pet.petID,
           name: pet.petName ?? "",
-          breed: pet.breed ?? "",
+          breed: pet.breed[0] ?? "",
         })) ?? [];
 
       // //const petsflat = pet_data?.flat();
@@ -1372,6 +1464,8 @@ const Owner: NextPage = () => {
     setIsViewProfilePage(false);
     setIsUploadModalOpen(false);
     setID(0);
+    setSouthAfricanIDOption("Select one");
+    setSouthAfricanID("");
     setFirstName("");
     setEmail("");
     setSurname("");
@@ -1395,6 +1489,19 @@ const Owner: NextPage = () => {
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
+  //South African ID
+  const [southAfricanIDMessage, setSouthAfricanIDMessage] = useState("");
+  useEffect(() => {
+    console.log(southAfricanID.length);
+    if (southAfricanID.match(/^[0-9]+$/) == null && southAfricanID.length != 0) {
+      setSouthAfricanIDMessage("ID must only contain numbers");
+    } else if (southAfricanID.length != 13 && southAfricanID.length != 0) {
+      setSouthAfricanIDMessage("ID must be 13 digits");
+    } else {
+      setSouthAfricanIDMessage("");
+    }
+  }, [southAfricanID]);
+
   //Mobile number
   const [mobileMessage, setMobileMessage] = useState("");
   useEffect(() => {
@@ -1459,7 +1566,7 @@ const Owner: NextPage = () => {
 
     if (firstName === "") mandatoryFields.push("First Name");
     if (surname === "") mandatoryFields.push("Surname");
-    if (mobile === "") mandatoryFields.push("Mobile");
+    //if (mobile === "") mandatoryFields.push("Mobile");
     if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
     // if (areaOption.area === "Select one") mandatoryFields.push("Area");
     // if (streetOption.street === "Select one") mandatoryFields.push("Street");
@@ -1471,6 +1578,7 @@ const Owner: NextPage = () => {
     if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
+    if (southAfricanIDMessage !== "") errorFields.push({ field: "South African ID", message: southAfricanIDMessage });
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -1661,8 +1769,8 @@ const Owner: NextPage = () => {
                     Upload
                     <input type="file" onChange={(e) => void handleUpload(e)} accept=".xlsx, .xls" />
                   </div> */}
-                  {/* 
-                  <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
                 </div>
@@ -1869,10 +1977,54 @@ const Owner: NextPage = () => {
                   <div className="flex py-2">
                     Owner ID: <div className="px-3">N{isCreate ? String((latestOwnerID?.data?.clinicID ?? 0) + 1) : id}</div>
                   </div>
+                  {/* South African ID with dropdown and textbox */}
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-4">
+                      <label className="">South African ID: </label>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnSouthAfricanIDRef}
+                        className="mb-3 mt-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleSouthAfricanID}
+                      >
+                        {southAfricanIDOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isSouthAfricanIDOpen && (
+                        <div ref={southAfricanIDRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {southAfricanIDOptions.map((option) => (
+                              <li key={option} onClick={() => handleSouthAfricanIDOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    {southAfricanIDOption === "Yes" && (
+                      <div className="flex flex-col items-center">
+                        <input
+                          className="m-2 mt-4 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                          placeholder="Type here: e.g. 9303085835382"
+                          onChange={(e) => setSouthAfricanID(e.target.value)}
+                          value={southAfricanID}
+                        />
+                        {southAfricanIDMessage && <div className="text-sm text-red-500">{southAfricanIDMessage}</div>}
+                      </div>
+                    )}
+                  </div>
+                  {/* {southAfricanIDOption === "Yes" && (
+                    <Input label="South African ID" placeholder="Type here: e.g. 9303085835382" value={southAfricanID} onChange={setSouthAfricanID} required />
+                  )} */}
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
                   <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />
-                  <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} required />
+                  <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} />
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
@@ -2173,7 +2325,7 @@ const Owner: NextPage = () => {
                       <DatePicker
                         selected={startingDate}
                         onChange={(date) => setStartingDate(date!)}
-                        dateFormat="dd/MM/yyyy"
+                        dateFormat="mm/dd/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-4 py-2"
                       />
@@ -2306,6 +2458,10 @@ const Owner: NextPage = () => {
                       <b className="mb-14 text-center text-xl">Personal & Contact Data</b>
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Owner ID:</b> N{id}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">South African ID:</b> {southAfricanID}
                       </div>
 
                       <div className="mb-2 flex items-center">

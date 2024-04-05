@@ -1772,69 +1772,79 @@ const User: NextPage = () => {
                 </div>
               </div>
               {user_data ? (
-                <article className="my-5 flex max-h-[60%] w-full flex-col items-center justify-center overflow-auto rounded-md shadow-inner">
-                  <table className="">
-                    {/* table-auto scroll-smooth */}
-                    <thead className=" z-20">
-                      <tr>
-                        <th className="px-4 py-2"></th>
-                        {/* <th className="px-4 py-2">ID</th> */}
-                        <th className="px-4 py-2">Name</th>
+                // <article className="my-5 flex max-h-[60%] w-full flex-col items-center justify-center overflow-auto rounded-md shadow-inner">
+                //   <table className="">
+                //     {/* table-auto scroll-smooth */}
+                //     <thead className=" z-20">
+                //       <tr>
+                //         <th className="px-4 py-2"></th>
+                //         {/* <th className="px-4 py-2">ID</th> */}
+                //         <th className="px-4 py-2">Name</th>
 
-                        <th className="px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
-                              Surname
-                            </button>
-                            <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort alphabetically
-                            </span>
-                          </span>
-                        </th>
-                        <th className="px-4 py-2">Email</th>
-                        <th className="px-4 py-2">Mobile</th>
-                        <th className="px-4 py-2">Greater Area</th>
-                        <th className="px-4 py-2">Area</th>
-                        <th className="px-4 py-2">Role</th>
-                        <th className="px-4 py-2">Status</th>
-                        <th className="w-[35px] px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                              Last Update
-                            </button>
-                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort reverse chronologically
-                            </span>
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {user_data?.map((user, index) => {
-                        return (
-                          <tr className="items-center">
-                            <td className=" border px-2 py-1">
-                              <div className="flex justify-center">{index + 1}</div>
-                            </td>
-                            {/* <td className="border px-4 py-2">U{user.userID}</td> */}
-                            <td className="border px-2 py-1">{user.name}</td>
-                            <td className="border px-2 py-1">{user.surname}</td>
-                            <td className="border px-2 py-1">{user.email}</td>
-                            <td className="border px-2 py-1">{user.mobile}</td>
-                            <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
-                            <td className="border px-2 py-1">{user.addressArea?.area}</td>
-                            <td className="border px-2 py-1">{user.role}</td>
-                            <td className="border px-2 py-1">{user.status}</td>
+                <article className="my-5 flex w-full justify-center rounded-md shadow-inner">
+                  <div className="max-h-[70vh] max-w-7xl overflow-auto">
+                    {/* max-h-[60vh] */}
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="z-30 bg-gray-50">
+                        <tr className="">
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Name</th>
 
-                            <td className=" border px-2 py-1">
-                              {user?.updatedAt?.getDate()?.toString() ?? ""}
-                              {"/"}
-                              {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                              {"/"}
-                              {user?.updatedAt?.getFullYear()?.toString() ?? ""}
-                            </td>
-                            <div className="flex">
-                              {/* <div className="group relative flex items-center justify-center">
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
+                                Surname
+                              </button>
+                              <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort alphabetically
+                              </span>
+                            </span>
+                          </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Email</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Mobile</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Greater Area</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Area</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Role</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Status</th>
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                                Last Update
+                              </button>
+                              <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort reverse chronologically
+                              </span>
+                            </span>
+                          </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {user_data?.map((user, index) => {
+                          return (
+                            <tr className="items-center">
+                              <td className=" border px-2 py-1">
+                                <div className="flex justify-center">{index + 1}</div>
+                              </td>
+                              {/* <td className="border px-4 py-2">U{user.userID}</td> */}
+                              <td className="border px-2 py-1">{user.name}</td>
+                              <td className="border px-2 py-1">{user.surname}</td>
+                              <td className="border px-2 py-1">{user.email}</td>
+                              <td className="border px-2 py-1">{user.mobile}</td>
+                              <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
+                              <td className="border px-2 py-1">{user.addressArea?.area}</td>
+                              <td className="border px-2 py-1">{user.role}</td>
+                              <td className="border px-2 py-1">{user.status}</td>
+
+                              <td className=" border px-2 py-1">
+                                {user?.updatedAt?.getDate()?.toString() ?? ""}
+                                {"/"}
+                                {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                                {"/"}
+                                {user?.updatedAt?.getFullYear()?.toString() ?? ""}
+                              </td>
+                              <div className="flex">
+                                {/* <div className="group relative flex items-center justify-center">
                               <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                 Deletes user
                               </span>
@@ -1844,38 +1854,39 @@ const User: NextPage = () => {
                                 onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")}
                               />
                             </div> */}
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Trash size={24} className="block" onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")} />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Delete user
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Trash size={24} className="block" onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")} />
+                                    <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Delete user
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(String(user.id))} />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Update user
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(String(user.id))} />
+                                    <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Update user
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(String(user.id))} />
-                                  <span className="absolute bottom-full hidden w-[75px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    View user profile
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(String(user.id))} />
+                                    <span className="absolute bottom-full hidden w-[75px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      View user profile
+                                    </span>
                                   </span>
-                                </span>
+                                </div>
                               </div>
-                            </div>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </article>
               ) : (
                 <div className="flex items-center justify-center pt-10">

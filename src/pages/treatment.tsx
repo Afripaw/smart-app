@@ -96,7 +96,7 @@ const Treatment: NextPage = () => {
         petID: number;
         category: string;
         date: Date; // Or string if you are handling date as a string before conversion.
-        type: string[];
+        // type: string[];
         comments: string;
       };
 
@@ -122,7 +122,8 @@ const Treatment: NextPage = () => {
           obj.date = new Date(obj.date);
         }
 
-        obj.type = [String(obj.type)];
+        //obj.type = [obj.type ?? ""];
+        //  obj.type = [String(obj.type)];
 
         //comments
         obj.comments = "";

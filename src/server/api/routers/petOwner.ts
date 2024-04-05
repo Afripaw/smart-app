@@ -6,6 +6,7 @@ export const petOwnerRouter = createTRPCRouter({
   create: publicProcedure
     .input(
       z.object({
+        southAfricanID: z.string(),
         firstName: z.string(),
         email: z.string(),
         surname: z.string(),
@@ -25,6 +26,7 @@ export const petOwnerRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const petOwner = await ctx.db.petOwner.create({
         data: {
+          southAfricanID: input.southAfricanID,
           firstName: input.firstName,
           email: input.email,
           surname: input.surname,
@@ -69,6 +71,7 @@ export const petOwnerRouter = createTRPCRouter({
     .input(
       z.object({
         petOwnerID: z.number(),
+        southAfricanID: z.string(),
         firstName: z.string(),
         email: z.string(),
         surname: z.string(),
@@ -91,6 +94,7 @@ export const petOwnerRouter = createTRPCRouter({
           ownerID: input.petOwnerID,
         },
         data: {
+          southAfricanID: input.southAfricanID,
           firstName: input.firstName,
           email: input.email,
           surname: input.surname,
@@ -183,6 +187,7 @@ export const petOwnerRouter = createTRPCRouter({
               //     },
               //   },
               // },
+              { southAfricanID: { contains: term } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
               { email: { contains: term } },
@@ -211,6 +216,7 @@ export const petOwnerRouter = createTRPCRouter({
                   },
                 },
               },
+              { southAfricanID: { contains: term } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
               { email: { contains: term } },
@@ -232,6 +238,7 @@ export const petOwnerRouter = createTRPCRouter({
         } else {
           return {
             OR: [
+              { southAfricanID: { contains: term } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
               { email: { contains: term } },
@@ -361,6 +368,7 @@ export const petOwnerRouter = createTRPCRouter({
     .input(
       z.array(
         z.object({
+          southAfricanID: z.string(),
           firstName: z.string(),
           email: z.string(),
           surname: z.string(),
@@ -712,6 +720,7 @@ export const petOwnerRouter = createTRPCRouter({
               //     },
               //   },
               // },
+              { southAfricanID: { contains: term } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
               { email: { contains: term } },
@@ -740,6 +749,7 @@ export const petOwnerRouter = createTRPCRouter({
                   },
                 },
               },
+              { southAfricanID: { contains: term } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
               { email: { contains: term } },
@@ -761,6 +771,7 @@ export const petOwnerRouter = createTRPCRouter({
         } else {
           return {
             OR: [
+              { southAfricanID: { contains: term } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
               { email: { contains: term } },

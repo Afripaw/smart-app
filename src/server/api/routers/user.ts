@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { QueryMode } from "@prisma/client"; // Make sure to import QueryMode
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 

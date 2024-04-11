@@ -1090,9 +1090,9 @@ const Volunteer: NextPage = () => {
     const volunteer = await updateVolunteer.mutateAsync({
       volunteerID: id,
       firstName: firstName,
-      email: email,
+      email: email ? email : "",
       surname: surname,
-      mobile: mobile,
+      mobile: mobile ? mobile : "",
       addressGreaterAreaID: greaterAreaIDList,
       addressStreet: street,
       addressStreetCode: addressStreetCode,
@@ -1212,9 +1212,9 @@ const Volunteer: NextPage = () => {
     try {
       const newUser_ = await newVolunteer.mutateAsync({
         firstName: firstName,
-        email: email,
+        email: email ? email : "",
         surname: surname,
-        mobile: mobile,
+        mobile: mobile ? mobile : "",
         addressGreaterAreaID: greaterAreaIDList,
         addressStreet: street,
         addressStreetCode: addressStreetCode,
@@ -1545,11 +1545,13 @@ const Volunteer: NextPage = () => {
 
     if (firstName === "") mandatoryFields.push("First Name");
     if (surname === "") mandatoryFields.push("Surname");
-    if (mobile === "") mandatoryFields.push("Mobile");
+    // if (mobile === "") mandatoryFields.push("Mobile");
     if (greaterAreaList.length === 0) mandatoryFields.push("Greater Area");
-    if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
+    // if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
     if (statusOption === "Select one") mandatoryFields.push("Status");
     if (startingDate === null) mandatoryFields.push("Starting Date");
+    if (preferredOption === "Email" && email === "") mandatoryFields.push("Email is preferred communication but is empty");
+    if (preferredOption === "SMS" && mobile === "") mandatoryFields.push("SMS is preferred communication but is empty");
 
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
     if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
@@ -2210,7 +2212,7 @@ const Volunteer: NextPage = () => {
             </div>
             <div className="flex grow flex-col items-center">
               <label className="">
-                {"("}All fields with <span className="mb-2 items-start px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
+                {"("}All fields marked <span className="mb-2 items-start px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
               </label>
               <div className="flex flex-col items-start">
                 {/* <div className="p-2">Volunteer ID: {(latestVolunteerID?.data?.volunteerID ?? 0) + 1}</div> */}
@@ -2253,35 +2255,37 @@ const Volunteer: NextPage = () => {
                   <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} />
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-start pt-4">
-                      <label className="mb-2">Preferred Communication Channel: </label>
+                  {(mobile != "" || email != "") && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-start pt-4">
+                        <label className="mb-2">Preferred Communication Channel: </label>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnPreferredCommunicationRef}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleTogglePreferredCommunication}
+                        >
+                          {preferredOption + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {preferredCommunication && (
+                          <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {preferredCommunicationOptions.map((option) => (
+                                <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnPreferredCommunicationRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleTogglePreferredCommunication}
-                      >
-                        {preferredOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {preferredCommunication && (
-                        <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {preferredCommunicationOptions.map((option) => (
-                              <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
@@ -2879,9 +2883,14 @@ const Volunteer: NextPage = () => {
                     {clinicList.length > 0 && (
                       <div className="flex flex-col">
                         {clinicList
-                          .sort((a, b) => a.id - b.id)
+                          // .sort((a, b) => a.id - b.id)
+                          .sort((a, b) => {
+                            const dateA = new Date(a.date.split("/").reverse().join("-"));
+                            const dateB = new Date(b.date.split("/").reverse().join("-"));
+                            return dateB.getTime() - dateA.getTime();
+                          })
                           .map((clinic, index) => (
-                            <div key={index}>{clinic.date + " " + clinic.area}</div>
+                            <div key={index}>{clinic.date + " (" + clinic.area + ")"}</div>
                           ))}
                       </div>
                     )}

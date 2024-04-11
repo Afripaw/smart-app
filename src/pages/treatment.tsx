@@ -1392,7 +1392,7 @@ const Treatment: NextPage = () => {
             </div>
             <div className="flex grow flex-col items-center">
               <label>
-                {"("}All fields with <span className="px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
+                {"("}All fields marked <span className="px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
               </label>
               <div className="flex w-[46%] flex-col">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}

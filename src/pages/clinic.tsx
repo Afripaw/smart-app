@@ -1137,7 +1137,7 @@ const Clinic: NextPage = () => {
             </div>
             <div className="flex grow flex-col items-center">
               <div className="flex">
-                {"("}All fields with <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
+                {"("}All fields marked <div className="px-1 text-lg text-main-orange"> * </div> are compulsary{")"}
               </div>
               <div className="flex w-[46%] flex-col">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}

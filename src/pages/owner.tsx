@@ -828,7 +828,7 @@ const Owner: NextPage = () => {
     const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
     const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
     const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
-    const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed[0]))[0] ?? [];
+    const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed.join(", ")))[0] ?? [];
 
     const combined = petsID.map((id, index) => {
       return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
@@ -1226,7 +1226,7 @@ const Owner: NextPage = () => {
       const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
       const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
       const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
-      const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed[0]))[0] ?? [];
+      const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed.join(", ")))[0] ?? [];
 
       const combined = petsID.map((id, index) => {
         return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
@@ -1329,7 +1329,7 @@ const Owner: NextPage = () => {
         userData.pets?.map((pet) => ({
           id: pet.petID,
           name: pet.petName ?? "",
-          breed: pet.breed[0] ?? "",
+          breed: pet.breed.join(", ") ?? "",
         })) ?? [];
 
       // //const petsflat = pet_data?.flat();
@@ -1583,7 +1583,10 @@ const Owner: NextPage = () => {
     if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
     // if (areaOption.area === "Select one") mandatoryFields.push("Area");
     // if (streetOption.street === "Select one") mandatoryFields.push("Street");
-    if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
+    //if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
+    if (preferredOption === "Email" && email === "") mandatoryFields.push("Email is preferred communication but is empty");
+    if (preferredOption === "SMS" && mobile === "") mandatoryFields.push("SMS is preferred communication but is empty");
+
     if (statusOption === "Select one") mandatoryFields.push("Status");
     if (startingDate === null) mandatoryFields.push("Starting Date");
 
@@ -1854,13 +1857,15 @@ const Owner: NextPage = () => {
                                 {user.pets?.map((pet) => {
                                   return (
                                     <div className="flex flex-col gap-0">
-                                      {pet.map((pet_) => {
-                                        return (
-                                          <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet_.petID)}>
-                                            {pet_.petName}
-                                          </button>
-                                        );
-                                      })}
+                                      {pet
+                                        .sort((a, b) => a.petName.localeCompare(b.petName))
+                                        .map((pet_) => {
+                                          return (
+                                            <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet_.petID)}>
+                                              {pet_.petName}
+                                            </button>
+                                          );
+                                        })}
                                     </div>
                                   );
                                 })}
@@ -1965,7 +1970,7 @@ const Owner: NextPage = () => {
             </div>
             <div className="flex grow flex-col items-center">
               <label>
-                {"("}All fields with <span className="px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
+                {"("}All fields marked <span className="px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
               </label>
               <div className="flex flex-col">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
@@ -2052,36 +2057,39 @@ const Owner: NextPage = () => {
                   <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} />
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-4">
-                      <label className="">Preferred Communication Channel: </label>
+                  {(mobile != "" || email != "") && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-4">
+                        <label className="">Preferred Communication Channel: </label>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnPreferredCommunicationRef}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleTogglePreferredCommunication}
+                        >
+                          {preferredOption + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {preferredCommunication && (
+                          <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              {preferredCommunicationOptions.map((option) => (
+                                <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnPreferredCommunicationRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleTogglePreferredCommunication}
-                      >
-                        {preferredOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {preferredCommunication && (
-                        <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            {preferredCommunicationOptions.map((option) => (
-                              <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  )}
                 </div>
+
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
                   <div className="flex flex-col divide-y-2 divide-gray-300">
@@ -2348,7 +2356,7 @@ const Owner: NextPage = () => {
                       <DatePicker
                         selected={startingDate}
                         onChange={(date) => setStartingDate(date!)}
-                        dateFormat="mm/dd/yyyy"
+                        dateFormat="dd/MM/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-4 py-2"
                       />
@@ -2375,7 +2383,7 @@ const Owner: NextPage = () => {
                     //       .join("; ")}
                     //   </div>
                     // </div>
-                    <div className="mb-2 flex items-center">
+                    <div className="mb-2 flex items-start">
                       <span className="mr-3">Pets:</span>{" "}
                       {/* <div className="flex flex-wrap gap-2">
                         {petsCombined.map((pet) => (
@@ -2568,13 +2576,15 @@ const Owner: NextPage = () => {
                       <div className="mb-2 flex items-start">
                         <b className="mr-3">Pet(s):</b>{" "}
                         <div className="flex flex-col items-start">
-                          {petsCombined.map((pet) => (
-                            <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
-                              {pet?.breed === "Not Applicable" || pet?.breed === "Not applicable"
-                                ? (pet?.name ?? "") + " (Cat, P" + (pet?.id ?? "") + ")"
-                                : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
-                            </button>
-                          ))}
+                          {petsCombined
+                            .sort((a, b) => a.name.localeCompare(b.name))
+                            .map((pet) => (
+                              <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
+                                {pet?.breed === "Not Applicable" || pet?.breed === "Not applicable"
+                                  ? (pet?.name ?? "") + " (Cat, P" + (pet?.id ?? "") + ")"
+                                  : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                              </button>
+                            ))}
                         </div>
                       </div>
 

@@ -23,7 +23,7 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 
 //Icons
-import { AddressBook, FirstAidKit, Pencil, Printer, Trash, UserCircle, Users, Bed, Info } from "phosphor-react";
+import { AddressBook, FirstAidKit, Pencil, Printer, Trash, UserCircle, Users, Bed, Info, Dog } from "phosphor-react";
 
 //Date picker
 import DatePicker from "react-datepicker";
@@ -2496,7 +2496,7 @@ const Pet: NextPage = () => {
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
-      breed: breedList,
+      breed: speciesOption === "Dog" ? breedList : ["Not applicable"],
       colour: colourList,
       size: speciesOption === "Dog" ? (sizeOption === "Select one" ? "" : sizeOption) : "",
       markings: markings,
@@ -2583,6 +2583,14 @@ const Pet: NextPage = () => {
   };
 
   //-------------------------------CREATE NEW USER-----------------------------------------
+  //------------------------------------CREATE A NEW PET FOR OWNER--------------------------------------
+  //When button is pressed the browser needs to go to the pet's page. The pet's page needs to know the owner's ID
+  const handleAddNewPet = async (id: number, firstName: string, surname: string) => {
+    await router.push({
+      pathname: "/pet",
+      query: { ownerID: id, firstName: firstName, surname: surname },
+    });
+  };
 
   const handleCreateNewUser = async () => {
     //const query = router.asPath.split("?")[1] ?? "";
@@ -2614,7 +2622,7 @@ const Pet: NextPage = () => {
     setVaccinationShot1Date(new Date());
     setVaccinationShot2Date(new Date());
     setVaccinationShot3Date(new Date());
-    setMembershipTypeOption("Non-Card Holder");
+    setMembershipTypeOption("Non-card Holder");
     setCardStatusOption("Not Applicable");
     setKennelsReceivedOption("No kennels received");
     setStartingDate(new Date());
@@ -2674,6 +2682,11 @@ const Pet: NextPage = () => {
         })),
       );
       // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+    } else {
+      setColourOptions([]);
+      setColourListOptions([]);
+      setBreedOptions([]);
+      setBreedListOptions([]);
     }
 
     // setColourListOptions(
@@ -2783,7 +2796,7 @@ const Pet: NextPage = () => {
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
-      breed: breedList,
+      breed: speciesOption === "Dog" ? breedList : ["Not applicable"],
       colour: colourList,
       size: speciesOption === "Dog" ? (sizeOption === "Select one" ? "" : sizeOption) : "",
       markings: markings,
@@ -3377,7 +3390,8 @@ const Pet: NextPage = () => {
     if (speciesOption === "Select one") mandatoryFields.push("Species");
     if (sexOption === "Select one") mandatoryFields.push("Sex");
     if (ageOption === "Select one") mandatoryFields.push("Age");
-    if (breedList.length === 0) mandatoryFields.push("Breed");
+    if (breedList.length === 0 && speciesOption === "Dog") mandatoryFields.push("Breed");
+
     //if (breedOption === "Select one") mandatoryFields.push("Breed");
     // if (colourOption === "Select one") mandatoryFields.push("Colour");
     // if (markings === "") mandatoryFields.push("Markings");
@@ -3796,7 +3810,7 @@ const Pet: NextPage = () => {
                 // <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
                 //   <table className="table-auto">
                 <article className="my-5 flex w-full justify-center rounded-md shadow-inner">
-                  <div className="max-h-[70vh] max-w-7xl overflow-auto">
+                  <div className="max-h-[70vh] max-w-[88%] overflow-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="z-30 bg-gray-50">
                         <tr>
@@ -3834,6 +3848,7 @@ const Pet: NextPage = () => {
                               </span>
                             </span>
                           </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3845,12 +3860,26 @@ const Pet: NextPage = () => {
                               </td>
                               {/* <td className="border px-4 py-2">P{pet.petID}</td> */}
                               <td className="border px-2 py-1">
-                                {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed[0]})
+                                {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed.join(", ")})
                               </td>
                               <td className="border px-2 py-1">
-                                <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(pet.ownerID)}>
-                                  {pet.owner.firstName} {pet.owner.surname}
-                                </button>
+                                <div className="flex items-center justify-around">
+                                  <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(pet.ownerID)}>
+                                    {pet.owner.firstName} {pet.owner.surname}
+                                  </button>
+                                  <div className="relative flex items-center justify-center">
+                                    <span className="group relative mx-[3px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                      <Dog
+                                        size={24}
+                                        className="block"
+                                        onClick={() => handleAddNewPet(pet.owner.ownerID, pet.owner.firstName, pet.owner.surname)}
+                                      />
+                                      <span className="absolute bottom-full z-50 hidden w-[86px] rounded-md border border-gray-300 bg-white px-1 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                        Add another pet to owner
+                                      </span>
+                                    </span>
+                                  </div>
+                                </div>
                               </td>
 
                               {/* <td className="border px-2 py-1">{pet.owner.addressGreaterArea.greaterArea}</td> */}
@@ -3904,7 +3933,7 @@ const Pet: NextPage = () => {
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                     <Trash size={24} className="block" onClick={() => handleDeleteModal(pet.petID, String(pet.petID), pet.petName ?? "")} />
-                                    <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                       Delete pet
                                     </span>
                                   </span>
@@ -3913,7 +3942,7 @@ const Pet: NextPage = () => {
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                     <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(pet.petID)} />
-                                    <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                       Update pet
                                     </span>
                                   </span>
@@ -3922,7 +3951,7 @@ const Pet: NextPage = () => {
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                     <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(pet.petID)} />
-                                    <span className="absolute bottom-full hidden w-[70px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    <span className="absolute bottom-full z-50 hidden w-[70px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                       View pet profile
                                     </span>
                                   </span>
@@ -3931,7 +3960,7 @@ const Pet: NextPage = () => {
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                     <FirstAidKit size={24} className="block" onClick={() => handleCreateNewTreatment(pet.petID)} />
-                                    <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    <span className="absolute bottom-full z-50 hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                       Create new treatment
                                     </span>
                                   </span>
@@ -3940,7 +3969,7 @@ const Pet: NextPage = () => {
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 mr-[31px] flex items-center justify-center rounded-lg hover:bg-orange-200">
                                     <Bed size={24} className="block" onClick={() => handleAddClinic(pet.petID)} />
-                                    <span className="absolute bottom-full hidden w-[85px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    <span className="absolute bottom-full z-50 hidden w-[85px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                       Add today's clinic to pet
                                     </span>
 
@@ -4045,7 +4074,7 @@ const Pet: NextPage = () => {
             </div>
             <div className="flex grow flex-col items-center">
               <label>
-                {"("}All fields with <span className="px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
+                {"("}All fields marked <span className="px-1 text-lg text-main-orange"> * </span> are compulsary{")"}
               </label>
               <div className="flex w-[47%] flex-col items-start">
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
@@ -4213,81 +4242,83 @@ const Pet: NextPage = () => {
                     </div>
                   </div> */}
 
-                  <div className="flex items-start">
-                    <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Breed(s): </div>
-                    </div>
-                    <div className="flex flex-col">
-                      <button
-                        ref={btnBreedRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                        type="button"
-                        onClick={handleToggleBreed}
-                      >
-                        {breedOption + " "}
-                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                        </svg>
-                      </button>
-                      {isBreedOpen && (
-                        <div ref={breedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                  {speciesOption === "Dog" && (
+                    <div className="flex items-start">
+                      <div className="mr-3 flex items-center pt-5">
+                        <div className=" flex">Breed(s): </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <button
+                          ref={btnBreedRef}
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          type="button"
+                          onClick={handleToggleBreed}
+                        >
+                          {breedOption + " "}
+                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                          </svg>
+                        </button>
+                        {isBreedOpen && (
+                          <div ref={breedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                            {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {colourOptions.map((option) => (
                               <li key={option} onClick={() => handleColourOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
                               </li>
                             ))}
                           </ul> */}
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                            <li key={1}>
-                              <div className="flex items-center px-4">
-                                <input
-                                  id="1"
-                                  type="checkbox"
-                                  checked={breedSelection?.allSelected}
-                                  onChange={(e) => handleBreed("", e.target.checked, "allSelected")}
-                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
-                                />
-                                <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
-                                  Select All
-                                </label>
-                              </div>
-                            </li>
-                            <li key={2}>
-                              <div className="flex items-center px-4">
-                                <input
-                                  id="2"
-                                  type="checkbox"
-                                  checked={breedSelection?.clear}
-                                  onChange={(e) => handleBreed("", e.target.checked, "clear")}
-                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
-                                />
-                                <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
-                                  Clear All
-                                </label>
-                              </div>
-                            </li>
-                            {breedListOptions?.map((option) => (
-                              <li key={option.breed}>
+                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                              <li key={1}>
                                 <div className="flex items-center px-4">
                                   <input
-                                    id={String(option.breed)}
+                                    id="1"
                                     type="checkbox"
-                                    checked={option.state}
-                                    onChange={(e) => handleBreed(option.breed, e.target.checked, "normal")}
+                                    checked={breedSelection?.allSelected}
+                                    onChange={(e) => handleBreed("", e.target.checked, "allSelected")}
                                     className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                   />
-                                  <label htmlFor={String(option.breed)} className="ms-2 text-sm font-medium text-gray-900">
-                                    {option.breed}
+                                  <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
+                                    Select All
                                   </label>
                                 </div>
                               </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                              <li key={2}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id="2"
+                                    type="checkbox"
+                                    checked={breedSelection?.clear}
+                                    onChange={(e) => handleBreed("", e.target.checked, "clear")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
+                                    Clear All
+                                  </label>
+                                </div>
+                              </li>
+                              {breedListOptions?.map((option) => (
+                                <li key={option.breed}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id={String(option.breed)}
+                                      type="checkbox"
+                                      checked={option.state}
+                                      onChange={(e) => handleBreed(option.breed, e.target.checked, "normal")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor={String(option.breed)} className="ms-2 text-sm font-medium text-gray-900">
+                                      {option.breed}
+                                    </label>
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
@@ -4999,16 +5030,14 @@ const Pet: NextPage = () => {
                         </div>
                       )}
                     </div>
-                    {/* {membershipTypeOption && membershipMessage(membershipTypeOption) && (
-                      <div className="pl-4 pt-5 text-red-600">({membershipMessage(membershipTypeOption)})</div>
-                    )} */}
-                    {membershipTypeOption !== "Non-card holder" &&
+
+                    {/* {membershipTypeOption !== "Non-card holder" &&
                       (membershipStatus() === "(Lapsed)" ? (
                         <div className="pl-4 pt-5 text-red-600">{membershipStatus()}</div>
                       ) : (
                         <div className="pl-4 pt-5 text-black">{membershipStatus()}</div>
-                      ))}
-                    {membershipTypeOption !== "Non-card holder" && membershipStatus() !== "" && (
+                      ))} */}
+                    {/* {membershipTypeOption !== "Non-card holder" && membershipStatus() !== "" && (
                       <div className="group relative mx-[5px] mt-5 flex items-center justify-center rounded-lg hover:bg-orange-200">
                         <Info size={24} className="block" />
                         <span className="absolute left-[90%] top-[90%] hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
@@ -5016,10 +5045,11 @@ const Pet: NextPage = () => {
                           active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
                         </span>
                       </div>
-                    )}
+                    )} */}
                   </div>
 
-                  {membershipTypeOption !== "Non-card holder" && membershipTypeOption !== "Select one" && (
+                  {/* membershipTypeOption !== "Non-card holder" && membershipTypeOption !== "Select one" */}
+                  {(membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder") && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
                         <div className=" flex">Card Status: </div>
@@ -5048,6 +5078,16 @@ const Pet: NextPage = () => {
                           </div>
                         )}
                       </div>
+
+                      {membershipStatus() !== "" && (
+                        <div className="group relative mx-[5px] mt-5 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                          <Info size={24} className="block" />
+                          <span className="absolute left-[90%] top-[90%] z-50 hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            The status of a card holder lapses if the pet has not attended a pet clinic for 3 months in a row. A lapsed card holder can become
+                            active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -5471,9 +5511,13 @@ const Pet: NextPage = () => {
                         {clinicList.length > 0 && (
                           <div className="flex flex-col">
                             {clinicList
-                              .sort((a, b) => a.id - b.id)
+                              .sort((a, b) => {
+                                const dateA = new Date(a.date.split("/").reverse().join("-"));
+                                const dateB = new Date(b.date.split("/").reverse().join("-"));
+                                return dateB.getTime() - dateA.getTime();
+                              })
                               .map((clinic, index) => (
-                                <div key={index}>{clinic.date + " " + clinic.area}</div>
+                                <div key={index}>{clinic.date + " (" + clinic.area + ")"}</div>
                               ))}
                           </div>
                         )}

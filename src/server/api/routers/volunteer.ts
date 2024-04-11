@@ -9,6 +9,7 @@ export const volunteerRouter = createTRPCRouter({
         firstName: z.string(),
         email: z.string(),
         surname: z.string(),
+        southAfricanID: z.string(),
         mobile: z.string(),
         addressGreaterAreaID: z.number().array(),
         addressStreet: z.string(),
@@ -33,6 +34,7 @@ export const volunteerRouter = createTRPCRouter({
           firstName: input.firstName,
           email: input.email,
           surname: input.surname,
+          southAfricanID: input.southAfricanID,
           mobile: input.mobile,
           // addressGreaterArea: {
           //   create: input.addressGreaterAreaID.map((areaID) => ({
@@ -137,6 +139,7 @@ export const volunteerRouter = createTRPCRouter({
         firstName: z.string(),
         email: z.string(),
         surname: z.string(),
+        southAfricanID: z.string(),
         mobile: z.string(),
         addressGreaterAreaID: z.number().array(),
         addressStreet: z.string(),
@@ -164,6 +167,7 @@ export const volunteerRouter = createTRPCRouter({
           firstName: input.firstName,
           email: input.email,
           surname: input.surname,
+          southAfricanID: input.southAfricanID,
           mobile: input.mobile,
           // addressGreaterArea: {
           //   create: input.addressGreaterAreaID.map((areaID) => ({
@@ -281,6 +285,7 @@ export const volunteerRouter = createTRPCRouter({
               { volunteerID: { equals: Number(term.substring(1)) } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
+              { southAfricanID: { contains: term } },
               { email: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
@@ -301,6 +306,7 @@ export const volunteerRouter = createTRPCRouter({
             OR: [
               { firstName: { contains: term } },
               { surname: { contains: term } },
+              { southAfricanID: { contains: term } },
               { email: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
@@ -678,6 +684,7 @@ export const volunteerRouter = createTRPCRouter({
               { volunteerID: { equals: Number(term.substring(1)) } },
               { firstName: { contains: term } },
               { surname: { contains: term } },
+              { southAfricanID: { contains: term } },
               { email: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
@@ -698,6 +705,7 @@ export const volunteerRouter = createTRPCRouter({
             OR: [
               { firstName: { contains: term } },
               { surname: { contains: term } },
+              { southAfricanID: { contains: term } },
               { email: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },

@@ -10,10 +10,12 @@ export const UserRouter = createTRPCRouter({
         email: z.string(),
         password: z.string().min(3),
         surname: z.string(),
+        southAfricanID: z.string(),
         mobile: z.string().max(10),
-        addressGreaterAreaID: z.number(),
-        addressAreaID: z.number(),
-        addressStreetID: z.number(),
+        addressGreaterAreaID: z.number().array(),
+        addressStreet: z.string(),
+        //addressAreaID: z.number(),
+        // addressStreetID: z.number(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
         addressSuburb: z.string(),
@@ -33,28 +35,37 @@ export const UserRouter = createTRPCRouter({
           email: input.email,
           password: ctx.security.hash(input.password),
           surname: input.surname,
+          southAfricanID: input.southAfricanID,
           mobile: input.mobile,
-          //addressGreaterAreaID: input.addressGreaterAreaID,
           addressGreaterArea: {
-            connect: {
-              greaterAreaID: input.addressGreaterAreaID,
+            createMany: {
+              data: input.addressGreaterAreaID.map((areaID) => ({
+                greaterAreaID: areaID,
+              })),
             },
           },
-          //addressAreaID: input.addressAreaID,
-          addressArea: input.addressAreaID
-            ? {
-                connect: {
-                  areaID: input.addressAreaID,
-                },
-              }
-            : undefined,
-          addressStreet: input.addressStreetID
-            ? {
-                connect: {
-                  streetID: input.addressStreetID,
-                },
-              }
-            : undefined,
+          addressStreet: input.addressStreet,
+          //addressGreaterAreaID: input.addressGreaterAreaID,
+          // addressGreaterArea: {
+          //   connect: {
+          //     greaterAreaID: input.addressGreaterAreaID,
+          //   },
+          // },
+          // //addressAreaID: input.addressAreaID,
+          // addressArea: input.addressAreaID
+          //   ? {
+          //       connect: {
+          //         areaID: input.addressAreaID,
+          //       },
+          //     }
+          //   : undefined,
+          // addressStreet: input.addressStreetID
+          //   ? {
+          //       connect: {
+          //         streetID: input.addressStreetID,
+          //       },
+          //     }
+          //   : undefined,
           addressStreetCode: input.addressStreetCode,
           addressStreetNumber: input.addressStreetNumber,
           addressSuburb: input.addressSuburb,
@@ -79,10 +90,13 @@ export const UserRouter = createTRPCRouter({
         email: z.string(),
         password: z.string(),
         surname: z.string(),
+        southAfricanID: z.string(),
         mobile: z.string().max(10),
-        addressGreaterAreaID: z.number(),
-        addressAreaID: z.number(),
-        addressStreetID: z.number(),
+        addressGreaterAreaID: z.number().array(),
+        addressStreet: z.string(),
+        // addressGreaterAreaID: z.number(),
+        // addressAreaID: z.number(),
+        // addressStreetID: z.number(),
         addressStreetCode: z.string(),
         addressStreetNumber: z.string(),
         addressSuburb: z.string(),
@@ -107,12 +121,21 @@ export const UserRouter = createTRPCRouter({
             password: ctx.security.hash(input.password),
             surname: input.surname,
             mobile: input.mobile,
-            //addressGreaterAreaID: input.addressGreaterAreaID,
             addressGreaterArea: {
-              connect: {
-                greaterAreaID: input.addressGreaterAreaID,
+              createMany: {
+                data: input.addressGreaterAreaID.map((areaID) => ({
+                  greaterAreaID: areaID,
+                })),
               },
             },
+            addressStreet: input.addressStreet,
+            southAfricanID: input.southAfricanID,
+            //addressGreaterAreaID: input.addressGreaterAreaID,
+            // addressGreaterArea: {
+            //   connect: {
+            //     greaterAreaID: input.addressGreaterAreaID,
+            //   },
+            // },
             // addressArea: input.addressAreaID
             //   ? {
             //       connect: {
@@ -120,24 +143,25 @@ export const UserRouter = createTRPCRouter({
             //       },
             //     }
             //   : undefined,
-            addressArea: input.addressAreaID
-              ? {
-                  connect: {
-                    areaID: input.addressAreaID,
-                  },
-                }
-              : {
-                  disconnect: true,
-                },
-            addressStreet: input.addressStreetID
-              ? {
-                  connect: {
-                    streetID: input.addressStreetID,
-                  },
-                }
-              : {
-                  disconnect: true,
-                },
+
+            // addressArea: input.addressAreaID
+            //   ? {
+            //       connect: {
+            //         areaID: input.addressAreaID,
+            //       },
+            //     }
+            //   : {
+            //       disconnect: true,
+            //     },
+            // addressStreet: input.addressStreetID
+            //   ? {
+            //       connect: {
+            //         streetID: input.addressStreetID,
+            //       },
+            //     }
+            //   : {
+            //       disconnect: true,
+            //     },
             addressStreetCode: input.addressStreetCode,
             addressStreetNumber: input.addressStreetNumber,
             addressSuburb: input.addressSuburb,
@@ -162,30 +186,39 @@ export const UserRouter = createTRPCRouter({
             email: input.email,
             surname: input.surname,
             mobile: input.mobile,
-            //addressGreaterAreaID: input.addressGreaterAreaID,
             addressGreaterArea: {
-              connect: {
-                greaterAreaID: input.addressGreaterAreaID,
+              createMany: {
+                data: input.addressGreaterAreaID.map((areaID) => ({
+                  greaterAreaID: areaID,
+                })),
               },
             },
-            addressArea: input.addressAreaID
-              ? {
-                  connect: {
-                    areaID: input.addressAreaID,
-                  },
-                }
-              : {
-                  disconnect: true,
-                },
-            addressStreet: input.addressStreetID
-              ? {
-                  connect: {
-                    streetID: input.addressStreetID,
-                  },
-                }
-              : {
-                  disconnect: true,
-                },
+            addressStreet: input.addressStreet,
+            southAfricanID: input.southAfricanID,
+            //addressGreaterAreaID: input.addressGreaterAreaID,
+            // addressGreaterArea: {
+            //   connect: {
+            //     greaterAreaID: input.addressGreaterAreaID,
+            //   },
+            // },
+            // addressArea: input.addressAreaID
+            //   ? {
+            //       connect: {
+            //         areaID: input.addressAreaID,
+            //       },
+            //     }
+            //   : {
+            //       disconnect: true,
+            //     },
+            // addressStreet: input.addressStreetID
+            //   ? {
+            //       connect: {
+            //         streetID: input.addressStreetID,
+            //       },
+            //     }
+            //   : {
+            //       disconnect: true,
+            //     },
             addressStreetCode: input.addressStreetCode,
             addressStreetNumber: input.addressStreetNumber,
             addressSuburb: input.addressSuburb,
@@ -244,6 +277,9 @@ export const UserRouter = createTRPCRouter({
             { role: { contains: input.searchQuery } },
             { status: { contains: input.searchQuery } },
             { mobile: { contains: input.searchQuery } },
+            { southAfricanID: { contains: input.searchQuery } },
+            //{ addressGreaterArea: { contains: input.searchQuery } },
+            { addressStreet: { contains: input.searchQuery } },
             // { addressGreaterArea: { contains: input.searchQuery } },
             // { addressArea: { contains: input.searchQuery } },
             // { addressStreet: { contains: input.searchQuery } },
@@ -296,6 +332,9 @@ export const UserRouter = createTRPCRouter({
               { role: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
+              { southAfricanID: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
               { addressSuburb: { contains: term } },
@@ -303,9 +342,6 @@ export const UserRouter = createTRPCRouter({
               { addressFreeForm: { contains: term } },
               { preferredCommunication: { contains: term } },
               { comments: { contains: term } },
-              { addressGreaterArea: { greaterArea: { contains: term } } },
-              { addressArea: { area: { contains: term } } },
-              { addressStreet: { street: { contains: term } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
@@ -317,6 +353,9 @@ export const UserRouter = createTRPCRouter({
               { role: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
+              { southAfricanID: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               { addressStreetNumber: { contains: term } },
               { addressSuburb: { contains: term } },
@@ -324,9 +363,6 @@ export const UserRouter = createTRPCRouter({
               { addressFreeForm: { contains: term } },
               { preferredCommunication: { contains: term } },
               { comments: { contains: term } },
-              { addressGreaterArea: { greaterArea: { contains: term } } },
-              { addressArea: { area: { contains: term } } },
-              { addressStreet: { street: { contains: term } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
@@ -345,20 +381,41 @@ export const UserRouter = createTRPCRouter({
         orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { id: input.cursor } : undefined,
-        include: {
-          addressGreaterArea: true,
-          addressArea: true,
-          addressStreet: true,
-        },
+        //include: {
+        // addressGreaterArea: true,
+        // addressArea: true,
+        // addressStreet: true,
+        //},
       });
+
       let nextCursor: typeof input.cursor | undefined = undefined;
       if (user.length > input.limit) {
         const nextRow = user.pop();
         nextCursor = nextRow?.id;
       }
 
+      //fetch the greater areas
+      const greaterAreas = await ctx.db.greaterAreaOnUser.findMany({
+        where: {
+          userID: {
+            in: user.map((user) => user.userID),
+          },
+        },
+        select: {
+          greaterAreaID: true,
+          userID: true,
+          greaterArea: {
+            // select: {
+            //   date: true,
+            //   area: true,
+            // },
+          },
+        },
+      });
+
       return {
         user_data: user,
+        greater_areas_data: greaterAreas,
         nextCursor,
       };
     }),
@@ -486,6 +543,9 @@ export const UserRouter = createTRPCRouter({
               { role: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
+              { southAfricanID: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { addressStreet: { contains: term } },
               // { addressGreaterArea: { contains: term } },
               // { addressArea: { contains: term } },
               // { addressStreet: { contains: term } },
@@ -507,6 +567,9 @@ export const UserRouter = createTRPCRouter({
               { role: { contains: term } },
               { status: { contains: term } },
               { mobile: { contains: term } },
+              { southAfricanID: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { addressStreet: { contains: term } },
               //  { addressGreaterArea: { contains: term } },
               //  { addressArea: { contains: term } },
               //  { addressStreet: { contains: term } },

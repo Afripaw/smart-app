@@ -48,29 +48,34 @@ const User: NextPage = () => {
     state: boolean;
   };
 
-  //---------------------------------AREA-----------------------------------------------
-  type Area = {
-    id: number;
-    area: string;
+  type GreaterAreaSelect = {
+    allSelected: boolean;
+    clear: boolean;
   };
 
-  type AreaOptions = {
-    id: number;
-    area: string;
-    state: boolean;
-  };
+  //---------------------------------AREA-----------------------------------------------
+  // type Area = {
+  //   id: number;
+  //   area: string;
+  // };
+
+  // type AreaOptions = {
+  //   id: number;
+  //   area: string;
+  //   state: boolean;
+  // };
 
   //---------------------------------STREET-----------------------------------------------
-  type Street = {
-    id: number;
-    street: string;
-  };
+  // type Street = {
+  //   id: number;
+  //   street: string;
+  // };
 
-  type StreetOptions = {
-    id: number;
-    street: string;
-    state: boolean;
-  };
+  // type StreetOptions = {
+  //   id: number;
+  //   street: string;
+  //   state: boolean;
+  // };
 
   //---------------------------------PREFERRED COMMUNICATION-----------------------------------------------
   type PreferredCommunication = {
@@ -272,7 +277,16 @@ const User: NextPage = () => {
   );
 
   //Flattens the pages array into one array
-  const user_data = queryData?.pages.flatMap((page) => page.user_data);
+  const user_data_ = queryData?.pages.flatMap((page) => page.user_data);
+  const greater_area_data = queryData?.pages.flatMap((page) => page.greater_areas_data);
+  const user_data = user_data_?.map((user) => {
+    const associatedGreaterAreas = greater_area_data?.filter((area) => area.userID === user.userID);
+
+    return {
+      ...user,
+      greaterAreas: associatedGreaterAreas,
+    };
+  });
 
   //Checks intersection of the observer target and reassigns target element once true
   useEffect(() => {
@@ -316,8 +330,10 @@ const User: NextPage = () => {
   const [userID, setUserID] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
+  const [southAfricanID, setSouthAfricanID] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
+  const [street, setStreet] = useState("");
   const [addressFreeForm, setAddressFreeForm] = useState("");
   const [addressStreetCode, setAddressStreetCode] = useState("");
   const [addressStreetNumber, setAddressStreetNumber] = useState("");
@@ -372,23 +388,27 @@ const User: NextPage = () => {
 
   //--------------------------------CREATE NEW USER DROPDOWN BOXES--------------------------------
   //WEBHOOKS FOR DROPDOWN BOXES
-  const [greaterAreaID, setGreaterAreaID] = useState(0);
+  // const [greaterAreaID, setGreaterAreaID] = useState(0);
+  // const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
+  // const [greaterAreaOption, setGreaterAreaOption] = useState<GreaterArea>({ area: "Select one", id: 0 });
+  // const greaterAreaRef = useRef<HTMLDivElement>(null);
+  // const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
   const [isGreaterAreaOpen, setIsGreaterAreaOpen] = useState(false);
-  const [greaterAreaOption, setGreaterAreaOption] = useState<GreaterArea>({ area: "Select one", id: 0 });
+  const [greaterAreaOption, setGreaterAreaOption] = useState("Select here");
   const greaterAreaRef = useRef<HTMLDivElement>(null);
   const btnGreaterAreaRef = useRef<HTMLButtonElement>(null);
 
-  const [areaID, setAreaID] = useState(0);
-  const [isAreaOpen, setIsAreaOpen] = useState(false);
-  const [areaOption, setAreaOption] = useState<Area>({ area: "Select one", id: 0 });
-  const areaRef = useRef<HTMLDivElement>(null);
-  const btnAreaRef = useRef<HTMLButtonElement>(null);
+  // const [areaID, setAreaID] = useState(0);
+  // const [isAreaOpen, setIsAreaOpen] = useState(false);
+  // const [areaOption, setAreaOption] = useState<Area>({ area: "Select one", id: 0 });
+  // const areaRef = useRef<HTMLDivElement>(null);
+  // const btnAreaRef = useRef<HTMLButtonElement>(null);
 
-  const [streetID, setStreetID] = useState(0);
-  const [isStreetOpen, setIsStreetOpen] = useState(false);
-  const [streetOption, setStreetOption] = useState<Street>({ street: "Select one", id: 0 });
-  const streetRef = useRef<HTMLDivElement>(null);
-  const btnStreetRef = useRef<HTMLButtonElement>(null);
+  // const [streetID, setStreetID] = useState(0);
+  // const [isStreetOpen, setIsStreetOpen] = useState(false);
+  // const [streetOption, setStreetOption] = useState<Street>({ street: "Select one", id: 0 });
+  // const streetRef = useRef<HTMLDivElement>(null);
+  // const btnStreetRef = useRef<HTMLButtonElement>(null);
   //const [streetOptions, setStreetOptions] = useState<string[]>([]);
 
   const [preferredCommunication, setPreferredCommunication] = useState(false);
@@ -406,37 +426,107 @@ const User: NextPage = () => {
   const statusRef = useRef<HTMLDivElement>(null);
   const btnStatusRef = useRef<HTMLButtonElement>(null);
 
+  const [isSouthAfricanIDOpen, setIsSouthAfricanIDOpen] = useState(false);
+  const [southAfricanIDOption, setSouthAfricanIDOption] = useState("Select one");
+  const southAfricanIDRef = useRef<HTMLDivElement>(null);
+  const btnSouthAfricanIDRef = useRef<HTMLButtonElement>(null);
+
+  // //GREATER AREA
+  // const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+  // const handleToggleGreaterArea = () => {
+  //   setIsGreaterAreaOpen(!isGreaterAreaOpen);
+  // };
+
+  // const handleGreaterAreaOption = (option: SetStateAction<string>, id: number) => {
+  //   const greaterArea: GreaterArea = { area: String(option), id: id };
+  //   setGreaterAreaOption(greaterArea);
+  //   setIsGreaterAreaOpen(false);
+  // };
+
+  // const [deselectGreaterArea, setDeselectGreaterArea] = useState("No");
+  // const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+
+  // useEffect(() => {
+  //   if (greaterAreaOptions.length > 0) {
+  //     setGreaterAreaListOptions(greaterAreaOptions.map((item) => ({ area: item.greaterArea, id: item.greaterAreaID, state: false })));
+  //   }
+  // }, [isCreate]);
+
+  // const handleGreaterArea = (id: number, area: SetStateAction<string>, deselect: string) => {
+  //   if (deselect === "Yes") {
+  //     setDeselectGreaterArea("Yes");
+  //     setGreaterAreaOption({ area: "Select one", id: 0 });
+  //     setGreaterAreaListOptions(greaterAreaListOptions.map((item) => ({ ...item, state: false })));
+  //   } else if (deselect === "No") {
+  //     setDeselectGreaterArea("No");
+  //     setGreaterAreaListOptions(greaterAreaListOptions.map((item) => (item.area === area ? { ...item, state: true } : { ...item, state: false })));
+  //     const greaterArea = { area: String(area), id: id };
+  //     setGreaterAreaOption(greaterArea);
+  //   }
+  // };
   //GREATER AREA
-  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+  //to select multiple areas
+  const [greaterAreaList, setGreaterAreaList] = useState<GreaterArea[]>([]);
+
+  const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+  const [greaterAreaSelection, setGreaterAreaSelection] = useState<GreaterAreaSelect>();
+
   const handleToggleGreaterArea = () => {
     setIsGreaterAreaOpen(!isGreaterAreaOpen);
   };
 
-  const handleGreaterAreaOption = (option: SetStateAction<string>, id: number) => {
-    const greaterArea: GreaterArea = { area: String(option), id: id };
-    setGreaterAreaOption(greaterArea);
-    setIsGreaterAreaOpen(false);
-  };
+  const handleGreaterArea = (id: number, option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setGreaterAreaOption("Select All");
+      setGreaterAreaSelection({ allSelected: state, clear: false });
 
-  const [deselectGreaterArea, setDeselectGreaterArea] = useState("No");
-  const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+      const greaterAreas = greaterAreaListOptions.map((area) => ({
+        id: area.id,
+        area: area.area,
+      }));
+      setGreaterAreaList(greaterAreas);
+      //order the greaterAreaList from smallest to largest id
+      setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+      setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: true })));
+    } else if (selectionCategory === "clear") {
+      setGreaterAreaOption("Clear All");
+      setGreaterAreaSelection({ allSelected: false, clear: state });
 
-  useEffect(() => {
-    if (greaterAreaOptions.length > 0) {
-      setGreaterAreaListOptions(greaterAreaOptions.map((item) => ({ area: item.greaterArea, id: item.greaterAreaID, state: false })));
-    }
-  }, [isCreate]);
+      setGreaterAreaList([]);
+      setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: false })));
+    } else if (selectionCategory === "normal") {
+      setGreaterAreaOption(option);
+      setGreaterAreaSelection({ allSelected: false, clear: false });
+      if (state) {
+        const area: GreaterArea = {
+          id: id,
+          area: String(option),
+        };
+        const greaterAreaIDList = greaterAreaList.map((area) => area.id);
+        if (!greaterAreaIDList.includes(id)) {
+          setGreaterAreaList([...greaterAreaList, area]);
 
-  const handleGreaterArea = (id: number, area: SetStateAction<string>, deselect: string) => {
-    if (deselect === "Yes") {
-      setDeselectGreaterArea("Yes");
-      setGreaterAreaOption({ area: "Select one", id: 0 });
-      setGreaterAreaListOptions(greaterAreaListOptions.map((item) => ({ ...item, state: false })));
-    } else if (deselect === "No") {
-      setDeselectGreaterArea("No");
-      setGreaterAreaListOptions(greaterAreaListOptions.map((item) => (item.area === area ? { ...item, state: true } : { ...item, state: false })));
-      const greaterArea = { area: String(area), id: id };
-      setGreaterAreaOption(greaterArea);
+          //order the greaterAreaList from smallest to largest id
+          // console.log(
+          //   "Sorted Greater Areas!!!: ",
+          //   greaterAreaList.sort((a, b) => a.id - b.id),
+          // );
+          // setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        }
+        setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: true } : area)));
+
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedGreaterAreaList = greaterAreaList.filter((area) => area.id !== id);
+        setGreaterAreaList(updatedGreaterAreaList);
+
+        //order the greaterAreaList from smallest to largest id
+        setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: false } : area)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
     }
   };
 
@@ -458,120 +548,10 @@ const User: NextPage = () => {
     };
   }, []);
 
+  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+
   //const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
   // const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
-
-  //AREA
-  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
-  const handleToggleArea = () => {
-    setIsAreaOpen(!isAreaOpen);
-    setStreetOption({ street: "Select one", id: 0 });
-  };
-
-  //SetStateAction<string>
-  const handleAreaOption = (option: string, id: number) => {
-    const area: Area = { area: String(option), id: id };
-    setAreaOption(area);
-    setIsAreaOpen(false);
-  };
-
-  const [deselectArea, setDeselectArea] = useState("No");
-  const [areaListOptions, setAreaListOptions] = useState<AreaOptions[]>([]);
-
-  useEffect(() => {
-    if (areaOptions.length > 0) {
-      setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: areaOption.id === item.areaID ? true : false })));
-    }
-    if (greaterAreaOption.area === "Select one") {
-      setAreaListOptions([]);
-    }
-  }, [isCreate, areaOptions, greaterAreaOption]);
-
-  const handleArea = (id: number, area: SetStateAction<string>, deselect: string) => {
-    if (deselect === "Yes") {
-      setDeselectArea("Yes");
-      setAreaOption({ area: "Select one", id: 0 });
-      const areas = areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false }));
-      setAreaListOptions(areas);
-      //setAreaListOptions(areaListOptions.map((item) => ({ ...item, state: false })));
-    } else if (deselect === "No") {
-      setDeselectArea("No");
-      setAreaListOptions(areaListOptions.map((item) => (item.area === area ? { ...item, state: true } : { ...item, state: false })));
-      const area_ = { area: String(area), id: id };
-      setAreaOption(area_);
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (areaRef.current && !areaRef.current.contains(event.target as Node) && btnAreaRef.current && !btnAreaRef.current.contains(event.target as Node)) {
-        setIsAreaOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  //STREET
-  const streetOptions = api.geographic.getStreetsByAreaID.useQuery({ areaID: areaOption.id })?.data ?? [];
-
-  const handleToggleStreet = () => {
-    setIsStreetOpen(!isStreetOpen);
-  };
-
-  const handleStreetOption = (option: string, id: number) => {
-    const street: Street = { street: String(option), id: id };
-    setStreetOption(street);
-    setIsStreetOpen(false);
-  };
-
-  const [deselectStreet, setDeselectStreet] = useState("No");
-  const [streetListOptions, setStreetListOptions] = useState<StreetOptions[]>([]);
-
-  useEffect(() => {
-    if (streetOptions.length > 0) {
-      setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: streetOption.id === item.streetID ? true : false })));
-    }
-    if (areaOption.area === "Select one") {
-      setStreetListOptions([]);
-    }
-  }, [isCreate, streetOptions, areaOption]);
-
-  const handleStreet = (id: number, street: SetStateAction<string>, deselect: string) => {
-    if (deselect === "Yes") {
-      setDeselectStreet("Yes");
-      setStreetOption({ street: "Select one", id: 0 });
-      const streets = streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false }));
-      setStreetListOptions(streets);
-      //setAreaListOptions(areaListOptions.map((item) => ({ ...item, state: false })));
-    } else if (deselect === "No") {
-      setDeselectStreet("No");
-      setStreetListOptions(streetListOptions.map((item) => (item.street === street ? { ...item, state: true } : { ...item, state: false })));
-      const street_ = { street: String(street), id: id };
-      setStreetOption(street_);
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        streetRef.current &&
-        !streetRef.current.contains(event.target as Node) &&
-        btnStreetRef.current &&
-        !btnStreetRef.current.contains(event.target as Node)
-      ) {
-        setIsStreetOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   //PREFERRED COMMUNICATION
   const [deselectPreferredCommunication, setDeselectPreferredCommunication] = useState("No");
@@ -740,6 +720,36 @@ const User: NextPage = () => {
 
   const statusOptions = ["Active", "Passive"];
 
+  //SOUTH AFRICAN ID
+  const handleToggleSouthAfricanID = () => {
+    setIsSouthAfricanIDOpen(!isSouthAfricanIDOpen);
+  };
+
+  const handleSouthAfricanIDOption = (option: SetStateAction<string>) => {
+    setSouthAfricanIDOption(option);
+    setIsSouthAfricanIDOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        southAfricanIDRef.current &&
+        !southAfricanIDRef.current.contains(event.target as Node) &&
+        btnSouthAfricanIDRef.current &&
+        !btnSouthAfricanIDRef.current.contains(event.target as Node)
+      ) {
+        setIsSouthAfricanIDOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const southAfricanIDOptions = ["Yes", "Unknown", "No ID"];
+
   //----------------------------COMMUNICATION OF USER DETAILS---------------------------
   //Send user's details to user
   const [sendUserDetails, setSendUserDetails] = useState(false);
@@ -762,9 +772,9 @@ const User: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
-      setAreaID(userData.addressAreaID ?? 0);
-      setStreetID(userData.addressStreetID ?? 0);
+      // setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
+      // setAreaID(userData.addressAreaID ?? 0);
+      // setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -776,39 +786,57 @@ const User: NextPage = () => {
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
       setImage(userData.image ?? "");
+      setStreet(userData.addressStreet ?? "");
 
-      const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+      } else if (userData.southAfricanID !== null ? userData.southAfricanID.match(/^\d{13}$/) : false) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData.southAfricanID ?? "");
+      }
 
-      setGreaterAreaOption(greaterArea);
+      // const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
 
-      const greaterAreas = greaterAreaOptions.map((item) => ({
-        area: item.greaterArea,
-        id: item.greaterAreaID,
-        state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
-      }));
-      setGreaterAreaListOptions(greaterAreas);
+      // setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
+      // const greaterAreas = greaterAreaOptions.map((item) => ({
+      //   area: item.greaterArea,
+      //   id: item.greaterAreaID,
+      //   state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
+      // }));
+      // setGreaterAreaListOptions(greaterAreas);
 
-      setAreaOption(area);
+      // const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
 
-      const areas = areaOptions.map((item) => ({
-        area: item.area,
-        id: item.areaID,
-        state: item.area === userData.addressArea?.area ? true : false,
-      }));
-      setAreaListOptions(areas);
+      // setAreaOption(area);
 
-      const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
+      // const areas = areaOptions.map((item) => ({
+      //   area: item.area,
+      //   id: item.areaID,
+      //   state: item.area === userData.addressArea?.area ? true : false,
+      // }));
+      // setAreaListOptions(areas);
 
-      setStreetOption(street);
+      // const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
 
-      const streets = streetOptions.map((item) => ({
-        street: item.street,
-        id: item.streetID,
-        state: item.street === userData.addressStreet?.street ? true : false,
-      }));
-      setStreetListOptions(streets);
+      // setStreetOption(street);
+
+      // const streets = streetOptions.map((item) => ({
+      //   street: item.street,
+      //   id: item.streetID,
+      //   state: item.street === userData.addressStreet?.street ? true : false,
+      // }));
+      // setStreetListOptions(streets);
+
+      const greaterAreaData = user?.greaterAreas;
+      const greaterAreas: GreaterArea[] =
+        greaterAreaData?.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea.greaterArea,
+        })) ?? [];
 
       if (userData.email === "") {
         setPreferredCommunicationListOptions([{ communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false }]);
@@ -823,24 +851,25 @@ const User: NextPage = () => {
 
       setStatusListOptions(statusListOptions.map((item) => (item.status === userData.status ? { ...item, state: true } : { ...item, state: false })));
 
-      setDeselectGreaterArea("No");
-      setDeselectArea("No");
+      setGreaterAreaList(greaterAreas ?? "Select here");
+      const greaterAreasIDs = greaterAreas.map((area) => area.id);
+
+      setGreaterAreaListOptions(
+        greaterAreaOptions.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea,
+          state: greaterAreasIDs.includes(area.greaterAreaID),
+        })),
+      );
+
       setDeselectPreferredCommunication("No");
-      setDeselectStreet("No");
+      // setDeselectStreet("No");
       setDeselectRole("No");
       setDeselectStatus("No");
 
       // setPreferredCommunicationListOptions(
       //   preferredCommunicationListOptions.map((item) => (item.communication === userData.preferredCommunication ? { ...item, state: "Yes" } : { ...item, state: "No" })),
       // );
-
-      //Make sure thet area and street options have a value
-      if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
-        setAreaOption({ area: "Select one", id: 0 });
-      }
-      if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
-        setStreetOption({ street: "Select one", id: 0 });
-      }
     }
 
     //isUpdate ? setIsUpdate(true) : setIsUpdate(true);
@@ -859,9 +888,9 @@ const User: NextPage = () => {
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
-      setAreaID(userData.addressAreaID ?? 0);
-      setStreetID(userData.addressStreetID ?? 0);
+      // setGreaterAreaID(userData.addressGreaterAreaID ?? 0);
+      // setAreaID(userData.addressAreaID ?? 0);
+      // setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
       setAddressSuburb(userData.addressSuburb ?? "");
@@ -874,38 +903,34 @@ const User: NextPage = () => {
       setComments(userData.comments ?? "");
       setImage(userData.image ?? "");
 
-      const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+        //}else if (userData?.southAfricanID?.match(/^\d{13}$/)){
+      } else if (userData.southAfricanID?.match(/^\d{13}$/)) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData?.southAfricanID ?? "");
+      }
 
-      setGreaterAreaOption(greaterArea);
+      const greaterAreaData = user?.greaterAreas;
+      const greaterAreas: GreaterArea[] =
+        greaterAreaData?.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea.greaterArea,
+        })) ?? [];
 
-      const greaterAreas = greaterAreaOptions.map((item) => ({
-        area: item.greaterArea,
-        id: item.greaterAreaID,
-        state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
-      }));
-      setGreaterAreaListOptions(greaterAreas);
+      setGreaterAreaList(greaterAreas ?? "Select here");
+      setStreet(userData.addressStreet ?? "");
 
-      const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
-
-      setAreaOption(area);
-
-      const areas = areaOptions.map((item) => ({
-        area: item.area,
-        id: item.areaID,
-        state: item.area === userData.addressArea?.area ? true : false,
-      }));
-      setAreaListOptions(areas);
-
-      const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
-
-      setStreetOption(street);
-
-      const streets = streetOptions.map((item) => ({
-        street: item.street,
-        id: item.streetID,
-        state: item.street === userData.addressStreet?.street ? true : false,
-      }));
-      setStreetListOptions(streets);
+      setGreaterAreaListOptions(
+        greaterAreaOptions.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea,
+          state: greaterAreas.map((area) => area.id).includes(area.greaterAreaID),
+        })),
+      );
 
       if (userData.email === "") {
         setPreferredCommunicationListOptions([{ communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false }]);
@@ -923,31 +948,23 @@ const User: NextPage = () => {
       // setPreferredCommunicationListOptions(
       //   preferredCommunicationListOptions.map((item) => (item.communication === userData.preferredCommunication ? { ...item, state: "Yes" } : { ...item, state: "No" })),
       // );
-
-      //Make sure thet area and street options have a value
-      if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
-        setAreaOption({ area: "Select one", id: 0 });
-      }
-      if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
-        setStreetOption({ street: "Select one", id: 0 });
-      }
     }
   }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
 
   const handleUpdateUser = async () => {
     setIsLoading(true);
-
-    console.log("Search Query!!!!: ", query);
+    const greaterAreaIDList = greaterAreaList.sort((a, b) => a.id - b.id).map((area) => (area.id ? area.id : 0));
+    //console.log("Search Query!!!!: ", query);
 
     const user = await updateUser.mutateAsync({
       id: id,
       firstName: firstName,
       email: email,
       surname: surname,
+      southAfricanID: southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
       mobile: mobile,
-      addressGreaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
-      addressAreaID: areaOption.area === "Select one" ? 0 : areaOption.id,
-      addressStreetID: streetOption.street === "Select one" ? 0 : streetOption.id,
+      addressGreaterAreaID: greaterAreaIDList,
+      addressStreet: street,
       addressStreetCode: addressStreetCode,
       addressStreetNumber: addressStreetNumber,
       addressSuburb: addressSuburb,
@@ -972,14 +989,12 @@ const User: NextPage = () => {
         "Dear " +
         firstName +
         ",\n" +
-        "Your AfriPaw Smart App (https://afripaw.app) user ID is: " +
-        "U" +
+        "Your AfriPaw Smart App (https://afripaw.app) credentials are: " +
+        "\n" +
+        "User ID: " +
         user?.userID +
         "\n" +
-        "Your username is: " +
-        id +
-        "\n" +
-        "Your password is: " +
+        "Password: " +
         password +
         "\n" +
         "Regards, AfriPaw Team";
@@ -993,6 +1008,8 @@ const User: NextPage = () => {
       }
     }
     //After the newUser has been created make sure to set the fields back to empty
+    setSouthAfricanIDOption("Select one");
+    setSouthAfricanID("");
     setUserID(0);
     setFirstName("");
     setEmail("");
@@ -1000,11 +1017,8 @@ const User: NextPage = () => {
     setPassword("");
     setConfirmPassword("");
     setMobile("");
-    setGreaterAreaOption({ area: "Select one", id: 0 });
-    //setGreaterAreaID(0);
-    setAreaOption({ area: "Select one", id: 0 });
-    //setAreaID(0);
-    setStreetOption({ street: "Select one", id: 0 });
+    setGreaterAreaOption("Select here");
+    setStreet("");
     //setStreetID(0);
     setAddressStreetCode("");
     setAddressStreetNumber("");
@@ -1019,16 +1033,12 @@ const User: NextPage = () => {
     setIsCreate(false);
     setIsUpdatePassword(false);
     setPreferredCommunicationListOptions([{ communication: "SMS", state: false }]);
-    setGreaterAreaListOptions(greaterAreaOptions.map((item) => ({ area: item.greaterArea, id: item.greaterAreaID, state: false })));
-    setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
-    setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
+    setGreaterAreaList([]);
     setRoleListOptions(roleListOptions.map((item) => ({ role: item.role, state: false })));
     setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
 
     setDeselectStatus("No");
-    setDeselectArea("No");
-    setDeselectStreet("No");
-    setDeselectGreaterArea("No");
+
     setDeselectPreferredCommunication("No");
     setDeselectRole("No");
     setIsLoading(false);
@@ -1037,9 +1047,8 @@ const User: NextPage = () => {
   //-------------------------------CREATE NEW USER-----------------------------------------
 
   const handleCreateNewUser = async () => {
-    setGreaterAreaOption({ area: "Select one", id: 0 });
-    setAreaOption({ area: "Select one", id: 0 });
-    setStreetOption({ street: "Select one", id: 0 });
+    setGreaterAreaOption("Select here");
+    setStreet("");
     // setGreaterAreaID(0);
     // setAreaID(0);
     // setStreetID(0);
@@ -1050,6 +1059,8 @@ const User: NextPage = () => {
     setComments("");
     setUserID(0);
     setFirstName("");
+    setSouthAfricanIDOption("Select one");
+    setSouthAfricanID("");
     setEmail("");
     setSurname("");
     setPassword("");
@@ -1065,34 +1076,31 @@ const User: NextPage = () => {
     setIsUpdate(false);
     setIsUpdatePassword(false);
     setPreferredCommunicationListOptions([{ communication: "SMS", state: false }]);
-    setDeselectGreaterArea("No");
     setDeselectPreferredCommunication("No");
-    setDeselectArea("No");
-    setDeselectStreet("No");
     setDeselectRole("No");
     setDeselectStatus("No");
     //set Status to Active
     setStatusListOptions(statusListOptions.map((item) => (item.status === "Active" ? { ...item, state: true } : { ...item, state: false })));
     //setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
     setRoleListOptions(roleListOptions.map((item) => ({ role: item.role, state: false })));
-    setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
-    setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
-    setGreaterAreaListOptions(greaterAreaOptions.map((item) => ({ area: item.greaterArea, id: item.greaterAreaID, state: false })));
+    setGreaterAreaListOptions(greaterAreaOptions.map((area) => ({ id: area.greaterAreaID, area: area.greaterArea, state: false })));
   };
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
     setIsLoading(true);
+
+    const greaterAreaIDList = greaterAreaList.sort((a, b) => a.id - b.id).map((area) => (area.id ? area.id : 0));
     try {
       const newUser_ = await newUser.mutateAsync({
         firstName: firstName,
         email: email ? email : "",
         surname: surname,
+        southAfricanID: southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
         password: password,
         mobile: mobile ? mobile : "",
-        addressGreaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
-        addressAreaID: areaOption.area === "Select one" ? 0 : areaOption.id,
-        addressStreetID: streetOption.street === "Select one" ? 0 : streetOption.id,
+        addressGreaterAreaID: greaterAreaIDList,
+        addressStreet: street,
         addressStreetCode: addressStreetCode,
         addressStreetNumber: addressStreetNumber,
         addressSuburb: addressSuburb,
@@ -1117,14 +1125,12 @@ const User: NextPage = () => {
           "Dear " +
           firstName +
           ",\n" +
-          "Your AfriPaw Smart App (https://afripaw.app) user ID is: " +
-          "U" +
+          "Your AfriPaw Smart App (https://afripaw.app) credentials are: " +
+          "\n" +
+          "User ID: " +
           newUser_?.userID +
           "\n" +
-          "Your username is: " +
-          newUser_?.userID +
-          "\n" +
-          "Your password is: " +
+          "Password: " +
           password +
           "\n" +
           "Regards, AfriPaw Team";
@@ -1204,38 +1210,33 @@ const User: NextPage = () => {
       console.log("Image: ", userData.image);
       console.log("Image: ", image);
 
-      const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "", id: userData.addressGreaterAreaID ?? 0 };
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+      } else if (userData.southAfricanID?.match(/^\d{13}$/)) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData.southAfricanID ?? "");
+      }
 
-      setGreaterAreaOption(greaterArea);
+      const greaterAreaData = user?.greaterAreas;
+      const greaterAreas: GreaterArea[] =
+        greaterAreaData?.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea.greaterArea,
+        })) ?? [];
 
-      const greaterAreas = greaterAreaOptions.map((item) => ({
-        area: item.greaterArea,
-        id: item.greaterAreaID,
-        state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
-      }));
-      setGreaterAreaListOptions(greaterAreas);
+      setGreaterAreaList(greaterAreas ?? "");
+      setStreet(userData.addressStreet ?? "");
 
-      const area: Area = { area: userData.addressArea?.area ?? "", id: userData.addressAreaID ?? 0 };
-
-      setAreaOption(area);
-
-      const areas = areaOptions.map((item) => ({
-        area: item.area,
-        id: item.areaID,
-        state: item.area === userData.addressArea?.area ? true : false,
-      }));
-      setAreaListOptions(areas);
-
-      const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
-
-      setStreetOption(street);
-
-      const streets = streetOptions.map((item) => ({
-        street: item.street,
-        id: item.streetID,
-        state: item.street === userData.addressStreet?.street ? true : false,
-      }));
-      setStreetListOptions(streets);
+      setGreaterAreaListOptions(
+        greaterAreaOptions.map((area) => ({
+          id: area.greaterAreaID,
+          area: area.greaterArea,
+          state: greaterAreas.map((area) => area.id).includes(area.greaterAreaID),
+        })),
+      );
 
       if (userData.email === "") {
         setPreferredCommunicationListOptions([{ communication: "SMS", state: userData.preferredCommunication === "SMS" ? true : false }]);
@@ -1252,20 +1253,6 @@ const User: NextPage = () => {
       // setPreferredCommunicationListOptions(
       //   preferredCommunicationListOptions.map((item) => (item.communication === userData.preferredCommunication ? { ...item, state: "Yes" } : { ...item, state: "No" })),
       // );
-
-      //Make sure thet area and street options have a value
-      // if (userData.addressAreaID === 0 || userData.addressAreaID === undefined) {
-      //   setAreaOption({ area: "", id: 0 });
-      // }
-      // if (userData.addressStreetID === 0 || userData.addressStreetID === undefined) {
-      //   setStreetOption({ street: "", id: 0 });
-      // }
-      if (areaOption.area == "Select one" || areaOption.area == "" || areaOption.area == undefined || areaOption.id == 0) {
-        setAreaOption({ area: "", id: 0 });
-      }
-      if (streetOption.street == "Select one" || streetOption.street == "" || streetOption.street == undefined || streetOption.id == 0) {
-        setStreetOption({ street: "", id: 0 });
-      }
     }
 
     setIsUpdate(false);
@@ -1298,6 +1285,17 @@ const User: NextPage = () => {
       setImage(userData.image ?? "");
       console.log("Image: ", userData.image);
       console.log("Image: ", image);
+      setStreet(userData.addressStreet ?? "");
+
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+      } else if (userData.southAfricanID?.match(/^\d{13}$/)) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData.southAfricanID ?? "");
+      }
 
       // setPreferredCommunicationListOptions(
       //   preferredCommunicationListOptions.map((item) => (item.communication === userData.preferredCommunication ? { ...item, state: "Yes" } : { ...item, state: "No" })),
@@ -1316,94 +1314,38 @@ const User: NextPage = () => {
 
       setStatusListOptions(statusListOptions.map((item) => (item.status === userData.status ? { ...item, state: true } : { ...item, state: false })));
       if (isUpdate) {
-        const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "Select one", id: userData.addressGreaterAreaID ?? 0 };
+        const greaterAreaData = user?.greaterAreas;
+        const greaterAreas: GreaterArea[] =
+          greaterAreaData?.map((area) => ({
+            id: area.greaterAreaID,
+            area: area.greaterArea.greaterArea,
+          })) ?? [];
 
-        setGreaterAreaOption(greaterArea);
-
-        const greaterAreas = greaterAreaOptions.map((item) => ({
-          area: item.greaterArea,
-          id: item.greaterAreaID,
-          state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
-        }));
-        setGreaterAreaListOptions(greaterAreas);
-
-        const area: Area = { area: userData.addressArea?.area ?? "Select one", id: userData.addressAreaID ?? 0 };
-
-        setAreaOption(area);
-
-        const areas = areaOptions.map((item) => ({
-          area: item.area,
-          id: item.areaID,
-          state: item.area === userData.addressArea?.area ? true : false,
-        }));
-        setAreaListOptions(areas);
-
-        const street: Street = { street: userData.addressStreet?.street ?? "Select one", id: userData.addressStreetID ?? 0 };
-
-        setStreetOption(street);
-
-        const streets = streetOptions.map((item) => ({
-          street: item.street,
-          id: item.streetID,
-          state: item.street === userData.addressStreet?.street ? true : false,
-        }));
-        setStreetListOptions(streets);
+        setGreaterAreaList(greaterAreas ?? "");
       }
       if (isViewProfilePage) {
-        const greaterArea: GreaterArea = { area: userData.addressGreaterArea.greaterArea ?? "", id: userData.addressGreaterAreaID ?? 0 };
+        const greaterAreaData = user?.greaterAreas;
+        const greaterAreas: GreaterArea[] =
+          greaterAreaData?.map((area) => ({
+            id: area.greaterAreaID,
+            area: area.greaterArea.greaterArea,
+          })) ?? [];
 
-        setGreaterAreaOption(greaterArea);
-
-        const greaterAreas = greaterAreaOptions.map((item) => ({
-          area: item.greaterArea,
-          id: item.greaterAreaID,
-          state: item.greaterArea === userData.addressGreaterArea.greaterArea ? true : false,
-        }));
-        setGreaterAreaListOptions(greaterAreas);
-
-        const area: Area = { area: userData.addressArea?.area ?? "", id: userData.addressAreaID ?? 0 };
-
-        setAreaOption(area);
-
-        const areas = areaOptions.map((item) => ({
-          area: item.area,
-          id: item.areaID,
-          state: item.area === userData.addressArea?.area ? true : false,
-        }));
-        setAreaListOptions(areas);
-
-        const street: Street = { street: userData.addressStreet?.street ?? "", id: userData.addressStreetID ?? 0 };
-
-        setStreetOption(street);
-
-        const streets = streetOptions.map((item) => ({
-          street: item.street,
-          id: item.streetID,
-          state: item.street === userData.addressStreet?.street ? true : false,
-        }));
-        setStreetListOptions(streets);
-      }
-
-      //console.log("Select one");
-      //Make sure thet area and street options have a value
-      // if ((userData.addressAreaID === 0 || userData.addressAreaID === undefined) && !isUpdate) {
-      //   setAreaOption({ area: "", id: 0 });
-      // }
-      // if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && !isUpdate)) {
-      //   setStreetOption({ street: "", id: 0 });
-      // }
-      // if (userData.addressAreaID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
-      //   setAreaOption({ area: "Select one", id: 0 });
-      // }
-      // if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
-      //   setStreetOption({ street: "Select one", id: 0 });
-      // }
-
-      if (areaOption.area === "Select one" && isViewProfilePage) {
-        setAreaOption({ area: "", id: 0 });
-      }
-      if (streetOption.street === "Select one" && isViewProfilePage) {
-        setStreetOption({ street: "", id: 0 });
+        setGreaterAreaList(greaterAreas ?? "");
+        //console.log("Select one");
+        //Make sure thet area and street options have a value
+        // if ((userData.addressAreaID === 0 || userData.addressAreaID === undefined) && !isUpdate) {
+        //   setAreaOption({ area: "", id: 0 });
+        // }
+        // if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && !isUpdate)) {
+        //   setStreetOption({ street: "", id: 0 });
+        // }
+        // if (userData.addressAreaID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
+        //   setAreaOption({ area: "Select one", id: 0 });
+        // }
+        // if (userData.addressStreetID === 0 || (userData.addressAreaID === undefined && isUpdate)) {
+        //   setStreetOption({ street: "Select one", id: 0 });
+        // }
       }
     }
   }, [isViewProfilePage, isCreate, isUpdate]); // Effect runs when userQuery.data changes
@@ -1442,14 +1384,17 @@ const User: NextPage = () => {
     setID("");
     setUserID(0);
     setFirstName("");
+    setSouthAfricanIDOption("Select one");
+    setSouthAfricanID("");
     setEmail("");
     setSurname("");
     setPassword("");
     setConfirmPassword("");
     setMobile("");
-    setGreaterAreaOption({ area: "Select one", id: 0 });
-    setAreaOption({ area: "Select one", id: 0 });
-    setStreetOption({ street: "Select one", id: 0 });
+    setGreaterAreaOption("Select here");
+    setGreaterAreaList([]);
+    setGreaterAreaSelection({ allSelected: false, clear: false });
+    setStreet("");
     setAddressStreetCode("");
     setAddressStreetNumber("");
     setAddressSuburb("");
@@ -1460,21 +1405,29 @@ const User: NextPage = () => {
     setComments("");
     setImage("");
     setPreferredCommunicationListOptions([{ communication: "SMS", state: false }]);
-    setGreaterAreaListOptions(greaterAreaOptions.map((item) => ({ area: item.greaterArea, id: item.greaterAreaID, state: false })));
-    setAreaListOptions(areaOptions.map((item) => ({ area: item.area, id: item.areaID, state: false })));
-    setStreetListOptions(streetOptions.map((item) => ({ street: item.street, id: item.streetID, state: false })));
+
     setRoleListOptions(roleListOptions.map((item) => ({ role: item.role, state: false })));
     setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
-
+    setGreaterAreaListOptions(greaterAreaOptions.map((area) => ({ id: area.greaterAreaID, area: area.greaterArea, state: false })));
     setDeselectStatus("No");
-    setDeselectGreaterArea("No");
     setDeselectPreferredCommunication("No");
-    setDeselectArea("No");
-    setDeselectStreet("No");
     setDeselectRole("No");
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
+  //South African ID
+  const [southAfricanIDMessage, setSouthAfricanIDMessage] = useState("");
+  useEffect(() => {
+    console.log(southAfricanID.length);
+    if (southAfricanID.match(/^[0-9]+$/) == null && southAfricanID.length != 0) {
+      setSouthAfricanIDMessage("ID must only contain numbers");
+    } else if (southAfricanID.length != 13 && southAfricanID.length != 0) {
+      setSouthAfricanIDMessage("ID must be 13 digits");
+    } else {
+      setSouthAfricanIDMessage("");
+    }
+  }, [southAfricanID]);
+
   //Mobile number
   const [mobileMessage, setMobileMessage] = useState("");
   useEffect(() => {
@@ -1571,8 +1524,9 @@ const User: NextPage = () => {
 
     if (firstName === "") mandatoryFields.push("First Name");
     if (surname === "") mandatoryFields.push("Surname");
+    if (greaterAreaList.length === 0) mandatoryFields.push("Greater Area");
     //if (mobile === "") mandatoryFields.push("Mobile");
-    if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
+    //if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
     // if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
     if (roleOption === "Select one") mandatoryFields.push("Role");
     if (statusOption === "Select one") mandatoryFields.push("Status");
@@ -1589,6 +1543,9 @@ const User: NextPage = () => {
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
     if (passwordMessage !== "") errorFields.push({ field: "Password", message: passwordMessage });
     if (confirmPasswordMessage !== "") errorFields.push({ field: "Confirm Password", message: confirmPasswordMessage });
+    if (southAfricanIDMessage !== "") errorFields.push({ field: "South African ID", message: southAfricanIDMessage });
+    if (southAfricanIDOption === "Yes" && southAfricanID === "")
+      errorFields.push({ field: "South African ID", message: "South African ID is selected but no ID is provided" });
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -1809,7 +1766,6 @@ const User: NextPage = () => {
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Email</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Mobile</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Greater Area</th>
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Area</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Role</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Status</th>
                           <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
@@ -1837,8 +1793,12 @@ const User: NextPage = () => {
                               <td className="border px-2 py-1">{user.surname}</td>
                               <td className="border px-2 py-1">{user.email}</td>
                               <td className="border px-2 py-1">{user.mobile}</td>
-                              <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
-                              <td className="border px-2 py-1">{user.addressArea?.area}</td>
+                              <td className="border px-2 py-1">
+                                {user?.greaterAreas
+                                  ?.sort((a, b) => a.greaterAreaID - b.greaterAreaID)
+                                  .map((greaterArea) => greaterArea.greaterArea.greaterArea)
+                                  .join("; ") ?? ""}
+                              </td>
                               <td className="border px-2 py-1">{user.role}</td>
                               <td className="border px-2 py-1">{user.status}</td>
 
@@ -1930,6 +1890,7 @@ const User: NextPage = () => {
                 />
               </div>
             </div>
+
             <div className="flex grow flex-col items-center">
               <label>
                 {"("}All fields marked <span className="px-1 text-lg text-main-orange">*</span> are compulsary{")"}
@@ -1978,6 +1939,47 @@ const User: NextPage = () => {
                   </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
+                  {/* South African ID with dropdown and textbox */}
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-4">
+                      <label className="">South African ID: </label>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnSouthAfricanIDRef}
+                        className="mb-3 mt-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleSouthAfricanID}
+                      >
+                        {southAfricanIDOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isSouthAfricanIDOpen && (
+                        <div ref={southAfricanIDRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {southAfricanIDOptions.map((option) => (
+                              <li key={option} onClick={() => handleSouthAfricanIDOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    {southAfricanIDOption === "Yes" && (
+                      <div className="flex flex-col items-center">
+                        <input
+                          className="m-2 mt-4 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                          placeholder="Type here: e.g. 9303085835382"
+                          onChange={(e) => setSouthAfricanID(e.target.value)}
+                          value={southAfricanID}
+                        />
+                        {southAfricanIDMessage && <div className="text-sm text-red-500">{southAfricanIDMessage}</div>}
+                      </div>
+                    )}
+                  </div>
                   <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />
                   <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} />
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
@@ -2048,10 +2050,30 @@ const User: NextPage = () => {
                   <div className="flex flex-col divide-y-2 divide-gray-300">
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-4">
-                        <label>
-                          Greater Area<span className="text-lg text-main-orange">*</span>:{" "}
+                        <label className="">
+                          Greater Area(s)<span className="text-lg text-main-orange">*</span>:{" "}
                         </label>
                       </div>
+
+                      {/* Old code. before checkboxes */}
+                      {/* <div className="flex flex-col items-center">
+                        <button
+                          onClick={handleShowGreaterArea}
+                          className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        >
+                          Show all greater areas attended
+                        </button>
+                        {showGreaterArea && (
+                          <ul className="mr-3 w-full rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                            {greaterAreaList.map((greaterArea) => (
+                              <li key={greaterArea.id} className=" py-2">
+                                {greaterArea.area}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div> */}
+
                       <div className="flex flex-col">
                         <button
                           ref={btnGreaterAreaRef}
@@ -2059,7 +2081,7 @@ const User: NextPage = () => {
                           type="button"
                           onClick={handleToggleGreaterArea}
                         >
-                          {isUpdate ? greaterAreaOption.area : greaterAreaOption.area + " "}
+                          {isUpdate ? greaterAreaOption : greaterAreaOption + " "}
                           <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
                             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                           </svg>
@@ -2067,43 +2089,53 @@ const User: NextPage = () => {
                         {isGreaterAreaOpen && (
                           <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                             <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                              {greaterAreaOptions.map((option) => (
-                                <li key={option.greaterAreaID} onClick={() => handleGreaterAreaOption(option.greaterArea, option.greaterAreaID)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                    {option.greaterArea}
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-
-                            {/* <ul className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                              <li key="0">
-                                <label className="flex">
+                              <li key={1}>
+                                <div className="flex items-center px-4">
                                   <input
-                                    type="radio"
-                                    name="greaterArea"
-                                    checked={deselectGreaterArea === "Yes"}
-                                    className="mr-1 checked:bg-main-orange"
-                                    onChange={() => handleGreaterArea(0, "", "Yes")}
+                                    id="1"
+                                    type="checkbox"
+                                    checked={greaterAreaSelection?.allSelected}
+                                    onChange={(e) => handleGreaterArea(0, "", e.target.checked, "allSelected")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                   />
-                                  Deselect
-                                </label>
-                              </li>
-                              {greaterAreaListOptions.map((option) => (
-                                <li key={option.id} className=" py-2">
-                                  <label className="flex justify-center">
-                                    <input
-                                      type="radio"
-                                      name="greaterArea"
-                                      checked={option.state}
-                                      className="mr-1 checked:bg-main-orange"
-                                      onChange={() => handleGreaterArea(option.id, option.area, "No")}
-                                    />
-                                    {option.area}
+                                  <label htmlFor="1" className=" ms-2 text-sm font-bold text-gray-900">
+                                    Select All
                                   </label>
-                                </li>
-                              ))}
-                            </ul> */}
+                                </div>
+                              </li>
+                              <li key={2}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id="2"
+                                    type="checkbox"
+                                    checked={greaterAreaSelection?.clear}
+                                    onChange={(e) => handleGreaterArea(0, "", e.target.checked, "clear")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
+                                    Clear All
+                                  </label>
+                                </div>
+                              </li>
+                              {greaterAreaListOptions
+                                ?.sort((a, b) => a.area.localeCompare(b.area))
+                                .map((option) => (
+                                  <li key={option.id}>
+                                    <div className="flex items-center px-4">
+                                      <input
+                                        id={String(option.id)}
+                                        type="checkbox"
+                                        checked={option.state}
+                                        onChange={(e) => handleGreaterArea(option.id, option.area, e.target.checked, "normal")}
+                                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                      />
+                                      <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
+                                        {option.area}
+                                      </label>
+                                    </div>
+                                  </li>
+                                ))}
+                            </ul>
                           </div>
                         )}
                       </div>
@@ -2111,129 +2143,7 @@ const User: NextPage = () => {
 
                     <div className="flex items-start divide-x-2 divide-gray-300">
                       <div className="flex flex-col pr-2">
-                        <div className="flex items-start">
-                          <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">Area: </div>
-                          </div>
-                          <div className="flex flex-col">
-                            <button
-                              ref={btnAreaRef}
-                              className="my-3 inline-flex items-center rounded-lg bg-main-orange px-2 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                              type="button"
-                              onClick={handleToggleArea}
-                            >
-                              {areaOption.area + " "}
-                              <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                              </svg>
-                            </button>
-                            {isAreaOpen && (
-                              <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                                {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                                  {areaOptions.map((option) => (
-                                    <li key={option.areaID} onClick={() => handleAreaOption(option.area, option.areaID)}>
-                                      <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option.area}</button>
-                                    </li>
-                                  ))}
-                                </ul> */}
-                                <ul
-                                  className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200"
-                                  aria-labelledby="dropdownHoverButton"
-                                >
-                                  <li key="0">
-                                    <label className="flex">
-                                      <input
-                                        type="radio"
-                                        name="area"
-                                        checked={deselectArea === "Yes"}
-                                        className="mr-1 checked:bg-main-orange"
-                                        onChange={() => handleArea(0, "", "Yes")}
-                                      />
-                                      Deselect
-                                    </label>
-                                  </li>
-                                  {areaListOptions.map((option) => (
-                                    <li key={option.id} className=" py-2">
-                                      <label className="flex justify-center">
-                                        <input
-                                          type="radio"
-                                          name="area"
-                                          checked={option.state}
-                                          className="mr-1 checked:bg-main-orange"
-                                          onChange={() => handleArea(option.id, option.area, "No")}
-                                        />
-                                        {option.area}
-                                      </label>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-start">
-                          <div className="mr-3 flex items-center pt-5">
-                            <div className=" flex">Street: </div>
-                          </div>
-                          <div className="flex flex-col">
-                            <button
-                              ref={btnStreetRef}
-                              className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                              type="button"
-                              onClick={handleToggleStreet}
-                            >
-                              {streetOption.street + " "}
-                              <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                              </svg>
-                            </button>
-                            {isStreetOpen && (
-                              <div ref={streetRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                                {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
-                                  {streetOptions.map((option) => (
-                                    <li key={option.streetID} onClick={() => handleStreetOption(option.street, option.streetID)}>
-                                      <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                        {option.street}
-                                      </button>
-                                    </li>
-                                  ))}
-                                </ul> */}
-                                <ul
-                                  className="flex flex-col items-start px-2 py-2 text-sm text-gray-700 dark:text-gray-200"
-                                  aria-labelledby="dropdownHoverButton"
-                                >
-                                  <li key="0">
-                                    <label className="flex">
-                                      <input
-                                        type="radio"
-                                        name="street"
-                                        checked={deselectStreet === "Yes"}
-                                        className="mr-1 checked:bg-main-orange"
-                                        onChange={() => handleStreet(0, "", "Yes")}
-                                      />
-                                      Deselect
-                                    </label>
-                                  </li>
-                                  {streetListOptions.map((option) => (
-                                    <li key={option.id} className=" py-2">
-                                      <label className="flex justify-center">
-                                        <input
-                                          type="radio"
-                                          name="street"
-                                          checked={option.state}
-                                          className="mr-1 checked:bg-main-orange"
-                                          onChange={() => handleStreet(option.id, option.street, "No")}
-                                        />
-                                        {option.street}
-                                      </label>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                        <Input label="Street" placeholder="Type here: e.g. Marina Str" value={street} onChange={setStreet} />
 
                         <Input label="Street Code" placeholder="Type here: e.g. OH" value={addressStreetCode} onChange={setAddressStreetCode} />
                         {streetCodeMessage && <div className="text-sm text-red-500">{streetCodeMessage}</div>}
@@ -2560,6 +2470,10 @@ const User: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
+                    <b className="mr-3">South African ID:</b> {southAfricanID}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
                     <b className="mr-3">Email:</b> {email}
                   </div>
 
@@ -2575,16 +2489,17 @@ const User: NextPage = () => {
                 <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Geographical & Location Data</b>
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Greater Area:</b> {greaterAreaOption.area}
+                    <b className="mr-3">Greater Area(s):</b>{" "}
+                    {greaterAreaList
+                      .sort((a, b) => a.id - b.id)
+                      .map((greaterArea) => greaterArea.area)
+                      .join("; ")}
                   </div>
+
                   <div className="flex items-start divide-x-2 divide-gray-300">
                     <div className="flex w-96 flex-col pr-2">
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Area:</b> {areaOption.area}
-                      </div>
-
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street:</b> {streetOption.street}
+                        <b className="mr-3">Street:</b> {street}
                       </div>
 
                       <div className="mb-2 flex items-center">

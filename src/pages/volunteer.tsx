@@ -393,6 +393,7 @@ const Volunteer: NextPage = () => {
   //---------------------------------EDIT BOXES----------------------------------
   const [firstName, setFirstName] = useState("");
   const [surname, setSurname] = useState("");
+  const [southAfricanID, setSouthAfricanID] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   const [street, setStreet] = useState("");
@@ -439,6 +440,11 @@ const Volunteer: NextPage = () => {
   const [statusOption, setStatusOption] = useState("Select one");
   const statusRef = useRef<HTMLDivElement>(null);
   const btnStatusRef = useRef<HTMLButtonElement>(null);
+
+  const [isSouthAfricanIDOpen, setIsSouthAfricanIDOpen] = useState(false);
+  const [southAfricanIDOption, setSouthAfricanIDOption] = useState("Select one");
+  const southAfricanIDRef = useRef<HTMLDivElement>(null);
+  const btnSouthAfricanIDRef = useRef<HTMLButtonElement>(null);
 
   //GREATER AREA
   //to select multiple areas
@@ -727,6 +733,36 @@ const Volunteer: NextPage = () => {
 
   const statusOptions = ["Active", "Passive"];
 
+  //SOUTH AFRICAN ID
+  const handleToggleSouthAfricanID = () => {
+    setIsSouthAfricanIDOpen(!isSouthAfricanIDOpen);
+  };
+
+  const handleSouthAfricanIDOption = (option: SetStateAction<string>) => {
+    setSouthAfricanIDOption(option);
+    setIsSouthAfricanIDOpen(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        southAfricanIDRef.current &&
+        !southAfricanIDRef.current.contains(event.target as Node) &&
+        btnSouthAfricanIDRef.current &&
+        !btnSouthAfricanIDRef.current.contains(event.target as Node)
+      ) {
+        setIsSouthAfricanIDOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const southAfricanIDOptions = ["Yes", "Unknown", "No ID"];
+
   //CLINICSATTENDED
 
   const [clinicListOptions, setClinicListOptions] = useState<ClinicOptions[]>([]);
@@ -928,12 +964,22 @@ const Volunteer: NextPage = () => {
           area: area.greaterArea.greaterArea,
         })) ?? [];
 
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+      } else if (userData.southAfricanID !== null ? userData.southAfricanID.match(/^\d{13}$/) : false) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData.southAfricanID ?? "");
+      }
+
       setID(userData.volunteerID ?? 0);
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
       setMobile(userData.mobile ?? "");
-      setGreaterAreaList(greaterAreas ?? "Select one");
+      setGreaterAreaList(greaterAreas ?? "Select here");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
       setAddressStreetNumber(userData.addressStreetNumber ?? "");
@@ -1028,6 +1074,17 @@ const Volunteer: NextPage = () => {
       setClinicList(clinicDates);
       setRoleList(userData.role ?? "Select here");
 
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+        //}else if (userData?.southAfricanID?.match(/^\d{13}$/)){
+      } else if (userData.southAfricanID?.match(/^\d{13}$/)) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData?.southAfricanID ?? "");
+      }
+
       setGreaterAreaListOptions(
         greaterAreaOptions.map((area) => ({
           id: area.greaterAreaID,
@@ -1092,6 +1149,7 @@ const Volunteer: NextPage = () => {
       firstName: firstName,
       email: email ? email : "",
       surname: surname,
+      southAfricanID: southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
       mobile: mobile ? mobile : "",
       addressGreaterAreaID: greaterAreaIDList,
       addressStreet: street,
@@ -1138,6 +1196,8 @@ const Volunteer: NextPage = () => {
     }
 
     //After the newUser has been created make sure to set the fields back to empty
+    setSouthAfricanIDOption("Select one");
+    setSouthAfricanID("");
     setFirstName("");
     setEmail("");
     setSurname("");
@@ -1177,6 +1237,8 @@ const Volunteer: NextPage = () => {
     setComments("");
     setCollaboratorOrg("");
     setFirstName("");
+    setSouthAfricanIDOption("Select one");
+    setSouthAfricanID("");
     setEmail("");
     setSurname("");
     setMobile("");
@@ -1214,6 +1276,7 @@ const Volunteer: NextPage = () => {
         firstName: firstName,
         email: email ? email : "",
         surname: surname,
+        southAfricanID: southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
         mobile: mobile ? mobile : "",
         addressGreaterAreaID: greaterAreaIDList,
         addressStreet: street,
@@ -1320,6 +1383,16 @@ const Volunteer: NextPage = () => {
           area: area.greaterArea.greaterArea,
         })) ?? [];
 
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+      } else if (userData.southAfricanID?.match(/^\d{13}$/)) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData.southAfricanID ?? "");
+      }
+
       setID(userData.volunteerID ?? 0);
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
@@ -1402,6 +1475,16 @@ const Volunteer: NextPage = () => {
           area: area.greaterArea.greaterArea,
         })) ?? [];
 
+      if (userData.southAfricanID === "No ID") {
+        setSouthAfricanIDOption("No ID");
+      } else if (userData.southAfricanID === "Unknown") {
+        setSouthAfricanIDOption("Unknown");
+        //else if the user has a valid South African ID with just number and 13 digits
+      } else if (userData.southAfricanID?.match(/^\d{13}$/)) {
+        setSouthAfricanIDOption("Yes");
+        setSouthAfricanID(userData.southAfricanID ?? "");
+      }
+
       setFirstName(userData.firstName ?? "");
       setSurname(userData.surname ?? "");
       setEmail(userData.email ?? "");
@@ -1445,6 +1528,8 @@ const Volunteer: NextPage = () => {
     setFirstName("");
     setEmail("");
     setSurname("");
+    setSouthAfricanIDOption("Select one");
+    setSouthAfricanID("");
     setMobile("");
     setGreaterAreaOption("Select here");
     setRoleOption("Select here");
@@ -1481,6 +1566,19 @@ const Volunteer: NextPage = () => {
   };
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
+  //South African ID
+  const [southAfricanIDMessage, setSouthAfricanIDMessage] = useState("");
+  useEffect(() => {
+    console.log(southAfricanID.length);
+    if (southAfricanID.match(/^[0-9]+$/) == null && southAfricanID.length != 0) {
+      setSouthAfricanIDMessage("ID must only contain numbers");
+    } else if (southAfricanID.length != 13 && southAfricanID.length != 0) {
+      setSouthAfricanIDMessage("ID must be 13 digits");
+    } else {
+      setSouthAfricanIDMessage("");
+    }
+  }, [southAfricanID]);
+
   //Mobile number
   const [mobileMessage, setMobileMessage] = useState("");
   useEffect(() => {
@@ -1552,12 +1650,15 @@ const Volunteer: NextPage = () => {
     if (startingDate === null) mandatoryFields.push("Starting Date");
     if (preferredOption === "Email" && email === "") mandatoryFields.push("Email is preferred communication but is empty");
     if (preferredOption === "SMS" && mobile === "") mandatoryFields.push("SMS is preferred communication but is empty");
+    if (roleList.length === 0) mandatoryFields.push("Role");
 
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
     if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
-    if (roleList.length === 0) mandatoryFields.push("Role");
+    if (southAfricanIDMessage !== "") errorFields.push({ field: "South African ID", message: southAfricanIDMessage });
+    if (southAfricanIDOption === "Yes" && southAfricanID === "")
+      errorFields.push({ field: "South African ID", message: "South African ID is selected but no ID is provided" });
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -2251,6 +2352,47 @@ const Volunteer: NextPage = () => {
                   </div>
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
+                  {/* South African ID with dropdown and textbox */}
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-4">
+                      <label className="">South African ID: </label>
+                    </div>
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnSouthAfricanIDRef}
+                        className="mb-3 mt-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        type="button"
+                        onClick={handleToggleSouthAfricanID}
+                      >
+                        {southAfricanIDOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {isSouthAfricanIDOpen && (
+                        <div ref={southAfricanIDRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {southAfricanIDOptions.map((option) => (
+                              <li key={option} onClick={() => handleSouthAfricanIDOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                    {southAfricanIDOption === "Yes" && (
+                      <div className="flex flex-col items-center">
+                        <input
+                          className="m-2 mt-4 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
+                          placeholder="Type here: e.g. 9303085835382"
+                          onChange={(e) => setSouthAfricanID(e.target.value)}
+                          value={southAfricanID}
+                        />
+                        {southAfricanIDMessage && <div className="text-sm text-red-500">{southAfricanIDMessage}</div>}
+                      </div>
+                    )}
+                  </div>
                   <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />
                   <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} />
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
@@ -2790,6 +2932,10 @@ const Volunteer: NextPage = () => {
 
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Surname:</b> {surname}
+                  </div>
+
+                  <div className="mb-2 flex items-center">
+                    <b className="mr-3">South African ID:</b> {southAfricanID}
                   </div>
 
                   <div className="mb-2 flex items-center">

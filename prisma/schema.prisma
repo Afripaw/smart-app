@@ -56,35 +56,38 @@ model Session {
 }
 
 model User {
-    id                     String      @id @default(cuid())
+    id                     String              @id @default(cuid())
     name                   String
     emailVerified          DateTime?
     email                  String?
     image                  String?
-    userID                 Int         @default(autoincrement())
+    userID                 Int                 @unique @default(autoincrement())
     password               String
     surname                String
-    mobile                 String      @unique
-    addressGreaterArea     greaterArea @relation(fields: [addressGreaterAreaID], references: [greaterAreaID])
-    addressGreaterAreaID   Int
-    addressArea            area?       @relation(fields: [addressAreaID], references: [areaID])
-    addressAreaID          Int?
-    addressStreet          street?     @relation(fields: [addressStreetID], references: [streetID])
-    addressStreetID        Int?
+    southAfricanID         String?
+    mobile                 String?
+    addressGreaterArea     greaterAreaOnUser[]
+    addressStreet          String?
+    // addressGreaterArea     greaterArea @relation(fields: [addressGreaterAreaID], references: [greaterAreaID])
+    // addressGreaterAreaID   Int
+    // addressArea            area?       @relation(fields: [addressAreaID], references: [areaID])
+    // addressAreaID          Int?
+    // addressStreet          street?     @relation(fields: [addressStreetID], references: [streetID])
+    // addressStreetID        Int?
     addressStreetCode      String?
     addressStreetNumber    String?
     addressSuburb          String?
     addressPostalCode      String?
     addressFreeForm        String?
-    preferredCommunication String
+    preferredCommunication String?
     role                   String
     status                 String
     comments               String?
     startingDate           DateTime
     // communication          communication? @relation(fields: [communicationID], references: [communicationID])
     communicationID        Int?
-    createdAt              DateTime    @default(now())
-    updatedAt              DateTime?   @updatedAt
+    createdAt              DateTime            @default(now())
+    updatedAt              DateTime?           @updatedAt
     accounts               Account[]
     sessions               Session[]
     posts                  Post[]
@@ -212,9 +215,10 @@ model volunteer {
     volunteerID            Int                      @id @default(autoincrement())
     firstName              String
     surname                String
+    southAfricanID         String?
     image                  String?
     email                  String?
-    mobile                 String?                  @unique
+    mobile                 String?
     addressGreaterArea     greaterAreaOnVolunteer[]
     addressStreet          String?
     addressStreetCode      String?
@@ -222,7 +226,7 @@ model volunteer {
     addressSuburb          String?
     addressPostalCode      String?
     addressFreeForm        String?
-    preferredCommunication String
+    preferredCommunication String?
     role                   String[]
     collaboratorOrg        String?
     status                 String
@@ -239,7 +243,8 @@ model greaterArea {
     greaterArea   String
     area          area[]
     volunteer     greaterAreaOnVolunteer[]
-    user          User[]
+    user          greaterAreaOnUser[]
+    //user          User[]
     petOwner      petOwner[]
     petClinic     petClinic[]
     communication greaterAreaOnCommunication[]
@@ -257,13 +262,23 @@ model greaterAreaOnVolunteer {
     updatedAt                DateTime    @updatedAt
 }
 
+model greaterAreaOnUser {
+    greaterAreaOnUserID Int         @id @default(autoincrement())
+    greaterArea         greaterArea @relation(fields: [greaterAreaID], references: [greaterAreaID])
+    greaterAreaID       Int
+    user                User        @relation(fields: [userID], references: [userID])
+    userID              Int
+    createdAt           DateTime    @default(now())
+    updatedAt           DateTime    @updatedAt
+}
+
 model area {
     areaID        Int                   @id @default(autoincrement())
     area          String
     greaterArea   greaterArea           @relation(fields: [greaterAreaID], references: [greaterAreaID])
     greaterAreaID Int
     street        street[]
-    user          User[]
+    //user          User[]
     petOwner      petOwner[]
     petClinic     petClinic[]
     communication areaOnCommunication[]
@@ -286,7 +301,7 @@ model street {
     street    String
     area      area       @relation(fields: [areaID], references: [areaID])
     areaID    Int
-    user      User[]
+    //user      User[]
     petOwner  petOwner[]
     createdAt DateTime   @default(now())
     updatedAt DateTime   @updatedAt

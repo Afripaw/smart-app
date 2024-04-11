@@ -10,7 +10,7 @@ import { api } from "~/utils/api";
 import { useSession } from "next-auth/react";
 
 const Dashboard: NextPage = () => {
-  //useSession({ required: true });
+  useSession({ required: true });
   const activeVolunteers = api.welcomePage.getVolunteers.useQuery();
   const sterilisedPets = api.welcomePage.getSterilisedPets.useQuery();
   const clinicVisits = api.welcomePage.getAllClinicVisits.useQuery();

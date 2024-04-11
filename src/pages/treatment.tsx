@@ -597,6 +597,7 @@ const Treatment: NextPage = () => {
     "Constipation",
     "Cruciate",
     "Dental",
+    "Diarrhoea",
     "Distemper",
     "Ear infection",
     "Ehrlichia",
@@ -624,7 +625,6 @@ const Treatment: NextPage = () => {
     "Urinary",
     "Vaccinations (ad hoc)",
     "Vomiting",
-    "Diarrhoea",
     "Wound shave and clean",
     "Wound stitch-up",
     "Other",
@@ -1217,131 +1217,143 @@ const Treatment: NextPage = () => {
               </div>
 
               {pet_treatment_data ? (
-                <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                  <table className="table-auto">
-                    <thead className="">
-                      <tr>
-                        <th className="px-4 py-2"></th>
-                        {/* <th className="px-4 py-2">ID</th> */}
-                        <th className="w-[35px] px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
-                              Treatment Date
-                            </button>
-                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort reverse chronologically
+                // <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+                //   <table className="table-auto">
+                //     <thead className="">
+                <article className="my-5 flex w-full justify-center rounded-md shadow-inner">
+                  <div className="max-h-[70vh] max-w-7xl overflow-auto">
+                    {/* max-h-[60vh] */}
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="z-30 bg-gray-50">
+                        <tr>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          {/* <th className="px-4 py-2">ID</th> */}
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "date" ? "underline" : ""}`} onClick={() => handleOrderFields("date")}>
+                                Treatment Date
+                              </button>
+                              <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort reverse chronologically
+                              </span>
                             </span>
-                          </span>
-                        </th>
-                        {/* <th className="px-4 py-2">Pet ID</th> */}
-                        <th className="px-4 py-2">Pet</th>
-                        <th className="px-4 py-2">Owner</th>
-                        <th className="px-4 py-2">Greater Area</th>
-                        <th className="px-4 py-2">Area</th>
-                        <th className="px-4 py-2">Category</th>
-                        <th className="px-4 py-2">
-                          Type
-                          {/* <button className={`${order == "condition" ? "underline" : ""}`} onClick={() => handleOrderFields("condition")}>
+                          </th>
+                          {/* <th className="px-4 py-2">Pet ID</th> */}
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Pet</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Owner</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Greater Area</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Area</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Category</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">
+                            Type
+                            {/* <button className={`${order == "condition" ? "underline" : ""}`} onClick={() => handleOrderFields("condition")}>
                           Conditions
                         </button> */}
-                        </th>
-                        <th className="w-[35px] px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                              Last Update
-                            </button>
-                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort reverse chronologically
+                          </th>
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                                Last Update
+                              </button>
+                              <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort reverse chronologically
+                              </span>
                             </span>
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pet_treatment_data?.map((treatment, index) => {
-                        return (
-                          <tr className="items-center">
-                            <td className=" border px-2 py-1">
-                              <div className="flex justify-center">{index + 1}</div>
-                            </td>
-                            {/* <td className="border px-2 py-1">T{treatment.treatmentID}</td> */}
-                            <td className="border px-2 py-1">
-                              {treatment?.date?.getDate()?.toString() ?? ""}
-                              {"/"}
-                              {((treatment?.date?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                              {"/"}
-                              {treatment?.date?.getFullYear()?.toString() ?? ""}
-                            </td>
-                            {/* <td className="border px-4 py-2">P{treatment.petID}</td> */}
-                            <td className="border px-2 py-1">
-                              <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(treatment.petID)}>
-                                {treatment.petName} ({treatment.species})
-                              </button>
-                            </td>
-                            <td className="border px-2 py-1">
-                              <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(treatment.ownerID)}>
-                                {treatment.firstName} {treatment.surname}
-                              </button>
-                            </td>
-                            <td className="border px-2 py-1">{treatment.greaterArea}</td>
-                            <td className="border px-2 py-1">{treatment.area}</td>
-                            <td className="border px-2 py-1">{treatment.category}</td>
-                            <td className="border px-2 py-1">{treatment.type.slice(0, 8).join("; ")}</td>
-                            <td className=" border px-2 py-1">
-                              {treatment?.updatedAt?.getDate()?.toString() ?? ""}
-                              {"/"}
-                              {((treatment?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                              {"/"}
-                              {treatment?.updatedAt?.getFullYear()?.toString() ?? ""}
-                            </td>
+                          </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pet_treatment_data?.map((treatment, index) => {
+                          return (
+                            <tr className="items-center">
+                              <td className=" border px-2 py-1">
+                                <div className="flex justify-center">{index + 1}</div>
+                              </td>
+                              {/* <td className="border px-2 py-1">T{treatment.treatmentID}</td> */}
+                              <td className="border px-2 py-1">
+                                {treatment?.date?.getDate()?.toString() ?? ""}
+                                {"/"}
+                                {((treatment?.date?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                                {"/"}
+                                {treatment?.date?.getFullYear()?.toString() ?? ""}
+                              </td>
+                              {/* <td className="border px-4 py-2">P{treatment.petID}</td> */}
+                              <td className="border px-2 py-1">
+                                <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(treatment.petID)}>
+                                  {treatment.petName} ({treatment.species})
+                                </button>
+                              </td>
+                              <td className="border px-2 py-1">
+                                <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(treatment.ownerID)}>
+                                  {treatment.firstName} {treatment.surname}
+                                </button>
+                              </td>
+                              <td className="border px-2 py-1">{treatment.greaterArea}</td>
+                              <td className="border px-2 py-1">{treatment.area}</td>
+                              <td className="border px-2 py-1">{treatment.category}</td>
+                              <td className="border px-2 py-1">{treatment.type.slice(0, 8).join("; ")}</td>
+                              <td className=" border px-2 py-1">
+                                {treatment?.updatedAt?.getDate()?.toString() ?? ""}
+                                {"/"}
+                                {((treatment?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                                {"/"}
+                                {treatment?.updatedAt?.getFullYear()?.toString() ?? ""}
+                              </td>
 
-                            <div className="flex">
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Trash
-                                    size={24}
-                                    className="block"
-                                    onClick={() =>
-                                      handleDeleteModal(
-                                        treatment.treatmentID ?? 0,
-                                        String(treatment.treatmentID ?? 0),
-                                        treatment.date?.getDate()?.toString() +
-                                          "/" +
-                                          ((treatment.date?.getMonth() ?? 0) + 1)?.toString() +
-                                          "/" +
-                                          treatment.date?.getFullYear()?.toString() ?? "",
-                                      )
-                                    }
-                                  />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Delete treatment
+                              <div className="flex">
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Trash
+                                      size={24}
+                                      className="block"
+                                      onClick={() =>
+                                        handleDeleteModal(
+                                          treatment.treatmentID ?? 0,
+                                          String(treatment.treatmentID ?? 0),
+                                          treatment.date?.getDate()?.toString() +
+                                            "/" +
+                                            ((treatment.date?.getMonth() ?? 0) + 1)?.toString() +
+                                            "/" +
+                                            treatment.date?.getFullYear()?.toString() ?? "",
+                                        )
+                                      }
+                                    />
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Delete treatment
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)} />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Update treatment
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)} />
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Update treatment
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)} />
-                                  <span className="absolute bottom-full hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    View treatment profile
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 mr-[30px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)} />
+                                    <span className="absolute bottom-full z-50 hidden w-[75px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      View treatment profile
+                                    </span>
                                   </span>
-                                </span>
+                                </div>
                               </div>
-                            </div>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                            </tr>
+                          );
+                        })}
+                        <tr>
+                          <td className=" px-2 py-1">
+                            <div ref={observerTarget} />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </article>
               ) : (
                 <div className="flex items-center justify-center pt-10">
@@ -1351,7 +1363,7 @@ const Treatment: NextPage = () => {
                   />
                 </div>
               )}
-              <div ref={observerTarget} />
+              {/* <div ref={observerTarget} /> */}
             </div>
           </>
         )}
@@ -1487,7 +1499,7 @@ const Treatment: NextPage = () => {
                         </svg>
                       </button>
                       {isTypeOpen && (
-                        <div ref={typeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                        <div ref={typeRef} className="w-50 z-10 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
                           {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {typeOptions.map((option) => (
                               <li key={option} onClick={() => handleTypeOption(option)}>
@@ -1506,7 +1518,7 @@ const Treatment: NextPage = () => {
                                   onChange={(e) => handleType("", e.target.checked, "allSelected")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
                                   Select All
                                 </label>
                               </div>
@@ -1520,7 +1532,7 @@ const Treatment: NextPage = () => {
                                   onChange={(e) => handleType("", e.target.checked, "clear")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
                                   Clear All
                                 </label>
                               </div>

@@ -643,14 +643,27 @@ const Owner: NextPage = () => {
     };
   }, []);
 
-  const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState(["SMS"]);
+  // const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState(["SMS"]);
+  // useEffect(() => {
+  //   if (email === "") {
+  //     setPreferredCommunicationOptions(["SMS"]);
+  //   } else if (email != "") {
+  //     setPreferredCommunicationOptions(["Email", "SMS"]);
+  //   }
+  // }, [email]);
+  const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState<string[]>([]);
+
   useEffect(() => {
-    if (email === "") {
+    if (email === "" && mobile === "") {
+      setPreferredCommunicationOptions([]);
+    } else if (email != "" && mobile === "") {
+      setPreferredCommunicationOptions(["Email"]);
+    } else if (email === "" && mobile != "") {
       setPreferredCommunicationOptions(["SMS"]);
-    } else if (email != "") {
+    } else if (email != "" && mobile != "") {
       setPreferredCommunicationOptions(["Email", "SMS"]);
     }
-  }, [email]);
+  }, [email, mobile]);
 
   //STATUS
   const handleToggleStatus = () => {
@@ -1507,11 +1520,11 @@ const Owner: NextPage = () => {
   useEffect(() => {
     console.log(mobile.length);
     if (mobile.match(/^[0-9]+$/) == null && mobile.length != 0) {
-      setMobileMessage("Mobile number must only contain numbers");
+      setMobileMessage("A mobile number should contain numbers only");
     } else if (mobile.length != 10 && mobile.length != 0) {
-      setMobileMessage("Mobile number must be 10 digits");
+      setMobileMessage("A mobile number should be 10 digits");
     } else if (!mobile.startsWith("0") && mobile.length != 0) {
-      setMobileMessage("Mobile number must start with 0");
+      setMobileMessage("A mobile number should start with 0");
     } else {
       setMobileMessage("");
     }
@@ -1522,9 +1535,9 @@ const Owner: NextPage = () => {
   const [streetCodeMessage, setStreetCodeMessage] = useState("");
   useEffect(() => {
     if (addressStreetCode.match(/^[A-Za-z]+$/) == null && addressStreetCode.length != 0) {
-      setStreetCodeMessage("Street code must only contain letters");
+      setStreetCodeMessage("A street code should contain letters only");
     } else if (addressStreetCode.length > 4 && addressStreetCode.length != 0) {
-      setStreetCodeMessage("Street code must be 4 characters or less");
+      setStreetCodeMessage("A street code should be 4 characters or less");
     } else {
       setStreetCodeMessage("");
     }
@@ -1534,9 +1547,9 @@ const Owner: NextPage = () => {
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
   useEffect(() => {
     if (addressStreetNumber.match(/^[0-9]+$/) == null && addressStreetNumber.length != 0) {
-      setStreetNumberMessage("Street number must only contain numbers");
+      setStreetNumberMessage("A street number should contain numbers only");
     } else if (addressStreetNumber.length > 4 && addressStreetNumber.length != 0) {
-      setStreetNumberMessage("Street number must be 4 digits or less");
+      setStreetNumberMessage("A street number should be 4 digits or less");
     } else {
       setStreetNumberMessage("");
     }
@@ -1546,9 +1559,9 @@ const Owner: NextPage = () => {
   const [postalCodeMessage, setPostalCodeMessage] = useState("");
   useEffect(() => {
     if (addressPostalCode.match(/^[0-9]+$/) == null && addressPostalCode.length != 0) {
-      setPostalCodeMessage("Postal code must only contain numbers");
+      setPostalCodeMessage("A postal code should only contain numbers");
     } else if (addressPostalCode.length > 4 && addressPostalCode.length != 0) {
-      setPostalCodeMessage("Postal code must be 4 digits or less");
+      setPostalCodeMessage("A postal code should be 4 digits or less");
     } else {
       setPostalCodeMessage("");
     }
@@ -1579,6 +1592,8 @@ const Owner: NextPage = () => {
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
     if (southAfricanIDMessage !== "") errorFields.push({ field: "South African ID", message: southAfricanIDMessage });
+    if (southAfricanIDOption === "Yes" && southAfricanID === "")
+      errorFields.push({ field: "South African ID", message: "South African ID is selected but no ID is provided" });
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -1777,137 +1792,147 @@ const Owner: NextPage = () => {
               </div>
 
               {owner_data ? (
-                <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                  <table className="table-auto">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2"></th>
-                        {/* <th className="px-4 py-2">ID</th> */}
-                        <th className="px-4 py-2">Name</th>
-                        <th className="px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
-                              Surname
-                            </button>
-                            <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort alphabetically
+                // <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+                <article className="my-5 flex w-full justify-center rounded-md shadow-inner">
+                  <div className="max-h-[70vh] max-w-7xl overflow-auto">
+                    <table className="table-auto">
+                      <thead className="z-30 bg-gray-50">
+                        <tr>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          {/* <th className="px-4 py-2">ID</th> */}
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Name</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
+                                Surname
+                              </button>
+                              <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort alphabetically
+                              </span>
                             </span>
-                          </span>
-                        </th>
+                          </th>
 
-                        <th className="px-4 py-2">Email</th>
-                        <th className="px-4 py-2">Mobile</th>
-                        <th className="px-4 py-2">Greater Area</th>
-                        <th className="px-4 py-2">Area</th>
-                        <th className="px-4 py-2">Address</th>
-                        <th className="px-4 py-2">Status</th>
-                        <th className="px-4 py-2">Pet(s)</th>
-                        <th className="w-[35px] px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                              Last Update
-                            </button>
-                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort reverse chronologically
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Email</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Mobile</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Greater Area</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Area</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Address</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Status</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Pet(s)</th>
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                                Last Update
+                              </button>
+                              <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort reverse chronologically
+                              </span>
                             </span>
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {owner_data?.map((user, index) => {
-                        return (
-                          <tr className="items-center">
-                            <td className=" border px-2 py-1">
-                              <div className="flex justify-center">{index + 1}</div>
-                            </td>
-                            {/* <td className="border px-4 py-2">N{user.ownerID}</td> */}
-                            <td className="border px-2 py-1">{user.firstName}</td>
-                            <td className="border px-2 py-1">{user.surname}</td>
-                            <td className="border px-2 py-1">{user.email}</td>
-                            <td className="border px-2 py-1">{user.mobile}</td>
-                            <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
-                            <td className="border px-2 py-1">{user.addressArea?.area ?? ""}</td>
-                            <td className="border px-2 py-1">
-                              {user.addressStreetNumber} {user.addressStreet?.street ?? ""}
-                            </td>
-                            <td className="border px-2 py-1">{user.status}</td>
-                            <td className="border px-2 py-1">
-                              {user.pets?.map((pet) => {
-                                return (
-                                  <div className="flex flex-col gap-0">
-                                    {pet.map((pet_) => {
-                                      return (
-                                        <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet_.petID)}>
-                                          {pet_.petName}
-                                        </button>
-                                      );
-                                    })}
-                                  </div>
-                                );
-                              })}
-                            </td>
-                            <td className=" border px-4 py-2">
-                              {user?.updatedAt?.getDate()?.toString() ?? ""}
-                              {"/"}
-                              {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                              {"/"}
-                              {user?.updatedAt?.getFullYear()?.toString() ?? ""}
-                            </td>
-                            <div className="flex">
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Trash
-                                    size={24}
-                                    className="block"
-                                    onClick={() => handleDeleteModal(user.ownerID, String(user.ownerID), user.firstName ?? "")}
-                                  />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Delete owner
+                          </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {owner_data?.map((user, index) => {
+                          return (
+                            <tr className="items-center">
+                              <td className=" border px-2 py-1">
+                                <div className="flex justify-center">{index + 1}</div>
+                              </td>
+                              {/* <td className="border px-4 py-2">N{user.ownerID}</td> */}
+                              <td className="border px-2 py-1">{user.firstName}</td>
+                              <td className="border px-2 py-1">{user.surname}</td>
+                              <td className="border px-2 py-1">{user.email}</td>
+                              <td className="border px-2 py-1">{user.mobile}</td>
+                              <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
+                              <td className="border px-2 py-1">{user.addressArea?.area ?? ""}</td>
+                              <td className="border px-2 py-1">
+                                {user.addressStreetNumber} {user.addressStreet?.street ?? ""}
+                              </td>
+                              <td className="border px-2 py-1">{user.status}</td>
+                              <td className="border px-2 py-1">
+                                {user.pets?.map((pet) => {
+                                  return (
+                                    <div className="flex flex-col gap-0">
+                                      {pet.map((pet_) => {
+                                        return (
+                                          <button className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet_.petID)}>
+                                            {pet_.petName}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  );
+                                })}
+                              </td>
+                              <td className=" border px-4 py-2">
+                                {user?.updatedAt?.getDate()?.toString() ?? ""}
+                                {"/"}
+                                {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                                {"/"}
+                                {user?.updatedAt?.getFullYear()?.toString() ?? ""}
+                              </td>
+                              <div className="flex">
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Trash
+                                      size={24}
+                                      className="block"
+                                      onClick={() => handleDeleteModal(user.ownerID, String(user.ownerID), user.firstName ?? "")}
+                                    />
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Delete owner
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.ownerID)} />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Update owner
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.ownerID)} />
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Update owner
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.ownerID)} />
-                                  <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    View owner profile
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.ownerID)} />
+                                    <span className="absolute bottom-full z-50 hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      View owner profile
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Dog size={24} className="block" onClick={() => handleCreateNewPet(user.ownerID, user.firstName, user.surname)} />
-                                  <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Add new pet to owner
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 mr-[31px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Dog size={24} className="block" onClick={() => handleCreateNewPet(user.ownerID, user.firstName, user.surname)} />
+                                    <span className="absolute bottom-full z-50 hidden w-[86px] rounded-md border border-gray-300 bg-white px-1 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Add new pet to owner
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              {/* <div className="relative flex items-center justify-center">
+                                {/* <div className="relative flex items-center justify-center">
                                 <button onClick={() => handleRandomDate(user.ownerID)} className="rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500">
                                   <span className="absolute bottom-full hidden w-[90px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                     Random date
                                   </span>
                                 </button>
                               </div> */}
-                            </div>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                              </div>
+                            </tr>
+                          );
+                        })}
+                        <tr>
+                          <td className=" px-2 py-1">
+                            <div ref={observerTarget} />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  {/* <div ref={observerTarget} /> */}
                 </article>
               ) : (
                 <div className="flex items-center justify-center pt-10">
@@ -1917,7 +1942,6 @@ const Owner: NextPage = () => {
                   />
                 </div>
               )}
-              <div ref={observerTarget} />
             </div>
           </>
         )}
@@ -1977,6 +2001,12 @@ const Owner: NextPage = () => {
                   <div className="flex py-2">
                     Owner ID: <div className="px-3">N{isCreate ? String((latestOwnerID?.data?.clinicID ?? 0) + 1) : id}</div>
                   </div>
+
+                  {/* {southAfricanIDOption === "Yes" && (
+                    <Input label="South African ID" placeholder="Type here: e.g. 9303085835382" value={southAfricanID} onChange={setSouthAfricanID} required />
+                  )} */}
+                  <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
+                  <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
                   {/* South African ID with dropdown and textbox */}
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
@@ -2018,20 +2048,13 @@ const Owner: NextPage = () => {
                       </div>
                     )}
                   </div>
-                  {/* {southAfricanIDOption === "Yes" && (
-                    <Input label="South African ID" placeholder="Type here: e.g. 9303085835382" value={southAfricanID} onChange={setSouthAfricanID} required />
-                  )} */}
-                  <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
-                  <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
                   <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />
                   <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} />
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
-                      <label className="">
-                        Preferred Communication Channel<span className="text-lg text-main-orange">*</span>:{" "}
-                      </label>
+                      <label className="">Preferred Communication Channel: </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -2461,15 +2484,15 @@ const Owner: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">South African ID:</b> {southAfricanID}
-                      </div>
-
-                      <div className="mb-2 flex items-center">
                         <b className="mr-3">Name:</b> {firstName}
                       </div>
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Surname:</b> {surname}
+                      </div>
+
+                      <div className="mb-2 flex items-center">
+                        <b className="mr-3">South African ID:</b> {southAfricanID}
                       </div>
 
                       <div className="mb-2 flex items-center">

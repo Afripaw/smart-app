@@ -623,21 +623,21 @@ const Volunteer: NextPage = () => {
   }, []);
 
   const roleOptions = [
+    "Ambassador",
     "Board Member",
     "Foster",
     "Groomer",
     "Marketing",
+    "Pet Clinic Administrator",
+    "Pet Clinic Cats",
     "Pet Clinic Director",
+    "Pet Clinic General",
+    "Pet Clinic Hospital",
     "Programme Co-ordinator",
     "Vet",
     "Vet Nurse",
     "Walker",
     "Ward Councillor",
-    "Ambassador",
-    "Pet Clinic Administrator",
-    "Pet Clinic Cats",
-    "Pet Clinic General",
-    "Pet Clinic Hospital",
     "Young Ambassador",
     "Other",
   ];
@@ -675,14 +675,27 @@ const Volunteer: NextPage = () => {
     };
   }, []);
 
-  const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState(["SMS"]);
+  // const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState(["SMS"]);
+  // useEffect(() => {
+  //   if (email === "") {
+  //     setPreferredCommunicationOptions(["SMS"]);
+  //   } else if (email != "") {
+  //     setPreferredCommunicationOptions(["Email", "SMS"]);
+  //   }
+  // }, [email]);
+  const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState<string[]>([]);
+
   useEffect(() => {
-    if (email === "") {
+    if (email === "" && mobile === "") {
+      setPreferredCommunicationOptions([]);
+    } else if (email != "" && mobile === "") {
+      setPreferredCommunicationOptions(["Email"]);
+    } else if (email === "" && mobile != "") {
       setPreferredCommunicationOptions(["SMS"]);
-    } else if (email != "") {
+    } else if (email != "" && mobile != "") {
       setPreferredCommunicationOptions(["Email", "SMS"]);
     }
-  }, [email]);
+  }, [email, mobile]);
 
   //STATUS
   const handleToggleStatus = () => {
@@ -1473,11 +1486,11 @@ const Volunteer: NextPage = () => {
   useEffect(() => {
     console.log(mobile.length);
     if (mobile.match(/^[0-9]+$/) == null && mobile.length != 0) {
-      setMobileMessage("Mobile number must only contain numbers");
+      setMobileMessage("A mobile number should contain numbers only");
     } else if (mobile.length != 10 && mobile.length != 0) {
-      setMobileMessage("Mobile number must be 10 digits");
+      setMobileMessage("A mobile number should be 10 digits");
     } else if (!mobile.startsWith("0") && mobile.length != 0) {
-      setMobileMessage("Mobile number must start with 0");
+      setMobileMessage("A mobile number should start with 0");
     } else {
       setMobileMessage("");
     }
@@ -1488,9 +1501,9 @@ const Volunteer: NextPage = () => {
   const [streetCodeMessage, setStreetCodeMessage] = useState("");
   useEffect(() => {
     if (addressStreetCode.match(/^[A-Za-z]+$/) == null && addressStreetCode.length != 0) {
-      setStreetCodeMessage("Street code must only contain letters");
+      setStreetCodeMessage("A street code should contain letters only");
     } else if (addressStreetCode.length > 4 && addressStreetCode.length != 0) {
-      setStreetCodeMessage("Street code must be 4 characters or less");
+      setStreetCodeMessage("A street code should be 4 characters or less");
     } else {
       setStreetCodeMessage("");
     }
@@ -1500,9 +1513,9 @@ const Volunteer: NextPage = () => {
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
   useEffect(() => {
     if (addressStreetNumber.match(/^[0-9]+$/) == null && addressStreetNumber.length != 0) {
-      setStreetNumberMessage("Street number must only contain numbers");
+      setStreetNumberMessage("A street number should contain numbers only");
     } else if (addressStreetNumber.length > 4 && addressStreetNumber.length != 0) {
-      setStreetNumberMessage("Street number must be 4 digits or less");
+      setStreetNumberMessage("A street number should be 4 digits or less");
     } else {
       setStreetNumberMessage("");
     }
@@ -1512,9 +1525,9 @@ const Volunteer: NextPage = () => {
   const [postalCodeMessage, setPostalCodeMessage] = useState("");
   useEffect(() => {
     if (addressPostalCode.match(/^[0-9]+$/) == null && addressPostalCode.length != 0) {
-      setPostalCodeMessage("Postal code must only contain numbers");
+      setPostalCodeMessage("A postal code should contain numbers only");
     } else if (addressPostalCode.length > 4 && addressPostalCode.length != 0) {
-      setPostalCodeMessage("Postal code must be 4 digits or less");
+      setPostalCodeMessage("A postal code should be 4 digits or less");
     } else {
       setPostalCodeMessage("");
     }
@@ -1987,114 +2000,117 @@ const Volunteer: NextPage = () => {
               </div>
 
               {volunteer_data_with_clinics ? (
-                <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                  <table className="table-auto">
-                    <thead className="">
-                      <tr>
-                        <th className="px-4 py-2"></th>
-                        {/* <th className="px-4 py-2">ID</th> */}
-                        <th className="px-4 py-2">Name</th>
-                        <th className="px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
-                              Surname
-                            </button>
-                            <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort alphabetically
+                <article className="my-5 flex w-full justify-center rounded-md shadow-inner">
+                  <div className="max-h-[70vh] max-w-7xl overflow-auto">
+                    {/* max-h-[60vh] */}
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="z-30 bg-gray-50">
+                        <tr>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          {/* <th className="px-4 py-2">ID</th> */}
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Name</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "surname" ? "underline" : ""}`} onClick={() => handleOrderFields("surname")}>
+                                Surname
+                              </button>
+                              <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort alphabetically
+                              </span>
                             </span>
-                          </span>
-                        </th>
-                        <th className="px-4 py-2">Email</th>
-                        <th className="px-4 py-2">Mobile</th>
-                        <th className="px-4 py-2">Greater Area</th>
-                        <th className="px-4 py-2">Status</th>
-                        <th className="w-[35px] px-4 py-2">Last Clinic</th>
-                        {/* <th className="w-[35px] px-4 py-2">
+                          </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Email</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Mobile</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Greater Area</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Status</th>
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">Last Clinic</th>
+                          {/* <th className="w-[35px] px-4 py-2">
                         <button className={`${order == "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
                           Last Update
                         </button>
                       </th> */}
-                        <th className="w-[35px] px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                              Last Update
-                            </button>
-                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort reverse chronologically
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                                Last Update
+                              </button>
+                              <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort reverse chronologically
+                              </span>
                             </span>
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {volunteer_data_with_clinics?.map((user, index) => {
-                        return (
-                          <tr className="items-center">
-                            <td className=" border px-2 py-1">
-                              <div className="flex justify-center">{index + 1}</div>
-                            </td>
-                            {/* <td className="border px-4 py-2">V{user.volunteerID}</td> */}
-                            <td className="border px-2 py-1">{user.firstName}</td>
-                            <td className="border px-2 py-1">{user.surname}</td>
-                            <td className="border px-2 py-1">{user.email}</td>
-                            <td className="border px-2 py-1">{user.mobile}</td>
-                            <td className="border px-2 py-1">
-                              {user?.greaterAreas
-                                ?.sort((a, b) => a.greaterAreaID - b.greaterAreaID)
-                                .map((greaterArea) => greaterArea.greaterArea.greaterArea)
-                                .join("; ") ?? ""}
-                            </td>
-                            <td className="border px-2 py-1">{user.status}</td>
-                            <td className="border px-2 py-1">
-                              {user.clinics && user.clinics.length > 0 ? (
-                                <>
-                                  {user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getDate().toString()}/
-                                  {((user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
-                                  {user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getFullYear().toString()}
-                                </>
-                              ) : (
-                                "None"
-                              )}
-                            </td>
-                            <td className="border px-2 py-1">
-                              {user?.updatedAt?.getDate()?.toString() ?? ""}
-                              {"/"}
-                              {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                              {"/"}
-                              {user?.updatedAt?.getFullYear()?.toString() ?? ""}
-                            </td>
-                            <div className="flex">
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Trash
-                                    size={24}
-                                    className="block"
-                                    onClick={() => handleDeleteModal(user.volunteerID, String(user.volunteerID), user.firstName ?? "")}
-                                  />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Delete volunteer
+                          </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {volunteer_data_with_clinics?.map((user, index) => {
+                          return (
+                            <tr className="items-center">
+                              <td className=" border px-2 py-1">
+                                <div className="flex justify-center">{index + 1}</div>
+                              </td>
+                              {/* <td className="border px-4 py-2">V{user.volunteerID}</td> */}
+                              <td className="border px-2 py-1">{user.firstName}</td>
+                              <td className="border px-2 py-1">{user.surname}</td>
+                              <td className="border px-2 py-1">{user.email}</td>
+                              <td className="border px-2 py-1">{user.mobile}</td>
+                              <td className="border px-2 py-1">
+                                {user?.greaterAreas
+                                  ?.sort((a, b) => a.greaterAreaID - b.greaterAreaID)
+                                  .map((greaterArea) => greaterArea.greaterArea.greaterArea)
+                                  .join("; ") ?? ""}
+                              </td>
+                              <td className="border px-2 py-1">{user.status}</td>
+                              <td className="border px-2 py-1">
+                                {user.clinics && user.clinics.length > 0 ? (
+                                  <>
+                                    {user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getDate().toString()}/
+                                    {((user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
+                                    {user?.clinics?.[user?.clinics.length - 1]?.clinic?.date.getFullYear().toString()}
+                                  </>
+                                ) : (
+                                  "None"
+                                )}
+                              </td>
+                              <td className="border px-2 py-1">
+                                {user?.updatedAt?.getDate()?.toString() ?? ""}
+                                {"/"}
+                                {((user?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                                {"/"}
+                                {user?.updatedAt?.getFullYear()?.toString() ?? ""}
+                              </td>
+                              <div className="flex">
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Trash
+                                      size={24}
+                                      className="block"
+                                      onClick={() => handleDeleteModal(user.volunteerID, String(user.volunteerID), user.firstName ?? "")}
+                                    />
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Delete volunteer
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.volunteerID)} />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Update volunteer
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.volunteerID)} />
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Update volunteer
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.volunteerID)} />
-                                  <span className="absolute bottom-full hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    View volunteer profile
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.volunteerID)} />
+                                    <span className="absolute bottom-full z-50 hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      View volunteer profile
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
-                              {/* <div className="relative flex items-center justify-center">
+                                </div>
+                                {/* <div className="relative flex items-center justify-center">
                                 <button
                                   onClick={() => handleRandomDate(user.volunteerID)}
                                   className="rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
@@ -2105,56 +2121,62 @@ const Volunteer: NextPage = () => {
                                 </button>
                               </div> */}
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Bed size={24} className="block" onClick={() => handleAddClinic(user.volunteerID)} />
-                                  <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Add today's clinic to volunteer
-                                  </span>
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 mr-[32px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Bed size={24} className="block" onClick={() => handleAddClinic(user.volunteerID)} />
+                                    <span className="absolute bottom-full z-50 hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Add today's clinic to volunteer
+                                    </span>
 
-                                  {showTodayClinics && volunteerIDForClinic === user.volunteerID && (
-                                    <>
-                                      {isClinicLoading ? (
-                                        <div
-                                          className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] group-hover:block motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                                          role="status"
-                                        />
-                                      ) : (
-                                        <div
-                                          ref={clinicRef}
-                                          className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow group-hover:block dark:bg-gray-700"
-                                        >
-                                          <ul
-                                            className="rounded-lg border-2 border-black py-2 text-sm text-gray-700 dark:text-gray-200"
-                                            aria-labelledby="dropdownHoverButton"
+                                    {showTodayClinics && volunteerIDForClinic === user.volunteerID && (
+                                      <>
+                                        {isClinicLoading ? (
+                                          <div
+                                            className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] group-hover:block motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                            role="status"
+                                          />
+                                        ) : (
+                                          <div
+                                            ref={clinicRef}
+                                            className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow group-hover:block dark:bg-gray-700"
                                           >
-                                            {todayClinicList.length > 0 ? (
-                                              todayClinicList.map((option) => (
-                                                <li key={option.id} onClick={() => handleAddTodaysClinic(user.volunteerID, option.id)}>
-                                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                    {
-                                                      //Give the date and in brackets the area
-                                                      option.date + " (" + option.area + ")"
-                                                    }
-                                                  </button>
-                                                </li>
-                                              ))
-                                            ) : (
-                                              <li className="px-2">There are no clinics today</li>
-                                            )}
-                                          </ul>
-                                        </div>
-                                      )}
-                                    </>
-                                  )}
-                                </span>
+                                            <ul
+                                              className="rounded-lg border-2 border-black py-2 text-sm text-gray-700 dark:text-gray-200"
+                                              aria-labelledby="dropdownHoverButton"
+                                            >
+                                              {todayClinicList.length > 0 ? (
+                                                todayClinicList.map((option) => (
+                                                  <li key={option.id} onClick={() => handleAddTodaysClinic(user.volunteerID, option.id)}>
+                                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                      {
+                                                        //Give the date and in brackets the area
+                                                        option.date + " (" + option.area + ")"
+                                                      }
+                                                    </button>
+                                                  </li>
+                                                ))
+                                              ) : (
+                                                <li className="px-2">There are no clinics today</li>
+                                              )}
+                                            </ul>
+                                          </div>
+                                        )}
+                                      </>
+                                    )}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                            </tr>
+                          );
+                        })}
+                        <tr>
+                          <td className=" px-2 py-1">
+                            <div ref={observerTarget} />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </article>
               ) : (
                 <div className="flex items-center justify-center pt-10">
@@ -2164,7 +2186,7 @@ const Volunteer: NextPage = () => {
                   />
                 </div>
               )}
-              <div ref={observerTarget} />
+              {/* <div ref={observerTarget} /> */}
             </div>
           </>
         )}
@@ -2228,14 +2250,12 @@ const Volunteer: NextPage = () => {
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
                   <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />
-                  <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} required />
+                  <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} />
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-start pt-4">
-                      <label className="mb-2">
-                        Preferred Communication Channel<span className="text-lg text-main-orange">*</span>:{" "}
-                      </label>
+                      <label className="mb-2">Preferred Communication Channel: </label>
                     </div>
                     <div className="flex flex-col">
                       <button
@@ -2316,7 +2336,7 @@ const Volunteer: NextPage = () => {
                                     onChange={(e) => handleGreaterArea(0, "", e.target.checked, "allSelected")}
                                     className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                   />
-                                  <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                  <label htmlFor="1" className=" ms-2 text-sm font-bold text-gray-900">
                                     Select All
                                   </label>
                                 </div>
@@ -2330,27 +2350,29 @@ const Volunteer: NextPage = () => {
                                     onChange={(e) => handleGreaterArea(0, "", e.target.checked, "clear")}
                                     className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                   />
-                                  <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                  <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
                                     Clear All
                                   </label>
                                 </div>
                               </li>
-                              {greaterAreaListOptions?.map((option) => (
-                                <li key={option.id}>
-                                  <div className="flex items-center px-4">
-                                    <input
-                                      id={String(option.id)}
-                                      type="checkbox"
-                                      checked={option.state}
-                                      onChange={(e) => handleGreaterArea(option.id, option.area, e.target.checked, "normal")}
-                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
-                                    />
-                                    <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
-                                      {option.area}
-                                    </label>
-                                  </div>
-                                </li>
-                              ))}
+                              {greaterAreaListOptions
+                                ?.sort((a, b) => a.area.localeCompare(b.area))
+                                .map((option) => (
+                                  <li key={option.id}>
+                                    <div className="flex items-center px-4">
+                                      <input
+                                        id={String(option.id)}
+                                        type="checkbox"
+                                        checked={option.state}
+                                        onChange={(e) => handleGreaterArea(option.id, option.area, e.target.checked, "normal")}
+                                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                      />
+                                      <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
+                                        {option.area}
+                                      </label>
+                                    </div>
+                                  </li>
+                                ))}
                             </ul>
                           </div>
                         )}
@@ -2472,7 +2494,7 @@ const Volunteer: NextPage = () => {
                                   onChange={(e) => handleRole("", e.target.checked, "allSelected")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
                                   Select All
                                 </label>
                               </div>
@@ -2486,7 +2508,7 @@ const Volunteer: NextPage = () => {
                                   onChange={(e) => handleRole("", e.target.checked, "clear")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
                                   Clear All
                                 </label>
                               </div>
@@ -2594,7 +2616,7 @@ const Volunteer: NextPage = () => {
                                   onChange={(e) => handleClinicsAttended(0, "", "", e.target.checked, "allSelected")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
                                   Select All
                                 </label>
                               </div>
@@ -2608,7 +2630,7 @@ const Volunteer: NextPage = () => {
                                   onChange={(e) => handleClinicsAttended(0, "", "", e.target.checked, "clear")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
                                   Clear All
                                 </label>
                               </div>

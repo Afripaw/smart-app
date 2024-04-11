@@ -632,14 +632,19 @@ const User: NextPage = () => {
   }, []);
 
   //old code
-  const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState(["SMS"]);
+  const [preferredCommunicationOptions, setPreferredCommunicationOptions] = useState<string[]>([]);
+
   useEffect(() => {
-    if (email === "") {
+    if (email === "" && mobile === "") {
+      setPreferredCommunicationOptions([]);
+    } else if (email != "" && mobile === "") {
+      setPreferredCommunicationOptions(["Email"]);
+    } else if (email === "" && mobile != "") {
       setPreferredCommunicationOptions(["SMS"]);
-    } else if (email != "") {
+    } else if (email != "" && mobile != "") {
       setPreferredCommunicationOptions(["Email", "SMS"]);
     }
-  }, [email]);
+  }, [email, mobile]);
 
   //ROLE
   const handleToggleRole = () => {
@@ -1475,11 +1480,11 @@ const User: NextPage = () => {
   useEffect(() => {
     console.log(mobile.length);
     if (mobile.match(/^[0-9]+$/) == null && mobile.length != 0) {
-      setMobileMessage("Mobile number must only contain numbers");
+      setMobileMessage("A mobile number should contain numbers only");
     } else if (mobile.length != 10 && mobile.length != 0) {
-      setMobileMessage("Mobile number must be 10 digits");
+      setMobileMessage("A mobile number should be 10 digits");
     } else if (!mobile.startsWith("0") && mobile.length != 0) {
-      setMobileMessage("Mobile number must start with 0");
+      setMobileMessage("A mobile number should start with 0");
     } else {
       setMobileMessage("");
     }
@@ -1490,9 +1495,9 @@ const User: NextPage = () => {
   const [streetCodeMessage, setStreetCodeMessage] = useState("");
   useEffect(() => {
     if (addressStreetCode.match(/^[A-Za-z]+$/) == null && addressStreetCode.length != 0) {
-      setStreetCodeMessage("Street code must only contain letters");
+      setStreetCodeMessage("A street code contain letters only");
     } else if (addressStreetCode.length > 4 && addressStreetCode.length != 0) {
-      setStreetCodeMessage("Street code must be 4 characters or less");
+      setStreetCodeMessage("A street code should be 4 characters or less");
     } else {
       setStreetCodeMessage("");
     }
@@ -1502,9 +1507,9 @@ const User: NextPage = () => {
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
   useEffect(() => {
     if (addressStreetNumber.match(/^[0-9]+$/) == null && addressStreetNumber.length != 0) {
-      setStreetNumberMessage("Street number must only contain numbers");
+      setStreetNumberMessage("A street number should contain numbers only");
     } else if (addressStreetNumber.length > 4 && addressStreetNumber.length != 0) {
-      setStreetNumberMessage("Street number must be 4 digits or less");
+      setStreetNumberMessage("A street number should be 4 digits or less");
     } else {
       setStreetNumberMessage("");
     }
@@ -1514,9 +1519,9 @@ const User: NextPage = () => {
   const [postalCodeMessage, setPostalCodeMessage] = useState("");
   useEffect(() => {
     if (addressPostalCode.match(/^[0-9]+$/) == null && addressPostalCode.length != 0) {
-      setPostalCodeMessage("Postal code must only contain numbers");
+      setPostalCodeMessage("A postal code should contain numbers only");
     } else if (addressPostalCode.length > 4 && addressPostalCode.length != 0) {
-      setPostalCodeMessage("Postal code must be 4 digits or less");
+      setPostalCodeMessage("A postal code should be 4 digits or less");
     } else {
       setPostalCodeMessage("");
     }
@@ -1527,11 +1532,11 @@ const User: NextPage = () => {
   const [confirmPasswordMessage, setConfirmPasswordMessage] = useState("");
   useEffect(() => {
     if (password.length < 8 && password.length != 0) {
-      setPasswordMessage("Password must be at least 8 characters long");
+      setPasswordMessage("A password should be at least 8 characters long");
     }
     //check if password is strong enough. Should contain Upper case, lower case, number and special character
     else if (password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\{\}:"<>?|\[\];',.\/`~])/) == null && password.length != 0) {
-      setPasswordMessage("Password must contain at least one upper case, one lower case, one number and one special character");
+      setPasswordMessage("A password should contain at least one upper case, one lower case, one number and one special character");
     }
 
     //!@#$%^&*()_+{}:\"<>?|[];',./`~
@@ -1857,7 +1862,7 @@ const User: NextPage = () => {
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                     <Trash size={24} className="block" onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")} />
-                                    <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                       Delete user
                                     </span>
                                   </span>
@@ -1866,16 +1871,16 @@ const User: NextPage = () => {
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                     <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(String(user.id))} />
-                                    <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                       Update user
                                     </span>
                                   </span>
                                 </div>
 
                                 <div className="relative flex items-center justify-center">
-                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                  <span className="group relative mx-[5px] my-3 mr-[30px] flex items-center justify-center rounded-lg hover:bg-orange-200">
                                     <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(String(user.id))} />
-                                    <span className="absolute bottom-full hidden w-[75px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                    <span className="absolute bottom-full z-50 hidden w-[75px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                       View user profile
                                     </span>
                                   </span>
@@ -1884,6 +1889,11 @@ const User: NextPage = () => {
                             </tr>
                           );
                         })}
+                        <tr>
+                          <td className=" px-2 py-1">
+                            <div ref={observerTarget} />
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>
@@ -1897,7 +1907,7 @@ const User: NextPage = () => {
                 </div>
               )}
 
-              <div ref={observerTarget} />
+              {/* <div ref={observerTarget} /> */}
             </div>
           </>
         )}
@@ -1968,14 +1978,12 @@ const User: NextPage = () => {
                   <Input label="First Name" placeholder="Type here: e.g. John" value={firstName} onChange={setFirstName} required />
                   <Input label="Surname" placeholder="Type here: e.g. Doe" value={surname} onChange={setSurname} required />
                   <Input label="Email" placeholder="Type here: e.g. jd@gmail.com" value={email} onChange={setEmail} />
-                  <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} required />
+                  <Input label="Mobile" placeholder="Type here: e.g. 0821234567" value={mobile} onChange={setMobile} />
                   {mobileMessage && <div className="text-sm text-red-500">{mobileMessage}</div>}
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-4">
-                      <label>
-                        Preferred Communication Channel<span className="text-lg text-main-orange">*</span>:{" "}
-                      </label>
+                      <label>Preferred Communication Channel: </label>
                     </div>
                     <div className="flex flex-col">
                       <button

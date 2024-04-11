@@ -1113,7 +1113,7 @@ const Pet: NextPage = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (sizeRef.current && !sizeRef.current.contains(event.target as Node) && btnSizeRef.current && !btnSizeRef.current.contains(event.target as Node)) {
-        setStatus(false);
+        setSize(false);
       }
     };
 
@@ -3793,167 +3793,170 @@ const Pet: NextPage = () => {
                 </div>
               </div>
               {pet_data_with_clinics_and_treatments ? (
-                <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
-                  <table className="table-auto">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2"></th>
-                        {/* <th className="px-4 py-2">ID</th> */}
-                        <th className="px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "petName" ? "underline" : ""}`} onClick={() => handleOrderFields("petName")}>
-                              Name
-                            </button>
-                            <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort alphabetically
-                            </span>
-                          </span>
-                        </th>
-                        <th className="px-4 py-2">Owner</th>
-
-                        {/* <th className="px-4 py-2">Greater Area</th> */}
-                        <th className="px-4 py-2">Membership</th>
-                        <th className="px-4 py-2">Card Status</th>
-                        <th className="px-4 py-2">Area</th>
-                        <th className="px-4 py-2">Address</th>
-                        <th className="px-4 py-2">Sterilised?</th>
-                        <th className="w-[35px] px-4 py-2">Last Deworming</th>
-                        <th className="w-[35px] px-4 py-2">Due for Deworming?</th>
-                        <th className="w-[35px] px-4 py-2">Last Clinic</th>
-                        {/* <th className="px-4 py-2">Last Treatment</th> */}
-                        <th className="w-[35px] px-4 py-2">
-                          <span className="group relative inline-block">
-                            <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
-                              Last Update
-                            </button>
-                            <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              Sort reverse chronologically
-                            </span>
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pet_data_with_clinics_and_treatments?.map((pet, index) => {
-                        return (
-                          <tr className="items-center">
-                            <td className=" border px-2 py-1">
-                              <div className="flex justify-center">{index + 1}</div>
-                            </td>
-                            {/* <td className="border px-4 py-2">P{pet.petID}</td> */}
-                            <td className="border px-2 py-1">
-                              {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed[0]})
-                            </td>
-                            <td className="border px-2 py-1">
-                              <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(pet.ownerID)}>
-                                {pet.owner.firstName} {pet.owner.surname}
+                // <article className="my-6 flex max-h-[60%] w-full items-center justify-center overflow-auto rounded-md shadow-inner">
+                //   <table className="table-auto">
+                <article className="my-5 flex w-full justify-center rounded-md shadow-inner">
+                  <div className="max-h-[70vh] max-w-7xl overflow-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="z-30 bg-gray-50">
+                        <tr>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          {/* <th className="px-4 py-2">ID</th> */}
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "petName" ? "underline" : ""}`} onClick={() => handleOrderFields("petName")}>
+                                Name
                               </button>
-                            </td>
+                              <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort alphabetically
+                              </span>
+                            </span>
+                          </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Owner</th>
 
-                            {/* <td className="border px-2 py-1">{pet.owner.addressGreaterArea.greaterArea}</td> */}
-                            <td className="border px-2 py-1">{pet.membership}</td>
-                            <td className="border px-2 py-1">{pet.cardStatus}</td>
-                            <td className="border px-2 py-1">{pet.owner.addressArea?.area ?? ""}</td>
-                            <td className="border px-2 py-1">
-                              {pet.owner.addressStreetNumber} {pet.owner.addressStreet?.street ?? ""}
-                            </td>
-                            <td className="border px-2 py-1">
-                              {pet.sterilisedStatus.getFullYear() === 1970
-                                ? "No"
-                                : "Yes, " +
-                                  pet?.sterilisedStatus?.getDate().toString() +
+                          {/* <th className="px-4 py-2">Greater Area</th> */}
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Membership</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Card Status</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Area</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Address</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Sterilised?</th>
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">Last Deworming</th>
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">Due for Deworming?</th>
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">Last Clinic</th>
+                          {/* <th className="px-4 py-2">Last Treatment</th> */}
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                                Last Update
+                              </button>
+                              <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort reverse chronologically
+                              </span>
+                            </span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {pet_data_with_clinics_and_treatments?.map((pet, index) => {
+                          return (
+                            <tr className="items-center">
+                              <td className=" border px-2 py-1">
+                                <div className="flex justify-center">{index + 1}</div>
+                              </td>
+                              {/* <td className="border px-4 py-2">P{pet.petID}</td> */}
+                              <td className="border px-2 py-1">
+                                {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed[0]})
+                              </td>
+                              <td className="border px-2 py-1">
+                                <button className="underline hover:text-blue-400" onClick={() => handleGoToOwnerProfile(pet.ownerID)}>
+                                  {pet.owner.firstName} {pet.owner.surname}
+                                </button>
+                              </td>
+
+                              {/* <td className="border px-2 py-1">{pet.owner.addressGreaterArea.greaterArea}</td> */}
+                              <td className="border px-2 py-1">{pet.membership}</td>
+                              <td className="border px-2 py-1">{pet.cardStatus}</td>
+                              <td className="border px-2 py-1">{pet.owner.addressArea?.area ?? ""}</td>
+                              <td className="border px-2 py-1">
+                                {pet.owner.addressStreetNumber} {pet.owner.addressStreet?.street ?? ""}
+                              </td>
+                              <td className="border px-2 py-1">
+                                {pet.sterilisedStatus.getFullYear() === 1970
+                                  ? "No"
+                                  : "Yes, " +
+                                    pet?.sterilisedStatus?.getDate().toString() +
+                                    "/" +
+                                    ((pet?.sterilisedStatus?.getMonth() ?? 0) + 1).toString() +
+                                    "/" +
+                                    pet?.sterilisedStatus?.getFullYear().toString()}
+                              </td>
+                              <td className="border px-2 py-1">
+                                {pet?.lastDeworming?.getDate().toString() +
                                   "/" +
-                                  ((pet?.sterilisedStatus?.getMonth() ?? 0) + 1).toString() +
+                                  ((pet?.lastDeworming?.getMonth() ?? 0) + 1).toString() +
                                   "/" +
-                                  pet?.sterilisedStatus?.getFullYear().toString()}
-                            </td>
-                            <td className="border px-2 py-1">
-                              {pet?.lastDeworming?.getDate().toString() +
-                                "/" +
-                                ((pet?.lastDeworming?.getMonth() ?? 0) + 1).toString() +
-                                "/" +
-                                pet?.lastDeworming?.getFullYear().toString()}
-                            </td>
-                            <td className="border px-2 py-1">
-                              {Number(pet?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - 6)) ? "Yes" : "No"}
-                            </td>
+                                  pet?.lastDeworming?.getFullYear().toString()}
+                              </td>
+                              <td className="border px-2 py-1">
+                                {Number(pet?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - 6)) ? "Yes" : "No"}
+                              </td>
 
-                            <td className="border px-2 py-1">
-                              {pet.clinic_data && pet.clinic_data.length > 0 ? (
-                                <>
-                                  {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getDate().toString()}/
-                                  {((pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
-                                  {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getFullYear().toString()}
-                                </>
-                              ) : (
-                                "None"
-                              )}
-                            </td>
+                              <td className="border px-2 py-1">
+                                {pet.clinic_data && pet.clinic_data.length > 0 ? (
+                                  <>
+                                    {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getDate().toString()}/
+                                    {((pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
+                                    {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getFullYear().toString()}
+                                  </>
+                                ) : (
+                                  "None"
+                                )}
+                              </td>
 
-                            <td className="border px-2 py-1">
-                              {pet?.updatedAt?.getDate()?.toString() ?? ""}
-                              {"/"}
-                              {((pet?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                              {"/"}
-                              {pet?.updatedAt?.getFullYear()?.toString() ?? ""}
-                            </td>
-                            <div className="flex">
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Trash size={24} className="block" onClick={() => handleDeleteModal(pet.petID, String(pet.petID), pet.petName ?? "")} />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Delete pet
+                              <td className="border px-2 py-1">
+                                {pet?.updatedAt?.getDate()?.toString() ?? ""}
+                                {"/"}
+                                {((pet?.updatedAt?.getMonth() ?? 0) + 1)?.toString() ?? ""}
+                                {"/"}
+                                {pet?.updatedAt?.getFullYear()?.toString() ?? ""}
+                              </td>
+                              <div className="flex">
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Trash size={24} className="block" onClick={() => handleDeleteModal(pet.petID, String(pet.petID), pet.petName ?? "")} />
+                                    <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Delete pet
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(pet.petID)} />
-                                  <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Update pet
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(pet.petID)} />
+                                    <span className="absolute bottom-full hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Update pet
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(pet.petID)} />
-                                  <span className="absolute bottom-full hidden w-[70px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    View pet profile
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(pet.petID)} />
+                                    <span className="absolute bottom-full hidden w-[70px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      View pet profile
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <FirstAidKit size={24} className="block" onClick={() => handleCreateNewTreatment(pet.petID)} />
-                                  <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Create new treatment
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <FirstAidKit size={24} className="block" onClick={() => handleCreateNewTreatment(pet.petID)} />
+                                    <span className="absolute bottom-full hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Create new treatment
+                                    </span>
                                   </span>
-                                </span>
-                              </div>
+                                </div>
 
-                              <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Bed size={24} className="block" onClick={() => handleAddClinic(pet.petID)} />
-                                  <span className="absolute bottom-full hidden w-[88px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Add today's clinic to pet
-                                  </span>
+                                <div className="relative flex items-center justify-center">
+                                  <span className="group relative mx-[5px] my-3 mr-[31px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Bed size={24} className="block" onClick={() => handleAddClinic(pet.petID)} />
+                                    <span className="absolute bottom-full hidden w-[85px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Add today's clinic to pet
+                                    </span>
 
-                                  {showTodayClinics && petIDForClinic === pet.petID && (
-                                    <>
-                                      {isClinicLoading ? (
-                                        <div
-                                          className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
-                                          role="status"
-                                        />
-                                      ) : (
-                                        <div
-                                          ref={clinicRef}
-                                          className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
-                                        >
-                                          {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                                    {showTodayClinics && petIDForClinic === pet.petID && (
+                                      <>
+                                        {isClinicLoading ? (
+                                          <div
+                                            className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                            role="status"
+                                          />
+                                        ) : (
+                                          <div
+                                            ref={clinicRef}
+                                            className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
+                                          >
+                                            {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                             {todayClinicList.map((option) => (
                                               <li key={option.id} onClick={() => handleAddTodaysClinic(pet.petID, option.id)}>
                                                 <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
@@ -3966,37 +3969,43 @@ const Pet: NextPage = () => {
                                             ))}
                                           </ul> */}
 
-                                          <ul
-                                            className="rounded-lg border-2 border-black py-2 text-sm text-gray-700 dark:text-gray-200"
-                                            aria-labelledby="dropdownHoverButton"
-                                          >
-                                            {todayClinicList.length > 0 ? (
-                                              todayClinicList.map((option) => (
-                                                <li key={option.id} onClick={() => handleAddTodaysClinic(pet.petID, option.id)}>
-                                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                                    {
-                                                      //Give the date and in brackets the area
-                                                      option.date + " (" + option.area + ")"
-                                                    }
-                                                  </button>
-                                                </li>
-                                              ))
-                                            ) : (
-                                              <li className="px-2">There are no clinics today</li>
-                                            )}
-                                          </ul>
-                                        </div>
-                                      )}
-                                    </>
-                                  )}
-                                </span>
+                                            <ul
+                                              className="rounded-lg border-2 border-black py-2 text-sm text-gray-700 dark:text-gray-200"
+                                              aria-labelledby="dropdownHoverButton"
+                                            >
+                                              {todayClinicList.length > 0 ? (
+                                                todayClinicList.map((option) => (
+                                                  <li key={option.id} onClick={() => handleAddTodaysClinic(pet.petID, option.id)}>
+                                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                      {
+                                                        //Give the date and in brackets the area
+                                                        option.date + " (" + option.area + ")"
+                                                      }
+                                                    </button>
+                                                  </li>
+                                                ))
+                                              ) : (
+                                                <li className="px-2">There are no clinics today</li>
+                                              )}
+                                            </ul>
+                                          </div>
+                                        )}
+                                      </>
+                                    )}
+                                  </span>
+                                </div>
                               </div>
-                            </div>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                            </tr>
+                          );
+                        })}
+                        <tr>
+                          <td className=" px-2 py-1">
+                            <div ref={observerTarget} />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </article>
               ) : (
                 <div className="flex items-center justify-center pt-10">
@@ -4007,7 +4016,7 @@ const Pet: NextPage = () => {
                 </div>
               )}
 
-              <div ref={observerTarget} />
+              {/* <div ref={observerTarget} /> */}
             </div>
           </>
         )}
@@ -4239,7 +4248,7 @@ const Pet: NextPage = () => {
                                   onChange={(e) => handleBreed("", e.target.checked, "allSelected")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
                                   Select All
                                 </label>
                               </div>
@@ -4253,7 +4262,7 @@ const Pet: NextPage = () => {
                                   onChange={(e) => handleBreed("", e.target.checked, "clear")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
                                   Clear All
                                 </label>
                               </div>
@@ -4315,7 +4324,7 @@ const Pet: NextPage = () => {
                                   onChange={(e) => handleColour("", e.target.checked, "allSelected")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
                                   Select All
                                 </label>
                               </div>
@@ -4329,7 +4338,7 @@ const Pet: NextPage = () => {
                                   onChange={(e) => handleColour("", e.target.checked, "clear")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
                                   Clear All
                                 </label>
                               </div>
@@ -4832,7 +4841,7 @@ const Pet: NextPage = () => {
                                   onChange={(e) => handleClinicsAttended(0, "", "", e.target.checked, "allSelected")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
                                   Select All
                                 </label>
                               </div>
@@ -4846,7 +4855,7 @@ const Pet: NextPage = () => {
                                   onChange={(e) => handleClinicsAttended(0, "", "", e.target.checked, "clear")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
                                   Clear All
                                 </label>
                               </div>
@@ -5113,7 +5122,7 @@ const Pet: NextPage = () => {
                                   onChange={(e) => handleKennel("", e.target.checked, "allSelected")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="1" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
                                   Select All
                                 </label>
                               </div>
@@ -5127,7 +5136,7 @@ const Pet: NextPage = () => {
                                   onChange={(e) => handleKennel("", e.target.checked, "clear")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
-                                <label htmlFor="2" className="ms-2 text-sm font-medium text-gray-900">
+                                <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
                                   Clear All
                                 </label>
                               </div>

@@ -216,8 +216,11 @@ export const communicationRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const users = ctx.db.user.findMany({
         where: {
-          addressGreaterAreaID: { in: input.greaterAreaID },
-          addressAreaID: { in: input.areaID },
+          addressGreaterArea: {
+            some: {
+              greaterAreaID: { in: input.greaterAreaID },
+            },
+          },
           status: "Active",
         },
       });

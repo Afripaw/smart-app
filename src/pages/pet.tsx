@@ -351,7 +351,7 @@ const Pet: NextPage = () => {
 
   //-------------------------------ORDER-----------------------------------------
   //Order fields
-  const [order, setOrder] = useState("petName");
+  const [order, setOrder] = useState("address");
 
   //------------------------------KENNELS-----------------------------------------
   type KennelOptions = {

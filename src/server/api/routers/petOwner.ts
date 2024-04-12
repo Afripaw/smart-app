@@ -297,6 +297,7 @@ export const petOwnerRouter = createTRPCRouter({
           addressGreaterArea: true,
           addressArea: true,
           addressStreet: true,
+          pets: true,
         },
       });
 
@@ -319,7 +320,8 @@ export const petOwnerRouter = createTRPCRouter({
 
       return {
         user_data: user,
-        pets_data: pets,
+        pets_data: user.map((owner) => owner.pets),
+        //pets_data: pets,
         nextCursor: newNextCursor,
       };
     }),

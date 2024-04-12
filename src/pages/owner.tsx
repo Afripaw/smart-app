@@ -297,7 +297,7 @@ const Owner: NextPage = () => {
   //-------------------------------ORDER-----------------------------------------
   //Order fields
   //sorts the table according to specific fields
-  const [order, setOrder] = useState("surname");
+  const [order, setOrder] = useState("address");
 
   //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
   const observerTarget = useRef<HTMLDivElement | null>(null);

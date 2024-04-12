@@ -272,7 +272,25 @@ export const petOwnerRouter = createTRPCRouter({
         where: {
           AND: searchConditions,
         },
-        orderBy: order,
+        //orderBy: order,
+        orderBy:
+          input.order === "address"
+            ? [
+                {
+                  addressStreet: {
+                    street: "asc",
+                  },
+                },
+                {
+                  addressStreetNumber: "asc",
+                },
+                {
+                  addressGreaterArea: {
+                    greaterArea: "asc",
+                  },
+                },
+              ]
+            : [order],
         take: input.limit + 1,
         cursor: input.cursor ? { ownerID: input.cursor } : undefined,
         include: {

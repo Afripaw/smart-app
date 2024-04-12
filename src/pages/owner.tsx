@@ -1819,7 +1819,16 @@ const Owner: NextPage = () => {
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Mobile</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Greater Area</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Area</th>
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Address</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "address" ? "underline" : ""}`} onClick={() => handleOrderFields("address")}>
+                                Address
+                              </button>
+                              <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort alphabetically
+                              </span>
+                            </span>
+                          </th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Status</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Pet(s)</th>
                           <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
@@ -1952,8 +1961,8 @@ const Owner: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="flex justify-center">
-              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+            <div className="sticky top-[11%] z-50 flex justify-center">
+              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Owner Data" : "Create New Owner"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
@@ -2457,8 +2466,8 @@ const Owner: NextPage = () => {
               </div>
             ) : (
               <>
-                <div className="flex justify-center">
-                  <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+                <div className="sticky top-[11%] z-50 flex justify-center">
+                  <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                     <div className=" text-2xl">Owner Profile</div>
                     <div className="flex justify-center">
                       <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>

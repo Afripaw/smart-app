@@ -1144,8 +1144,8 @@ const Geographic: NextPage = () => {
         {/*CREATE AND UPDATE USER*/}
         {(isCreate || isUpdate) && (
           <>
-            <div className="flex justify-center">
-              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+            <div className="sticky top-[11%] z-50 flex justify-center">
+              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isCreate ? "Create New Greater Area" : "Update Greater Area"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
@@ -1425,8 +1425,8 @@ const Geographic: NextPage = () => {
         {/*VIEW PROFILE PAGE*/}
         {isViewProfilePage && (
           <>
-            <div className="flex justify-center">
-              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+            <div className="sticky top-[11%] z-50 flex justify-center">
+              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Greater Area Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>

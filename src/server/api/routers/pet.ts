@@ -325,9 +325,9 @@ export const petRouter = createTRPCRouter({
 
       const order: Record<string, string> = {};
 
-      if (input.order !== "petName") {
+      if (input.order === "updatedAt") {
         order.updatedAt = "desc";
-      } else {
+      } else if (input.order === "petName") {
         order.petName = "asc";
       }
 
@@ -346,7 +346,43 @@ export const petRouter = createTRPCRouter({
           // ],
         },
 
-        orderBy: order,
+        // orderBy: input.order === "address" ? {
+        //   owner: {
+        //     addressStreet: {
+        //       street: "asc",
+        //     },
+        //     addressStreetNumber: "asc",
+        //     addressGreaterArea: {
+        //       greaterArea: "asc",
+        //     },
+        //   },
+        // } : order,
+
+        orderBy:
+          input.order === "address"
+            ? [
+                {
+                  owner: {
+                    addressStreet: {
+                      street: "asc",
+                    },
+                  },
+                },
+                {
+                  owner: {
+                    addressStreetNumber: "asc",
+                  },
+                },
+                {
+                  owner: {
+                    addressGreaterArea: {
+                      greaterArea: "asc",
+                    },
+                  },
+                },
+              ]
+            : [order],
+
         take: input.limit + 1,
         cursor: input.cursor ? { petID: input.cursor } : undefined,
         include: {

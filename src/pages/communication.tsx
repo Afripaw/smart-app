@@ -1246,8 +1246,8 @@ const Communication: NextPage = () => {
         )}
         {isCreate && (
           <>
-            <div className="flex justify-center">
-              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+            <div className="sticky top-[11%] z-50 flex justify-center">
+              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{"Create New Message"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
@@ -1605,8 +1605,8 @@ const Communication: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="flex justify-center">
-              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+            <div className="sticky top-[11%] z-50 flex justify-center">
+              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Message Profile</div>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>

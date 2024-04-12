@@ -2415,7 +2415,11 @@ const Pet: NextPage = () => {
       //setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
       //setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
       setMembershipTypeOption(userData?.membership ?? "Select one");
-      setCardStatusOption(userData?.cardStatus ?? "Select one");
+      if (userData?.cardStatus === "") {
+        setCardStatusOption("Select one");
+      } else {
+        setCardStatusOption(userData?.cardStatus ?? "Select one");
+      }
       setKennelList(userData?.kennelReceived ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
       setStatusOption(userData?.status ?? "Select one");
@@ -2489,7 +2493,14 @@ const Pet: NextPage = () => {
   //[user, isUpdate, isCreate];
   const handleUpdateUser = async () => {
     setIsLoading(true);
-    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
+
+    const clinicIDList = clinicList
+      .sort((a, b) => {
+        const dateA = new Date(a.date.split("/").reverse().join("-"));
+        const dateB = new Date(b.date.split("/").reverse().join("-"));
+        return dateA.getTime() - dateB.getTime();
+      })
+      .map((clinic) => (clinic.id ? clinic.id : 0));
     await updatePet.mutateAsync({
       petID: id,
       petName: petName,
@@ -2787,7 +2798,14 @@ const Pet: NextPage = () => {
   const handleNewUser = async () => {
     setIsLoading(true);
     console.log("Owner ID for pet creation: ", ownerID);
-    const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
+    const clinicIDList = clinicList
+      .sort((a, b) => {
+        const dateA = new Date(a.date.split("/").reverse().join("-"));
+        const dateB = new Date(b.date.split("/").reverse().join("-"));
+        return dateA.getTime() - dateB.getTime();
+      })
+      .map((clinic) => (clinic.id ? clinic.id : 0));
+    // const clinicIDList = clinicList.map((clinic) => (clinic.id ? clinic.id : 0));
 
     // console.log("All clinics attended: ", clinicIDList);
     const newUser_ = await newPet.mutateAsync({
@@ -3815,8 +3833,27 @@ const Pet: NextPage = () => {
                       <thead className="z-30 bg-gray-50">
                         <tr>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+
+                          {/* Subheadings for Deworming */}
+                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4" colSpan={2}>
+                            Deworming
+                          </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                        </tr>
+
+                        <tr>
+                          <th className="sticky top-6 z-10 bg-gray-50 px-4 py-2"></th>
                           {/* <th className="px-4 py-2">ID</th> */}
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">
+                          <th className="sticky top-6 z-10 bg-gray-50 px-4 py-2">
                             <span className="group relative inline-block">
                               <button className={`${order === "petName" ? "underline" : ""}`} onClick={() => handleOrderFields("petName")}>
                                 Name
@@ -3826,19 +3863,28 @@ const Pet: NextPage = () => {
                               </span>
                             </span>
                           </th>
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Owner</th>
+                          <th className="sticky top-6 z-10 bg-gray-50 px-4 py-2">Owner</th>
 
                           {/* <th className="px-4 py-2">Greater Area</th> */}
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Membership</th>
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Card Status</th>
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Area</th>
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Address</th>
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Sterilised?</th>
-                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">Last Deworming</th>
-                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">Due for Deworming?</th>
-                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">Last Clinic</th>
+                          <th className="sticky top-6 z-10 bg-gray-50 px-4 py-2">Membership</th>
+                          <th className="sticky top-6 z-10 bg-gray-50 px-4 py-2">Card Status</th>
+                          <th className="sticky top-6 z-10 bg-gray-50 px-4 py-2">Area</th>
+                          <th className="sticky top-6 z-10 bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "address" ? "underline" : ""}`} onClick={() => handleOrderFields("address")}>
+                                Address
+                              </button>
+                              <span className="absolute right-[-30px] top-full hidden w-[130px] whitespace-nowrap rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort alphabetically
+                              </span>
+                            </span>
+                          </th>
+                          <th className="sticky top-6 z-10 bg-gray-50 px-4 py-2">Pet Sterilised?</th>
+                          <th className="sticky top-6 z-10 w-[35px] bg-gray-50 px-4 pb-2 pt-0">Last</th>
+                          <th className="sticky top-6 z-10 w-[35px] bg-gray-50 px-4 pb-2 pt-0">Due?</th>
+                          <th className="sticky top-6 z-10 w-[35px] bg-gray-50 px-4 py-2">Last Clinic</th>
                           {/* <th className="px-4 py-2">Last Treatment</th> */}
-                          <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                          <th className="sticky top-6 z-10 w-[35px] bg-gray-50 px-4 py-2">
                             <span className="group relative inline-block">
                               <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
                                 Last Update
@@ -3848,7 +3894,7 @@ const Pet: NextPage = () => {
                               </span>
                             </span>
                           </th>
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-6 z-10 bg-gray-50 px-4 py-2"></th>
                         </tr>
                       </thead>
                       <tbody>
@@ -4051,8 +4097,8 @@ const Pet: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="flex justify-center">
-              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+            <div className="sticky top-[11%] z-50 flex justify-center">
+              <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Pet Data" : "Add New Pet"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
@@ -5284,8 +5330,8 @@ const Pet: NextPage = () => {
               </div>
             ) : (
               <>
-                <div className="flex justify-center">
-                  <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-200 px-5 py-6">
+                <div className="sticky top-[11%] z-50 flex justify-center">
+                  <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                     <div className=" text-2xl">Pet Profile</div>
                     <div className="flex justify-center">
                       <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
@@ -5457,7 +5503,9 @@ const Pet: NextPage = () => {
                               className="underline hover:text-blue-400"
                               onClick={() => handleGoToTreatmentProfile(treatment?.treatmentID)}
                             >
-                              {treatment?.date.toString() + " - " + (treatment?.type[0] ?? "") + " - " + (treatment?.category ?? "")}
+                              {treatment?.type[0] != undefined
+                                ? treatment?.date.toString() + " - " + (treatment?.type[0] ?? "") + " - " + "(" + (treatment?.category ?? "") + ")"
+                                : treatment?.date.toString() + " (" + (treatment?.category ?? "") + ")"}
                             </button>
                           ))}
                         </div>

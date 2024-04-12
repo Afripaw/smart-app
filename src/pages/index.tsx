@@ -275,7 +275,7 @@ export default function Home() {
           <div className="absolute left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-gray-200 " role="status">
             <svg
               aria-hidden="true"
-              className="h-20 w-20 animate-spin fill-main-orange text-gray-200 dark:text-gray-600"
+              className="h-20 w-20 animate-spin fill-main-orange text-gray-200 "
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"

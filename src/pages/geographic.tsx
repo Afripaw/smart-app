@@ -1210,13 +1210,13 @@ const Geographic: NextPage = () => {
                         <button
                           ref={btnAreaRef}
                           onClick={handleShowArea}
-                          className="mb-2 mr-3 mt-5 inline-flex items-center rounded-lg bg-main-orange px-4 py-2 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="mb-2 mr-3 mt-5 inline-flex items-center rounded-lg bg-main-orange px-4 py-2 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                         >
                           Show all areas
                         </button>
                         {showArea && (
                           <div ref={areaRef}>
-                            <ul className="mr-3 flex w-full flex-col items-start rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                            <ul className="mr-3 flex w-full flex-col items-start rounded-lg bg-white px-5 py-2 text-sm text-gray-700 ">
                               <li key="0">
                                 <label className="flex justify-center">
                                   <input
@@ -1310,13 +1310,13 @@ const Geographic: NextPage = () => {
                         <button
                           ref={btnStreetRef}
                           onClick={handleShowStreet}
-                          className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="mb-2 mr-3 mt-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                         >
                           Show all streets
                         </button>
                         {showStreet && (
                           <div ref={streetRef}>
-                            <ul className="mr-3 flex w-full flex-col items-start rounded-lg bg-white px-5 py-2 text-sm text-gray-700 dark:text-gray-200">
+                            <ul className="mr-3 flex w-full flex-col items-start rounded-lg bg-white px-5 py-2 text-sm text-gray-700">
                               <li key="0">
                                 <label className="flex justify-center">
                                   <input

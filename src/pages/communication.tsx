@@ -1365,7 +1365,7 @@ const Communication: NextPage = () => {
                         <div className="flex flex-col">
                           <button
                             ref={btnGreaterAreaRef}
-                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                             type="button"
                             onClick={handleToggleGreaterArea}
                           >
@@ -1375,8 +1375,8 @@ const Communication: NextPage = () => {
                             </svg>
                           </button>
                           {isGreaterAreaOpen && (
-                            <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                              <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                              <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
                                 <li key={1}>
                                   <div className="flex items-center px-4">
                                     <input
@@ -1480,7 +1480,7 @@ const Communication: NextPage = () => {
                         <div className="flex flex-col">
                           <button
                             ref={btnAreaRef}
-                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                             type="button"
                             onClick={handleToggleArea}
                           >
@@ -1490,8 +1490,8 @@ const Communication: NextPage = () => {
                             </svg>
                           </button>
                           {isAreaOpen && (
-                            <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                              <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <div ref={areaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow">
+                              <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
                                 <li key={1}>
                                   <div className="flex items-center px-4">
                                     <input
@@ -1562,7 +1562,7 @@ const Communication: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnPreferredCommunicationRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                         type="button"
                         onClick={handleTogglePreferredCommunication}
                       >
@@ -1572,11 +1572,11 @@ const Communication: NextPage = () => {
                         </svg>
                       </button>
                       {preferredCommunication && (
-                        <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                        <div ref={preferredCommunicationRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow">
                           <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {preferredCommunicationOptions.map((option) => (
                               <li key={option} onClick={() => handlePreferredCommunicationOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                <button className="block px-4 py-2 hover:bg-gray-100">{option}</button>
                               </li>
                             ))}
                           </ul>

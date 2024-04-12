@@ -1215,13 +1215,7 @@ const Pet: NextPage = () => {
   // CustomInput component with explicit types for the props
   const CustomSterilisationStatusInput: React.FC<CustomInput> = ({ value, onClick }) => (
     <button className="form-input z-0 flex items-center rounded-md border px-1 py-2" onClick={onClick}>
-      <svg
-        className=" mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
+      <svg className=" mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
@@ -1321,13 +1315,7 @@ const Pet: NextPage = () => {
   // CustomInput component with explicit types for the props
   const CustomSterilisationRequestedInput: React.FC<CustomInput> = ({ value, onClick }) => (
     <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
-      <svg
-        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
+      <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
@@ -1416,13 +1404,7 @@ const Pet: NextPage = () => {
   // CustomInput component with explicit types for the props
   const CustomVaccine1Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
     <button className="form-input z-0 flex items-center rounded-md border px-1 py-2" onClick={onClick}>
-      <svg
-        className=" mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
+      <svg className=" mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
@@ -1490,13 +1472,7 @@ const Pet: NextPage = () => {
   // CustomInput component with explicit types for the props
   const CustomVaccine2Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
     <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
-      <svg
-        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
+      <svg className="z-10 mr-2 h-4 w-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
@@ -1548,13 +1524,7 @@ const Pet: NextPage = () => {
   // CustomInput component with explicit types for the props
   const CustomVaccine3Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
     <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
-      <svg
-        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
+      <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
@@ -2113,13 +2083,7 @@ const Pet: NextPage = () => {
   // CustomInput component with explicit types for the props
   const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
     <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
-      <svg
-        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
+      <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
@@ -4029,7 +3993,7 @@ const Pet: NextPage = () => {
                                         ) : (
                                           <div
                                             ref={clinicRef}
-                                            className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700"
+                                            className="absolute right-0 top-0 z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow "
                                           >
                                             {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                                             {todayClinicList.map((option) => (
@@ -4044,14 +4008,11 @@ const Pet: NextPage = () => {
                                             ))}
                                           </ul> */}
 
-                                            <ul
-                                              className="rounded-lg border-2 border-black py-2 text-sm text-gray-700 dark:text-gray-200"
-                                              aria-labelledby="dropdownHoverButton"
-                                            >
+                                            <ul className="rounded-lg border-2 border-black py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                                               {todayClinicList.length > 0 ? (
                                                 todayClinicList.map((option) => (
                                                   <li key={option.id} onClick={() => handleAddTodaysClinic(pet.petID, option.id)}>
-                                                    <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                                    <button className="block px-4 py-2 hover:bg-gray-100 ">
                                                       {
                                                         //Give the date and in brackets the area
                                                         option.date + " (" + option.area + ")"
@@ -4168,7 +4129,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnSpeciesRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleSpecies}
                       >
@@ -4178,11 +4139,11 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {isSpeciesOpen && (
-                        <div ref={speciesRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={speciesRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                          <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                             {speciesOptions.map((option) => (
                               <li key={option} onClick={() => handleSpeciesOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                               </li>
                             ))}
                           </ul>
@@ -4200,7 +4161,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnSexRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleSex}
                       >
@@ -4210,11 +4171,11 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {isSexOpen && (
-                        <div ref={sexRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={sexRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                          <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                             {sexOptions.map((option) => (
                               <li key={option} onClick={() => handleSexOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                               </li>
                             ))}
                           </ul>
@@ -4232,7 +4193,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnAgeRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleAge}
                       >
@@ -4243,11 +4204,11 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {isAgeOpen && (
-                        <div ref={ageRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={ageRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                          <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                             {ageOptions.map((option) => (
                               <li key={option} onClick={() => handleAgeOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                               </li>
                             ))}
                           </ul>
@@ -4296,7 +4257,7 @@ const Pet: NextPage = () => {
                       <div className="flex flex-col">
                         <button
                           ref={btnBreedRef}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                           type="button"
                           onClick={handleToggleBreed}
                         >
@@ -4306,7 +4267,7 @@ const Pet: NextPage = () => {
                           </svg>
                         </button>
                         {isBreedOpen && (
-                          <div ref={breedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <div ref={breedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
                             {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {colourOptions.map((option) => (
                               <li key={option} onClick={() => handleColourOption(option)}>
@@ -4314,7 +4275,7 @@ const Pet: NextPage = () => {
                               </li>
                             ))}
                           </ul> */}
-                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                               <li key={1}>
                                 <div className="flex items-center px-4">
                                   <input
@@ -4373,7 +4334,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnColourRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleColour}
                       >
@@ -4383,7 +4344,7 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {isColourOpen && (
-                        <div ref={colourRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                        <div ref={colourRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
                           {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {colourOptions.map((option) => (
                               <li key={option} onClick={() => handleColourOption(option)}>
@@ -4391,7 +4352,7 @@ const Pet: NextPage = () => {
                               </li>
                             ))}
                           </ul> */}
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                             <li key={1}>
                               <div className="flex items-center px-4">
                                 <input
@@ -4450,7 +4411,7 @@ const Pet: NextPage = () => {
                       <div className="flex flex-col">
                         <button
                           ref={btnSizeRef}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                           type="button"
                           onClick={handleToggleSize}
                         >
@@ -4460,11 +4421,11 @@ const Pet: NextPage = () => {
                           </svg>
                         </button>
                         {size && (
-                          <div ref={sizeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <div ref={sizeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                            <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                               {sizeOptions.map((option) => (
                                 <li key={option} onClick={() => handleSizeOption(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                                 </li>
                               ))}
                             </ul>
@@ -4515,7 +4476,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnStatusRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                         type="button"
                         onClick={handleToggleStatus}
                       >
@@ -4525,11 +4486,11 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {status && (
-                        <div ref={statusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={statusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow">
+                          <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                             {statusOptions.map((option) => (
                               <li key={option} onClick={() => handleStatusOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                               </li>
                             ))}
                           </ul>
@@ -4547,7 +4508,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnSterilisationStatusRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                         type="button"
                         onClick={handleToggleSterilisationStatus}
                       >
@@ -4557,11 +4518,11 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {sterilisationStatus && (
-                        <div ref={sterilisationStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={sterilisationStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                          <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                             {sterilisationStatusOptions.map((option) => (
                               <li key={option} onClick={() => handleSterilisationStatusOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                <button className="block px-4 py-2 hover:bg-gray-100">{option}</button>
                               </li>
                             ))}
                           </ul>
@@ -4594,7 +4555,7 @@ const Pet: NextPage = () => {
                       <div className="flex flex-col">
                         <button
                           ref={btnSterilisationRequestedRef}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                           type="button"
                           onClick={handleToggleSterilisationRequested}
                         >
@@ -4604,11 +4565,11 @@ const Pet: NextPage = () => {
                           </svg>
                         </button>
                         {sterilisationRequested && (
-                          <div ref={sterilisationRequestedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <div ref={sterilisationRequestedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow">
+                            <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                               {sterilisationRequestedOptions.map((option) => (
                                 <li key={option} onClick={() => handleSterilisationRequestedOption(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                                 </li>
                               ))}
                             </ul>
@@ -4642,7 +4603,7 @@ const Pet: NextPage = () => {
                       <div className="flex flex-col">
                         <button
                           ref={btnSterilisationRequestSignedRef}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                           type="button"
                           onClick={handleToggleSterilisationRequestSigned}
                         >
@@ -4652,11 +4613,11 @@ const Pet: NextPage = () => {
                           </svg>
                         </button>
                         {sterilisationRequestSigned && (
-                          <div ref={sterilisationRequestSignedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <div ref={sterilisationRequestSignedRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                            <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                               {sterilisationRequestSignedOptions.map((option) => (
                                 <li key={option} onClick={() => handleSterilisationRequestSignedOption(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  <button className="block px-4 py-2 hover:bg-gray-100">{option}</button>
                                 </li>
                               ))}
                             </ul>
@@ -4674,7 +4635,7 @@ const Pet: NextPage = () => {
                       <div className="flex flex-col">
                         <button
                           ref={btnSterilisationOutcomeRef}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                           type="button"
                           onClick={handleToggleSterilisationOutcome}
                         >
@@ -4684,11 +4645,11 @@ const Pet: NextPage = () => {
                           </svg>
                         </button>
                         {sterilisationOutcome && (
-                          <div ref={sterilisationOutcomeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <div ref={sterilisationOutcomeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                            <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                               {sterilisationOutcomeOptions.map((option) => (
                                 <li key={option} onClick={() => handleSterilisationOutcomeOption(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                                 </li>
                               ))}
                             </ul>
@@ -4707,7 +4668,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnVaccinationShot1Ref}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleVaccinationShot1}
                       >
@@ -4717,11 +4678,11 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {vaccinationShot1 && (
-                        <div ref={vaccinationShot1Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={vaccinationShot1Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                          <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                             {vaccinationShot1Options.map((option) => (
                               <li key={option} onClick={() => handleVaccinationShot1Option(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                               </li>
                             ))}
                           </ul>
@@ -4754,7 +4715,7 @@ const Pet: NextPage = () => {
                       <div className="flex flex-col">
                         <button
                           ref={btnVaccinationShot2Ref}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                           type="button"
                           onClick={handleToggleVaccinationShot2}
                         >
@@ -4764,11 +4725,11 @@ const Pet: NextPage = () => {
                           </svg>
                         </button>
                         {vaccinationShot2 && (
-                          <div ref={vaccinationShot2Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                          <div ref={vaccinationShot2Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
                             <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                               {vaccinationShot2Options.map((option) => (
                                 <li key={option} onClick={() => handleVaccinationShot2Option(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                                 </li>
                               ))}
                             </ul>
@@ -4802,7 +4763,7 @@ const Pet: NextPage = () => {
                       <div className="flex flex-col">
                         <button
                           ref={btnVaccinationShot3Ref}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                           type="button"
                           onClick={handleToggleVaccinationShot3}
                         >
@@ -4812,11 +4773,11 @@ const Pet: NextPage = () => {
                           </svg>
                         </button>
                         {vaccinationShot3 && (
-                          <div ref={vaccinationShot3Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <div ref={vaccinationShot3Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow">
+                            <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                               {vaccinationShot3Options.map((option) => (
                                 <li key={option} onClick={() => handleVaccinationShot3Option(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  <button className="block px-4 py-2 hover:bg-gray-100">{option}</button>
                                 </li>
                               ))}
                             </ul>
@@ -4897,7 +4858,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnClinicsAttendedRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleClinicsAttended}
                       >
@@ -4907,8 +4868,8 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {clinicsAttended && (
-                        <div ref={clinicsAttendedRef} className="z-10 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="w-52 py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={clinicsAttendedRef} className="z-10 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                          <ul className="w-52 py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                             <li key={1}>
                               <div className="flex items-center px-4">
                                 <input
@@ -5055,7 +5016,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnMembershipTypeRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleMembershipType}
                       >
@@ -5065,11 +5026,11 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {membershipType && (
-                        <div ref={membershipTypeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={membershipTypeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                          <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
                             {membershipTypeOptions.map((option) => (
                               <li key={option} onClick={() => handleMembershipTypeOption(option)}>
-                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                               </li>
                             ))}
                           </ul>
@@ -5103,7 +5064,7 @@ const Pet: NextPage = () => {
                       <div className="flex flex-col">
                         <button
                           ref={btnCardStatusRef}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                           type="button"
                           onClick={handleToggleCardStatus}
                         >
@@ -5113,11 +5074,11 @@ const Pet: NextPage = () => {
                           </svg>
                         </button>
                         {cardStatus && (
-                          <div ref={cardStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <div ref={cardStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                            <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                               {cardStatusOptions.map((option) => (
                                 <li key={option} onClick={() => handleCardStatusOption(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                                  <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
                                 </li>
                               ))}
                             </ul>
@@ -5180,7 +5141,7 @@ const Pet: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnKennelsReceivedRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleKennelsReceived}
                       >
@@ -5190,7 +5151,7 @@ const Pet: NextPage = () => {
                         </svg>
                       </button>
                       {kennelsReceived && (
-                        <div ref={kennelsReceivedRef} className="z-10 w-52 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                        <div ref={kennelsReceivedRef} className="z-10 w-52 divide-y divide-gray-100 rounded-lg bg-white shadow">
                           {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {kennelsReceivedOptions.map((option) => (
                               <li key={option} onClick={() => handleKennelsReceivedOption(option)}>
@@ -5198,7 +5159,7 @@ const Pet: NextPage = () => {
                               </li>
                             ))}
                           </ul> */}
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
                             <li key={1}>
                               <div className="flex items-center px-4">
                                 <input

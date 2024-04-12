@@ -883,13 +883,7 @@ const Clinic: NextPage = () => {
   // CustomInput component with explicit types for the props
   const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
     <button className="form-input flex items-center rounded-md border px-3 py-2" onClick={onClick}>
-      <svg
-        className="z-10 mr-2 h-4 w-4 text-gray-500 dark:text-gray-400"
-        aria-hidden="true"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
+      <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
       </svg>
       <div className="m-1 mr-2">(Select here): </div>
@@ -1171,7 +1165,7 @@ const Clinic: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnGreaterAreaRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                         type="button"
                         onClick={handleToggleGreaterArea}
                       >
@@ -1181,15 +1175,13 @@ const Clinic: NextPage = () => {
                         </svg>
                       </button>
                       {isGreaterAreaOpen && (
-                        <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                        <div ref={greaterAreaRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                          <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
                             {greaterAreaOptions
                               .sort((a, b) => a.greaterArea.localeCompare(b.greaterArea))
                               .map((option) => (
                                 <li key={option.greaterAreaID} onClick={() => handleGreaterAreaOption(option.greaterArea, option.greaterAreaID)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                                    {option.greaterArea}
-                                  </button>
+                                  <button className="block px-4 py-2 hover:bg-gray-100">{option.greaterArea}</button>
                                 </li>
                               ))}
                           </ul>
@@ -1240,7 +1232,7 @@ const Clinic: NextPage = () => {
                     <div className="flex flex-col">
                       <button
                         ref={btnConditionRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300"
                         type="button"
                         onClick={handleToggleConditions}
                       >
@@ -1250,7 +1242,7 @@ const Clinic: NextPage = () => {
                         </svg>
                       </button>
                       {conditions && (
-                        <div ref={conditionRef} className="z-10 w-48 divide-y divide-gray-100 rounded-lg bg-white shadow dark:bg-gray-700">
+                        <div ref={conditionRef} className="z-10 w-48 divide-y divide-gray-100 rounded-lg bg-white shadow">
                           {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
                             {conditionOptions.map((option) => (
                               <li key={option} onClick={() => handleConditionOption(option)}>
@@ -1259,7 +1251,7 @@ const Clinic: NextPage = () => {
                             ))}
                           </ul> */}
 
-                          <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                          <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
                             <li key={1}>
                               <div className="flex items-center px-4">
                                 <input

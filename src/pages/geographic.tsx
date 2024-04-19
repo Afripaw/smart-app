@@ -1078,17 +1078,17 @@ const Geographic: NextPage = () => {
                               </td>
                               <div className="flex">
                                 {/* <div className="relative flex items-center justify-center">
-                                <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                  <Trash
-                                    size={24}
-                                    className="block"
-                                    onClick={() => handleDeleteModal(geo.greaterAreaID, `G${geo.greaterAreaID}`, geo.greaterArea)}
-                                  />
-                                  <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-center text-sm text-gray-700 shadow-sm group-hover:block">
-                                    Delete greater area
+                                  <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                    <Trash
+                                      size={24}
+                                      className="block"
+                                      onClick={() => handleDeleteModal(geo.greaterAreaID, `G${geo.greaterAreaID}`, geo.greaterArea)}
+                                    />
+                                    <span className="absolute bottom-full hidden w-[100px] rounded-md border border-gray-300 bg-white px-2 py-1 text-center text-sm text-gray-700 shadow-sm group-hover:block">
+                                      Delete greater area
+                                    </span>
                                   </span>
-                                </span>
-                              </div> */}
+                                </div> */}
 
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">

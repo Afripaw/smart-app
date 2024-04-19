@@ -17,7 +17,7 @@ export const UserRouter = createTRPCRouter({
         //addressAreaID: z.number(),
         // addressStreetID: z.number(),
         addressStreetCode: z.string(),
-        addressStreetNumber: z.string(),
+        addressStreetNumber: z.number(),
         addressSuburb: z.string(),
         addressPostalCode: z.string(),
         addressFreeForm: z.string(),
@@ -98,7 +98,7 @@ export const UserRouter = createTRPCRouter({
         // addressAreaID: z.number(),
         // addressStreetID: z.number(),
         addressStreetCode: z.string(),
-        addressStreetNumber: z.string(),
+        addressStreetNumber: z.number(),
         addressSuburb: z.string(),
         addressPostalCode: z.string(),
         addressFreeForm: z.string(),
@@ -237,7 +237,8 @@ export const UserRouter = createTRPCRouter({
     }),
 
   deleteAll: publicProcedure.mutation(async ({ ctx }) => {
-    return await ctx.db.user.deleteMany({});
+    await ctx.db.greaterAreaOnUser.deleteMany();
+    return await ctx.db.user.deleteMany();
   }),
 
   getUserDetails: protectedProcedure.query(({ ctx }) => {
@@ -284,7 +285,7 @@ export const UserRouter = createTRPCRouter({
             // { addressArea: { contains: input.searchQuery } },
             // { addressStreet: { contains: input.searchQuery } },
             { addressStreetCode: { contains: input.searchQuery } },
-            { addressStreetNumber: { contains: input.searchQuery } },
+            // { addressStreetNumber: { equals: input.searchQuery } },
             { addressSuburb: { contains: input.searchQuery } },
             { addressPostalCode: { contains: input.searchQuery } },
             { addressFreeForm: { contains: input.searchQuery } },
@@ -336,7 +337,7 @@ export const UserRouter = createTRPCRouter({
               { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
               { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
-              { addressStreetNumber: { contains: term } },
+              //{ addressStreetNumber: { equals: Number(term) } },
               { addressSuburb: { contains: term } },
               { addressPostalCode: { contains: term } },
               { addressFreeForm: { contains: term } },
@@ -357,7 +358,7 @@ export const UserRouter = createTRPCRouter({
               { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
               { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
-              { addressStreetNumber: { contains: term } },
+              //{ addressStreetNumber: { equals: Number(term) } },
               { addressSuburb: { contains: term } },
               { addressPostalCode: { contains: term } },
               { addressFreeForm: { contains: term } },
@@ -550,7 +551,7 @@ export const UserRouter = createTRPCRouter({
               // { addressArea: { contains: term } },
               // { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
-              { addressStreetNumber: { contains: term } },
+              //{ addressStreetNumber: { equals: Number(term) } },
               { addressSuburb: { contains: term } },
               { addressPostalCode: { contains: term } },
               { addressFreeForm: { contains: term } },
@@ -574,7 +575,7 @@ export const UserRouter = createTRPCRouter({
               //  { addressArea: { contains: term } },
               //  { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
-              { addressStreetNumber: { contains: term } },
+              //{ addressStreetNumber: { equals: Number(term) } },
               { addressSuburb: { contains: term } },
               { addressPostalCode: { contains: term } },
               { addressFreeForm: { contains: term } },

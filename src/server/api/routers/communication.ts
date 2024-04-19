@@ -171,6 +171,18 @@ export const communicationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.greaterAreaOnCommunication.deleteMany({
+        where: {
+          communicationID: input.communicationID,
+        },
+      });
+
+      await ctx.db.areaOnCommunication.deleteMany({
+        where: {
+          communicationID: input.communicationID,
+        },
+      });
+
       return await ctx.db.communication.delete({
         where: {
           communicationID: input.communicationID,

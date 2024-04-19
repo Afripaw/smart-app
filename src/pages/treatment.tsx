@@ -795,7 +795,7 @@ const Treatment: NextPage = () => {
   const [getPreviousTreatments, setGetPreviousTreatments] = useState(false);
   const [numberOfFetches, setNumberOfFetches] = useState(0);
   useEffect(() => {
-    if (router.asPath.includes("petID") && (petID === 0 || (previousTreatments.length === 0 && numberOfFetches < 400))) {
+    if (router.asPath.includes("petID") && (petID === 0 || (previousTreatments.length === 0 && numberOfFetches < 50))) {
       setNumberOfFetches(numberOfFetches + 1);
       void prevTreatments.refetch();
       getPreviousTreatments ? setGetPreviousTreatments(false) : setGetPreviousTreatments(true);
@@ -828,7 +828,7 @@ const Treatment: NextPage = () => {
         })),
       );
     }
-  }, [getPreviousTreatments]);
+  }, [getPreviousTreatments, isCreate]);
 
   //-------------------------------NEW USER-----------------------------------------
 

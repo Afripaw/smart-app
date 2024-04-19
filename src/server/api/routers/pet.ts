@@ -243,7 +243,7 @@ export const petRouter = createTRPCRouter({
               { owner: { addressGreaterArea: { greaterArea: { contains: term } } } },
               { owner: { addressArea: { area: { contains: term } } } },
               { owner: { addressStreet: { street: { contains: term } } } },
-              { owner: { addressStreetNumber: { contains: term } } },
+              //{ owner: { addressStreetNumber: { contains: term } } },
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
@@ -274,7 +274,7 @@ export const petRouter = createTRPCRouter({
               { owner: { addressGreaterArea: { greaterArea: { contains: term } } } },
               { owner: { addressArea: { area: { contains: term } } } },
               { owner: { addressStreet: { street: { contains: term } } } },
-              { owner: { addressStreetNumber: { contains: term } } },
+              //{ owner: { addressStreetNumber: { contains: term } } },
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
@@ -305,7 +305,7 @@ export const petRouter = createTRPCRouter({
               { owner: { addressGreaterArea: { greaterArea: { contains: term } } } },
               { owner: { addressArea: { area: { contains: term } } } },
               { owner: { addressStreet: { street: { contains: term } } } },
-              { owner: { addressStreetNumber: { contains: term } } },
+              //{ owner: { addressStreetNumber: { contains: term } } },
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term } },
@@ -1223,7 +1223,7 @@ export const petRouter = createTRPCRouter({
               // { addressGreaterArea: { contains: term } },
               // { addressArea: { contains: term } },
               // { addressStreet: { contains: term } },
-              { addressStreetNumber: { contains: term } },
+              // { addressStreetNumber: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
@@ -1234,7 +1234,7 @@ export const petRouter = createTRPCRouter({
               // { addressGreaterArea: { contains: term } },
               // { addressArea: { contains: term } },
               // { addressStreet: { contains: term } },
-              { addressStreetNumber: { contains: term } },
+              //{ addressStreetNumber: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }

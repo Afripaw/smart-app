@@ -177,6 +177,52 @@ export const geographicRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.greaterAreaOnVolunteer.deleteMany({
+        where: {
+          greaterAreaID: input.greaterAreaID,
+        },
+      });
+
+      await ctx.db.greaterAreaOnUser.deleteMany({
+        where: {
+          greaterAreaID: input.greaterAreaID,
+        },
+      });
+
+      await ctx.db.pet.deleteMany({
+        where: {
+          owner: {
+            addressGreaterAreaID: input.greaterAreaID,
+          },
+        },
+      });
+
+      await ctx.db.petOwner.deleteMany({
+        where: {
+          addressGreaterAreaID: input.greaterAreaID,
+        },
+      });
+
+      await ctx.db.areaOnCommunication.deleteMany({
+        where: {
+          area: {
+            greaterAreaID: input.greaterAreaID,
+          },
+        },
+      });
+
+      await ctx.db.greaterAreaOnCommunication.deleteMany({
+        where: {
+          greaterAreaID: input.greaterAreaID,
+        },
+      });
+
+      await ctx.db.petClinic.deleteMany({
+        where: {
+          greaterAreaID: input.greaterAreaID,
+        },
+      });
+
       await ctx.db.street.deleteMany({
         where: {
           area: {
@@ -409,9 +455,9 @@ export const geographicRouter = createTRPCRouter({
       //Orders the results
       const order: Record<string, string> = {};
       if (input.order !== "date") {
-        order.updatedAt = "desc";
+        order.updatedAt = "asc";
       } else {
-        order.date = "desc";
+        order.date = "asc";
       }
       const greaterArea_ = await ctx.db.greaterArea.findMany({
         where: {

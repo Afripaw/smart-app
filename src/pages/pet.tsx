@@ -529,6 +529,7 @@ const Pet: NextPage = () => {
       // const path = router.asPath.split("?")[1] ?? "";
       // console.log("Path: ", path);
       // console.log("Owner ID: ", Number(path.split("=")[1]));
+      console.log("Owner ID at line 532: ", Number(router.asPath.split("=")[1]));
       setOwnerID(Number(router.asPath.split("=")[1]));
 
       //setFirstName(owner?.data?.firstName);
@@ -558,7 +559,11 @@ const Pet: NextPage = () => {
       // console.log("Owner ID: ", ownerID);
 
       //setIsCreate(true);
-      void handleCreateNewUser();
+      void handleCreateNewUser(
+        Number((router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]),
+        String((router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]?.replaceAll("+", " ")),
+        String((router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]?.replaceAll("+", " ")),
+      );
     }
     if (router.asPath.includes("petID")) {
       setIsViewProfilePage(true);
@@ -575,11 +580,12 @@ const Pet: NextPage = () => {
   // console.log("Pet: ", pet.data);
 
   //make sure the ownerID is not 0
-  useEffect(() => {
-    if (ownerID != 0 && isCreate) {
-      setOwnerID(Number(router.asPath.split("=")[1]));
-    }
-  }, [isCreate]);
+  // useEffect(() => {
+  //   if (ownerID != 0 && isCreate && router.asPath.includes("ownerID")) {
+  //     console.log("Owner ID at line 585: ", Number(router.asPath.split("=")[1]));
+  //     setOwnerID(Number(router.asPath.split("=")[1]));
+  //   }
+  // }, [isCreate]);
 
   //-------------------------------NAVIGATING BY CLICKING ON THE TAB---------------------
   // useEffect(() => {
@@ -594,11 +600,13 @@ const Pet: NextPage = () => {
       }
     }, [router?.asPath]);
   }
-  const owner = api.petOwner.getOwnerByID.useQuery({ ownerID: ownerID });
 
-  useEffect(() => {
-    void owner.refetch();
-  }, []);
+  //Code I commented out on 19/4/2024
+  //  const owner = api.petOwner.getOwnerByID.useQuery({ ownerID: ownerID });
+
+  // useEffect(() => {
+  //    void owner.refetch();
+  // }, []);
 
   // const handleNavbarLinkClick = () => {
   //   setIsUpdate(false);
@@ -608,9 +616,17 @@ const Pet: NextPage = () => {
 
   //-------------------------------UPDATE USER-----------------------------------------
   //const user = api.pet.getPetByID.useQuery({ petID: id });
+  if (typeof api.pet.addClinicToPet.useMutation === "function") {
+    console.log("useMutation is a function");
+    // const addClinic = api.pet.addClinicToPet.useMutation();
+  } else {
+    console.error("useMutation is not a function, it's:", typeof api.pet.addClinicToPet.useMutation);
+  }
 
   //Add clinic to pet
+  //console.log("addClinicToPet: ", api.pet.addClinicToPet.useMutation());
   const addClinic = api.pet.addClinicToPet.useMutation();
+  //console.log("addClinicToPet: ", addClinic);
 
   //Order fields
   // const [order, setOrder] = useState("petName");
@@ -1259,6 +1275,12 @@ const Pet: NextPage = () => {
 
   const sterilisationRequestedOptions = ["Yes", "No"];
 
+  useEffect(() => {
+    if (sterilisationRequestedOption === "Yes") {
+      setSterilisationRequestedDate(new Date());
+    }
+  }, [sterilisationRequestedOption]);
+
   //if sterilisation status is No
   useEffect(() => {
     if (sterilisationStatusOption === "No" && sterilisationRequestedOption === "") {
@@ -1486,6 +1508,12 @@ const Pet: NextPage = () => {
     </button>
   );
 
+  useEffect(() => {
+    if (vaccinationShot2Option === "Yes") {
+      setVaccinationShot2Date(new Date());
+    }
+  }, [vaccinationShot2Option]);
+
   //VACCINATION SHOT 3
   const handleToggleVaccinationShot3 = () => {
     setVaccinationShot3(!vaccinationShot3);
@@ -1537,6 +1565,12 @@ const Pet: NextPage = () => {
         : value}
     </button>
   );
+
+  useEffect(() => {
+    if (vaccinationShot3Option === "Yes") {
+      setVaccinationShot3Date(new Date());
+    }
+  }, [vaccinationShot3Option]);
 
   //MEMBERSHIP TYPE
   const handleToggleMembershipType = () => {
@@ -2140,7 +2174,11 @@ const Pet: NextPage = () => {
       setSizeOption(userData?.size ?? "Select one");
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
-      setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
+      if (userData?.sterilisedRequestSigned === "") {
+        setSterilisationRequestSignedOption("Select one");
+      } else {
+        setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
+      }
 
       if (userData?.species == "Cat") {
         //setColourOption("Select one");
@@ -2393,6 +2431,7 @@ const Pet: NextPage = () => {
       console.log("Treatment list: ", treatmentList);
       //setClinicIDList(clinicIDs ?? []);
 
+      console.log("Owner ID of the pet line 2420:   ", userData?.owner?.ownerID);
       setOwnerID(userData?.owner?.ownerID ?? 0);
       setFirstName(userData?.owner?.firstName ?? "");
       setSurname(userData?.owner?.surname ?? "");
@@ -2503,6 +2542,7 @@ const Pet: NextPage = () => {
     setStatusOption("Select one");
     setSterilisationStatusOption("Select one");
     setSterilisationRequestedOption("Select one");
+    setSterilisationRequestSignedOption("Select one");
     setSterilisationOutcomeOption("Select one");
     setVaccinationShot1Option("Select one");
     setVaccinationShot2Option("Select one");
@@ -2561,22 +2601,39 @@ const Pet: NextPage = () => {
   //------------------------------------CREATE A NEW PET FOR OWNER--------------------------------------
   //When button is pressed the browser needs to go to the pet's page. The pet's page needs to know the owner's ID
   const handleAddNewPet = async (id: number, firstName: string, surname: string) => {
-    await router.push({
-      pathname: "/pet",
-      query: { ownerID: id, firstName: firstName, surname: surname },
-    });
+    // await router.push({
+    //   pathname: "/inProgress",
+    // });
+    // await router.push({
+    //   pathname: "/pet",
+    //   query: { ownerID: id, firstName: firstName, surname: surname },
+    // });
+    setIsCreate(true);
+    setIsUpdate(false);
+    // setOwnerID(id);
+    // setFirstName(firstName);
+    // setSurname(surname);
+    void handleCreateNewUser(id, firstName, surname);
   };
 
-  const handleCreateNewUser = async () => {
+  const handleCreateNewUser = async (id: number, name: string, surname: string) => {
     //const query = router.asPath.split("?")[1] ?? "";
 
     console.log("OwnerID!!!: ", (router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]);
     console.log("FirstName!!!: ", (router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]);
     console.log("Surname!!!: ", (router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]);
     // setOwnerID(Number(router.asPath.split("=")[1]));
-    setOwnerID(Number((router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]));
-    setFirstName(String((router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]?.replaceAll("+", " ")));
-    setSurname(String((router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]?.replaceAll("+", " ")));
+    // setOwnerID(Number((router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]));
+    // setFirstName(String((router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]?.replaceAll("+", " ")));
+    // setSurname(String((router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]?.replaceAll("+", " ")));
+
+    console.log("OwnerID____: ", id);
+    console.log("FirstName___: ", name);
+    console.log("Surname___: ", surname);
+    setOwnerID(id);
+    console.log("OwnerID line 2615: ", ownerID);
+    setFirstName(name);
+    setSurname(surname);
     setPetName("");
     setSpeciesOption("Select one");
     setSexOption("Select one");
@@ -2588,6 +2645,7 @@ const Pet: NextPage = () => {
     setStatusOption("Active");
     setSterilisationStatusOption("Select one");
     setSterilisationRequestedOption("Select one");
+    setSterilisationRequestSignedOption("Select one");
     setSterilisationStatusDate(new Date());
     setSterilisationRequestedDate(new Date());
     setSterilisationOutcomeOption("Select one");
@@ -2773,7 +2831,8 @@ const Pet: NextPage = () => {
 
     // console.log("All clinics attended: ", clinicIDList);
     const newUser_ = await newPet.mutateAsync({
-      ownerID: Number((router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]),
+      //ownerID: Number((router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]),
+      ownerID: ownerID,
       petName: petName,
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
@@ -3276,6 +3335,7 @@ const Pet: NextPage = () => {
       // setClinicIDList(clinicIDs ?? []);
       const ownerData = userData?.owner_data;
 
+      console.log("Owner data line 3319: ", ownerData);
       setOwnerID(ownerData?.ownerID ?? 0);
       setFirstName(ownerData?.firstName ?? "");
       setSurname(ownerData?.surname ?? "");
@@ -3342,8 +3402,11 @@ const Pet: NextPage = () => {
     setKennelList([]);
     setKennelSelection({ allSelected: false, clear: false });
 
+    window.history.replaceState(null, "", "/pet");
+    //await router.replace("/pet", undefined, { shallow: true });
     // await router.push({
     //   pathname: "/pet",
+    //   query: {},
     // });
   };
 
@@ -3897,7 +3960,7 @@ const Pet: NextPage = () => {
                               <td className="border px-2 py-1">{pet.cardStatus}</td>
                               <td className="border px-2 py-1">{pet.owner.addressArea?.area ?? ""}</td>
                               <td className="border px-2 py-1">
-                                {pet.owner.addressStreetNumber} {pet.owner.addressStreet?.street ?? ""}
+                                {pet.owner.addressStreetNumber === 0 ? "" : pet.owner.addressStreetNumber} {pet.owner.addressStreet?.street ?? ""}
                               </td>
                               <td className="border px-2 py-1">
                                 {pet.sterilisedStatus.getFullYear() === 1970
@@ -4252,7 +4315,9 @@ const Pet: NextPage = () => {
                   {speciesOption === "Dog" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
-                        <div className=" flex">Breed(s): </div>
+                        <div className=" flex">
+                          Breed(s)<span className="text-lg text-main-orange">*</span>:{" "}
+                        </div>
                       </div>
                       <div className="flex flex-col">
                         <button
@@ -4457,8 +4522,9 @@ const Pet: NextPage = () => {
                     <div className="mt-3 flex items-start">
                       <div className="mr-3">Owner: </div>
                       <div>
-                        {(router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]} {(router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]}{" "}
-                        (N{(router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]})
+                        {firstName} {surname} (N{ownerID})
+                        {/* {(router.asPath.split("?")[1] ?? "")?.split("&")[1]?.split("=")[1]} {(router.asPath.split("?")[1] ?? "")?.split("&")[2]?.split("=")[1]}{" "}
+                        (N{(router.asPath.split("?")[1] ?? "")?.split("&")[0]?.split("=")[1]}) */}
                       </div>
                     </div>
                   )}
@@ -5389,7 +5455,7 @@ const Pet: NextPage = () => {
                         <b className="mr-3">Sterilised?:</b>{" "}
                         {sterilisationStatusOption === "Yes" ? (
                           <>
-                            {sterilisationStatusDate.getDate().toString()}/{((sterilisationStatusDate.getMonth() ?? 0) + 1).toString()}/
+                            {"Yes, " + sterilisationStatusDate.getDate().toString()}/{((sterilisationStatusDate.getMonth() ?? 0) + 1).toString()}/
                             {sterilisationStatusDate.getFullYear().toString()}
                           </>
                         ) : (
@@ -5405,13 +5471,17 @@ const Pet: NextPage = () => {
                             {sterilisationRequestedDate.getFullYear().toString()}
                           </>
                         ) : (
-                          "None"
+                          "Not Applicable"
                         )}
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Sterilisation Request Signed:</b>{" "}
-                        {sterilisationRequestSignedOption === "Select one" ? user?.sterilisedRequestSigned : sterilisationRequestSignedOption}
+                        <b className="mr-3">Sterilisation Request Signed At:</b>{" "}
+                        {sterilisationStatusOption != "Yes" ? (
+                          <>{sterilisationRequestSignedOption === "Select one" ? user?.sterilisedRequestSigned : sterilisationRequestSignedOption}</>
+                        ) : (
+                          "Not Applicable"
+                        )}
                       </div>
 
                       <div className="mb-2 flex items-center">

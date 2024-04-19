@@ -161,6 +161,18 @@ export const petClinicRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.petOnPetClinic.deleteMany({
+        where: {
+          clinicID: input.clinicID,
+        },
+      });
+
+      await ctx.db.volunteerOnPetClinic.deleteMany({
+        where: {
+          clinicID: input.clinicID,
+        },
+      });
+
       return await ctx.db.petClinic.delete({
         where: {
           clinicID: input.clinicID,

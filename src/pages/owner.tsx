@@ -14,6 +14,10 @@ import { areaOptions } from "~/components/GeoLocation/areaOptions";
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 import { sendUserCredentialsEmail } from "~/components/CommunicationPortals/email";
 
+//Message to user
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 //Excel
 import * as XLSX from "xlsx";
 
@@ -39,7 +43,7 @@ import { router } from "@trpc/server";
 import Link from "next/link";
 
 const Owner: NextPage = () => {
-  useSession({ required: true });
+  //useSession({ required: true });
 
   //-------------------------------GREATER AREA-----------------------------------------
   type GreaterArea = {
@@ -126,7 +130,7 @@ const Owner: NextPage = () => {
         addressAreaID: number;
         addressStreetID: number;
         addressStreetCode: string;
-        addressStreetNumber: string;
+        addressStreetNumber: number;
         addressFreeForm: string;
         preferredCommunication: string;
         status: string;
@@ -145,7 +149,7 @@ const Owner: NextPage = () => {
         //change the format of the mobile number
         obj.mobile = obj.mobile.toString();
         //change the format of the addressStreetNumber
-        obj.addressStreetNumber = obj.addressStreetNumber.toString();
+        // obj.addressStreetNumber = obj.addressStreetNumber.toString();
         //change the format of the addressStreetCode
         //obj.addressStreetCode = obj.addressStreetCode.toString();
         //change the  format of the addressPostalCode
@@ -381,7 +385,7 @@ const Owner: NextPage = () => {
   const [mobile, setMobile] = useState("");
   const [addressFreeForm, setAddressFreeForm] = useState("");
   const [addressStreetCode, setAddressStreetCode] = useState("");
-  const [addressStreetNumber, setAddressStreetNumber] = useState("");
+  const [addressStreetNumber, setAddressStreetNumber] = useState(0);
   const [addressSuburb, setAddressSuburb] = useState("");
   const [addressPostalCode, setAddressPostalCode] = useState("");
   const [comments, setComments] = useState("");
@@ -503,6 +507,11 @@ const Owner: NextPage = () => {
 
   //const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
   const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+
+  //ADDRESS STREET NUMBER
+  const handleAddressStreetNumber = (e: string) => {
+    setAddressStreetNumber(Number(e));
+  };
 
   //AREA
   const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
@@ -750,7 +759,7 @@ const Owner: NextPage = () => {
       setAreaID(userData.addressAreaID ?? 0);
       setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       // setAddressSuburb(userData.addressSuburb ?? "");
       //setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
@@ -858,7 +867,7 @@ const Owner: NextPage = () => {
       setAreaID(userData.addressAreaID ?? 0);
       setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       //setAddressSuburb(userData.addressSuburb ?? "");
       //setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
@@ -1039,7 +1048,7 @@ const Owner: NextPage = () => {
     setStreetOption({ street: "Select one", id: 0 });
     //setStreetID(0);
     setAddressStreetCode("");
-    setAddressStreetNumber("");
+    setAddressStreetNumber(0);
     setAddressSuburb("");
     setAddressPostalCode("");
     setAddressFreeForm("");
@@ -1080,7 +1089,7 @@ const Owner: NextPage = () => {
     setSurname("");
     setMobile("");
     setAddressStreetCode("");
-    setAddressStreetNumber("");
+    setAddressStreetNumber(0);
     setAddressSuburb("");
     setAddressPostalCode("");
     setAddressFreeForm("");
@@ -1148,9 +1157,9 @@ const Owner: NextPage = () => {
         const destinationNumber = mobile;
         try {
           await sendSMS(messageContent, destinationNumber);
-          console.log("SMS sent successfully");
+          toast.success("SMS sent successfully");
         } catch (error) {
-          console.error("Failed to send SMS", error);
+          toast.error("Failed to send SMS");
         }
       }
 
@@ -1198,7 +1207,7 @@ const Owner: NextPage = () => {
       //setAreaID(userData.addressAreaID ?? 0);
       //setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       //setAddressSuburb(userData.addressSuburb ?? "");
       //setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
@@ -1300,7 +1309,7 @@ const Owner: NextPage = () => {
       setMobile(userData.mobile ?? "");
 
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       //setAddressSuburb(userData.addressSuburb ?? "");
       //setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
@@ -1487,7 +1496,7 @@ const Owner: NextPage = () => {
     setAreaOption({ area: "Select one", id: 0 });
     setStreetOption({ street: "Select one", id: 0 });
     setAddressStreetCode("");
-    setAddressStreetNumber("");
+    setAddressStreetNumber(0);
     setAddressSuburb("");
     setAddressPostalCode("");
     setPreferredCommunicationOption("Select one");
@@ -1546,9 +1555,9 @@ const Owner: NextPage = () => {
   //Street number
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
   useEffect(() => {
-    if (addressStreetNumber.match(/^[0-9]+$/) == null && addressStreetNumber.length != 0) {
+    if (addressStreetNumber.toString().match(/^[0-9]+$/) == null && addressStreetNumber.toString().length != 0) {
       setStreetNumberMessage("A street number should contain numbers only");
-    } else if (addressStreetNumber.length > 4 && addressStreetNumber.length != 0) {
+    } else if (addressStreetNumber.toString().length > 4 && addressStreetNumber.toString().length != 0) {
       setStreetNumberMessage("A street number should be 4 digits or less");
     } else {
       setStreetNumberMessage("");
@@ -1731,6 +1740,7 @@ const Owner: NextPage = () => {
         <Navbar />
         {!isCreate && !isUpdate && !isViewProfilePage && (
           <>
+            <ToastContainer position="top-center" />
             <div className="flex flex-col text-black">
               <DeleteButtonModal
                 isOpen={isDeleteModalOpen}
@@ -1853,7 +1863,7 @@ const Owner: NextPage = () => {
                               <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
                               <td className="border px-2 py-1">{user.addressArea?.area ?? ""}</td>
                               <td className="border px-2 py-1">
-                                {user.addressStreetNumber} {user.addressStreet?.street ?? ""}
+                                {user.addressStreetNumber === 0 ? "" : user.addressStreetNumber} {user.addressStreet?.street ?? ""}
                               </td>
                               <td className="border px-2 py-1">{user.status}</td>
                               <td className="border px-2 py-1">
@@ -2265,8 +2275,8 @@ const Owner: NextPage = () => {
                           <input
                             className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                             placeholder="Type here: e.g. 14"
-                            onChange={(e) => setAddressStreetNumber(e.target.value)}
-                            value={addressStreetNumber}
+                            onChange={(e) => handleAddressStreetNumber(e.target.value)}
+                            value={addressStreetNumber === 0 ? "" : addressStreetNumber.toString()}
                           />
                         </div>
                         {streetNumberMessage && <div className="text-sm text-red-500">{streetNumberMessage}</div>}
@@ -2411,17 +2421,19 @@ const Owner: NextPage = () => {
                     />
                   </div>
 
-                  <div className="flex items-center">
-                    <input
-                      id="checked-checkbox"
-                      type="checkbox"
-                      onChange={(e) => setSendOwnerDetails(e.target.checked)}
-                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
-                    />
-                    <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
-                      Welcome owner via preferred communication channel
-                    </label>
-                  </div>
+                  {(email != "" || mobile != "") && (
+                    <div className="flex items-center">
+                      <input
+                        id="checked-checkbox"
+                        type="checkbox"
+                        onChange={(e) => setSendOwnerDetails(e.target.checked)}
+                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                      />
+                      <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
+                        Welcome owner via preferred communication channel
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
               <button
@@ -2533,7 +2545,7 @@ const Owner: NextPage = () => {
                           </div>
 
                           <div className="mb-2 flex items-center">
-                            <b className="mr-3">Street Number:</b> {addressStreetNumber}
+                            <b className="mr-3">Street Number:</b> {addressStreetNumber === 0 ? "" : addressStreetNumber}
                           </div>
                           {/*
                       <div className="mb-2 flex items-center">

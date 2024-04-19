@@ -75,7 +75,7 @@ model User {
     // addressStreet          street?     @relation(fields: [addressStreetID], references: [streetID])
     // addressStreetID        Int?
     addressStreetCode      String?
-    addressStreetNumber    String?
+    addressStreetNumber    Int?
     addressSuburb          String?
     addressPostalCode      String?
     addressFreeForm        String?
@@ -116,7 +116,7 @@ model petOwner {
     addressStreet          street?     @relation(fields: [addressStreetID], references: [streetID])
     addressStreetID        Int?
     addressStreetCode      String?
-    addressStreetNumber    String
+    addressStreetNumber    Int?
     addressFreeForm        String?
     status                 String
     startingDate           DateTime
@@ -222,7 +222,7 @@ model volunteer {
     addressGreaterArea     greaterAreaOnVolunteer[]
     addressStreet          String?
     addressStreetCode      String?
-    addressStreetNumber    String?
+    addressStreetNumber    Int?
     addressSuburb          String?
     addressPostalCode      String?
     addressFreeForm        String?

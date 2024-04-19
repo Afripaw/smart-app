@@ -34,7 +34,7 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 
 const User: NextPage = () => {
-  useSession({ required: true });
+  //useSession({ required: true });
 
   //-------------------------------GREATER AREA-----------------------------------------
   type GreaterArea = {
@@ -336,7 +336,7 @@ const User: NextPage = () => {
   const [street, setStreet] = useState("");
   const [addressFreeForm, setAddressFreeForm] = useState("");
   const [addressStreetCode, setAddressStreetCode] = useState("");
-  const [addressStreetNumber, setAddressStreetNumber] = useState("");
+  const [addressStreetNumber, setAddressStreetNumber] = useState(0);
   const [addressSuburb, setAddressSuburb] = useState("");
   const [addressPostalCode, setAddressPostalCode] = useState("");
   const [comments, setComments] = useState("");
@@ -549,6 +549,11 @@ const User: NextPage = () => {
   }, []);
 
   const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+
+  //ADDRESS STREET NUMBER
+  const handleAddressStreetNumber = (e: string) => {
+    setAddressStreetNumber(Number(e));
+  };
 
   //const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
   // const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
@@ -776,7 +781,7 @@ const User: NextPage = () => {
       // setAreaID(userData.addressAreaID ?? 0);
       // setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
@@ -892,7 +897,7 @@ const User: NextPage = () => {
       // setAreaID(userData.addressAreaID ?? 0);
       // setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
@@ -992,7 +997,7 @@ const User: NextPage = () => {
         "Your AfriPaw Smart App (https://afripaw.app) credentials are: " +
         "\n" +
         "User ID: " +
-        user?.userID +
+        "U"+user?.userID +
         "\n" +
         "Password: " +
         password +
@@ -1021,7 +1026,7 @@ const User: NextPage = () => {
     setStreet("");
     //setStreetID(0);
     setAddressStreetCode("");
-    setAddressStreetNumber("");
+    setAddressStreetNumber(0);
     setAddressSuburb("");
     setAddressPostalCode("");
     setAddressFreeForm("");
@@ -1067,7 +1072,7 @@ const User: NextPage = () => {
     setConfirmPassword("");
     setMobile("");
     setAddressStreetCode("");
-    setAddressStreetNumber("");
+    setAddressStreetNumber(0);
     setAddressSuburb("");
     setAddressPostalCode("");
     setAddressFreeForm("");
@@ -1197,7 +1202,7 @@ const User: NextPage = () => {
       //setAreaID(userData.addressAreaID ?? 0);
       //setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
@@ -1273,7 +1278,7 @@ const User: NextPage = () => {
       //setAreaID(userData.addressAreaID ?? 0);
       //setStreetID(userData.addressStreetID ?? 0);
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
@@ -1396,7 +1401,7 @@ const User: NextPage = () => {
     setGreaterAreaSelection({ allSelected: false, clear: false });
     setStreet("");
     setAddressStreetCode("");
-    setAddressStreetNumber("");
+    setAddressStreetNumber(0);
     setAddressSuburb("");
     setAddressPostalCode("");
     setPreferredCommunicationOption("Select one");
@@ -1459,9 +1464,9 @@ const User: NextPage = () => {
   //Street number
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
   useEffect(() => {
-    if (addressStreetNumber.match(/^[0-9]+$/) == null && addressStreetNumber.length != 0) {
+    if (addressStreetNumber.toString().match(/^[0-9]+$/) == null && addressStreetNumber.toString().length != 0) {
       setStreetNumberMessage("A street number should contain numbers only");
-    } else if (addressStreetNumber.length > 4 && addressStreetNumber.length != 0) {
+    } else if (addressStreetNumber.toString().length > 4 && addressStreetNumber.toString().length != 0) {
       setStreetNumberMessage("A street number should be 4 digits or less");
     } else {
       setStreetNumberMessage("");
@@ -2147,8 +2152,8 @@ const User: NextPage = () => {
                           <input
                             className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                             placeholder="Type here: e.g. 14"
-                            onChange={(e) => setAddressStreetNumber(e.target.value)}
-                            value={addressStreetNumber}
+                            onChange={(e) => handleAddressStreetNumber(e.target.value)}
+                            value={addressStreetNumber === 0 ? "" : addressStreetNumber.toString()}
                           />
                         </div>
                         {streetNumberMessage && <div className="text-sm text-red-500">{streetNumberMessage}</div>}
@@ -2383,17 +2388,19 @@ const User: NextPage = () => {
                   )}
                   {confirmPasswordMessage && <div className="text-sm text-red-500">{confirmPasswordMessage}</div>}
 
-                  <div className="flex items-center">
-                    <input
-                      id="checked-checkbox"
-                      type="checkbox"
-                      onChange={(e) => setSendUserDetails(e.target.checked)}
-                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
-                    />
-                    <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
-                      Send login credentials via preferred communication channel
-                    </label>
-                  </div>
+                  {(email != "" || mobile != "") && (
+                    <div className="flex items-center">
+                      <input
+                        id="checked-checkbox"
+                        type="checkbox"
+                        onChange={(e) => setSendUserDetails(e.target.checked)}
+                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                      />
+                      <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
+                        Send login credentials via preferred communication channel
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
               <button
@@ -2501,7 +2508,7 @@ const User: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street Number:</b> {addressStreetNumber}
+                        <b className="mr-3">Street Number:</b> {addressStreetNumber === 0 ? "" : addressStreetNumber}
                       </div>
 
                       <div className="mb-2 flex items-center">

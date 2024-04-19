@@ -36,7 +36,7 @@ import { set } from "date-fns";
 import { greaterArea } from "@prisma/client";
 
 const Volunteer: NextPage = () => {
-  useSession({ required: true });
+  //useSession({ required: true });
 
   const newVolunteer = api.volunteer.create.useMutation();
   const updateVolunteer = api.volunteer.update.useMutation();
@@ -84,7 +84,7 @@ const Volunteer: NextPage = () => {
         //addressGreaterAreaID: number[]; // Array of strings
         addressStreet: string;
         addressStreetCode: string;
-        addressStreetNumber: string;
+        addressStreetNumber: number;
         addressSuburb: string;
         addressPostalCode: string;
         addressFreeForm: string;
@@ -103,7 +103,7 @@ const Volunteer: NextPage = () => {
         //change the format of the mobile number
         obj.mobile = obj.mobile.toString();
 
-        obj.addressStreetNumber = "";
+        // obj.addressStreetNumber = "";
 
         obj.addressStreetCode = "";
 
@@ -399,7 +399,7 @@ const Volunteer: NextPage = () => {
   const [street, setStreet] = useState("");
   const [addressFreeForm, setAddressFreeForm] = useState("");
   const [addressStreetCode, setAddressStreetCode] = useState("");
-  const [addressStreetNumber, setAddressStreetNumber] = useState("");
+  const [addressStreetNumber, setAddressStreetNumber] = useState(0);
   const [addressSuburb, setAddressSuburb] = useState("");
   const [addressPostalCode, setAddressPostalCode] = useState("");
   const [comments, setComments] = useState("");
@@ -547,6 +547,11 @@ const Volunteer: NextPage = () => {
   }, []);
 
   const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+
+  //ADDRESS STREET NUMBER
+  const handleAddressStreetNumber = (e: string) => {
+    setAddressStreetNumber(Number(e));
+  };
 
   //Old code
   // //show all the clinics that the volunteer attended
@@ -982,7 +987,7 @@ const Volunteer: NextPage = () => {
       setGreaterAreaList(greaterAreas ?? "Select here");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "Select one");
@@ -1063,7 +1068,7 @@ const Volunteer: NextPage = () => {
       setStreet(userData.addressStreet ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "Select one");
@@ -1208,7 +1213,7 @@ const Volunteer: NextPage = () => {
     setClinicsAttendedOption("Select here");
     setStreet("");
     setAddressStreetCode("");
-    setAddressStreetNumber("");
+    setAddressStreetNumber(0);
     setAddressSuburb("");
     setAddressPostalCode("");
     setAddressFreeForm("");
@@ -1243,7 +1248,7 @@ const Volunteer: NextPage = () => {
     setSurname("");
     setMobile("");
     setAddressStreetCode("");
-    setAddressStreetNumber("");
+    setAddressStreetNumber(0);
     setAddressSuburb("");
     setAddressPostalCode("");
     setAddressFreeForm("");
@@ -1401,7 +1406,7 @@ const Volunteer: NextPage = () => {
       setGreaterAreaList(greaterAreas ?? "");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
@@ -1492,7 +1497,7 @@ const Volunteer: NextPage = () => {
       setGreaterAreaList(greaterAreas ?? "");
       setStreet(userData.addressStreet ?? "");
       setAddressStreetCode(userData.addressStreetCode ?? "");
-      setAddressStreetNumber(userData.addressStreetNumber ?? "");
+      setAddressStreetNumber(userData.addressStreetNumber ?? 0);
       setAddressSuburb(userData.addressSuburb ?? "");
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "");
@@ -1537,7 +1542,7 @@ const Volunteer: NextPage = () => {
     setClinicsAttendedOption("Select here");
     setStreet("");
     setAddressStreetCode("");
-    setAddressStreetNumber("");
+    setAddressStreetNumber(0);
     setAddressSuburb("");
     setAddressPostalCode("");
     setPreferredCommunicationOption("Select one");
@@ -1610,9 +1615,9 @@ const Volunteer: NextPage = () => {
   //Street number
   const [streetNumberMessage, setStreetNumberMessage] = useState("");
   useEffect(() => {
-    if (addressStreetNumber.match(/^[0-9]+$/) == null && addressStreetNumber.length != 0) {
+    if (addressStreetNumber.toString().match(/^[0-9]+$/) == null && addressStreetNumber.toString().length != 0) {
       setStreetNumberMessage("A street number should contain numbers only");
-    } else if (addressStreetNumber.length > 4 && addressStreetNumber.length != 0) {
+    } else if (addressStreetNumber.toString().length > 4 && addressStreetNumber.toString().length != 0) {
       setStreetNumberMessage("A street number should be 4 digits or less");
     } else {
       setStreetNumberMessage("");
@@ -2528,8 +2533,8 @@ const Volunteer: NextPage = () => {
                           <input
                             className="m-2 rounded-lg border-2 border-slate-300 px-2 focus:border-black"
                             placeholder="Type here: e.g. 14"
-                            onChange={(e) => setAddressStreetNumber(e.target.value)}
-                            value={addressStreetNumber}
+                            onChange={(e) => handleAddressStreetNumber(e.target.value)}
+                            value={addressStreetNumber === 0 ? "" : addressStreetNumber.toString()}
                           />
                         </div>
                         {streetNumberMessage && <div className="text-sm text-red-500">{streetNumberMessage}</div>}
@@ -2851,17 +2856,19 @@ const Volunteer: NextPage = () => {
                     />
                   </div>
 
-                  <div className="flex items-center">
-                    <input
-                      id="checked-checkbox"
-                      type="checkbox"
-                      onChange={(e) => setSendVolunteerDetails(e.target.checked)}
-                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
-                    />
-                    <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
-                      Welcome volunteer via preferred communication channel
-                    </label>
-                  </div>
+                  {(email != "" || mobile != "") && (
+                    <div className="flex items-center">
+                      <input
+                        id="checked-checkbox"
+                        type="checkbox"
+                        onChange={(e) => setSendVolunteerDetails(e.target.checked)}
+                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                      />
+                      <label htmlFor="checked-checkbox" className="ms-2 text-sm font-medium text-gray-900">
+                        Welcome volunteer via preferred communication channel
+                      </label>
+                    </div>
+                  )}
                 </div>
               </div>
               <button
@@ -2962,7 +2969,7 @@ const Volunteer: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Street Number:</b> {addressStreetNumber}
+                        <b className="mr-3">Street Number:</b> {addressStreetNumber === 0 ? "" : addressStreetNumber}
                       </div>
 
                       <div className="mb-2 flex items-center">

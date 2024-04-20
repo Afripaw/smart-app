@@ -465,13 +465,18 @@ export const UserRouter = createTRPCRouter({
   deleteUser: publicProcedure
     .input(
       z.object({
-        userID: z.string(),
+        userID: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.greaterAreaOnUser.deleteMany({
+        where: {
+          userID: input.userID,
+        },
+      });
       return await ctx.db.user.delete({
         where: {
-          id: input.userID,
+          userID: input.userID,
         },
       });
     }),

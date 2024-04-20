@@ -163,7 +163,7 @@ const User: NextPage = () => {
   //const data = api.user.searchUsers.useQuery({ searchQuery: query });
   //delete specific row
   const deleteRow = api.user.deleteUser.useMutation();
-  const handleDeleteRow = async (id: string) => {
+  const handleDeleteRow = async (id: number) => {
     setIsDeleteModalOpen(false);
     await deleteRow.mutateAsync({ userID: id });
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
@@ -1133,7 +1133,7 @@ const User: NextPage = () => {
           ",\n" +
           "Your AfriPaw Smart App (https://afripaw.app) credentials are: " +
           "\n" +
-          "User ID: " +
+          "User ID: U" +
           newUser_?.userID +
           "\n" +
           "Password: " +
@@ -1572,8 +1572,8 @@ const User: NextPage = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteModalID, setDeleteModalID] = useState("");
   const [deleteModalName, setDeleteModalName] = useState("");
-  const [deleteUserID, setDeleteUserID] = useState("");
-  const handleDeleteModal = (id: string, userID: string, name: string) => {
+  const [deleteUserID, setDeleteUserID] = useState(0);
+  const handleDeleteModal = (id: number, userID: string, name: string) => {
     setDeleteUserID(id);
     setDeleteModalID(userID);
     setDeleteModalName(name);
@@ -1822,7 +1822,7 @@ const User: NextPage = () => {
                             </div> */}
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                    <Trash size={24} className="block" onClick={() => handleDeleteModal(user.id, String(user.userID), user.name ?? "")} />
+                                    <Trash size={24} className="block" onClick={() => handleDeleteModal(user.userID, String(user.userID), user.name ?? "")} />
                                     <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                                       Delete user
                                     </span>

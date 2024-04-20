@@ -648,7 +648,7 @@ const Treatment: NextPage = () => {
     setID(id);
 
     const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
-
+    console.log("UPDATING PAGE: ", treatment);
     if (treatment) {
       // Assuming userQuery.data contains the user object
       const userData = treatment;
@@ -667,8 +667,8 @@ const Treatment: NextPage = () => {
       setStartingDate(userData?.date ?? new Date());
       setComments(userData.comments ?? "");
 
-      if (userData.category === "Pet clinic, Infield" || userData.category === "Pet clinic (Infield)") {
-        console.log("!!!!Category is Pet clinic, Infield!!!!");
+      console.log("Type list options from DB___: ", userData.type);
+      if (userData.category === "Pet clinic, Infield") {
         //remove the Vaccinations (ad hoc) option
         const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
         setTypeListOptions(
@@ -677,6 +677,7 @@ const Treatment: NextPage = () => {
             state: userData.type.includes(type),
           })),
         );
+        console.log("We have a pet clinic infield!!");
       } else {
         setTypeListOptions(
           typeOptions.map((type: string) => ({
@@ -684,7 +685,10 @@ const Treatment: NextPage = () => {
             state: userData.type.includes(type),
           })),
         );
+        console.log("We have do not have a pet clinic infield!!");
       }
+
+      console.log("Type list options___: ", typeListOptions);
 
       // //Make sure thet area and street options have a value
       // if (userData.area === "") {
@@ -698,6 +702,23 @@ const Treatment: NextPage = () => {
     setIsCreate(false);
   };
 
+  //read in the data into the checkboxes of the type
+
+  //filter out all the types that have a state false in the typeListOptions
+  // const typeList = typeListOptions.filter((type) => type.state === true).map((type) => type.type);
+  useEffect(() => {
+    //console.log("!!!Type list__: ", typeList);
+    if (typeListOptions.filter((type) => type.state === true).length === typeList.length) {
+      // console.log("Uneven for types!!!!");
+      setTypeListOptions(
+        typeOptions.map((type: string) => ({
+          type: type,
+          state: typeList.includes(type),
+        })),
+      );
+    }
+  }, [typeList]);
+
   useEffect(() => {
     const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
     if (treatment) {
@@ -709,30 +730,33 @@ const Treatment: NextPage = () => {
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
 
-      if (userData.category === "Pet clinic, Infield" || userData.category === "Pet clinic (Infield)") {
-        //remove the Vaccinations (ad hoc) option
-        const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
-        setTypeListOptions(
-          newTypeOptions.map((type: string) => ({
-            type: type,
-            state: userData.type.includes(type),
-          })),
-        );
-      } else {
-        setTypeListOptions(
-          typeOptions.map((type: string) => ({
-            type: type,
-            state: userData.type.includes(type),
-          })),
-        );
-      }
+      // console.log("Type list options from DB___: ", userData.type);
+      // if (userData.category === "Pet clinic, Infield") {
+      //   //remove the Vaccinations (ad hoc) option
+      //   const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
+      //   setTypeListOptions(
+      //     newTypeOptions.map((type: string) => ({
+      //       type: type,
+      //       state: userData.type.includes(type),
+      //     })),
+      //   );
+      // } else {
+      //   setTypeListOptions(
+      //     typeOptions.map((type: string) => ({
+      //       type: type,
+      //       state: userData.type.includes(type),
+      //     })),
+      //   );
+      // }
+
+      // console.log("Type list options___: ", typeListOptions);
 
       // if (userData.area === "") {
       //   console.log("Area option is select one");
       //   setAreaOption("Select one");
       // }
     }
-  }, [isUpdate, isCreate]); // Effect runs when userQuery.data changes
+  }, [isUpdate]);
 
   const handleUpdateUser = async () => {
     setIsLoading(true);
@@ -795,8 +819,9 @@ const Treatment: NextPage = () => {
   const [getPreviousTreatments, setGetPreviousTreatments] = useState(false);
   const [numberOfFetches, setNumberOfFetches] = useState(0);
   useEffect(() => {
-    if (router.asPath.includes("petID") && (petID === 0 || (previousTreatments.length === 0 && numberOfFetches < 50))) {
+    if (router.asPath.includes("petID") && (petID === 0 || (previousTreatments.length === 0 && numberOfFetches < 1))) {
       setNumberOfFetches(numberOfFetches + 1);
+      console.log("Number of fetches: ", numberOfFetches);
       void prevTreatments.refetch();
       getPreviousTreatments ? setGetPreviousTreatments(false) : setGetPreviousTreatments(true);
     }
@@ -811,24 +836,37 @@ const Treatment: NextPage = () => {
       })) ?? [],
     );
 
-    if (categoryOption === "Pet clinic, Infield") {
-      //remove the Vaccinations (ad hoc) option
-      const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
-      setTypeListOptions(
-        newTypeOptions.map((type: string) => ({
-          type: type,
-          state: false,
-        })),
-      );
-    } else {
-      setTypeListOptions(
-        typeOptions.map((type: string) => ({
-          type: type,
-          state: false,
-        })),
-      );
-    }
+    // if (categoryOption === "Pet clinic, Infield") {
+    //   //remove the Vaccinations (ad hoc) option
+    //   const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
+    //   setTypeListOptions(
+    //     newTypeOptions.map((type: string) => ({
+    //       type: type,
+    //       state: false,
+    //     })),
+    //   );
+    // } else {
+    //   setTypeListOptions(
+    //     typeOptions.map((type: string) => ({
+    //       type: type,
+    //       state: false,
+    //     })),
+    //   );
+    // }
   }, [getPreviousTreatments, isCreate]);
+
+  //when the query came back retrieve the previous treatment data
+  useEffect(() => {
+    setPreviousTreatments(
+      prevTreatments.data?.map((treatment) => ({
+        treatmentID: treatment.treatmentID ?? 0,
+        type: treatment.type ?? "",
+        category: treatment.category ?? "",
+        date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+        comments: treatment.comments ?? "",
+      })) ?? [],
+    );
+  }, [prevTreatments.data]);
 
   //-------------------------------NEW USER-----------------------------------------
 

@@ -235,6 +235,37 @@ export const petOwnerRouter = createTRPCRouter({
               { comments: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
+        } else if (term.match(/^\d+$/) !== null) {
+          return {
+            OR: [
+              // { userID: { equals: Number(term) } },
+              //{ ownerID: { equals: Number(term.substring(1)) } },
+              // {
+              //   pets: {
+              //     some: {
+              //       petID: { equals: Number(term.substring(1)) },
+              //     },
+              //   },
+              // },
+              { southAfricanID: { contains: term } },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              { addressGreaterArea: { greaterArea: { contains: term } } },
+              { addressArea: { area: { contains: term } } },
+              { addressStreet: { street: { contains: term } } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { equals: Number(term) } },
+              // { addressSuburb: { contains: term } },
+              // { addressPostalCode: { contains: term } },
+              { pets: { some: { petName: { contains: term } } } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
         } else {
           return {
             OR: [
@@ -780,6 +811,37 @@ export const petOwnerRouter = createTRPCRouter({
               // { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               //{ addressStreetNumber: { equals: Number(term) } },
+              // { addressSuburb: { contains: term } },
+              // { addressPostalCode: { contains: term } },
+              { pets: { some: { petName: { contains: term } } } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else if (term.match(/^\d+$/) !== null) {
+          return {
+            OR: [
+              // { userID: { equals: Number(term) } },
+              //{ ownerID: { equals: Number(term.substring(1)) } },
+              // {
+              //   pets: {
+              //     some: {
+              //       petID: { equals: Number(term.substring(1)) },
+              //     },
+              //   },
+              // },
+              { southAfricanID: { contains: term } },
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              //{ addressGreaterArea: { greaterArea: { contains: term } } },
+              //{ addressArea: { area: { contains: term } } },
+              //{ addressStreet: { street: { contains: term } } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { equals: Number(term) } },
               // { addressSuburb: { contains: term } },
               // { addressPostalCode: { contains: term } },
               { pets: { some: { petName: { contains: term } } } },

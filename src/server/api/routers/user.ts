@@ -345,6 +345,28 @@ export const UserRouter = createTRPCRouter({
               { comments: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
+          //checks for a number
+        } else if (term.match(/^\d+$/) !== null) {
+          return {
+            OR: [
+              { name: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { role: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              { southAfricanID: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { equals: Number(term) } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
         } else {
           return {
             OR: [
@@ -552,6 +574,27 @@ export const UserRouter = createTRPCRouter({
               // { addressStreet: { contains: term } },
               { addressStreetCode: { contains: term } },
               //{ addressStreetNumber: { equals: Number(term) } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else if (term.match(/^\d+$/) !== null) {
+          return {
+            OR: [
+              { name: { contains: term } },
+              { surname: { contains: term } },
+              { email: { contains: term } },
+              { role: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              { southAfricanID: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { addressStreet: { contains: term } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { equals: Number(term) } },
               { addressSuburb: { contains: term } },
               { addressPostalCode: { contains: term } },
               { addressFreeForm: { contains: term } },

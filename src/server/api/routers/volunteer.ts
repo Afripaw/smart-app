@@ -301,6 +301,27 @@ export const volunteerRouter = createTRPCRouter({
               { comments: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
+        } else if (term.match(/^\d+$/) !== null) {
+          return {
+            OR: [
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { southAfricanID: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { equals: Number(term) } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { collaboratorOrg: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+              //  dateCondition,
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
         } else {
           return {
             OR: [
@@ -698,6 +719,27 @@ export const volunteerRouter = createTRPCRouter({
               { collaboratorOrg: { contains: term } },
               { preferredCommunication: { contains: term } },
               { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
+        } else if (term.match(/^\d+$/) !== null) {
+          return {
+            OR: [
+              { firstName: { contains: term } },
+              { surname: { contains: term } },
+              { southAfricanID: { contains: term } },
+              { email: { contains: term } },
+              { status: { contains: term } },
+              { mobile: { contains: term } },
+              //{ addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
+              { addressStreetCode: { contains: term } },
+              { addressStreetNumber: { equals: Number(term) } },
+              { addressSuburb: { contains: term } },
+              { addressPostalCode: { contains: term } },
+              { addressFreeForm: { contains: term } },
+              { collaboratorOrg: { contains: term } },
+              { preferredCommunication: { contains: term } },
+              { comments: { contains: term } },
+              //  dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {

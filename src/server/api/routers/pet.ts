@@ -288,6 +288,35 @@ export const petRouter = createTRPCRouter({
               { comments: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
+        } else if (term.match(/^\d+$/) !== null) {
+          return {
+            OR: [
+              { petName: { contains: term } },
+              { species: { contains: term } },
+              { sex: { contains: term } },
+              { age: { contains: term } },
+              { breed: { hasSome: [term] } },
+              { colour: { hasSome: [term] } },
+              { size: { contains: term } },
+              { markings: { contains: term } },
+              { status: { contains: term } },
+              { owner: { firstName: { contains: term } } },
+              { owner: { surname: { contains: term } } },
+              { owner: { addressGreaterArea: { greaterArea: { contains: term } } } },
+              { owner: { addressArea: { area: { contains: term } } } },
+              { owner: { addressStreet: { street: { contains: term } } } },
+              { owner: { addressStreetNumber: { equals: Number(term) } } },
+              // { sterilisedStatus: { contains: term } },
+              // { sterilisedRequested: { contains: term } },
+              { sterilisedRequestSigned: { contains: term } },
+              { petTreatments: { some: { type: { hasSome: [term] } } } },
+              // { vaccinatedStatus: { contains: term } },
+              //{ treatments: { contains: term } },
+              { membership: { contains: term } },
+              { cardStatus: { contains: term } },
+              { comments: { contains: term } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+          };
         } else {
           return {
             OR: [

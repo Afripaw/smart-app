@@ -34,7 +34,7 @@ import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 
 const User: NextPage = () => {
-  //useSession({ required: true });
+  useSession({ required: true });
 
   //-------------------------------GREATER AREA-----------------------------------------
   type GreaterArea = {
@@ -997,7 +997,8 @@ const User: NextPage = () => {
         "Your AfriPaw Smart App (https://afripaw.app) credentials are: " +
         "\n" +
         "User ID: " +
-        "U"+user?.userID +
+        "U" +
+        user?.userID +
         "\n" +
         "Password: " +
         password +

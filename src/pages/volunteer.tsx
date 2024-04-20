@@ -36,7 +36,7 @@ import { set } from "date-fns";
 import { greaterArea } from "@prisma/client";
 
 const Volunteer: NextPage = () => {
-  //useSession({ required: true });
+  useSession({ required: true });
 
   const newVolunteer = api.volunteer.create.useMutation();
   const updateVolunteer = api.volunteer.update.useMutation();

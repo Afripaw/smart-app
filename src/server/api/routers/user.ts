@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
+import { Prisma } from "@prisma/client";
+
 export const UserRouter = createTRPCRouter({
   create: publicProcedure
     .input(
@@ -327,65 +329,65 @@ export const UserRouter = createTRPCRouter({
           return {
             OR: [
               { userID: { equals: Number(term.substring(1)) } },
-              { name: { contains: term } },
-              { surname: { contains: term } },
-              { email: { contains: term } },
-              { role: { contains: term } },
-              { status: { contains: term } },
+              { name: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { surname: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { email: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { role: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { mobile: { contains: term } },
               { southAfricanID: { contains: term } },
-              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
-              { addressStreet: { contains: term } },
-              { addressStreetCode: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { addressStreet: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { addressStreetCode: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //{ addressStreetNumber: { equals: Number(term) } },
-              { addressSuburb: { contains: term } },
+              { addressSuburb: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { addressPostalCode: { contains: term } },
-              { addressFreeForm: { contains: term } },
-              { preferredCommunication: { contains: term } },
-              { comments: { contains: term } },
+              { addressFreeForm: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { preferredCommunication: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
           //checks for a number
         } else if (term.match(/^\d+$/) !== null) {
           return {
             OR: [
-              { name: { contains: term } },
-              { surname: { contains: term } },
-              { email: { contains: term } },
-              { role: { contains: term } },
-              { status: { contains: term } },
+              { name: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { surname: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { email: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { role: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { mobile: { contains: term } },
               { southAfricanID: { contains: term } },
-              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
-              { addressStreet: { contains: term } },
-              { addressStreetCode: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { addressStreet: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { addressStreetCode: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { addressStreetNumber: { equals: Number(term) } },
-              { addressSuburb: { contains: term } },
+              { addressSuburb: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { addressPostalCode: { contains: term } },
-              { addressFreeForm: { contains: term } },
-              { preferredCommunication: { contains: term } },
-              { comments: { contains: term } },
+              { addressFreeForm: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { preferredCommunication: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
             OR: [
-              { name: { contains: term } },
-              { surname: { contains: term } },
-              { email: { contains: term } },
-              { role: { contains: term } },
-              { status: { contains: term } },
+              { name: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { surname: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { email: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { role: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { mobile: { contains: term } },
               { southAfricanID: { contains: term } },
-              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
-              { addressStreet: { contains: term } },
-              { addressStreetCode: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { addressStreet: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { addressStreetCode: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //{ addressStreetNumber: { equals: Number(term) } },
-              { addressSuburb: { contains: term } },
+              { addressSuburb: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { addressPostalCode: { contains: term } },
-              { addressFreeForm: { contains: term } },
-              { preferredCommunication: { contains: term } },
-              { comments: { contains: term } },
+              { addressFreeForm: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { preferredCommunication: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
@@ -401,6 +403,12 @@ export const UserRouter = createTRPCRouter({
 
       const user = await ctx.db.user.findMany({
         where: { AND: searchConditions },
+        // where: {
+        //   name: {
+        //     contains: input.searchQuery,
+        //     mode: "insensitive",
+        //   },
+        // },
         orderBy: order,
         take: input.limit + 1,
         cursor: input.cursor ? { id: input.cursor } : undefined,
@@ -565,70 +573,70 @@ export const UserRouter = createTRPCRouter({
             OR: [
               // { userID: { equals: Number(term) } },
               { userID: { equals: Number(term.substring(1)) } },
-              { name: { contains: term } },
-              { surname: { contains: term } },
-              { email: { contains: term } },
-              { role: { contains: term } },
-              { status: { contains: term } },
+              { name: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { surname: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { email: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { role: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { mobile: { contains: term } },
               { southAfricanID: { contains: term } },
-              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
-              { addressStreet: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { addressStreet: { contains: term, mode: Prisma.QueryMode.insensitive } },
               // { addressGreaterArea: { contains: term } },
               // { addressArea: { contains: term } },
               // { addressStreet: { contains: term } },
-              { addressStreetCode: { contains: term } },
+              { addressStreetCode: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //{ addressStreetNumber: { equals: Number(term) } },
-              { addressSuburb: { contains: term } },
+              { addressSuburb: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { addressPostalCode: { contains: term } },
-              { addressFreeForm: { contains: term } },
-              { preferredCommunication: { contains: term } },
-              { comments: { contains: term } },
+              { addressFreeForm: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { preferredCommunication: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else if (term.match(/^\d+$/) !== null) {
           return {
             OR: [
-              { name: { contains: term } },
-              { surname: { contains: term } },
-              { email: { contains: term } },
-              { role: { contains: term } },
-              { status: { contains: term } },
+              { name: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { surname: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { email: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { role: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { mobile: { contains: term } },
               { southAfricanID: { contains: term } },
-              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
-              { addressStreet: { contains: term } },
-              { addressStreetCode: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { addressStreet: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { addressStreetCode: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { addressStreetNumber: { equals: Number(term) } },
-              { addressSuburb: { contains: term } },
+              { addressSuburb: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { addressPostalCode: { contains: term } },
-              { addressFreeForm: { contains: term } },
-              { preferredCommunication: { contains: term } },
-              { comments: { contains: term } },
+              { addressFreeForm: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { preferredCommunication: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
             OR: [
-              { name: { contains: term } },
-              { surname: { contains: term } },
-              { email: { contains: term } },
-              { role: { contains: term } },
-              { status: { contains: term } },
+              { name: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { surname: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { email: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { role: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { mobile: { contains: term } },
               { southAfricanID: { contains: term } },
-              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
-              { addressStreet: { contains: term } },
+              { addressGreaterArea: { some: { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { addressStreet: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //  { addressGreaterArea: { contains: term } },
               //  { addressArea: { contains: term } },
               //  { addressStreet: { contains: term } },
-              { addressStreetCode: { contains: term } },
+              { addressStreetCode: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //{ addressStreetNumber: { equals: Number(term) } },
-              { addressSuburb: { contains: term } },
+              { addressSuburb: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { addressPostalCode: { contains: term } },
-              { addressFreeForm: { contains: term } },
-              { preferredCommunication: { contains: term } },
-              { comments: { contains: term } },
+              { addressFreeForm: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { preferredCommunication: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }

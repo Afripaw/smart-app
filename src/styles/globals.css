@@ -14,3 +14,9 @@
       align-items: flex-start !important;
     } */
 }
+
+@media (min-width: 1920px) {
+  .3xl\:top-20 {
+    top: 20%;
+  }
+}

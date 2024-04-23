@@ -483,7 +483,7 @@ const Pet: NextPage = () => {
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  }, [fetchNextPage, hasNextPage, observerTarget, isUpdate]);
 
   //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
   useEffect(() => {
@@ -593,13 +593,15 @@ const Pet: NextPage = () => {
   //     setOwnerID(Number(user?.ownerID ?? 0));
   //   }
   // }, [router.asPath]);
-  if (router.asPath.includes("petID")) {
-    useEffect(() => {
-      if (!isCreate) {
-        setOwnerID(Number(user?.ownerID ?? 0));
-      }
-    }, [router?.asPath]);
-  }
+
+  //Code I commented out on 23/4/2024
+  // if (router.asPath.includes("petID")) {
+  //   useEffect(() => {
+  //     if (!isCreate) {
+  //       setOwnerID(Number(user?.ownerID ?? 0));
+  //     }
+  //   }, [router?.asPath]);
+  // }
 
   //Code I commented out on 19/4/2024
   //  const owner = api.petOwner.getOwnerByID.useQuery({ ownerID: ownerID });
@@ -1945,10 +1947,10 @@ const Pet: NextPage = () => {
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
       } else {
         const updatedClinicList = clinicList.filter((clinic) => clinic.id !== id);
-        setClinicList(updatedClinicList);
+        // setClinicList(updatedClinicList);
 
         //order the greaterAreaList from smallest to largest id
-        setClinicList(clinicList.sort((a, b) => a.id - b.id));
+        setClinicList(updatedClinicList.sort((a, b) => a.id - b.id));
         setClinicListOptions(clinicListOptions.map((clinic) => (clinic.id === id ? { ...clinic, state: false } : clinic)));
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
@@ -2432,7 +2434,7 @@ const Pet: NextPage = () => {
       //setClinicIDList(clinicIDs ?? []);
 
       console.log("Owner ID of the pet line 2420:   ", userData?.owner?.ownerID);
-      setOwnerID(userData?.owner?.ownerID ?? 0);
+      //setOwnerID(userData?.owner?.ownerID ?? 0);
       setFirstName(userData?.owner?.firstName ?? "");
       setSurname(userData?.owner?.surname ?? "");
       setGreaterArea(userData?.owner?.addressGreaterArea.greaterArea ?? "");
@@ -2956,8 +2958,10 @@ const Pet: NextPage = () => {
 
       if (userData?.sterilisedStatus?.getFullYear() !== 1970) {
         setSterilisationStatusOption("Yes");
+        console.log("Sterilisation status: Yes, ", userData?.sterilisedStatus);
       } else {
         setSterilisationStatusOption("No");
+        console.log("Sterilisation status: No, ", userData?.sterilisedStatus);
       }
 
       if (userData?.sterilisedRequested?.getFullYear() !== 1970) {
@@ -2986,7 +2990,7 @@ const Pet: NextPage = () => {
       console.log("Treatment list: ", treatmentList);
 
       // setClinicIDList(clinicIDs ?? []);
-
+      console.log("Owner ID!!!! line 2991:   ", userData?.owner?.ownerID);
       setOwnerID(userData?.owner?.ownerID ?? 0);
       setFirstName(userData?.owner?.firstName ?? "");
       setSurname(userData?.owner?.surname ?? "");
@@ -3070,18 +3074,12 @@ const Pet: NextPage = () => {
       getPet ? setGetPet(false) : setGetPet(true);
     }
 
-    if (ownerID === 0 && rerenders < 800 && router.asPath.includes("petID")) {
-      setRerenders(rerenders + 1);
-      setOwnerID(pet?.data?.owner_data?.ownerID ?? 0);
-      getPet ? setGetPet(false) : setGetPet(true);
-    }
-
-    // if (petName === "" || petName === undefined) {
-    //   console.log("Pet name: ", petName);
-    //   console.log("Pet data: ", pet.data);
+    //Uncomment if doing brute force method
+    // if (ownerID === 0 && rerenders < 800 && router.asPath.includes("petID")) {
+    //   setRerenders(rerenders + 1);
+    //   setOwnerID(pet?.data?.owner_data?.ownerID ?? 0);
     //   getPet ? setGetPet(false) : setGetPet(true);
     // }
-    // void pet.refetch();
 
     //alternate method to get pet data
 
@@ -3335,8 +3333,8 @@ const Pet: NextPage = () => {
       // setClinicIDList(clinicIDs ?? []);
       const ownerData = userData?.owner_data;
 
-      console.log("Owner data line 3319: ", ownerData);
-      setOwnerID(ownerData?.ownerID ?? 0);
+      console.log("Owner data line 3340: ", ownerData);
+      // setOwnerID(ownerData?.ownerID ?? 0);
       setFirstName(ownerData?.firstName ?? "");
       setSurname(ownerData?.surname ?? "");
       setGreaterArea(ownerData?.addressGreaterArea.greaterArea ?? "");
@@ -4121,7 +4119,7 @@ const Pet: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Pet Data" : "Add New Pet"}</b>
                 <div className="flex justify-center">
@@ -4887,7 +4885,7 @@ const Pet: NextPage = () => {
                               handleTreatmentModal(treatment?.treatmentID, treatment?.category, treatment?.type, treatment?.date, treatment?.comments)
                             }
                           >
-                            {treatment.date.toString() + " - " + (treatment?.type[0] ?? "") + " (" + (treatment?.category ?? "") + ")"}
+                            {treatment.date.toString() + " " + treatment?.type.join(", ") + " (" + (treatment?.category ?? "") + ")"}
                           </button>
                         ))}
                       </div>
@@ -5357,7 +5355,7 @@ const Pet: NextPage = () => {
               </div>
             ) : (
               <>
-                <div className="sticky top-[11%] z-50 flex justify-center">
+                <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
                   <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                     <div className=" text-2xl">Pet Profile</div>
                     <div className="flex justify-center">
@@ -5415,7 +5413,7 @@ const Pet: NextPage = () => {
                         {breedList
                           // .slice(1, breedList.length)
                           .map((breed) => breed)
-                          .join("; ")}
+                          .join(", ")}
                       </div>
 
                       <div className="mb-2 flex items-center">
@@ -5423,7 +5421,7 @@ const Pet: NextPage = () => {
                         {colourList
                           // .slice(1, colourList.length)
                           .map((colour) => colour)
-                          .join("; ")}
+                          .join(", ")}
                       </div>
 
                       {speciesOption === "Dog" && (
@@ -5459,35 +5457,53 @@ const Pet: NextPage = () => {
                             {sterilisationStatusDate.getFullYear().toString()}
                           </>
                         ) : (
-                          "None"
+                          sterilisationStatusOption
                         )}
                       </div>
 
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Sterilisation Requested:</b>{" "}
-                        {sterilisationRequestedOption === "Yes" ? (
-                          <>
-                            {sterilisationRequestedDate.getDate().toString()}/{((sterilisationRequestedDate.getMonth() ?? 0) + 1).toString()}/
-                            {sterilisationRequestedDate.getFullYear().toString()}
-                          </>
-                        ) : (
-                          "Not Applicable"
-                        )}
-                      </div>
+                      {sterilisationStatusOption === "No" ? (
+                        <>
+                          <div className="mb-2 flex items-center">
+                            <b className="mr-3">Sterilisation Requested:</b>{" "}
+                            {sterilisationRequestedOption === "Yes" ? (
+                              <>
+                                {sterilisationRequestedDate.getDate().toString()}/{((sterilisationRequestedDate.getMonth() ?? 0) + 1).toString()}/
+                                {sterilisationRequestedDate.getFullYear().toString()}
+                              </>
+                            ) : (
+                              "Not Applicable"
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <></>
+                      )}
 
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Sterilisation Request Signed At:</b>{" "}
-                        {sterilisationStatusOption != "Yes" ? (
-                          <>{sterilisationRequestSignedOption === "Select one" ? user?.sterilisedRequestSigned : sterilisationRequestSignedOption}</>
-                        ) : (
-                          "Not Applicable"
-                        )}
-                      </div>
+                      {sterilisationRequestedOption === "Yes" ? (
+                        <div className="mb-2 flex items-center">
+                          <b className="mr-3">Sterilisation Request Signed At:</b>{" "}
+                          {sterilisationStatusOption != "Yes" ? (
+                            <>{sterilisationRequestSignedOption === "Select one" ? user?.sterilisedRequestSigned : sterilisationRequestSignedOption}</>
+                          ) : (
+                            "Not Applicable"
+                          )}
+                        </div>
+                      ) : (
+                        <></>
+                      )}
 
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Sterilisation Outcome:</b>{" "}
-                        {sterilisationOutcomeOption === "Select one" ? user?.sterilisationOutcome : sterilisationOutcomeOption}
-                      </div>
+                      {sterilisationRequestedOption === "Yes" ? (
+                        <div className="mb-2 flex items-center">
+                          <b className="mr-3">Sterilisation Outcome:</b>{" "}
+                          {sterilisationStatusOption != "Yes" ? (
+                            <>{sterilisationOutcomeOption === "Select one" ? user?.sterilisationOutcome : sterilisationOutcomeOption}</>
+                          ) : (
+                            "Not Applicable"
+                          )}
+                        </div>
+                      ) : (
+                        <></>
+                      )}
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Vaccination Shot 1:</b>
@@ -5535,7 +5551,7 @@ const Pet: NextPage = () => {
                               onClick={() => handleGoToTreatmentProfile(treatment?.treatmentID)}
                             >
                               {treatment?.type[0] != undefined
-                                ? treatment?.date.toString() + " - " + (treatment?.type[0] ?? "") + " - " + "(" + (treatment?.category ?? "") + ")"
+                                ? treatment?.date.toString() + " " + treatment?.type.join(", ") + " " + "(" + (treatment?.category ?? "") + ")"
                                 : treatment?.date.toString() + " (" + (treatment?.category ?? "") + ")"}
                             </button>
                           ))}

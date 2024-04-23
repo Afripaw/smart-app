@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { areaStreetMapping } from "~/components/GeoLocation/areaStreetMapping";
 
+import { Prisma } from "@prisma/client";
+
 import {
   createTRPCRouter,
   //protectedProcedure,
@@ -424,9 +426,9 @@ export const geographicRouter = createTRPCRouter({
       const searchConditions = terms.map((term) => {
         return {
           OR: [
-            { greaterArea: { contains: term } },
-            { area: { some: { area: { contains: term } } } },
-            { area: { some: { street: { some: { street: { contains: term } } } } } },
+            { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } },
+            { area: { some: { area: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+            { area: { some: { street: { some: { street: { contains: term, mode: Prisma.QueryMode.insensitive } } } } } },
             //{ area: { some: { area: { some: { street: { contains: term } } } } } },
             // { area: { contains: term } },
             // { street: { contains: term } },
@@ -561,4 +563,138 @@ export const geographicRouter = createTRPCRouter({
 
     return identification;
   }),
+
+  //Download
+  download: publicProcedure
+    .input(
+      z.object({
+        searchQuery: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Parse the search query
+      const terms = input.searchQuery.match(/\+\w+/g)?.map((term) => term.substring(1)) ?? [];
+      // Construct a complex search condition
+      const searchConditions = terms.map((term) => {
+        return {
+          OR: [
+            { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } },
+            { area: { some: { area: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+            { area: { some: { street: { some: { street: { contains: term, mode: Prisma.QueryMode.insensitive } } } } } },
+          ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
+        };
+      });
+
+      //get all the greaterAreas data specifically
+      const greaterArea_ = await ctx.db.greaterArea.findMany({
+        where: {
+          AND: searchConditions,
+        },
+        orderBy: {
+          greaterAreaID: "asc",
+        },
+      });
+
+      const all_data_for_areas_streets = await ctx.db.greaterArea.findMany({
+        where: {
+          AND: searchConditions,
+        },
+        include: {
+          area: {
+            include: {
+              street: true,
+            },
+          },
+        },
+        orderBy: {
+          greaterAreaID: "asc",
+        },
+      });
+
+      //retrieve all the areas data
+      const area_ = all_data_for_areas_streets.map((greaterArea) => {
+        greaterArea.area.map((area) => {
+          return {
+            areaID: area.areaID,
+            area: area.area,
+            greaterAreaID: area.greaterAreaID,
+            createdAt: area.createdAt,
+            updatedAt: area.updatedAt,
+          };
+        });
+      });
+
+      //retrieve all the streets data
+      const street_ = all_data_for_areas_streets.map((greaterArea) => {
+        greaterArea.area.map((area) => {
+          area.street.map((street) => {
+            return {
+              streetID: street.streetID,
+              street: street.street,
+              areaID: street.areaID,
+              createdAt: street.createdAt,
+              updatedAt: street.updatedAt,
+            };
+          });
+        });
+      });
+
+      // const greaterArea_ = await ctx.db.greaterArea.findMany({
+      //   where: {
+      //     AND: searchConditions,
+      //   },
+      //   // include: {
+      //   //   area: {
+      //   //     include: {
+      //   //       street: true,
+      //   //     },
+      //   //   },
+      //   // },
+      //   orderBy: {
+      //     greaterAreaID: "asc",
+      //   },
+      // });
+
+      // const area_ = await ctx.db.area.findMany({
+      //   where: {
+      //     greaterAreaID: {
+      //       in: greaterArea_.map((greaterArea) => greaterArea.greaterAreaID),
+      //     },
+      //   },
+      //   orderBy: {
+      //     areaID: "asc",
+      //   },
+      //   select: {
+      //     areaID: true,
+      //     area: true,
+      //     greaterAreaID: true,
+      //     createdAt: true,
+      //     updatedAt: true,
+      //   },
+      // });
+
+      // const street_ = await ctx.db.street.findMany({
+      //   where: {
+      //     areaID: {
+      //       in: area_.map((area) => area.areaID),
+      //     },
+      //   },
+      //   orderBy: {
+      //     streetID: "asc",
+      //   },
+      //   select: {
+      //     streetID: true,
+      //     street: true,
+      //     areaID: true,
+      //     createdAt: true,
+      //     updatedAt: true,
+      //   },
+      // });
+
+      return {
+        greaterAreas: greaterArea_,
+        areas: area_,
+        streets: street_,
+      };
+    }),
 });

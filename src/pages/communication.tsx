@@ -1160,8 +1160,8 @@ const Communication: NextPage = () => {
                                       .sort((a, b) => a.greaterArea.greaterAreaID - b.greaterArea.greaterAreaID)
                                       .slice(0, 7)
                                       .map((greaterArea) => greaterArea.greaterArea.greaterArea)
-                                      .join("; ") + "..."
-                                  : user.greaterArea.map((greaterArea) => greaterArea.greaterArea.greaterArea).join("; ")}
+                                      .join(", ") + "..."
+                                  : user.greaterArea.map((greaterArea) => greaterArea.greaterArea.greaterArea).join(", ")}
                               </td>
                               <td className="max-w-[15rem] border px-2 py-1">
                                 {user.area.length > 7
@@ -1169,8 +1169,8 @@ const Communication: NextPage = () => {
                                       .sort((a, b) => a.area.areaID - b.area.areaID)
                                       .slice(0, 7)
                                       .map((area) => area.area.area)
-                                      .join("; ") + "..."
-                                  : user.area.map((area) => area.area.area).join("; ")}
+                                      .join(", ") + "..."
+                                  : user.area.map((area) => area.area.area).join(", ")}
                               </td>
                               <td className="border px-2 py-1">{user.success}</td>
                               <td className=" border px-2 py-1">
@@ -1246,7 +1246,7 @@ const Communication: NextPage = () => {
         )}
         {isCreate && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{"Create New Message"}</b>
                 <div className="flex justify-center">
@@ -1605,7 +1605,7 @@ const Communication: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Message Profile</div>
                 <div className="flex justify-center">
@@ -1647,7 +1647,7 @@ const Communication: NextPage = () => {
                   </div>
 
                   <div className="mb-2 flex items-center">
-                    <b className="mr-3">Recipient(s):</b> {recipients.map((recipient) => recipient).join("; ")}
+                    <b className="mr-3">Recipient(s):</b> {recipients.map((recipient) => recipient).join(", ")}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -1655,7 +1655,7 @@ const Communication: NextPage = () => {
                     {greaterAreaList
                       .sort((a, b) => a.id - b.id)
                       .map((greaterArea) => greaterArea.name)
-                      .join("; ")}
+                      .join(", ")}
                   </div>
 
                   <div className="mb-2 flex items-center">
@@ -1663,7 +1663,7 @@ const Communication: NextPage = () => {
                     {areaList
                       .sort((a, b) => a.id - b.id)
                       .map((area) => area.name)
-                      .join("; ")}
+                      .join(", ")}
                   </div>
 
                   <div className="mb-2 flex items-center">

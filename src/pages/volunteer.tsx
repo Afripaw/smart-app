@@ -370,7 +370,7 @@ const Volunteer: NextPage = () => {
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  }, [fetchNextPage, hasNextPage, observerTarget, isUpdate]);
 
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
@@ -501,10 +501,10 @@ const Volunteer: NextPage = () => {
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
       } else {
         const updatedGreaterAreaList = greaterAreaList.filter((area) => area.id !== id);
-        setGreaterAreaList(updatedGreaterAreaList);
+        //setGreaterAreaList(updatedGreaterAreaList);
 
         //order the greaterAreaList from smallest to largest id
-        setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        setGreaterAreaList(updatedGreaterAreaList.sort((a, b) => a.id - b.id));
         setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: false } : area)));
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
@@ -845,14 +845,20 @@ const Volunteer: NextPage = () => {
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
       } else {
         const updatedClinicList = clinicList.filter((clinic) => clinic.id !== id);
-        setClinicList(updatedClinicList);
+        console.log(
+          "Updated Clinic List: ",
+          clinicList.filter((clinic) => clinic.id !== id),
+        );
+        // setClinicList(updatedClinicList);
 
         //order the greaterAreaList from smallest to largest id
-        setClinicList(clinicList.sort((a, b) => a.id - b.id));
+        setClinicList(updatedClinicList.sort((a, b) => a.id - b.id));
         setClinicListOptions(clinicListOptions.map((clinic) => (clinic.id === id ? { ...clinic, state: false } : clinic)));
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
+        console.log("Helloooo Clinic List___: ", clinicList);
       }
+      console.log("Clinic List___: ", clinicList);
     }
   };
 
@@ -2160,7 +2166,7 @@ const Volunteer: NextPage = () => {
                                 {user?.greaterAreas
                                   ?.sort((a, b) => a.greaterAreaID - b.greaterAreaID)
                                   .map((greaterArea) => greaterArea.greaterArea.greaterArea)
-                                  .join("; ") ?? ""}
+                                  .join(", ") ?? ""}
                               </td>
                               <td className="border px-2 py-1">{user.status}</td>
                               <td className="border px-2 py-1">
@@ -2291,7 +2297,7 @@ const Volunteer: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Volunteer Data" : "Create New Volunteer"}</b>
                 <div className="flex justify-center">
@@ -2890,7 +2896,7 @@ const Volunteer: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Volunteer Profile</div>
                 <div className="flex justify-center">
@@ -2956,7 +2962,7 @@ const Volunteer: NextPage = () => {
                     {greaterAreaList
                       .sort((a, b) => a.id - b.id)
                       .map((greaterArea) => greaterArea.area)
-                      .join("; ")}
+                      .join(", ")}
                   </div>
                   <div className="flex items-start divide-x-2 divide-gray-300">
                     <div className="flex w-96 flex-col pr-2">
@@ -2999,7 +3005,7 @@ const Volunteer: NextPage = () => {
                     {roleList
                       .sort((a, b) => a.localeCompare(b))
                       .map((role) => role)
-                      .join("; ")}
+                      .join(", ")}
                   </div>
 
                   <div className="mb-2 flex items-center">

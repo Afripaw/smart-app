@@ -250,7 +250,7 @@ const Clinic: NextPage = () => {
         console.log("Next Cursor: " + lastPage.nextCursor);
         return lastPage.nextCursor;
       },
-      enabled: false,
+      enabled: true,
     },
   );
 
@@ -275,7 +275,7 @@ const Clinic: NextPage = () => {
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  }, [fetchNextPage, hasNextPage, observerTarget, isUpdate]);
 
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
@@ -325,7 +325,7 @@ const Clinic: NextPage = () => {
 
   const [areaID, setAreaID] = useState(0);
   const [isAreaOpen, setIsAreaOpen] = useState(false);
-  const [areaOption, setAreaOption] = useState<Area>({ area: "Select one", id: 0 });
+  //const [areaOption, setAreaOption] = useState<Area>({ area: "Select one", id: 0 });
   const areaRef = useRef<HTMLDivElement>(null);
   const btnAreaRef = useRef<HTMLButtonElement>(null);
 
@@ -372,24 +372,24 @@ const Clinic: NextPage = () => {
   };
 
   //SetStateAction<string>
-  const handleAreaOption = (option: string, id: number) => {
-    const area: Area = { area: String(option), id: id };
-    setAreaOption(area);
-    setIsAreaOpen(false);
+  // const handleAreaOption = (option: string, id: number) => {
+  //   const area: Area = { area: String(option), id: id };
+  //   setAreaOption(area);
+  //   setIsAreaOpen(false);
 
-    //Makes the options one word for the key of the areaStreetMapping
-    // if (option === "Coniston Park") option = "ConistonPark";
-    // if (option === "Grassy Park") option = "GrassyPark";
-    // if (option === "Lavendar Hill") option = "LavendarHill";
-    // if (option === "Costa da Gamma") option = "CostaDaGamma";
-    // if (option === "Marina Da Gamma") option = "MarinaDaGamma";
-    // if (option === "Montagu V") option = "MontaguV";
-    // if (option === "Overcome Heights") option = "OvercomeHeights";
-    // if (option === "Pelican Park") option = "PelicanPark";
-    // if (option === "Seekoei vlei") option = "Seekoeivlei";
-    // if (option === "St Ruth") option = "StRuth";
-    // setStreetOptions(areaStreetMapping[option] ?? []);
-  };
+  //   //Makes the options one word for the key of the areaStreetMapping
+  //   // if (option === "Coniston Park") option = "ConistonPark";
+  //   // if (option === "Grassy Park") option = "GrassyPark";
+  //   // if (option === "Lavendar Hill") option = "LavendarHill";
+  //   // if (option === "Costa da Gamma") option = "CostaDaGamma";
+  //   // if (option === "Marina Da Gamma") option = "MarinaDaGamma";
+  //   // if (option === "Montagu V") option = "MontaguV";
+  //   // if (option === "Overcome Heights") option = "OvercomeHeights";
+  //   // if (option === "Pelican Park") option = "PelicanPark";
+  //   // if (option === "Seekoei vlei") option = "Seekoeivlei";
+  //   // if (option === "St Ruth") option = "StRuth";
+  //   // setStreetOptions(areaStreetMapping[option] ?? []);
+  // };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -404,7 +404,7 @@ const Clinic: NextPage = () => {
     };
   }, []);
 
-  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
+  //const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
 
   //CONDITIONS
   const handleToggleConditions = () => {
@@ -500,8 +500,8 @@ const Clinic: NextPage = () => {
   //-------------------------------UPDATE USER-----------------------------------------
 
   //GEOGRAPHIC LOCATION
-  const getGreaterAreaByID = api.geographic.getGreaterAreaByID.useQuery({ greaterAreaID: greaterAreaID });
-  const getAreaByID = api.geographic.getAreaByID.useQuery({ areaID: areaID });
+  // const getGreaterAreaByID = api.geographic.getGreaterAreaByID.useQuery({ greaterAreaID: greaterAreaID });
+  // const getAreaByID = api.geographic.getAreaByID.useQuery({ areaID: areaID });
   //Update the user's details in fields
   const handleUpdateUserProfile = async (id: number) => {
     setID(id);
@@ -510,18 +510,18 @@ const Clinic: NextPage = () => {
     if (clinic) {
       // Assuming userQuery.data contains the user object
       const userData = clinic;
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
-
+      //const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      const greaterArea: GreaterArea = { area: userData.greaterArea.greaterArea ?? "Select one", id: userData.greaterAreaID ?? 0 };
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+      // const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
 
-      setAreaOption(area);
+      // setAreaOption(area);
 
-      //Make sure thet area and street options have a value
-      if (userData.areaID === 0 || userData.areaID === undefined) {
-        setAreaOption({ area: "Select one", id: 0 });
-      }
+      // //Make sure thet area and street options have a value
+      // if (userData.areaID === 0 || userData.areaID === undefined) {
+      //   setAreaOption({ area: "Select one", id: 0 });
+      // }
 
       setStartingDate(userData?.date ?? new Date());
       setComments(userData.comments ?? "");
@@ -556,18 +556,18 @@ const Clinic: NextPage = () => {
     if (clinic) {
       // Assuming userQuery.data contains the user object
       const userData = clinic;
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
-
+      //const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      const greaterArea: GreaterArea = { area: userData.greaterArea.greaterArea ?? "Select one", id: userData.greaterAreaID ?? 0 };
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+      // const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
 
-      setAreaOption(area);
+      // setAreaOption(area);
 
-      //Make sure thet area and street options have a value
-      if (userData.areaID === 0 || userData.areaID === undefined) {
-        setAreaOption({ area: "Select one", id: 0 });
-      }
+      // //Make sure thet area and street options have a value
+      // if (userData.areaID === 0 || userData.areaID === undefined) {
+      //   setAreaOption({ area: "Select one", id: 0 });
+      // }
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
       setConditionList(userData.conditions ?? "Select here");
@@ -605,7 +605,7 @@ const Clinic: NextPage = () => {
     //After the newUser has been created make sure to set the fields back to empty
     setGreaterAreaOption({ area: "Select one", id: 0 });
     //setGreaterAreaID(0);
-    setAreaOption({ area: "Select one", id: 0 });
+    // setAreaOption({ area: "Select one", id: 0 });
     setConditionOption("Select here");
     setConditionList([]);
     //setGreaterAreaID(0);
@@ -621,7 +621,7 @@ const Clinic: NextPage = () => {
 
   const handleCreateNewUser = async () => {
     setGreaterAreaOption({ area: "Select one", id: 0 });
-    setAreaOption({ area: "Select one", id: 0 });
+    // setAreaOption({ area: "Select one", id: 0 });
     setStartingDate(new Date());
     setComments("");
     setConditionOption("Select here");
@@ -669,18 +669,18 @@ const Clinic: NextPage = () => {
     if (clinic) {
       // Assuming userQuery.data contains the user object
       const userData = clinic;
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
-
+      //const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      const greaterArea: GreaterArea = { area: userData.greaterArea.greaterArea ?? "Select one", id: userData.greaterAreaID ?? 0 };
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+      // const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
 
-      setAreaOption(area);
+      // setAreaOption(area);
 
-      //Make sure thet area and street options have a value
-      if (userData.areaID === 0 || userData.areaID === undefined) {
-        setAreaOption({ area: "Select one", id: 0 });
-      }
+      // //Make sure thet area and street options have a value
+      // if (userData.areaID === 0 || userData.areaID === undefined) {
+      //   setAreaOption({ area: "Select one", id: 0 });
+      // }
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
       //setConditionOption(userData.conditions ?? "Select here");
@@ -695,7 +695,7 @@ const Clinic: NextPage = () => {
       );
 
       setGreaterAreaID(userData.greaterAreaID ?? 0);
-      setAreaID(userData.areaID ?? 0);
+      //setAreaID(userData.areaID ?? 0);
 
       setDogVisits(userData.pet.filter((pet) => pet.pet.species === "Dog").length);
       setCatVisits(userData.pet.filter((pet) => pet.pet.species === "Cat").length);
@@ -713,13 +713,13 @@ const Clinic: NextPage = () => {
     }
     if (clinic) {
       const userData = clinic;
-      const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
-
+      //const greaterArea: GreaterArea = { area: getGreaterAreaByID.data?.greaterArea ?? "Select one", id: getGreaterAreaByID.data?.greaterAreaID ?? 0 };
+      const greaterArea: GreaterArea = { area: userData.greaterArea.greaterArea ?? "Select one", id: userData.greaterAreaID ?? 0 };
       setGreaterAreaOption(greaterArea);
 
-      const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
+      // const area: Area = { area: getAreaByID.data?.area ?? "Select one", id: getAreaByID.data?.areaID ?? 0 };
 
-      setAreaOption(area);
+      // setAreaOption(area);
 
       setConditionList(userData.conditions ?? "");
 
@@ -732,12 +732,12 @@ const Clinic: NextPage = () => {
       //setAreaID(userData.areaID ?? 0);
       //console.log("Select one");
       //Make sure thet area and street options have a value
-      if ((userData.areaID === 0 || userData.areaID === undefined) && !isUpdate) {
-        setAreaOption({ area: "", id: 0 });
-      }
-      if (userData.areaID === 0 || (userData.areaID === undefined && isUpdate)) {
-        setAreaOption({ area: "Select one", id: 0 });
-      }
+      // if ((userData.areaID === 0 || userData.areaID === undefined) && !isUpdate) {
+      //   setAreaOption({ area: "", id: 0 });
+      // }
+      // if (userData.areaID === 0 || (userData.areaID === undefined && isUpdate)) {
+      //   setAreaOption({ area: "Select one", id: 0 });
+      // }
 
       setDogVisits(userData.pet.filter((pet) => pet.pet.species === "Dog").length);
       setCatVisits(userData.pet.filter((pet) => pet.pet.species === "Cat").length);
@@ -761,7 +761,7 @@ const Clinic: NextPage = () => {
     setIsViewProfilePage(false);
     setID(0);
     setGreaterAreaOption({ area: "Select one", id: 0 });
-    setAreaOption({ area: "Select one", id: 0 });
+    //setAreaOption({ area: "Select one", id: 0 });
     setComments("");
     setConditionList([]);
     setConditionOption("Select here");
@@ -819,59 +819,6 @@ const Clinic: NextPage = () => {
   const handleOrderFields = (field: string) => {
     setOrder(field);
   };
-
-  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  // const observerTarget = useRef<HTMLDivElement | null>(null);
-
-  // const [limit] = useState(12);
-  // const {
-  //   data: queryData,
-  //   fetchNextPage,
-  //   hasNextPage,
-  //   refetch,
-  // } = api.petClinic.searchClinicsInfinite.useInfiniteQuery(
-  //   {
-  //     clinicID: id,
-  //     limit: limit,
-  //     searchQuery: query,
-  //     order: order,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => {
-  //       console.log("Next Cursor: " + lastPage.nextCursor);
-  //       return lastPage.nextCursor;
-  //     },
-  //     enabled: false,
-  //   },
-  // );
-
-  // //Flattens the pages array into one array
-  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
-
-  // //Checks intersection of the observer target and reassigns target element once true
-  // useEffect(() => {
-  //   if (!observerTarget.current || !fetchNextPage) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-  //     },
-  //     { threshold: 1 },
-  //   );
-
-  //   if (observerTarget.current) observer.observe(observerTarget.current);
-
-  //   const currentTarget = observerTarget.current;
-
-  //   return () => {
-  //     if (currentTarget) observer.unobserve(currentTarget);
-  //   };
-  // }, [fetchNextPage, hasNextPage, observerTarget]);
-
-  // //Make it retrieve the data from tab;e again when the user is updated, deleted or created
-  // useEffect(() => {
-  //   void refetch();
-  // }, [isUpdate, isDeleted, isCreate, query, order]);
 
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
@@ -1030,7 +977,7 @@ const Clinic: NextPage = () => {
                               <td className="border px-2 py-1">{user.greaterArea.greaterArea}</td>
                               {/* <td className="border px-2 py-1">{user.area.area}</td> */}
 
-                              <td className="border px-2 py-1">{user.conditions.join("; ")}</td>
+                              <td className="border px-2 py-1">{user.conditions.join(", ")}</td>
                               <td className=" border px-2 py-1">
                                 <div className="flex justify-center">{user.pet.filter((pet) => pet.pet.species === "Dog").length}</div>
                               </td>
@@ -1091,7 +1038,7 @@ const Clinic: NextPage = () => {
                           );
                         })}
                         <tr>
-                          <td className=" px-2 py-1">
+                          <td className=" mb-5 px-2 py-1">
                             <div ref={observerTarget} />
                           </td>
                         </tr>
@@ -1113,7 +1060,7 @@ const Clinic: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Pet Clinic Data" : "Create New Pet Clinic"}</b>
                 <div className="flex justify-center">
@@ -1344,7 +1291,7 @@ const Clinic: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Pet Clinic Profile</div>
                 <div className="flex justify-center">
@@ -1392,7 +1339,7 @@ const Clinic: NextPage = () => {
                     {conditionList
                       .sort((a, b) => a.localeCompare(b))
                       .map((condition) => condition)
-                      .join("; ")}
+                      .join(", ")}
                   </div>
 
                   <div className="mb-2 flex items-center">

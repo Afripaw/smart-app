@@ -306,7 +306,7 @@ const User: NextPage = () => {
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  }, [fetchNextPage, hasNextPage, observerTarget, isUpdate]);
 
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
@@ -1797,7 +1797,7 @@ const User: NextPage = () => {
                                 {user?.greaterAreas
                                   ?.sort((a, b) => a.greaterAreaID - b.greaterAreaID)
                                   .map((greaterArea) => greaterArea.greaterArea.greaterArea)
-                                  .join("; ") ?? ""}
+                                  .join(", ") ?? ""}
                               </td>
                               <td className="border px-2 py-1">{user.role}</td>
                               <td className="border px-2 py-1">{user.status}</td>
@@ -1874,7 +1874,7 @@ const User: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update User Data" : "Create New User"}</b>
                 <div className="flex justify-center">
@@ -2423,7 +2423,7 @@ const User: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">User Profile</div>
                 <div className="flex justify-center">
@@ -2495,7 +2495,7 @@ const User: NextPage = () => {
                     {greaterAreaList
                       .sort((a, b) => a.id - b.id)
                       .map((greaterArea) => greaterArea.area)
-                      .join("; ")}
+                      .join(", ")}
                   </div>
 
                   <div className="flex items-start divide-x-2 divide-gray-300">

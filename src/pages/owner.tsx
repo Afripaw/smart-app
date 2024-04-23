@@ -356,7 +356,7 @@ const Owner: NextPage = () => {
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  }, [fetchNextPage, hasNextPage, observerTarget, isUpdate]);
 
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
@@ -1965,7 +1965,7 @@ const Owner: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Owner Data" : "Create New Owner"}</b>
                 <div className="flex justify-center">
@@ -2466,7 +2466,7 @@ const Owner: NextPage = () => {
               </div>
             ) : (
               <>
-                <div className="sticky top-[11%] z-50 flex justify-center">
+                <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
                   <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                     <div className=" text-2xl">Owner Profile</div>
                     <div className="flex justify-center">

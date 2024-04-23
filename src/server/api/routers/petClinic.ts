@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
+import { Prisma } from "@prisma/client";
+
 type Visits = {
   date: Date;
   species: string;
@@ -91,19 +93,19 @@ export const petClinicRouter = createTRPCRouter({
           return {
             OR: [
               { clinicID: { equals: Number(term.substring(1)) } },
-              { greaterArea: { greaterArea: { contains: term } } },
+              { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               // { area: { area: { contains: term } } },
               { conditions: { hasSome: [term] } },
-              { comments: { contains: term } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
             OR: [
-              { greaterArea: { greaterArea: { contains: term } } },
+              { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               // { area: { area: { contains: term } } },
               { conditions: { hasSome: [term] } },
-              { comments: { contains: term } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               // dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
@@ -438,19 +440,19 @@ export const petClinicRouter = createTRPCRouter({
           return {
             OR: [
               { clinicID: { equals: Number(term.substring(1)) } },
-              //  { greaterArea: { contains: term } },
+              { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               //  { area: { contains: term } },
               { conditions: { hasSome: [term] } },
-              { comments: { contains: term } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
             OR: [
-              // { greaterArea: { contains: term } },
+              { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               // { area: { contains: term } },
               { conditions: { hasSome: [term] } },
-              { comments: { contains: term } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               // dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };

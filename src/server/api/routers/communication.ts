@@ -6,6 +6,8 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 
+import { Prisma } from "@prisma/client";
+
 export const communicationRouter = createTRPCRouter({
   create: publicProcedure
     .input(
@@ -97,11 +99,11 @@ export const communicationRouter = createTRPCRouter({
           return {
             OR: [
               { communicationID: { equals: Number(term.substring(1)) } },
-              { message: { contains: term } },
-              { success: { contains: term } },
-              { type: { contains: term } },
-              { greaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
-              { area: { some: { area: { area: { contains: term } } } } },
+              { message: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { success: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { type: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { greaterArea: { some: { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { area: { some: { area: { area: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
               // { greaterArea: { hasSome: [term] } },
               // { area: { hasSome: [term] } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
@@ -109,11 +111,11 @@ export const communicationRouter = createTRPCRouter({
         } else {
           return {
             OR: [
-              { message: { contains: term } },
-              { success: { contains: term } },
-              { type: { contains: term } },
-              { greaterArea: { some: { greaterArea: { greaterArea: { contains: term } } } } },
-              { area: { some: { area: { area: { contains: term } } } } },
+              { message: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { success: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { type: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { greaterArea: { some: { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { area: { some: { area: { area: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
@@ -334,9 +336,9 @@ export const communicationRouter = createTRPCRouter({
           return {
             OR: [
               { communicationID: { equals: Number(term.substring(1)) } },
-              { message: { contains: term } },
-              { success: { contains: term } },
-              { type: { contains: term } },
+              { message: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { success: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { type: { contains: term, mode: Prisma.QueryMode.insensitive } },
               // { greaterArea: { hasSome: [term] } },
               // { area: { hasSome: [term] } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
@@ -344,9 +346,9 @@ export const communicationRouter = createTRPCRouter({
         } else {
           return {
             OR: [
-              { message: { contains: term } },
-              { success: { contains: term } },
-              { type: { contains: term } },
+              { message: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { success: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { type: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //  { greaterArea: { hasSome: [term] } },
               //  { area: { hasSome: [term] } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions

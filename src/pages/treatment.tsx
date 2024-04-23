@@ -338,7 +338,7 @@ const Treatment: NextPage = () => {
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  }, [fetchNextPage, hasNextPage, observerTarget, isUpdate]);
 
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
@@ -1324,7 +1324,7 @@ const Treatment: NextPage = () => {
                               <td className="border px-2 py-1">{treatment.greaterArea}</td>
                               <td className="border px-2 py-1">{treatment.area}</td>
                               <td className="border px-2 py-1">{treatment.category}</td>
-                              <td className="border px-2 py-1">{treatment.type.slice(0, 8).join("; ")}</td>
+                              <td className="border px-2 py-1">{treatment.type.slice(0, 8).join(", ")}</td>
                               <td className=" border px-2 py-1">
                                 {treatment?.updatedAt?.getDate()?.toString() ?? ""}
                                 {"/"}
@@ -1401,7 +1401,7 @@ const Treatment: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Pet Treatment Data" : "Add Pet Treatment"}</b>
                 <div className="flex justify-center">
@@ -1470,7 +1470,7 @@ const Treatment: NextPage = () => {
                               handleTreatmentModal(treatment?.treatmentID, treatment?.category, treatment?.type, treatment?.date, treatment?.comments)
                             }
                           >
-                            {(treatment?.type[0] ?? "") + " (" + (treatment?.category ?? "") + ")"}
+                            {treatment?.date + " " + treatment?.type.join(", ") + " (" + (treatment?.category ?? "") + ")"}
                           </button>
                         ))}
                       </div>
@@ -1632,7 +1632,7 @@ const Treatment: NextPage = () => {
               </div>
             ) : (
               <>
-                <div className="sticky top-[11%] z-50 flex justify-center">
+                <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
                   <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                     <div className=" text-2xl">Pet Treatment Profile</div>
                     <div className="flex justify-center">
@@ -1696,7 +1696,7 @@ const Treatment: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Type(s):</b> {typeList.join("; ")}
+                        <b className="mr-3">Type(s):</b> {typeList.join(", ")}
                       </div>
 
                       <div className="mb-2 flex items-center">

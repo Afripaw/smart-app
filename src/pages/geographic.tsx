@@ -158,7 +158,7 @@ const Geographic: NextPage = () => {
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  }, [fetchNextPage, hasNextPage, observerTarget, isUpdate]);
 
   //Make it retrieve the data from tab;e again when the user is updated, deleted or created
   useEffect(() => {
@@ -830,6 +830,27 @@ const Geographic: NextPage = () => {
     setOrder(field);
   };
 
+  //------------------------------------------DOWNLOADING GEOGRAPHIC TABLE TO EXCEL FILE------------------------------------------
+  const downloadGeographicTable = api.geographic.download.useQuery({ searchQuery: query });
+  const handleDownloadGeographicTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+    const greaterArea_data = downloadGeographicTable.data?.greaterAreas;
+    const area_data = downloadGeographicTable.data?.areas;
+    const street_data = downloadGeographicTable.data?.streets;
+    const fileName = "Geographic Table";
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const greaterArea_ws = XLSX.utils.json_to_sheet(greaterArea_data ?? []);
+    const area_ws = XLSX.utils.json_to_sheet(area_data ?? []);
+    const street_ws = XLSX.utils.json_to_sheet(street_data ?? []);
+    const wb = { Sheets: { greaterArea: greaterArea_ws, area: area_ws, street: street_ws }, SheetNames: ["greaterArea", "area", "street"] };
+    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    const dataFile = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataFile, fileName + fileExtension);
+    setIsLoading(false);
+  };
+
   return (
     <>
       <Head>
@@ -849,9 +870,9 @@ const Geographic: NextPage = () => {
               />
               <div className="sticky top-20 z-20 bg-white py-4">
                 <div className="relative flex justify-center">
-                  {/* <button
+                  <button
                     className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500"
-                    onClick={handleDownloadCommunicationTable}
+                    onClick={handleDownloadGeographicTable}
                   >
                     {isLoading ? (
                       <div
@@ -859,9 +880,9 @@ const Geographic: NextPage = () => {
                         role="status"
                       />
                     ) : (
-                      <div>Download Geographic Tables</div>
+                      <div>Download Geographic Table</div>
                     )}
-                  </button> */}
+                  </button>
 
                   {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={uploadButton}>
                     {isLoading ? (
@@ -965,7 +986,7 @@ const Geographic: NextPage = () => {
                                         {area.street
                                           .slice(0, 16)
                                           .map((street) => street.street)
-                                          .join("; ") + ")..."}
+                                          .join(", ") + ")..."}
                                       </p>
                                     ))
                                   : (geo.area[1]?.street.length ?? 0) > 8
@@ -980,8 +1001,8 @@ const Geographic: NextPage = () => {
                                             ? area.street
                                                 .slice(0, 8)
                                                 .map((street) => street.street)
-                                                .join("; ") + ")..."
-                                            : area.street.map((street) => street.street).join("; ")}
+                                                .join(", ") + ")..."
+                                            : area.street.map((street) => street.street).join(", ")}
                                         </p>
                                       ))
                                     : (geo.area[2]?.street.length ?? 0) > 4
@@ -995,8 +1016,8 @@ const Geographic: NextPage = () => {
                                               ? area.street
                                                   .slice(0, 4)
                                                   .map((street) => street.street)
-                                                  .join("; ") + ")..."
-                                              : area.street.map((street) => street.street).join("; ")}
+                                                  .join(", ") + ")..."
+                                              : area.street.map((street) => street.street).join(", ")}
                                             )
                                           </p>
                                         ))
@@ -1011,8 +1032,8 @@ const Geographic: NextPage = () => {
                                                 ? area.street
                                                     .slice(0, 2)
                                                     .map((street) => street.street)
-                                                    .join("; ") + ")..."
-                                                : area.street.map((street) => street.street).join("; ")}
+                                                    .join(", ") + ")..."
+                                                : area.street.map((street) => street.street).join(", ")}
                                               )
                                             </p>
                                           ))
@@ -1027,8 +1048,8 @@ const Geographic: NextPage = () => {
                                                   ? area.street
                                                       .slice(0, 1)
                                                       .map((street) => street.street)
-                                                      .join("; ") + ")..."
-                                                  : area.street.map((street) => street.street).join("; ")}
+                                                      .join(", ") + ")..."
+                                                  : area.street.map((street) => street.street).join(", ")}
                                                 )
                                               </p>
                                             ))
@@ -1037,7 +1058,7 @@ const Geographic: NextPage = () => {
                                                 <b>
                                                   {String(index + 1)}. {area.area}
                                                 </b>{" "}
-                                                ({area.street.map((street) => street.street).join("; ")})
+                                                ({area.street.map((street) => street.street).join(", ")})
                                               </p>
                                             ))}
                               </td>
@@ -1144,7 +1165,7 @@ const Geographic: NextPage = () => {
         {/*CREATE AND UPDATE USER*/}
         {(isCreate || isUpdate) && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isCreate ? "Create New Greater Area" : "Update Greater Area"}</b>
                 <div className="flex justify-center">
@@ -1425,7 +1446,7 @@ const Geographic: NextPage = () => {
         {/*VIEW PROFILE PAGE*/}
         {isViewProfilePage && (
           <>
-            <div className="sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Greater Area Profile</div>
                 <div className="flex justify-center">
@@ -1484,7 +1505,7 @@ const Geographic: NextPage = () => {
                           {streetList
                             .filter((street) => street.areaID === area.id)
                             .map((street) => street.name)
-                            .join("; ")}
+                            .join(", ")}
                           )
                         </p>
                       ))}

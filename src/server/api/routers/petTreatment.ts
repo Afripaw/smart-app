@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
+import { Prisma } from "@prisma/client";
+
 export const petTreatmentRouter = createTRPCRouter({
   create: publicProcedure
     .input(
@@ -80,72 +82,72 @@ export const petTreatmentRouter = createTRPCRouter({
           return {
             OR: [
               { treatmentID: { equals: Number(term.substring(1)) } },
-              { category: { contains: term } },
+              { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
 
               // { type: { hasSome: [term] } },
-              { comments: { contains: term } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //pet
-              { pet: { petName: { contains: term } } },
-              { pet: { species: { contains: term } } },
+              { pet: { petName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
+              { pet: { species: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               { pet: { breed: { hasSome: [term] } } },
               //owner
-              { pet: { owner: { firstName: { contains: term } } } },
-              { pet: { owner: { surname: { contains: term } } } },
-              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term } } } } },
-              { pet: { owner: { addressArea: { area: { contains: term } } } } },
+              { pet: { owner: { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+              { pet: { owner: { surname: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { pet: { owner: { addressArea: { area: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else if (term.match(/^P\d+$/) !== null) {
           return {
             OR: [
               { pet: { petID: { equals: Number(term.substring(1)) } } },
-              { category: { contains: term } },
+              { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { type: { hasSome: [term] } },
-              { comments: { contains: term } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //pet
-              { pet: { petName: { contains: term } } },
-              { pet: { species: { contains: term } } },
+              { pet: { petName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
+              { pet: { species: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               { pet: { breed: { hasSome: [term] } } },
               //owner
-              { pet: { owner: { firstName: { contains: term } } } },
-              { pet: { owner: { surname: { contains: term } } } },
-              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term } } } } },
-              { pet: { owner: { addressArea: { area: { contains: term } } } } },
+              { pet: { owner: { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+              { pet: { owner: { surname: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { pet: { owner: { addressArea: { area: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else if (term.match(/^N\d+$/) !== null) {
           return {
             OR: [
               { ownerID: { equals: Number(term.substring(1)) } },
-              { category: { contains: term } },
+              { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { type: { hasSome: [term] } },
-              { comments: { contains: term } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //pet
-              { pet: { petName: { contains: term } } },
-              { pet: { species: { contains: term } } },
+              { pet: { petName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
+              { pet: { species: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               { pet: { breed: { hasSome: [term] } } },
               //owner
-              { pet: { owner: { firstName: { contains: term } } } },
-              { pet: { owner: { surname: { contains: term } } } },
-              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term } } } } },
-              { pet: { owner: { addressArea: { area: { contains: term } } } } },
+              { pet: { owner: { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+              { pet: { owner: { surname: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { pet: { owner: { addressArea: { area: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
             OR: [
-              { category: { contains: term } },
+              { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { type: { hasSome: [term] } },
-              { comments: { contains: term } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //pet
-              { pet: { petName: { contains: term } } },
-              { pet: { species: { contains: term } } },
+              { pet: { petName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
+              { pet: { species: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               { pet: { breed: { hasSome: [term] } } },
               //owner
-              { pet: { owner: { firstName: { contains: term } } } },
-              { pet: { owner: { surname: { contains: term } } } },
-              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term } } } } },
-              { pet: { owner: { addressArea: { area: { contains: term } } } } },
+              { pet: { owner: { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+              { pet: { owner: { surname: { contains: term, mode: Prisma.QueryMode.insensitive } } } },
+              { pet: { owner: { addressGreaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
+              { pet: { owner: { addressArea: { area: { contains: term, mode: Prisma.QueryMode.insensitive } } } } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
@@ -399,16 +401,18 @@ export const petTreatmentRouter = createTRPCRouter({
           return {
             OR: [
               { treatmentID: { equals: Number(term.substring(1)) } },
-              { category: { contains: term } },
+              { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { type: { hasSome: [term] } },
-              { comments: { contains: term } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
-            OR: [{ category: { contains: term } }, { type: { hasSome: [term] } }, { comments: { contains: term } }].filter(
-              (condition) => Object.keys(condition).length > 0,
-            ), // Filter out empty conditions
+            OR: [
+              { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { type: { hasSome: [term] } },
+              { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
       });
@@ -422,16 +426,18 @@ export const petTreatmentRouter = createTRPCRouter({
           return {
             OR: [
               { petID: { equals: Number(term.substring(1)) } },
-              { petName: { contains: term } },
-              { species: { contains: term } },
+              { petName: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { species: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { breed: { hasSome: [term] } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         } else {
           return {
-            OR: [{ petName: { contains: term } }, { species: { contains: term } }, { breed: { hasSome: [term] } }].filter(
-              (condition) => Object.keys(condition).length > 0,
-            ), // Filter out empty conditions
+            OR: [
+              { petName: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { species: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { breed: { hasSome: [term] } },
+            ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
         }
       });
@@ -443,8 +449,8 @@ export const petTreatmentRouter = createTRPCRouter({
           return {
             OR: [
               { ownerID: { equals: Number(term.substring(1)) } },
-              { firstName: { contains: term } },
-              { surname: { contains: term } },
+              { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { surname: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //  { addressGreaterArea: { contains: term } },
               //  { addressArea: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
@@ -452,8 +458,8 @@ export const petTreatmentRouter = createTRPCRouter({
         } else {
           return {
             OR: [
-              { firstName: { contains: term } },
-              { surname: { contains: term } },
+              { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { surname: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //  { addressGreaterArea: { contains: term } },
               //  { addressArea: { contains: term } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions

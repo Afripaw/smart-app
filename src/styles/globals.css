@@ -20,3 +20,9 @@
     top: 20%;
   }
 }
+
+@media (min-width: 320px) {
+  .xs\:top-20 {
+    top: 20%;
+  }
+}

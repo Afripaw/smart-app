@@ -31,6 +31,7 @@ export default withUt({
       },
       screens: {
         "3xl": "1920px", // Define your custom breakpoint
+        xs: "320px",
       },
 
       fontSize: {

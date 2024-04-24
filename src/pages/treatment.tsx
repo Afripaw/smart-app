@@ -1406,7 +1406,7 @@ const Treatment: NextPage = () => {
                 <b className=" text-2xl">{isUpdate ? "Update Pet Treatment Data" : "Add Pet Treatment"}</b>
                 <div className="flex justify-center">
                   <button className="absolute right-0 top-0 m-3 rounded-lg bg-main-orange p-3 text-white hover:bg-orange-500" onClick={handleBackButton}>
-                    Back To Treatment Table
+                    {router.asPath.includes("petID") ? "Back To Pet Table" : "Back To Treatment Table"}
                   </button>
                 </div>
                 <CreateButtonModal

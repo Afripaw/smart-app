@@ -25,37 +25,37 @@ const Dashboard: NextPage = () => {
       <Head>
         <title>Dashboard</title>
       </Head>
-      <main className="flex h-screen flex-col text-normal">
+      <main className="xs:flex-row flex h-screen text-normal sm:flex-col">
         <Navbar />
-        <div className="grid h-full grid-cols-3 grid-rows-3">
-          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
+        <div className="xs:grid-cols-1 xs:grid-rows-4 xs:overflow-hidden grid h-full sm:grid-cols-3 sm:grid-rows-3">
+          <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="activeOwners" />
             <div className="pl-12">
               <div>New Pet Owners per Greater Area (Last 5 Years)</div>
             </div>
           </div>
-          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
+          <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
             <BarGraph type="clinicsVisited" />
             <div className="pl-12">Clinic Visits by Pets (All Areas, Last 5 Years)</div>
           </div>
-          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
+          <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="activeVolunteers" />
             <div className="pl-12">New Volunteers per Greater Area (Last 5 Years)</div>
           </div>
-          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
+          <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="kennels" />
             <div className="pl-12">Kennels Provided per Greater Area (Last 5 Years)</div>
           </div>
 
-          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
+          <div className=" flex flex-col items-center justify-center border border-gray-300 pr-16">
             <BarGraph type="sterilisedPets" />
             <div className="pl-12">Pets Sterilised (All Areas, Last 5 Years)</div>
           </div>
-          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16">
+          <div className=" flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="clinics" />
             <div className="pl-12">Pet Clinics Held per Greater Area (Last 5 Years)</div>
           </div>
-          <div className="flex flex-col items-center justify-center border border-gray-300">
+          <div className=" flex flex-col items-center justify-center border border-gray-300">
             <PieGraph type="ClinicVisits" />
             <div className="">Total Clinic Visits to Date</div>
           </div>

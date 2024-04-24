@@ -72,11 +72,11 @@ const Navbar = () => {
     await signOut({ callbackUrl: `${window.location.origin}/` });
   };
   return (
-    <div className=" sticky top-0 z-50 flex grow items-center justify-between bg-main-orange p-3 text-normal text-black">
+    <div className="xs:left-0 xs:flex-col sticky z-50 flex items-center justify-between bg-main-orange p-3 text-normal text-black md:w-full md:flex-row lg:top-0">
       <div className="justify-begin flex">
         <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="ml-auto aspect-square h-max rounded-full" width={56} height={56} />
       </div>
-      <div className="mx-auto flex items-center gap-2">
+      <div className="xs:flex-col mx-auto flex items-center gap-2 md:flex-row">
         {NavbarLinks.map((link) => (
           <div key={link.name}>
             <Link

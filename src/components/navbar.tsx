@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Gauge, Users, User, Dog, FirstAidKit, Bed, Info, SignOut, Person, Envelope, GlobeHemisphereEast } from "phosphor-react";
+import { Gauge, Users, User, Dog, FirstAidKit, Bed, Info, SignOut, Person, Envelope, GlobeHemisphereEast, EnvelopeOpen } from "phosphor-react";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
 //import { router } from "@trpc/server";
@@ -9,52 +9,61 @@ const NavbarLinks = [
   {
     name: "Dashboard",
     href: "/dashboard",
-    icon: <Gauge size={24} />,
+    icon: <Gauge className="h-full w-full" />,
   },
   {
     name: "Users",
     href: "/user",
-    icon: <User size={24} />,
+    // icon: <User size={24} />,
+    icon: <User className="h-full w-full" />,
   },
   {
     name: "Volunteers",
     href: "/volunteer",
-    icon: <Person size={24} />,
+    // icon: <Person size={24} />,
+    icon: <Person className="h-full w-full" />,
   },
   {
     name: "Owners",
     href: "/owner",
-    icon: <Users size={24} />,
+    // icon: <Users size={24} />,
+    icon: <Users className="h-full w-full" />,
   },
   {
     name: "Pets",
     href: "/pet",
-    icon: <Dog size={24} />,
+    // icon: <Dog size={24} />,
+    icon: <Dog className="h-full w-full" />,
   },
   {
     name: "Treatments",
     href: "/treatment",
-    icon: <FirstAidKit size={24} />,
+    // icon: <FirstAidKit size={24} />,
+    icon: <FirstAidKit className="h-full w-full" />,
   },
   {
     name: "Clinics",
     href: "/clinic",
-    icon: <Bed size={24} />,
+    // icon: <Bed size={24} />,
+    icon: <Bed className="h-full w-full" />,
   },
   {
     name: "Geographic",
     href: "/geographic",
-    icon: <GlobeHemisphereEast size={24} />,
+    // icon: <GlobeHemisphereEast size={24} />,
+    icon: <GlobeHemisphereEast className="h-full w-full" />,
   },
   {
     name: "Database",
     href: "/info",
-    icon: <Info size={24} />,
+    // icon: <Info size={24} />,
+    icon: <Info className="h-full w-full" />,
   },
   {
     name: "Messages",
     href: "/communication",
-    icon: <Envelope size={24} />,
+    // icon: <Envelope size={24} />,
+    icon: <Envelope className="h-full w-full" />,
   },
 ];
 
@@ -72,26 +81,41 @@ const Navbar = () => {
     await signOut({ callbackUrl: `${window.location.origin}/` });
   };
   return (
-    <div className="xs:left-0 xs:flex-col sticky z-50 flex items-center justify-between bg-main-orange p-3 text-normal text-black md:w-full md:flex-row lg:top-0">
-      <div className="justify-begin flex">
+    <div className="xs:left-0 xs:flex-col sticky z-50 flex items-center justify-between bg-main-orange text-normal text-black md:flex-row md:p-2 md:text-xs lg:top-0 xl:w-full xl:p-3 xl:text-normal">
+      {/* <div className="justify-begin flex">
         <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="ml-auto aspect-square h-max rounded-full" width={56} height={56} />
+      </div> */}
+      <div className="justify-begin flex">
+        <Image
+          src={"/afripaw-logo.jpg"}
+          alt="Afripaw Logo"
+          className="ml-auto aspect-square h-[3.5rem] w-[3.5rem] rounded-full md:h-[2.7rem] md:w-[2.7rem] xl:h-[3.5rem] xl:w-[3.5rem]"
+          width={56}
+          height={56}
+        />
       </div>
-      <div className="xs:flex-col mx-auto flex items-center gap-2 md:flex-row">
+      <div className="xs:flex-col mx-auto flex items-center md:flex-row md:gap-1 xl:gap-2">
         {NavbarLinks.map((link) => (
           <div key={link.name}>
             <Link
               key={link.name}
               href={link.href}
-              className={`flex rounded-lg px-3 py-2  hover:bg-gray-200/30 ${router.pathname === link.href ? "bg-white text-black" : "text-white"}`}
+              className={`flex items-center rounded-lg hover:bg-gray-200/30 md:px-2 md:py-1 xl:px-3  xl:py-2 ${
+                router.pathname === link.href ? "bg-white text-black" : "text-white"
+              }`}
             >
-              <div className="mr-2">{link.icon}</div>
+              {/* <div className="mr-2">{link.icon}</div> */}
+              <div className="h-6 w-6 md:mr-1 md:h-4 md:w-4 xl:mr-2 xl:h-6 xl:w-6">{link.icon}</div>
               {link.name}
             </Link>
           </div>
         ))}
       </div>
-      <Link className="flex rounded-lg px-3 py-2 text-white hover:bg-gray-200/30" href="/" onClick={handleLogout}>
-        <SignOut size={24} />
+      <Link className="flex items-center rounded-lg px-3 py-2 text-white hover:bg-gray-200/30" href="/" onClick={handleLogout}>
+        <div className="h-6 w-6 md:h-4 md:w-4 xl:h-6 xl:w-6">
+          <SignOut className="h-full w-full" />
+        </div>
+        {/* <SignOut size={24} /> */}
         Logout
       </Link>
     </div>

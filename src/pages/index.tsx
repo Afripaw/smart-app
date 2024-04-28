@@ -111,17 +111,31 @@ export default function Home() {
       </Head>
       <main className=" relative flex min-h-screen flex-col bg-gray-100 text-normal sm:w-screen">
         {/*Background image*/}
-        <Image src={"/Collage Greyed Out.jpg"} alt="Afripaw backdrop" className="absolute left-0 top-0 max-h-screen min-w-full" width={720} height={480} />
+        <Image
+          src={"/Collage Greyed Out.jpg"}
+          alt="Afripaw backdrop"
+          className="absolute left-0 top-0 max-h-screen min-h-full min-w-full"
+          width={720}
+          height={480}
+        />
         {!signIn_ && (
           <>
             <div className=" flex grow flex-col bg-white">
               <div className="z-10 flex items-center justify-between bg-main-orange">
                 <div className="justify-begin flex">
-                  <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="m-2 ml-2 aspect-square h-max rounded-full" width={62} height={62} />
+                  <Image
+                    src={"/afripaw-logo.jpg"}
+                    alt="Afripaw Logo"
+                    className="m-2 ml-2 aspect-square h-[3.85rem] w-[3.85rem] rounded-full md:h-[3rem] md:w-[3rem] xl:h-[3.85rem] xl:w-[3.85rem]"
+                    width={62}
+                    height={62}
+                  />
+                  {/* className="m-2 ml-2 aspect-square h-max rounded-full" */}
+                  {/* className="m-2 ml-2 aspect-square h-[3.5rem] w-[3.5rem] rounded-full md:h-[2.7rem] md:w-[2.7rem] xl:h-[3.5rem] xl:w-[3.5rem]" */}
                 </div>
-                <div className="text-3xl">Welcome to the Afripaw Smart App</div>
+                <div className="md:text-xl xl:text-3xl">Welcome to the Afripaw Smart App</div>
                 <button
-                  className=" m-2 rounded-lg border-black bg-white p-2 text-lg text-black duration-150 hover:bg-gray-200/30"
+                  className=" m-2 rounded-lg border-black bg-white p-2 text-black duration-150 hover:bg-gray-200/30 md:text-base xl:text-lg"
                   onClick={() => void handleSignIn()}
                 >
                   Sign in
@@ -223,7 +237,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="z-20 flex flex-col items-center justify-center bg-main-orange text-black">
+              <div className="z-20 flex flex-col items-center justify-center bg-main-orange text-black md:text-sm xl:text-base">
                 <div className="">Design by JHO Ludik and JH van Vuuren</div>
                 <div className="">Development by JHO Ludik</div>
                 <div className="">© JHO Ludik (2024)</div>

@@ -53,6 +53,7 @@
 import React, { PureComponent } from "react";
 import { PieChart, Pie, Sector, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { api } from "~/utils/api";
+import { useEffect, useState } from "react";
 
 interface PieGraphProps {
   type: string;
@@ -94,17 +95,24 @@ const PieGraph: React.FC<PieGraphProps> = ({ type, isLoading }) => {
         </text>
       );
     };
-    // const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: LabelProps) => {
-    //   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    //   const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    //   const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    //   return (
-    //     <text x={x} y={y} fill={`${index === 0 ? "white" : "black"}`} textAnchor={x > cx ? "start" : "end"} dominantBaseline="central">
-    //       {`${(percent * 100).toFixed(0)}%`}
-    //     </text>
-    //   );
-    // };
+    const [outerRadius, setOuterRadius] = useState(80);
+
+    useEffect(() => {
+      const updateSize = () => {
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 1500) {
+          setOuterRadius(70); // smaller radius for smaller screens
+        } else {
+          setOuterRadius(80); // default radius
+        }
+      };
+
+      window.addEventListener("resize", updateSize);
+      updateSize(); // Set initial size
+
+      return () => window.removeEventListener("resize", updateSize);
+    }, []);
 
     isLoading = clinicVisits.isLoading;
 
@@ -120,9 +128,9 @@ const PieGraph: React.FC<PieGraphProps> = ({ type, isLoading }) => {
     }
 
     return (
-      <ResponsiveContainer width="85%" height="85%">
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart width={300} height={300}>
-          <Pie data={data} cx="50%" cy="50%" labelLine={false} label={renderCustomizedLabel} outerRadius={80} fill="#8884d8" dataKey="value">
+          <Pie data={data} cx="50%" cy="50%" labelLine={false} label={renderCustomizedLabel} outerRadius={outerRadius} fill="#8884d8" dataKey="value">
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
@@ -167,17 +175,24 @@ const PieGraph: React.FC<PieGraphProps> = ({ type, isLoading }) => {
         </text>
       );
     };
-    // const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }: LabelProps) => {
-    //   const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-    //   const x = cx + radius * Math.cos(-midAngle * RADIAN);
-    //   const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    //   return (
-    //     <text x={x} y={y} fill={`${index === 0 ? "white" : "black"}`} textAnchor={x > cx ? "start" : "end"} dominantBaseline="central">
-    //       {`${(percent * 100).toFixed(0)}%`}
-    //     </text>
-    //   );
-    // };
+    const [outerRadius, setOuterRadius] = useState(80);
+
+    useEffect(() => {
+      const updateSize = () => {
+        const screenWidth = window.innerWidth;
+        if (screenWidth < 1500) {
+          setOuterRadius(70); // smaller radius for smaller screens
+        } else {
+          setOuterRadius(80); // default radius
+        }
+      };
+
+      window.addEventListener("resize", updateSize);
+      updateSize(); // Set initial size
+
+      return () => window.removeEventListener("resize", updateSize);
+    }, []);
 
     if (treatments.isLoading) {
       return (
@@ -190,9 +205,9 @@ const PieGraph: React.FC<PieGraphProps> = ({ type, isLoading }) => {
       );
     }
     return (
-      <ResponsiveContainer width="85%" height="85%">
+      <ResponsiveContainer width="100%" height="100%">
         <PieChart width={300} height={300}>
-          <Pie data={data} cx="50%" cy="50%" labelLine={false} label={renderCustomizedLabel} outerRadius={80} fill="#8884d8" dataKey="value">
+          <Pie data={data} cx="50%" cy="50%" labelLine={false} label={renderCustomizedLabel} outerRadius={outerRadius} fill="#8884d8" dataKey="value">
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}

@@ -40,7 +40,7 @@ const Dashboard: NextPage = () => {
           </div>
           <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="activeVolunteers" />
-            <div className="pl-12">New Volunteers per Greater Area (Last 5 Years)</div>
+            <div className="md:pl-9 xl:pl-12">New Volunteers per Greater Area (Last 5 Years)</div>
           </div>
           <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
             <LineGraph type="kennels" />

@@ -81,7 +81,7 @@ const Navbar = () => {
     await signOut({ callbackUrl: `${window.location.origin}/` });
   };
   return (
-    <div className="xs:left-0 xs:flex-col sticky z-50 flex items-center justify-between bg-main-orange text-normal text-black md:flex-row md:p-2 md:text-xs lg:top-0 xl:w-full xl:p-3 xl:text-normal">
+    <div className="xs:left-0 xs:flex-col sticky z-50 flex items-center justify-between bg-main-orange text-normal text-black md:top-0 md:flex-row md:p-2 md:text-xs xl:w-full xl:p-3 xl:text-normal">
       {/* <div className="justify-begin flex">
         <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="ml-auto aspect-square h-max rounded-full" width={56} height={56} />
       </div> */}

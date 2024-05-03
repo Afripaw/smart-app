@@ -881,8 +881,9 @@ const Treatment: NextPage = () => {
       comments: comments,
     });
 
-    setIsCreate(false);
-    setIsUpdate(false);
+    //changed on 2 May 2024
+    // setIsCreate(false);
+    // setIsUpdate(false);
 
     // return newUser_;
 
@@ -891,6 +892,11 @@ const Treatment: NextPage = () => {
       await updateIdentification.mutateAsync({
         treatmentID: newUser_?.treatmentID ?? 0,
       });
+    }
+
+    //Go to pet page
+    if (Number(router.asPath.split("=")[1]) != 0 && !isViewProfilePage && !isUpdate) {
+      await router.push(`/pet`);
     }
 
     setIsLoading(false);
@@ -1516,7 +1522,9 @@ const Treatment: NextPage = () => {
 
                   <div className="flex items-start">
                     <div className="mr-3 flex items-center pt-5">
-                      <div className=" flex">Type(s): </div>
+                      <div className=" flex">
+                        Type(s)<span className="text-lg text-main-orange">*</span>:{" "}
+                      </div>
                     </div>
                     <div className="flex flex-col">
                       <button

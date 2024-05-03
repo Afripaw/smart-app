@@ -4119,7 +4119,7 @@ const Pet: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Pet Data" : "Add New Pet"}</b>
                 <div className="flex justify-center">
@@ -5150,15 +5150,15 @@ const Pet: NextPage = () => {
                         )}
                       </div>
 
-                      {membershipStatus() !== "" && (
-                        <div className="group relative mx-[5px] mt-5 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                          <Info size={24} className="block" />
-                          <span className="absolute left-[90%] top-[90%] z-50 hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                            The status of a card holder lapses if the pet has not attended a pet clinic for 3 months in a row. A lapsed card holder can become
-                            active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
-                          </span>
-                        </div>
-                      )}
+                      {/* {membershipStatus() !== "" && ( */}
+                      <div className="group relative mx-[5px] mt-5 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                        <Info size={24} className="block" />
+                        <span className="absolute left-[90%] top-[90%] z-50 hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                          The status of a card holder lapses if the pet has not attended a pet clinic for 3 months in a row. A lapsed card holder can become
+                          active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
+                        </span>
+                      </div>
+                      {/* )} */}
                     </div>
                   )}
 
@@ -5355,7 +5355,7 @@ const Pet: NextPage = () => {
               </div>
             ) : (
               <>
-                <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
+                <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
                   <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                     <div className=" text-2xl">Pet Profile</div>
                     <div className="flex justify-center">

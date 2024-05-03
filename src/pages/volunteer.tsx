@@ -2297,7 +2297,7 @@ const Volunteer: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Volunteer Data" : "Create New Volunteer"}</b>
                 <div className="flex justify-center">
@@ -2896,7 +2896,7 @@ const Volunteer: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Volunteer Profile</div>
                 <div className="flex justify-center">

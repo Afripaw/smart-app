@@ -831,6 +831,22 @@ const Geographic: NextPage = () => {
   };
 
   //------------------------------------------DOWNLOADING GEOGRAPHIC TABLE TO EXCEL FILE------------------------------------------
+  // type Area_ = {
+  //   areaID: number;
+  //   area: string;
+  //   greaterAreaID: number;
+  //   createdAt: Date;
+  //   updatedAt: Date;
+  // };
+
+  // type Street_ = {
+  //   streetID: number;
+  //   street: string;
+  //   areaID: number;
+  //   createdAt: Date;
+  //   updatedAt: Date;
+  // };
+
   const downloadGeographicTable = api.geographic.download.useQuery({ searchQuery: query });
   const handleDownloadGeographicTable = async () => {
     setIsLoading(true);
@@ -842,12 +858,19 @@ const Geographic: NextPage = () => {
     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
     const greaterArea_ws = XLSX.utils.json_to_sheet(greaterArea_data ?? []);
-    const area_ws = XLSX.utils.json_to_sheet(area_data ?? []);
-    const street_ws = XLSX.utils.json_to_sheet(street_data ?? []);
+    console.log("area_data:", area_data);
+    console.log("street_data:", street_data);
+    //filter out any area that is undefined
+    const area_data_ = area_data?.filter((area) => area !== undefined);
+    //filter out any street that is undefined
+    const street_data_ = street_data?.filter((street) => street !== undefined);
+    const area_ws = XLSX.utils.json_to_sheet(area_data_ ?? []);
+    const street_ws = XLSX.utils.json_to_sheet(street_data_ ?? []);
     const wb = { Sheets: { greaterArea: greaterArea_ws, area: area_ws, street: street_ws }, SheetNames: ["greaterArea", "area", "street"] };
     const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
     const dataFile = new Blob([excelBuffer], { type: fileType });
     FileSaver.saveAs(dataFile, fileName + fileExtension);
+
     setIsLoading(false);
   };
 
@@ -1165,7 +1188,7 @@ const Geographic: NextPage = () => {
         {/*CREATE AND UPDATE USER*/}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isCreate ? "Create New Greater Area" : "Update Greater Area"}</b>
                 <div className="flex justify-center">
@@ -1446,7 +1469,7 @@ const Geographic: NextPage = () => {
         {/*VIEW PROFILE PAGE*/}
         {isViewProfilePage && (
           <>
-            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center">
+            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Greater Area Profile</div>
                 <div className="flex justify-center">

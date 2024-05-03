@@ -595,49 +595,111 @@ export const geographicRouter = createTRPCRouter({
         },
       });
 
-      const all_data_for_areas_streets = await ctx.db.greaterArea.findMany({
+      // const all_data_for_areas_streets = await ctx.db.greaterArea.findMany({
+      //   where: {
+      //     AND: searchConditions,
+      //   },
+      //   include: {
+      //     area: {
+      //       include: {
+      //         street: true,
+      //       },
+      //     },
+      //   },
+      //   orderBy: {
+      //     greaterAreaID: "asc",
+      //   },
+      // });
+
+      // type Area_ = {
+      //   areaID: number;
+      //   area: string;
+      //   greaterAreaID: number;
+      //   createdAt: Date;
+      //   updatedAt: Date;
+      // };
+
+      // //retrieve all the areas data
+      // const area_ = all_data_for_areas_streets.map((greaterArea) => {
+      //   // if (greaterArea.area[0] === undefined || greaterArea.area === undefined)
+      //   //   return { areaID: 0, area: "", greaterAreaID: greaterArea.greaterAreaID, createdAt: new Date(), updatedAt: new Date() };
+      //   // else
+      //   greaterArea.area.map((area) => {
+      //     // if (area.street[0] === undefined) return { areaID: 0, area: "", greaterAreaID: 0, createdAt: new Date(), updatedAt: new Date() };
+      //     return {
+      //       areaID: area.areaID,
+      //       area: area.area,
+      //       greaterAreaID: area.greaterAreaID,
+      //       createdAt: area.createdAt,
+      //       updatedAt: area.updatedAt,
+      //     };
+      //   });
+      // });
+
+      const _area = await ctx.db.area.findMany({
         where: {
-          AND: searchConditions,
-        },
-        include: {
-          area: {
-            include: {
-              street: true,
-            },
+          greaterAreaID: {
+            in: greaterArea_.map((greaterArea) => greaterArea.greaterAreaID),
           },
         },
         orderBy: {
-          greaterAreaID: "asc",
+          areaID: "asc",
+        },
+        select: {
+          areaID: true,
+          area: true,
+          greaterAreaID: true,
+          createdAt: true,
+          updatedAt: true,
         },
       });
 
-      //retrieve all the areas data
-      const area_ = all_data_for_areas_streets.map((greaterArea) => {
-        greaterArea.area.map((area) => {
-          return {
-            areaID: area.areaID,
-            area: area.area,
-            greaterAreaID: area.greaterAreaID,
-            createdAt: area.createdAt,
-            updatedAt: area.updatedAt,
-          };
-        });
+      const _street = await ctx.db.street.findMany({
+        where: {
+          areaID: {
+            in: _area.map((area) => area.areaID),
+          },
+        },
+        orderBy: {
+          streetID: "asc",
+        },
+        select: {
+          streetID: true,
+          street: true,
+          areaID: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       });
 
+      // type Street_ = {
+      //   streetID: number;
+      //   street: string;
+      //   areaID: number;
+      //   createdAt: Date;
+      //   updatedAt: Date;
+      // };
+
       //retrieve all the streets data
-      const street_ = all_data_for_areas_streets.map((greaterArea) => {
-        greaterArea.area.map((area) => {
-          area.street.map((street) => {
-            return {
-              streetID: street.streetID,
-              street: street.street,
-              areaID: street.areaID,
-              createdAt: street.createdAt,
-              updatedAt: street.updatedAt,
-            };
-          });
-        });
-      });
+      // const street_ = all_data_for_areas_streets.map((greaterArea) => {
+      //   // if (greaterArea.area[0] === undefined || greaterArea === undefined)
+      //   //   return { streetID: 0, street: "", areaID: 0, createdAt: new Date(), updatedAt: new Date() };
+      //   // else
+      //   greaterArea.area.map((area) => {
+      //     if (area.street[0] === undefined) return { streetID: 0, street: "", areaID: 0, createdAt: new Date(), updatedAt: new Date() };
+      //     else
+      //       area.street.map((street) => {
+      //         if (street.street === undefined) return { streetID: 0, street: "", areaID: 0, createdAt: new Date(), updatedAt: new Date() };
+      //         return {
+      //           streetID: street.streetID,
+      //           street: street.street,
+      //           areaID: street.areaID,
+      //           createdAt: street.createdAt,
+      //           updatedAt: street.updatedAt,
+      //         };
+      //       });
+      //   });
+      // });
 
       // const greaterArea_ = await ctx.db.greaterArea.findMany({
       //   where: {
@@ -693,8 +755,8 @@ export const geographicRouter = createTRPCRouter({
 
       return {
         greaterAreas: greaterArea_,
-        areas: area_,
-        streets: street_,
+        areas: _area,
+        streets: _street,
       };
     }),
 });

@@ -484,9 +484,9 @@ const User: NextPage = () => {
         id: area.id,
         area: area.area,
       }));
-      setGreaterAreaList(greaterAreas);
+      //setGreaterAreaList(greaterAreas);
       //order the greaterAreaList from smallest to largest id
-      setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+      setGreaterAreaList(greaterAreas.sort((a, b) => a.id - b.id));
       setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: true })));
     } else if (selectionCategory === "clear") {
       setGreaterAreaOption("Clear All");
@@ -519,10 +519,10 @@ const User: NextPage = () => {
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
       } else {
         const updatedGreaterAreaList = greaterAreaList.filter((area) => area.id !== id);
-        setGreaterAreaList(updatedGreaterAreaList);
+        //setGreaterAreaList(updatedGreaterAreaList);
 
         //order the greaterAreaList from smallest to largest id
-        setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+        setGreaterAreaList(updatedGreaterAreaList.sort((a, b) => a.id - b.id));
         setGreaterAreaListOptions(greaterAreaListOptions.map((area) => (area.id === id ? { ...area, state: false } : area)));
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
@@ -792,6 +792,7 @@ const User: NextPage = () => {
       setComments(userData.comments ?? "");
       setImage(userData.image ?? "");
       setStreet(userData.addressStreet ?? "");
+      setSendUserDetails(false);
 
       if (userData.southAfricanID === "No ID") {
         setSouthAfricanIDOption("No ID");
@@ -856,6 +857,7 @@ const User: NextPage = () => {
 
       setStatusListOptions(statusListOptions.map((item) => (item.status === userData.status ? { ...item, state: true } : { ...item, state: false })));
 
+      console.log("Greater Areas in update: ", greaterAreas);
       setGreaterAreaList(greaterAreas ?? "Select here");
       const greaterAreasIDs = greaterAreas.map((area) => area.id);
 
@@ -926,6 +928,8 @@ const User: NextPage = () => {
           area: area.greaterArea.greaterArea,
         })) ?? [];
 
+      console.log("Greater Areas in update useeffect: ", greaterAreas);
+
       setGreaterAreaList(greaterAreas ?? "Select here");
       setStreet(userData.addressStreet ?? "");
 
@@ -959,10 +963,12 @@ const User: NextPage = () => {
   const handleUpdateUser = async () => {
     setIsLoading(true);
     const greaterAreaIDList = greaterAreaList.sort((a, b) => a.id - b.id).map((area) => (area.id ? area.id : 0));
+    console.log("Greater Area ID List before update: ", greaterAreaIDList);
     //console.log("Search Query!!!!: ", query);
 
     const user = await updateUser.mutateAsync({
       id: id,
+      userID: userID,
       firstName: firstName,
       email: email,
       surname: surname,
@@ -1042,6 +1048,7 @@ const User: NextPage = () => {
     setGreaterAreaList([]);
     setRoleListOptions(roleListOptions.map((item) => ({ role: item.role, state: false })));
     setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
+    setSendUserDetails(false);
 
     setDeselectStatus("No");
 
@@ -1085,6 +1092,7 @@ const User: NextPage = () => {
     setDeselectPreferredCommunication("No");
     setDeselectRole("No");
     setDeselectStatus("No");
+    setSendUserDetails(false);
     //set Status to Active
     setStatusListOptions(statusListOptions.map((item) => (item.status === "Active" ? { ...item, state: true } : { ...item, state: false })));
     //setStatusListOptions(statusListOptions.map((item) => ({ status: item.status, state: false })));
@@ -1178,6 +1186,8 @@ const User: NextPage = () => {
         setIsCreateButtonModalOpen(true);
       }
     }
+
+    setSendUserDetails(false);
     setIsLoading(false);
 
     // return newUser_;
@@ -1327,6 +1337,7 @@ const User: NextPage = () => {
             area: area.greaterArea.greaterArea,
           })) ?? [];
 
+        console.log("Greater Areas in update, view and create useeffect: ", greaterAreas);
         setGreaterAreaList(greaterAreas ?? "");
       }
       if (isViewProfilePage) {
@@ -1336,8 +1347,8 @@ const User: NextPage = () => {
             id: area.greaterAreaID,
             area: area.greaterArea.greaterArea,
           })) ?? [];
-
         setGreaterAreaList(greaterAreas ?? "");
+
         //console.log("Select one");
         //Make sure thet area and street options have a value
         // if ((userData.addressAreaID === 0 || userData.addressAreaID === undefined) && !isUpdate) {
@@ -1874,7 +1885,7 @@ const User: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update User Data" : "Create New User"}</b>
                 <div className="flex justify-center">
@@ -2423,7 +2434,7 @@ const User: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="3xl:top-[8.5%] sticky top-[11%] z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky top-[11%] z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">User Profile</div>
                 <div className="flex justify-center">

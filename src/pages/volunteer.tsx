@@ -466,9 +466,9 @@ const Volunteer: NextPage = () => {
         id: area.id,
         area: area.area,
       }));
-      setGreaterAreaList(greaterAreas);
+      //setGreaterAreaList(greaterAreas);
       //order the greaterAreaList from smallest to largest id
-      setGreaterAreaList(greaterAreaList.sort((a, b) => a.id - b.id));
+      setGreaterAreaList(greaterAreas.sort((a, b) => a.id - b.id));
       setGreaterAreaListOptions(greaterAreaListOptions.map((area) => ({ ...area, state: true })));
     } else if (selectionCategory === "clear") {
       setGreaterAreaOption("Clear All");
@@ -1003,6 +1003,7 @@ const Volunteer: NextPage = () => {
       setRoleList(userData.role ?? "Select here");
       setCollaboratorOrg(userData.collaboratorOrg ?? "");
       setClinicList(clinicDates);
+      setSendVolunteerDetails(false);
 
       const greaterAreasIDs = greaterAreas.map((area) => area.id);
 
@@ -1230,6 +1231,7 @@ const Volunteer: NextPage = () => {
     setClinicList([]);
     setRoleList([]);
     setGreaterAreaList([]);
+    setSendVolunteerDetails(false);
     setIsUpdate(false);
     setIsCreate(false);
     setIsLoading(false);
@@ -1260,6 +1262,7 @@ const Volunteer: NextPage = () => {
     setAddressFreeForm("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setClinicList([]);
+    setSendVolunteerDetails(false);
 
     setGreaterAreaListOptions(greaterAreaOptions.map((area) => ({ id: area.greaterAreaID, area: area.greaterArea, state: false })));
     setRoleListOptions(roleOptions.map((role) => ({ role: role, state: false })));
@@ -1359,6 +1362,7 @@ const Volunteer: NextPage = () => {
         setIsCreateButtonModalOpen(true);
       }
     }
+    setSendVolunteerDetails(false);
     setIsLoading(false);
     // return newUser_;
   };
@@ -2297,7 +2301,7 @@ const Volunteer: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Volunteer Data" : "Create New Volunteer"}</b>
                 <div className="flex justify-center">
@@ -2896,7 +2900,7 @@ const Volunteer: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Volunteer Profile</div>
                 <div className="flex justify-center">

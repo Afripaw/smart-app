@@ -875,21 +875,35 @@ const Pet: NextPage = () => {
 
   const [breedOptions, setBreedOptions] = useState([""]);
 
+  // useEffect(() => {
+  //   console.group("Species: ", speciesOption);
+  //   console.log("breedOptions before: ", breedOptions);
+  //   if (speciesOption == "Cat") {
+  //     //setColourOption("Select one");
+  //     setBreedOptions(breedCatOptions);
+  //     // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+  //   } else if (speciesOption == "Dog") {
+  //     //setColourOption("Select one");
+  //     setBreedOptions(breedDogOptions);
+  //     // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+  //   }
+  //   console.log("breedListOptions after: ", breedListOptions);
+  //   console.log("breedOptions after: ", breedOptions);
+  // }, [speciesOption, isUpdate, breedList]);
+
   useEffect(() => {
-    console.group("Species: ", speciesOption);
-    console.log("breedOptions before: ", breedOptions);
+    //check if any of the breedListOptions are selected
+    const selected = breedListOptions.some((breed) => breed.state === true);
+
     if (speciesOption == "Cat") {
-      //setColourOption("Select one");
       setBreedOptions(breedCatOptions);
-      // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-    } else if (speciesOption == "Dog") {
-      //setColourOption("Select one");
+      setBreedListOptions(breedCatOptions.map((breed) => ({ breed: breed, state: false })));
+    } else if (speciesOption == "Dog" && !selected) {
+      console.log("Breed Dog Options when changing species: ", breedDogOptions);
       setBreedOptions(breedDogOptions);
-      // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      setBreedListOptions(breedDogOptions.map((breed) => ({ breed: breed, state: false })));
     }
-    console.log("breedListOptions after: ", breedListOptions);
-    console.log("breedOptions after: ", breedOptions);
-  }, [speciesOption, isUpdate, breedList]);
+  }, [speciesOption]);
 
   const handleBreed = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
     if (selectionCategory === "allSelected") {
@@ -1037,21 +1051,41 @@ const Pet: NextPage = () => {
 
   const [colourOptions, setColourOptions] = useState([""]);
 
+  // useEffect(() => {
+  //   console.log("Changing colour options");
+  //   //console.group("Species: ", speciesOption);
+  //   //console.log("colourOptions before: ", colourOptions);
+  //   if (speciesOption == "Cat") {
+  //     console.log("Setting colour options to cat");
+  //     //setColourOption("Select one");
+  //     setColourOptions(colourCatOptions);
+  //     //setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: false })));
+  //     // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+  //   } else if (speciesOption == "Dog") {
+  //     //setColourOption("Select one");
+  //     console.log("Setting colour options to dog");
+  //     setColourOptions(colourDogOptions);
+  //     // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+  //   }
+  //   // console.log("colourListOptions after: ", colourListOptions);
+  //   // console.log("colourOptions after: ", colourOptions);
+  // }, [isUpdate, colourList]);
+
   useEffect(() => {
-    console.group("Species: ", speciesOption);
-    console.log("colourOptions before: ", colourOptions);
-    if (speciesOption == "Cat") {
-      //setColourOption("Select one");
-      setColourOptions(colourCatOptions);
-      // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-    } else if (speciesOption == "Dog") {
-      //setColourOption("Select one");
-      setColourOptions(colourDogOptions);
-      // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+    //const selected = colourListOptions.some((colour) => colour.state === true);
+    //check if the current colourListOptions has a specific species colours
+    const colours = colourListOptions.map((colour) => colour.colour);
+    // const catColours = colours.includes((colour) => colour === "Calico (Tri-Colour)");
+
+    //check if the colours are the same as the cat colours
+    const catColours = colours.some((colour) => colour == "Calico (Tri-Colour)");
+    console.log("Cat Colours: ", catColours);
+    if (speciesOption == "Cat" && !catColours) {
+      setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: false })));
+    } else if (speciesOption == "Dog" && catColours) {
+      setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: false })));
     }
-    console.log("colourListOptions after: ", colourListOptions);
-    console.log("colourOptions after: ", colourOptions);
-  }, [speciesOption, isUpdate, colourList]);
+  }, [speciesOption]);
 
   const handleColour = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
     if (selectionCategory === "allSelected") {
@@ -1246,6 +1280,14 @@ const Pet: NextPage = () => {
         : value}
     </button>
   );
+
+  //if sterilisation outcome is actioned the sterilisation yes
+  useEffect(() => {
+    if (sterilisationOutcomeOption === "Actioned") {
+      setSterilisationStatusOption("Yes");
+      setSterilisationStatusDate(new Date());
+    }
+  }, [sterilisationOutcomeOption]);
 
   //STERILISATION REQUESTED
   const handleToggleSterilisationRequested = () => {
@@ -1629,6 +1671,23 @@ const Pet: NextPage = () => {
     }
   };
 
+  //Membership from non to standard card holder
+  useEffect(() => {
+    // console.log("Helllo this is Membership Type: ", membershipTypeOption);
+    // console.log("Helllo this is Sterilisation Status: ", sterilisationStatusOption);
+    // console.log("Helllo this is Clinic List: ", clinicList);
+    // console.log("Helllo this is Qualifies with attendance: ", qualifiesWithAttendance(6));
+    if (
+      qualifiesWithAttendance(6) &&
+      (membershipTypeOption === "Non-card Holder" || membershipTypeOption === "Non-card holder") &&
+      sterilisationStatusOption === "Yes"
+    ) {
+      // console.log("Yesss we are changing it to standard card holder");
+      setMembershipTypeOption("Standard card holder");
+    }
+  }, [clinicList, sterilisationStatusOption]);
+
+  //Checks if card status of membership is lapsed or active
   const membershipStatus = (): string => {
     if (membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder") {
       const currentDate = new Date();
@@ -1854,7 +1913,7 @@ const Pet: NextPage = () => {
       return parseInt(year.slice(19, 23)) >= pastDate.getFullYear();
     });
 
-    console.log("receivedKennelInLast3Years!!!!: ", receivedKennelInLast3Years);
+    //console.log("receivedKennelInLast3Years!!!!: ", receivedKennelInLast3Years);
     if (membershipTypeOption !== "Non-card holder" && filteredClinics.length >= 9 && !receivedKennelInLast3Years) {
       return "Yes";
     } else {
@@ -2092,10 +2151,14 @@ const Pet: NextPage = () => {
   //   }
   // }, []);
 
-  //checks if deworming was more than 6 months ago
+  //checks if deworming was more than 3 months ago if cat and 6 months ago if dog
   const isMoreThanSixMonthsAgo = (date: Date): boolean => {
     const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    if (speciesOption === "Cat") {
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 3);
+    } else {
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    }
 
     return date < sixMonthsAgo;
   };
@@ -2182,6 +2245,8 @@ const Pet: NextPage = () => {
         setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
       }
 
+      console.log("BREED LIST: ", userData?.breed);
+
       if (userData?.species == "Cat") {
         //setColourOption("Select one");
         setColourOptions(colourCatOptions);
@@ -2192,6 +2257,7 @@ const Pet: NextPage = () => {
           })),
         );
 
+        console.log("Breed options cat!!!!!: ", userData.breed);
         setBreedOptions(breedCatOptions);
         setBreedListOptions(
           breedCatOptions.map((breed) => ({
@@ -2210,6 +2276,8 @@ const Pet: NextPage = () => {
           })),
         );
 
+        console.log("Breed options dog!!!!!: ", userData.breed);
+        console.log("All breed options dog!!!!!: ", breedDogOptions);
         setBreedOptions(breedDogOptions);
         setBreedListOptions(
           breedDogOptions.map((breed) => ({
@@ -2449,43 +2517,48 @@ const Pet: NextPage = () => {
         })),
       );
 
-      if (userData?.species == "Cat") {
-        //setColourOption("Select one");
-        setColourOptions(colourCatOptions);
-        setColourListOptions(
-          colourCatOptions.map((colour) => ({
-            colour: colour,
-            state: userData.colour.includes(colour),
-          })),
-        );
+      ////////////////////////////Commented out because maybe overriding pet colour and breed options (4 May 2024)
+      // console.log("Updating colouroptions because of update variable");
+      // if (userData?.species == "Cat") {
+      //   //setColourOption("Select one");
 
-        // setBreedOptions(breedCatOptions);
-        // setBreedListOptions(
-        //   breedCatOptions.map((breed) => ({
-        //     breed: breed,
-        //     state: userData.breed.includes(breed),
-        //   })),
-        // );
-        // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-      } else if (userData?.species == "Dog") {
-        //setColourOption("Select one");
-        setColourOptions(colourDogOptions);
-        setColourListOptions(
-          colourDogOptions.map((colour) => ({
-            colour: colour,
-            state: userData.colour.includes(colour),
-          })),
-        );
+      //   console.log("Updating colouroptions to cats because of update variable");
+      //   setColourOptions(colourCatOptions);
+      //   setColourListOptions(
+      //     colourCatOptions.map((colour) => ({
+      //       colour: colour,
+      //       state: userData.colour.includes(colour),
+      //     })),
+      //   );
 
-        // setBreedOptions(breedDogOptions);
-        // setBreedListOptions(
-        //   breedDogOptions.map((breed) => ({
-        //     breed: breed,
-        //     state: userData.breed.includes(breed),
-        //   })),
-        // );
-        // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-      }
+      //   // setBreedOptions(breedCatOptions);
+      //   // setBreedListOptions(
+      //   //   breedCatOptions.map((breed) => ({
+      //   //     breed: breed,
+      //   //     state: userData.breed.includes(breed),
+      //   //   })),
+      //   // );
+      //   // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      // } else if (userData?.species == "Dog") {
+      //   console.log("Updating colouroptions to dogs because of update variable");
+      //   //setColourOption("Select one");
+      //   setColourOptions(colourDogOptions);
+      //   setColourListOptions(
+      //     colourDogOptions.map((colour) => ({
+      //       colour: colour,
+      //       state: userData.colour.includes(colour),
+      //     })),
+      //   );
+
+      //   // setBreedOptions(breedDogOptions);
+      //   // setBreedListOptions(
+      //   //   breedDogOptions.map((breed) => ({
+      //   //     breed: breed,
+      //   //     state: userData.breed.includes(breed),
+      //   //   })),
+      //   // );
+      //   // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      // }
 
       setKennelListOptions(
         kennelsReceivedOptions.map((kennel) => ({
@@ -2737,86 +2810,91 @@ const Pet: NextPage = () => {
     setIsUpdate(false);
   };
 
-  useEffect(() => {
-    if (isCreate) {
-      if (speciesOption == "Cat") {
-        //setColourOption("Select one");
-        setColourOptions(colourCatOptions);
-        setColourListOptions(
-          colourCatOptions.map((colour) => ({
-            colour: colour,
-            state: false,
-          })),
-        );
+  // useEffect(() => {
+  //   if (isCreate && !isUpdate) {
+  //     console.log("We have changed the species and will change the breed and colour options");
+  //     if (speciesOption == "Cat") {
+  //       //setColourOption("Select one");
+  //       setColourOptions(colourCatOptions);
+  //       setColourListOptions(
+  //         colourCatOptions.map((colour) => ({
+  //           colour: colour,
+  //           state: false,
+  //         })),
+  //       );
 
-        setBreedOptions(breedCatOptions);
-        setBreedListOptions(
-          breedCatOptions.map((breed) => ({
-            breed: breed,
-            state: false,
-          })),
-        );
-        // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-      } else if (speciesOption == "Dog") {
-        //setColourOption("Select one");
-        setColourOptions(colourDogOptions);
-        setColourListOptions(
-          colourDogOptions.map((colour) => ({
-            colour: colour,
-            state: false,
-          })),
-        );
+  //       console.log("Changing the colours to cat ones");
 
-        setBreedOptions(breedDogOptions);
-        setBreedListOptions(
-          breedDogOptions.map((breed) => ({
-            breed: breed,
-            state: false,
-          })),
-        );
-        // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-      }
-    }
-    // else if (isUpdate) {
-    //   if (speciesOption == "Cat") {
-    //     //setColourOption("Select one");
-    //     setColourOptions(colourCatOptions);
-    //     setColourListOptions(
-    //       colourCatOptions.map((colour) => ({
-    //         colour: colour,
-    //         state: colourList.includes(colour),
-    //       })),
-    //     );
+  //       setBreedOptions(breedCatOptions);
+  //       setBreedListOptions(
+  //         breedCatOptions.map((breed) => ({
+  //           breed: breed,
+  //           state: false,
+  //         })),
+  //       );
+  //       // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+  //     } else if (speciesOption == "Dog") {
+  //       //setColourOption("Select one");
+  //       setColourOptions(colourDogOptions);
+  //       setColourListOptions(
+  //         colourDogOptions.map((colour) => ({
+  //           colour: colour,
+  //           state: false,
+  //         })),
+  //       );
 
-    //     setBreedOptions(breedCatOptions);
-    //     setBreedListOptions(
-    //       breedCatOptions.map((breed) => ({
-    //         breed: breed,
-    //         state: breedList.includes(breed),
-    //       })),
-    //     );
-    //     // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-    //   } else if (speciesOption == "Dog") {
-    //     //setColourOption("Select one");
-    //     setColourOptions(colourDogOptions);
-    //     setColourListOptions(
-    //       colourDogOptions.map((colour) => ({
-    //         colour: colour,
-    //         state: colourList.includes(colour),
-    //       })),
-    //     );
+  //       console.log("Changing the colours to dog ones");
 
-    //     setBreedOptions(breedDogOptions);
-    //     setBreedListOptions(
-    //       breedDogOptions.map((breed) => ({
-    //         breed: breed,
-    //         state: breedList.includes(breed),
-    //       })),
-    //     );
-    //     // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-    //   }
-    // }
-  }, [speciesOption]);
+  //       setBreedOptions(breedDogOptions);
+  //       setBreedListOptions(
+  //         breedDogOptions.map((breed) => ({
+  //           breed: breed,
+  //           state: false,
+  //         })),
+  //       );
+  //       // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+  //     }
+  //   }
+  //   // else if (isUpdate) {
+  //   //   if (speciesOption == "Cat") {
+  //   //     //setColourOption("Select one");
+  //   //     setColourOptions(colourCatOptions);
+  //   //     setColourListOptions(
+  //   //       colourCatOptions.map((colour) => ({
+  //   //         colour: colour,
+  //   //         state: colourList.includes(colour),
+  //   //       })),
+  //   //     );
+
+  //   //     setBreedOptions(breedCatOptions);
+  //   //     setBreedListOptions(
+  //   //       breedCatOptions.map((breed) => ({
+  //   //         breed: breed,
+  //   //         state: breedList.includes(breed),
+  //   //       })),
+  //   //     );
+  //   //     // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+  //   //   } else if (speciesOption == "Dog") {
+  //   //     //setColourOption("Select one");
+  //   //     setColourOptions(colourDogOptions);
+  //   //     setColourListOptions(
+  //   //       colourDogOptions.map((colour) => ({
+  //   //         colour: colour,
+  //   //         state: colourList.includes(colour),
+  //   //       })),
+  //   //     );
+
+  //   //     setBreedOptions(breedDogOptions);
+  //   //     setBreedListOptions(
+  //   //       breedDogOptions.map((breed) => ({
+  //   //         breed: breed,
+  //   //         state: breedList.includes(breed),
+  //   //       })),
+  //   //     );
+  //   //     // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+  //   //   }
+  //   // }
+  // }, [speciesOption]);
   //-------------------------------NEW USER-----------------------------------------
 
   const handleNewUser = async () => {
@@ -3180,8 +3258,11 @@ const Pet: NextPage = () => {
           })),
         );
 
+        console.log("This code may not execute now at all");
+
         if (petData?.species == "Cat") {
           //setColourOption("Select one");
+          console.log("Changing the colours to cat ones!!!");
           setColourOptions(colourCatOptions);
           setColourListOptions(
             colourCatOptions.map((colour) => ({
@@ -3200,6 +3281,8 @@ const Pet: NextPage = () => {
           // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
         } else if (petData?.species == "Dog") {
           //setColourOption("Select one");
+
+          console.log("Changing the colours to dog ones!!!");
           setColourOptions(colourDogOptions);
           setColourListOptions(
             colourDogOptions.map((colour) => ({
@@ -3285,43 +3368,44 @@ const Pet: NextPage = () => {
         })),
       );
 
-      if (petData?.species == "Cat") {
-        //setColourOption("Select one");
-        setColourOptions(colourCatOptions);
-        setColourListOptions(
-          colourCatOptions.map((colour) => ({
-            colour: colour,
-            state: petData.colour.includes(colour) ?? false,
-          })),
-        );
+      /////////////////////////////Commented out because maybe overriding the breed and colour options (4 May 2024)
+      // if (petData?.species == "Cat") {
+      //   //setColourOption("Select one");
+      //   setColourOptions(colourCatOptions);
+      //   setColourListOptions(
+      //     colourCatOptions.map((colour) => ({
+      //       colour: colour,
+      //       state: petData.colour.includes(colour) ?? false,
+      //     })),
+      //   );
 
-        setBreedOptions(breedCatOptions);
-        setBreedListOptions(
-          breedCatOptions.map((breed) => ({
-            breed: breed,
-            state: petData.breed.includes(breed) ?? false,
-          })),
-        );
-        // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-      } else if (petData?.species == "Dog") {
-        //setColourOption("Select one");
-        setColourOptions(colourDogOptions);
-        setColourListOptions(
-          colourDogOptions.map((colour) => ({
-            colour: colour,
-            state: petData.colour.includes(colour) ?? false,
-          })),
-        );
+      //   setBreedOptions(breedCatOptions);
+      //   setBreedListOptions(
+      //     breedCatOptions.map((breed) => ({
+      //       breed: breed,
+      //       state: petData.breed.includes(breed) ?? false,
+      //     })),
+      //   );
+      //   // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      // } else if (petData?.species == "Dog") {
+      //   //setColourOption("Select one");
+      //   setColourOptions(colourDogOptions);
+      //   setColourListOptions(
+      //     colourDogOptions.map((colour) => ({
+      //       colour: colour,
+      //       state: petData.colour.includes(colour) ?? false,
+      //     })),
+      //   );
 
-        setBreedOptions(breedDogOptions);
-        setBreedListOptions(
-          breedDogOptions.map((breed) => ({
-            breed: breed,
-            state: petData.breed.includes(breed) ?? false,
-          })),
-        );
-        // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-      }
+      //   setBreedOptions(breedDogOptions);
+      //   setBreedListOptions(
+      //     breedDogOptions.map((breed) => ({
+      //       breed: breed,
+      //       state: petData.breed.includes(breed) ?? false,
+      //     })),
+      //   );
+      //   // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+      // }
 
       setKennelListOptions(
         kennelsReceivedOptions.map((kennel) => ({
@@ -3978,7 +4062,9 @@ const Pet: NextPage = () => {
                                   pet?.lastDeworming?.getFullYear().toString()}
                               </td>
                               <td className="border px-2 py-1">
-                                {Number(pet?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - 6)) ? "Yes" : "No"}
+                                {Number(pet?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - (pet?.species == "Cat" ? 3 : 6)))
+                                  ? "Yes"
+                                  : "No"}
                               </td>
 
                               <td className="border px-2 py-1">
@@ -4119,7 +4205,7 @@ const Pet: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Pet Data" : "Add New Pet"}</b>
                 <div className="flex justify-center">
@@ -4790,7 +4876,7 @@ const Pet: NextPage = () => {
                         </button>
                         {vaccinationShot2 && (
                           <div ref={vaccinationShot2Ref} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
-                            <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
                               {vaccinationShot2Options.map((option) => (
                                 <li key={option} onClick={() => handleVaccinationShot2Option(option)}>
                                   <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
@@ -5035,7 +5121,8 @@ const Pet: NextPage = () => {
                       <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
                         <Info size={24} className="block" />
                         <span className="absolute left-[90%] top-[90%] hidden w-[12rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                          A pet is due for deworming if its last deworming was more than 6 months ago.
+                          A dog is due for deworming if its last deworming was more than 6 months ago. A cat is due for deworming if its last deworming was more
+                          than 3 months ago.
                         </span>
                       </div>
                     )}
@@ -5355,7 +5442,7 @@ const Pet: NextPage = () => {
               </div>
             ) : (
               <>
-                <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+                <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
                   <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                     <div className=" text-2xl">Pet Profile</div>
                     <div className="flex justify-center">
@@ -5479,10 +5566,11 @@ const Pet: NextPage = () => {
                         <></>
                       )}
 
-                      {sterilisationRequestedOption === "Yes" ? (
+                      {/* sterilisationRequestedOption */}
+                      {sterilisationStatusOption === "No" ? (
                         <div className="mb-2 flex items-center">
                           <b className="mr-3">Sterilisation Request Signed At:</b>{" "}
-                          {sterilisationStatusOption != "Yes" ? (
+                          {sterilisationStatusOption === "No" ? (
                             <>{sterilisationRequestSignedOption === "Select one" ? user?.sterilisedRequestSigned : sterilisationRequestSignedOption}</>
                           ) : (
                             "Not Applicable"
@@ -5492,10 +5580,10 @@ const Pet: NextPage = () => {
                         <></>
                       )}
 
-                      {sterilisationRequestedOption === "Yes" ? (
+                      {sterilisationStatusOption === "No" ? (
                         <div className="mb-2 flex items-center">
                           <b className="mr-3">Sterilisation Outcome:</b>{" "}
-                          {sterilisationStatusOption != "Yes" ? (
+                          {sterilisationStatusOption === "No" ? (
                             <>{sterilisationOutcomeOption === "Select one" ? user?.sterilisationOutcome : sterilisationOutcomeOption}</>
                           ) : (
                             "Not Applicable"
@@ -5626,7 +5714,8 @@ const Pet: NextPage = () => {
                           <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
                             <Info size={24} className="block" />
                             <span className="absolute left-[90%] top-[90%] hidden w-[14rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                              A pet is due for deworming if its last deworming was more than 6 months ago.
+                              A dog is due for deworming if its last deworming was more than 6 months ago. A cat is due for deworming if its last deworming was
+                              more than 3 months ago.
                             </span>
                           </div>
                         )}

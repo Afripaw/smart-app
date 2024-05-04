@@ -88,6 +88,7 @@ export const UserRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string(),
+        userID: z.number(),
         firstName: z.string(),
         email: z.string(),
         password: z.string(),
@@ -123,13 +124,13 @@ export const UserRouter = createTRPCRouter({
             password: ctx.security.hash(input.password),
             surname: input.surname,
             mobile: input.mobile,
-            addressGreaterArea: {
-              createMany: {
-                data: input.addressGreaterAreaID.map((areaID) => ({
-                  greaterAreaID: areaID,
-                })),
-              },
-            },
+            // addressGreaterArea: {
+            //   createMany: {
+            //     data: input.addressGreaterAreaID.map((areaID) => ({
+            //       greaterAreaID: areaID,
+            //     })),
+            //   },
+            // },
             addressStreet: input.addressStreet,
             southAfricanID: input.southAfricanID,
             //addressGreaterAreaID: input.addressGreaterAreaID,
@@ -177,6 +178,34 @@ export const UserRouter = createTRPCRouter({
             updatedAt: new Date(),
           },
         });
+
+        //greater areas
+        //delete all the greater areas
+        await ctx.db.greaterAreaOnUser.deleteMany({
+          where: {
+            userID: input.userID,
+          },
+        });
+
+        //create new greater areas
+        const greaterAreaRelationships = input.addressGreaterAreaID.map(async (areaID) => {
+          await ctx.db.greaterAreaOnUser.create({
+            data: {
+              user: {
+                connect: {
+                  userID: user.userID,
+                },
+              },
+              greaterArea: {
+                connect: {
+                  greaterAreaID: areaID,
+                },
+              },
+            },
+          });
+        });
+
+        await Promise.all(greaterAreaRelationships);
         return user;
       } else {
         const user = await ctx.db.user.update({
@@ -188,13 +217,13 @@ export const UserRouter = createTRPCRouter({
             email: input.email,
             surname: input.surname,
             mobile: input.mobile,
-            addressGreaterArea: {
-              createMany: {
-                data: input.addressGreaterAreaID.map((areaID) => ({
-                  greaterAreaID: areaID,
-                })),
-              },
-            },
+            // addressGreaterArea: {
+            //   createMany: {
+            //     data: input.addressGreaterAreaID.map((areaID) => ({
+            //       greaterAreaID: areaID,
+            //     })),
+            //   },
+            // },
             addressStreet: input.addressStreet,
             southAfricanID: input.southAfricanID,
             //addressGreaterAreaID: input.addressGreaterAreaID,
@@ -234,6 +263,35 @@ export const UserRouter = createTRPCRouter({
             updatedAt: new Date(),
           },
         });
+
+        //greater areas
+        //delete all the greater areas
+        await ctx.db.greaterAreaOnUser.deleteMany({
+          where: {
+            userID: input.userID,
+          },
+        });
+
+        //create new greater areas
+        const greaterAreaRelationships = input.addressGreaterAreaID.map(async (areaID) => {
+          await ctx.db.greaterAreaOnUser.create({
+            data: {
+              user: {
+                connect: {
+                  userID: user.userID,
+                },
+              },
+              greaterArea: {
+                connect: {
+                  greaterAreaID: areaID,
+                },
+              },
+            },
+          });
+        });
+
+        await Promise.all(greaterAreaRelationships);
+
         return user;
       }
     }),

@@ -515,7 +515,7 @@ const Treatment: NextPage = () => {
     };
   }, []);
 
-  const categoryOptions = ["Pet clinic, Infield", "Pet clinic, Admission to TEARS", "Reported outside of pet clinic"];
+  const categoryOptions = ["Pet clinic, Infield", "Pet clinic, Admission to TEARS", "Pet Clinic, Mobile to Collect", "Reported outside of pet clinic"];
 
   //TYPE
   const handleToggleType = () => {
@@ -1407,7 +1407,7 @@ const Treatment: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Pet Treatment Data" : "Add Pet Treatment"}</b>
                 <div className="flex justify-center">
@@ -1640,7 +1640,7 @@ const Treatment: NextPage = () => {
               </div>
             ) : (
               <>
-                <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+                <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
                   <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                     <div className=" text-2xl">Pet Treatment Profile</div>
                     <div className="flex justify-center">

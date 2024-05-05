@@ -139,29 +139,31 @@ model pet {
 
     petTreatments petTreatment[]
 
-    species                 String
-    sex                     String
-    age                     String
-    breed                   String[]
-    size                    String?
-    colour                  String[]
-    markings                String?
-    status                  String
-    sterilisedStatus        DateTime
-    sterilisedRequested     DateTime?
-    sterilisedRequestSigned String?
-    sterilisationOutcome    String?
-    vaccinationShot1        DateTime
-    vaccinationShot2        DateTime?
-    vaccinationShot3        DateTime?
-    clinicsAttended         petOnPetClinic[]
-    lastDeworming           DateTime?
-    membership              String
-    cardStatus              String?
-    kennelReceived          String[]
-    comments                String?
-    createdAt               DateTime         @default(now())
-    updatedAt               DateTime         @updatedAt
+    species                  String
+    sex                      String
+    age                      String
+    breed                    String[]
+    size                     String?
+    colour                   String[]
+    markings                 String?
+    status                   String
+    sterilisedStatus         DateTime
+    sterilisedRequested      DateTime?
+    sterilisedRequestSigned  String?
+    sterilisationOutcome     String?
+    sterilisationOutcomeDate DateTime?
+    vaccinationShot1         DateTime
+    vaccinationShot2         DateTime?
+    vaccinationShot3         DateTime?
+    clinicsAttended          petOnPetClinic[]
+    lastDeworming            DateTime?
+    membership               String
+    membershipDate           DateTime?
+    cardStatus               String?
+    kennelReceived           String[]
+    comments                 String?
+    createdAt                DateTime         @default(now())
+    updatedAt                DateTime         @updatedAt
 }
 
 model petClinic {

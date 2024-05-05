@@ -127,12 +127,14 @@ const Pet: NextPage = () => {
         sterilisedRequested: Date;
         sterilisedRequestSigned: string;
         sterilisationOutcome: string;
+        sterilisationOutcomeDate: Date;
         vaccinationShot1: Date;
         vaccinationShot2: Date;
         vaccinationShot3: Date;
         // clinicsAttended: number[];
         lastDeworming: Date; // Or string if you are handling date as a string before conversion.
         membership: string;
+        membershipDate: Date;
         cardStatus: string;
         kennelReceived: string[];
         comments: string;
@@ -691,6 +693,7 @@ const Pet: NextPage = () => {
   const [sterilisationOutcomeOption, setSterilisationOutcomeOption] = useState("Select one");
   const sterilisationOutcomeRef = useRef<HTMLDivElement>(null);
   const btnSterilisationOutcomeRef = useRef<HTMLButtonElement>(null);
+  const [sterilisationOutcomeDate, setSterilisationOutcomeDate] = useState(new Date());
 
   const [vaccinationShot1, setVaccinationShot1] = useState(false);
   const [vaccinationShot1Option, setVaccinationShot1Option] = useState("Select one");
@@ -714,6 +717,7 @@ const Pet: NextPage = () => {
   const [membershipTypeOption, setMembershipTypeOption] = useState("Select one");
   const membershipTypeRef = useRef<HTMLDivElement>(null);
   const btnMembershipTypeRef = useRef<HTMLButtonElement>(null);
+  const [membershipDate, setMembershipDate] = useState(new Date());
 
   const [cardStatus, setCardStatus] = useState(false);
   const [cardStatusOption, setCardStatusOption] = useState("Select one");
@@ -1425,6 +1429,25 @@ const Pet: NextPage = () => {
 
   const sterilisationOutcomeOptions = ["Actioned", "No show"];
 
+  //Sterilisation Outcome Date
+  //const [sterilisationOutcomeDate, setSterilisationOutcomeDate] = useState(new Date());
+  // CustomInput component with explicit types for the props
+  const CustomSterilisationOutcomeInput: React.FC<CustomInput> = ({ value, onClick }) => (
+    <button className="form-input z-0 flex items-center rounded-md border px-1 py-2" onClick={onClick}>
+      <svg className=" mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+      </svg>
+      <div className="m-1 mr-2">(Select here): </div>
+      {isUpdate
+        ? sterilisationOutcomeDate.getDate().toString() +
+          "/" +
+          (sterilisationOutcomeDate.getMonth() + 1).toString() +
+          "/" +
+          sterilisationOutcomeDate.getFullYear().toString()
+        : value}
+    </button>
+  );
+
   //if sterilisation requested option is Yes and sterilisationRequestSigned != ""
   useEffect(() => {
     if (sterilisationRequestedOption === "Yes" && sterilisationRequestSignedOption != "" && sterilisationOutcomeOption === "") {
@@ -1738,6 +1761,19 @@ const Pet: NextPage = () => {
       return "";
     }
   };
+
+  //Membership date
+  const CustomMembershipInput: React.FC<CustomInput> = ({ value, onClick }) => (
+    <button className="form-input z-0 flex items-center rounded-md border px-1 py-2" onClick={onClick}>
+      <svg className=" mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+      </svg>
+      <div className="m-1 mr-2">(Select here): </div>
+      {isUpdate
+        ? membershipDate.getDate().toString() + "/" + (membershipDate.getMonth() + 1).toString() + "/" + membershipDate.getFullYear().toString()
+        : value}
+    </button>
+  );
 
   //CARD STATUS
   const handleToggleCardStatus = () => {
@@ -2291,6 +2327,11 @@ const Pet: NextPage = () => {
       // setSterilisationStatusOption(userData?.sterilisedStatus.getFullYear() === 1970 ? "Select one" : "Yes");
       // setSterilisationRequestedOption(userData?.sterilisedRequested?.getFullYear() === 1970 ? "Select one" : "Yes");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
+      const sterilisationOutcomeDate_ =
+        userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No show"
+          ? userData?.sterilisationOutcomeDate ?? new Date()
+          : new Date();
+      setSterilisationOutcomeDate(sterilisationOutcomeDate_);
       if (userData?.vaccinationShot1?.getFullYear() !== 1970) {
         setVaccinationShot1Option("Yes");
         console.log("Vaccination shot 1(!1970): ", userData?.vaccinationShot1);
@@ -2358,6 +2399,10 @@ const Pet: NextPage = () => {
       // setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
       // setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
       setMembershipTypeOption(userData?.membership ?? "Select one");
+      const membershipDate_ =
+        userData?.membership === "Gold card holder" || userData?.membership === "Standard card holder" ? userData?.membershipDate ?? new Date() : new Date();
+      setMembershipDate(membershipDate_);
+
       setCardStatusOption(userData?.cardStatus ?? "Select one");
       setKennelList(userData?.kennelReceived ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
@@ -2594,11 +2639,13 @@ const Pet: NextPage = () => {
       sterilisedRequested: sterilisationRequestedOption === "Yes" ? sterilisationRequestedDate : new Date(0),
       sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisedOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
+      sterilisationOutcomeDate: sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show" ? sterilisationOutcomeDate : new Date(0),
       vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
       vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
       vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
+      membershipDate: membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder" ? membershipDate : new Date(0),
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
       kennelReceived: kennelList,
       clinicsAttended: clinicIDList,
@@ -2619,6 +2666,7 @@ const Pet: NextPage = () => {
     setSterilisationRequestedOption("Select one");
     setSterilisationRequestSignedOption("Select one");
     setSterilisationOutcomeOption("Select one");
+    setSterilisationOutcomeDate(new Date());
     setVaccinationShot1Option("Select one");
     setVaccinationShot2Option("Select one");
     setVaccinationShot3Option("Select one");
@@ -2626,6 +2674,7 @@ const Pet: NextPage = () => {
     setVaccinationShot2Date(new Date());
     setVaccinationShot3Date(new Date());
     setMembershipTypeOption("Select one");
+    setMembershipDate(new Date());
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select here");
     setLastDeworming(new Date());
@@ -2724,6 +2773,7 @@ const Pet: NextPage = () => {
     setSterilisationStatusDate(new Date());
     setSterilisationRequestedDate(new Date());
     setSterilisationOutcomeOption("Select one");
+    setSterilisationOutcomeDate(new Date());
     setVaccinationShot1Option("Select one");
     setVaccinationShot2Option("Select one");
     setVaccinationShot3Option("Select one");
@@ -2731,6 +2781,7 @@ const Pet: NextPage = () => {
     setVaccinationShot2Date(new Date());
     setVaccinationShot3Date(new Date());
     setMembershipTypeOption("Non-card Holder");
+    setMembershipDate(new Date());
     setCardStatusOption("Not Applicable");
     setKennelsReceivedOption("No kennels received");
     setStartingDate(new Date());
@@ -2926,6 +2977,7 @@ const Pet: NextPage = () => {
       sterilisedRequested: sterilisationRequestedOption === "Yes" ? sterilisationRequestedDate : new Date(0),
       sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisationOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
+      sterilisationOutcomeDate: sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show" ? sterilisationOutcomeDate : new Date(0),
       vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
       vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
       vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
@@ -2934,6 +2986,7 @@ const Pet: NextPage = () => {
       // vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
+      membershipDate: membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder" ? membershipDate : new Date(0),
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
       kennelReceived: kennelList,
       clinicsAttended: clinicIDList,
@@ -3015,6 +3068,11 @@ const Pet: NextPage = () => {
       //setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
       //setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
+      const sterilisationOutcomeDate_ =
+        userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No show"
+          ? userData?.sterilisationOutcomeDate ?? new Date()
+          : new Date();
+      setSterilisationOutcomeDate(sterilisationOutcomeDate_);
 
       if (userData?.vaccinationShot1.getFullYear() !== 1970) {
         setVaccinationShot1Option("Yes");
@@ -3059,6 +3117,9 @@ const Pet: NextPage = () => {
       setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date());
 
       setMembershipTypeOption(userData?.membership ?? "");
+      const membershipDate_ = userData?.membership === "Actioned" || userData?.membership === "No show" ? userData?.membershipDate ?? new Date() : new Date();
+      setSterilisationOutcomeDate(membershipDate_);
+
       setCardStatusOption(userData?.cardStatus ?? "");
       setKennelList(userData?.kennelReceived ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
@@ -3221,6 +3282,7 @@ const Pet: NextPage = () => {
               : "Yes",
         );
         setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "Select one");
+
         setMembershipTypeOption(petData?.membership ?? "Select one");
         setCardStatusOption(petData?.cardStatus ?? "Select one");
 
@@ -3463,6 +3525,7 @@ const Pet: NextPage = () => {
     setSterilisationStatusOption("Select one");
     setSterilisationRequestedOption("Select one");
     setSterilisationOutcomeOption("Select one");
+    setSterilisationOutcomeDate(new Date());
     setVaccinationShot1Option("Select one");
     setVaccinationShot2Option("Select one");
     setVaccinationShot3Option("Select one");
@@ -3471,6 +3534,7 @@ const Pet: NextPage = () => {
     setVaccinationShot3Date(new Date());
     setClinicsAttendedOption("Select here");
     setMembershipTypeOption("Select one");
+    setMembershipDate(new Date());
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select here");
     setComments("");
@@ -4806,6 +4870,22 @@ const Pet: NextPage = () => {
                           </div>
                         )}
                       </div>
+                      {(sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show") && (
+                        <div className="flex items-start">
+                          <div className="mr-3 flex items-center pt-5">
+                            <div className=" flex pl-3">Sterilisation Outcome Date: </div>
+                          </div>
+                          <div className=" pt-2">
+                            <DatePicker
+                              selected={sterilisationOutcomeDate}
+                              onChange={(date) => setSterilisationOutcomeDate(date!)}
+                              dateFormat="dd/MM/yyyy"
+                              customInput={<CustomSterilisationOutcomeInput />}
+                              className="form-input z-30 rounded-md border py-2"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -5188,6 +5268,23 @@ const Pet: NextPage = () => {
                         </div>
                       )}
                     </div>
+
+                    {(membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder") && (
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-5">
+                          <div className=" flex pl-3">Membership Date: </div>
+                        </div>
+                        <div className=" pt-2">
+                          <DatePicker
+                            selected={membershipDate}
+                            onChange={(date) => setMembershipDate(date!)}
+                            dateFormat="dd/MM/yyyy"
+                            customInput={<CustomMembershipInput />}
+                            className="form-input z-30 rounded-md border py-2"
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     {/* {membershipTypeOption !== "Non-card holder" &&
                       (membershipStatus() === "(Lapsed)" ? (
@@ -5583,11 +5680,13 @@ const Pet: NextPage = () => {
                       {sterilisationStatusOption === "No" ? (
                         <div className="mb-2 flex items-center">
                           <b className="mr-3">Sterilisation Outcome:</b>{" "}
-                          {sterilisationStatusOption === "No" ? (
-                            <>{sterilisationOutcomeOption === "Select one" ? user?.sterilisationOutcome : sterilisationOutcomeOption}</>
-                          ) : (
-                            "Not Applicable"
-                          )}
+                          {sterilisationStatusOption === "No"
+                            ? sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show"
+                              ? `${sterilisationOutcomeOption}, ${sterilisationOutcomeDate.getDate().toString()}/${(
+                                  (sterilisationOutcomeDate.getMonth() ?? 0) + 1
+                                ).toString()}/${sterilisationOutcomeDate.getFullYear().toString()}`
+                              : "Not Applicable"
+                            : "Not Applicable"}
                         </div>
                       ) : (
                         <></>
@@ -5722,7 +5821,12 @@ const Pet: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Membership Type:</b> {membershipTypeOption === "Select one" ? user?.membership : membershipTypeOption}
+                        <b className="mr-3">Membership Type:</b>{" "}
+                        {membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder"
+                          ? `${membershipTypeOption}, ${membershipDate.getDate().toString()}/${(
+                              (membershipDate.getMonth() ?? 0) + 1
+                            ).toString()}/${membershipDate.getFullYear().toString()}`
+                          : membershipTypeOption}
                         {/* {membershipTypeOption && membershipMessage(membershipTypeOption) && (
                           <div className="ml-3 text-red-600">({membershipMessage(membershipTypeOption)})</div>
                         )} */}

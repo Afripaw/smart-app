@@ -24,6 +24,7 @@ export const petRouter = createTRPCRouter({
         sterilisedRequested: z.date(),
         sterilisedRequestSigned: z.string(),
         sterilisationOutcome: z.string(),
+        sterilisationOutcomeDate: z.date(),
         vaccinationShot1: z.date(),
         vaccinationShot2: z.date(),
         vaccinationShot3: z.date(),
@@ -31,6 +32,7 @@ export const petRouter = createTRPCRouter({
         clinicsAttended: z.number().array(),
         lastDeWorming: z.date(),
         membership: z.string(),
+        membershipDate: z.date(),
         cardStatus: z.string(),
         kennelReceived: z.string().array(),
         comments: z.string(),
@@ -58,11 +60,13 @@ export const petRouter = createTRPCRouter({
           sterilisedRequested: input.sterilisedRequested,
           sterilisedRequestSigned: input.sterilisedRequestSigned,
           sterilisationOutcome: input.sterilisationOutcome,
+          sterilisationOutcomeDate: input.sterilisationOutcomeDate,
           vaccinationShot1: input.vaccinationShot1,
           vaccinationShot2: input.vaccinationShot2,
           vaccinationShot3: input.vaccinationShot3,
           lastDeworming: input.lastDeWorming,
           membership: input.membership,
+          membershipDate: input.membershipDate,
           cardStatus: input.cardStatus,
           kennelReceived: input.kennelReceived,
           comments: input.comments,
@@ -102,6 +106,13 @@ export const petRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      //delete all the relationships with the treatment
+      await ctx.db.petTreatment.deleteMany({
+        where: {
+          petID: input.petID,
+        },
+      });
+
       const pet = await ctx.db.pet.delete({
         where: {
           petID: input.petID,
@@ -128,6 +139,7 @@ export const petRouter = createTRPCRouter({
         sterilisedRequested: z.date(),
         sterilisedRequestSigned: z.string(),
         sterilisedOutcome: z.string(),
+        sterilisationOutcomeDate: z.date(),
         vaccinationShot1: z.date(),
         vaccinationShot2: z.date(),
         vaccinationShot3: z.date(),
@@ -135,6 +147,7 @@ export const petRouter = createTRPCRouter({
         clinicsAttended: z.number().array(),
         lastDeWorming: z.date(),
         membership: z.string(),
+        membershipDate: z.date(),
         cardStatus: z.string(),
         kennelReceived: z.string().array(),
         comments: z.string(),
@@ -160,11 +173,13 @@ export const petRouter = createTRPCRouter({
           sterilisedRequested: input.sterilisedRequested,
           sterilisedRequestSigned: input.sterilisedRequestSigned,
           sterilisationOutcome: input.sterilisedOutcome,
+          sterilisationOutcomeDate: input.sterilisationOutcomeDate,
           vaccinationShot1: input.vaccinationShot1,
           vaccinationShot2: input.vaccinationShot2,
           vaccinationShot3: input.vaccinationShot3,
           lastDeworming: input.lastDeWorming,
           membership: input.membership,
+          membershipDate: input.membershipDate,
           cardStatus: input.cardStatus,
           kennelReceived: input.kennelReceived,
           comments: input.comments,

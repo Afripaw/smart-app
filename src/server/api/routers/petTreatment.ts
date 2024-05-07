@@ -11,7 +11,7 @@ export const petTreatmentRouter = createTRPCRouter({
         petID: z.number(),
         category: z.string(),
         date: z.date(),
-        type: z.string().array(),
+        typesID: z.number().array(),
         comments: z.string(),
       }),
     )
@@ -23,7 +23,14 @@ export const petTreatmentRouter = createTRPCRouter({
             connect: { petID: input.petID },
           },
           category: input.category,
-          type: input.type,
+          // type: input.type,
+          type: {
+            createMany: {
+              data: input.typesID.map((typeID) => ({
+                typeID: typeID,
+              })),
+            },
+          },
           comments: input.comments,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -38,7 +45,7 @@ export const petTreatmentRouter = createTRPCRouter({
       z.object({
         treatmentID: z.number(),
         category: z.string(),
-        type: z.string().array(),
+        typesID: z.number().array(),
         comments: z.string(),
         date: z.date(),
       }),
@@ -50,12 +57,39 @@ export const petTreatmentRouter = createTRPCRouter({
         },
         data: {
           category: input.category,
-          type: input.type,
+          //type: input.type,
           comments: input.comments,
           date: input.date,
           updatedAt: new Date(),
         },
       });
+
+      await ctx.db.typesOnTreatment.deleteMany({
+        where: {
+          treatmentID: input.treatmentID,
+        },
+      });
+
+      //create new greater areas
+      const typesRelationships = input.typesID.map(async (typeID) => {
+        await ctx.db.typesOnTreatment.create({
+          data: {
+            treatment: {
+              connect: {
+                treatmentID: petTreatment.treatmentID,
+              },
+            },
+            type: {
+              connect: {
+                typeID: typeID,
+              },
+            },
+          },
+        });
+      });
+
+      await Promise.all(typesRelationships);
+
       return petTreatment;
     }),
 
@@ -83,7 +117,18 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { treatmentID: { equals: Number(term.substring(1)) } },
               { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
-
+              {
+                type: {
+                  some: {
+                    type: {
+                      type: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
               // { type: { hasSome: [term] } },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //pet
@@ -102,7 +147,19 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { pet: { petID: { equals: Number(term.substring(1)) } } },
               { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
-              { type: { hasSome: [term] } },
+              {
+                type: {
+                  some: {
+                    type: {
+                      type: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
+              // { type: { hasSome: [term] } },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //pet
               { pet: { petName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
@@ -120,7 +177,19 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { ownerID: { equals: Number(term.substring(1)) } },
               { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
-              { type: { hasSome: [term] } },
+              // { type: { hasSome: [term] } },
+              {
+                type: {
+                  some: {
+                    type: {
+                      type: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //pet
               { pet: { petName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
@@ -137,7 +206,19 @@ export const petTreatmentRouter = createTRPCRouter({
           return {
             OR: [
               { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
-              { type: { hasSome: [term] } },
+              //{ type: { hasSome: [term] } },
+              {
+                type: {
+                  some: {
+                    type: {
+                      type: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //pet
               { pet: { petName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
@@ -194,6 +275,16 @@ export const petTreatmentRouter = createTRPCRouter({
                 include: {
                   addressArea: true,
                   addressGreaterArea: true,
+                },
+              },
+            },
+          },
+          type: {
+            select: {
+              typeID: true,
+              type: {
+                select: {
+                  type: true,
                 },
               },
             },
@@ -301,6 +392,16 @@ export const petTreatmentRouter = createTRPCRouter({
               },
             },
           },
+          type: {
+            select: {
+              typeID: true,
+              type: {
+                select: {
+                  type: true,
+                },
+              },
+            },
+          },
         },
       });
       return petTreatment;
@@ -314,6 +415,12 @@ export const petTreatmentRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.typesOnTreatment.deleteMany({
+        where: {
+          treatmentID: input.treatmentID,
+        },
+      });
+
       return await ctx.db.petTreatment.delete({
         where: {
           treatmentID: input.treatmentID,
@@ -329,6 +436,7 @@ export const petTreatmentRouter = createTRPCRouter({
 
   //delete all treatments
   deleteAllTreatments: publicProcedure.mutation(async ({ ctx }) => {
+    await ctx.db.typesOnTreatment.deleteMany({});
     return await ctx.db.petTreatment.deleteMany({});
   }),
 
@@ -382,6 +490,30 @@ export const petTreatmentRouter = createTRPCRouter({
     return identification;
   }),
 
+  //Types table create
+  createTypes: publicProcedure
+    .input(
+      z.object({
+        types: z.string().array(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const types = input.types;
+      const now = new Date();
+
+      for (const type of types) {
+        await ctx.db.type.create({
+          data: {
+            type: type,
+            createdAt: now,
+            updatedAt: now,
+          },
+        });
+      }
+
+      return types;
+    }),
+
   //download
   download: publicProcedure
     .input(
@@ -402,7 +534,19 @@ export const petTreatmentRouter = createTRPCRouter({
             OR: [
               { treatmentID: { equals: Number(term.substring(1)) } },
               { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
-              { type: { hasSome: [term] } },
+              //{ type: { hasSome: [term] } },
+              {
+                type: {
+                  some: {
+                    type: {
+                      type: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
@@ -410,7 +554,19 @@ export const petTreatmentRouter = createTRPCRouter({
           return {
             OR: [
               { category: { contains: term, mode: Prisma.QueryMode.insensitive } },
-              { type: { hasSome: [term] } },
+              //{ type: { hasSome: [term] } },
+              {
+                type: {
+                  some: {
+                    type: {
+                      type: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
@@ -513,7 +669,20 @@ export const petTreatmentRouter = createTRPCRouter({
         where: {
           petID: input.petID,
         },
+        include: {
+          type: {
+            select: {
+              typeID: true,
+              type: {
+                select: {
+                  type: true,
+                },
+              },
+            },
+          },
+        },
       });
+
       return petTreatment;
     }),
 });

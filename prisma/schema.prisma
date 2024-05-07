@@ -175,10 +175,28 @@ model petClinic {
     greaterAreaID Int
     area          area?                  @relation(fields: [areaID], references: [areaID])
     areaID        Int?
-    conditions    String[]
+    conditions    ConditionsOnClinic[]
     comments      String?
     createdAt     DateTime               @default(now())
     updatedAt     DateTime               @updatedAt
+}
+
+model conditions {
+    conditionID Int                  @id @default(autoincrement())
+    condition   String
+    clinic      ConditionsOnClinic[]
+    createdAt   DateTime             @default(now())
+    updatedAt   DateTime             @updatedAt
+}
+
+model ConditionsOnClinic {
+    conditionsOnClinicID Int        @id @default(autoincrement())
+    condition            conditions @relation(fields: [conditionID], references: [conditionID])
+    conditionID          Int
+    clinic               petClinic  @relation(fields: [clinicID], references: [clinicID])
+    clinicID             Int
+    createdAt            DateTime   @default(now())
+    updatedAt            DateTime   @updatedAt
 }
 
 //For many to many relationship between pet and petClinic
@@ -207,10 +225,28 @@ model petTreatment {
     petID Int
 
     category  String
-    type      String[]
+    type      typesOnTreatment[]
     comments  String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt DateTime           @default(now())
+    updatedAt DateTime           @updatedAt
+}
+
+model type {
+    typeID    Int                @id @default(autoincrement())
+    type      String
+    treatment typesOnTreatment[]
+    createdAt DateTime           @default(now())
+    updatedAt DateTime           @updatedAt
+}
+
+model typesOnTreatment {
+    typesOnTreatmentID Int          @id @default(autoincrement())
+    type               type         @relation(fields: [typeID], references: [typeID])
+    typeID             Int
+    treatment          petTreatment @relation(fields: [treatmentID], references: [treatmentID])
+    treatmentID        Int
+    createdAt          DateTime     @default(now())
+    updatedAt          DateTime     @updatedAt
 }
 
 model volunteer {

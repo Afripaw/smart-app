@@ -2259,7 +2259,7 @@ const Pet: NextPage = () => {
           treatmentID: treatment.treatmentID,
           date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
           category: treatment.category,
-          type: treatment.type,
+          type: treatment.type.map((type) => type.type.type),
           comments: treatment.comments ?? "",
         })) ?? [];
       console.log("Treatment data: ", treatmentData);
@@ -2467,7 +2467,7 @@ const Pet: NextPage = () => {
           treatmentID: treatment.treatmentID,
           date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
           category: treatment.category,
-          type: treatment.type,
+          type: treatment.type.map((type) => type.type.type),
           comments: treatment.comments ?? "",
         })) ?? [];
 
@@ -3050,7 +3050,7 @@ const Pet: NextPage = () => {
           treatmentID: treatment.treatmentID,
           date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
           category: treatment.category,
-          type: treatment.type,
+          type: treatment.type.map((type) => type.type.type),
           comments: treatment.comments ?? "",
         })) ?? [];
 
@@ -3247,7 +3247,7 @@ const Pet: NextPage = () => {
           treatmentID: treatment.treatmentID,
           date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
           category: treatment.category,
-          type: treatment.type,
+          type: treatment.type.map((type) => type.type.type),
           comments: treatment.comments ?? "",
         })) ?? [];
 

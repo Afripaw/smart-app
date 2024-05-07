@@ -49,8 +49,14 @@ const Clinic: NextPage = () => {
 
   //------------------------------CONDITIONS-----------------------------------------
   type ConditionOptions = {
+    id: number;
     condition: string;
     state: boolean;
+  };
+
+  type Condition = {
+    id: number;
+    condition: string;
   };
 
   type ConditionSelect = {
@@ -60,6 +66,8 @@ const Clinic: NextPage = () => {
 
   const newClinic = api.petClinic.create.useMutation();
   const updateClinic = api.petClinic.update.useMutation();
+
+  const newConditions = api.petClinic.createConditions.useMutation();
   const [isUpdate, setIsUpdate] = useState(false);
   const [isCreate, setIsCreate] = useState(false);
   //Update the table when user is deleted
@@ -420,18 +428,28 @@ const Clinic: NextPage = () => {
   const [conditionListOptions, setConditionListOptions] = useState<ConditionOptions[]>([]);
   const [conditionSelection, setConditionSelection] = useState<ConditionSelect>();
   //to select multiple roles
-  const [conditionList, setConditionList] = useState<string[]>([]);
+  const [conditionList, setConditionList] = useState<Condition[]>([]);
 
-  const handleCondition = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+  const handleCondition = (id: number, option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
     if (selectionCategory === "allSelected") {
       setConditionOption("Select All");
       setConditionSelection({ allSelected: state, clear: false });
 
-      const conditions = conditionListOptions.map((condition) => condition.condition);
-      setConditionList(conditions);
+      const conditions = conditionListOptions.map((condition) => ({
+        id: condition.id,
+        condition: condition.condition,
+      }));
+      //setGreaterAreaList(greaterAreas);
+      //order the greaterAreaList from smallest to largest id
+      setConditionList(conditions.sort((a, b) => a.id - b.id));
+      setConditionListOptions(conditionListOptions.map((condition) => ({ ...condition, state: true })));
+
+      //const conditions = conditionListOptions.map((condition) => condition.condition);
+      //setConditionList(conditions);
+
       //order the roleList in alphabetical order
       // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
-      setConditionListOptions(conditionListOptions.map((condition) => ({ ...condition, state: true })));
+      //setConditionListOptions(conditionListOptions.map((condition) => ({ ...condition, state: true })));
     } else if (selectionCategory === "clear") {
       setConditionOption("Clear All");
       setConditionSelection({ allSelected: false, clear: state });
@@ -441,22 +459,29 @@ const Clinic: NextPage = () => {
     } else if (selectionCategory === "normal") {
       setConditionOption(option);
       setConditionSelection({ allSelected: false, clear: false });
+
       if (state) {
-        if (!conditionList.includes(String(option))) {
-          setConditionList([...conditionList, String(option)]);
+        const condition: Condition = {
+          id: id,
+          condition: String(option),
+        };
+        //if (!conditionList.includes(String(option))) {
+        const conditionIDList = conditionList.map((condition) => condition.id);
+        if (!conditionIDList.includes(id)) {
+          setConditionList([...conditionList, condition]);
           //order the roleList in alphabetical order
           // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
         }
 
-        setConditionListOptions(conditionListOptions.map((condition) => (condition.condition === option ? { ...condition, state: true } : condition)));
+        setConditionListOptions(conditionListOptions.map((condition) => (condition.id === id ? { ...condition, state: true } : condition)));
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
       } else {
-        const updatedConditionList = conditionList.filter((condition) => condition !== option);
-        setConditionList(updatedConditionList);
+        const updatedConditionList = conditionList.filter((condition) => condition.id !== id);
+        setConditionList(updatedConditionList.sort((a, b) => a.id - b.id));
         //order the roleList in alphabetical order
         // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
-        setConditionListOptions(conditionListOptions.map((condition) => (condition.condition === option ? { ...condition, state: false } : condition)));
+        setConditionListOptions(conditionListOptions.map((condition) => (condition.id === id ? { ...condition, state: false } : condition)));
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
       }
@@ -481,18 +506,31 @@ const Clinic: NextPage = () => {
     };
   }, []);
 
+  // const conditionOptions = [
+  //   "Unknown",
+  //   "Fair",
+  //   "Light wind",
+  //   "Strong wind",
+  //   "Light rain",
+  //   "Heavy rain",
+  //   "Excessively hot",
+  //   "Excessively cold",
+  //   "Free food parcels",
+  //   "Incentive competition",
+  //   "External restrictions",
+  // ];
   const conditionOptions = [
-    "Unknown",
-    "Fair",
-    "Light wind",
-    "Strong wind",
-    "Light rain",
-    "Heavy rain",
-    "Excessively hot",
-    "Excessively cold",
-    "Free food parcels",
-    "Incentive competition",
-    "External restrictions",
+    { id: 1, name: "Unknown" },
+    { id: 2, name: "Fair" },
+    { id: 3, name: "Light wind" },
+    { id: 4, name: "Strong wind" },
+    { id: 5, name: "Light rain" },
+    { id: 6, name: "Heavy rain" },
+    { id: 7, name: "Excessively hot" },
+    { id: 8, name: "Excessively cold" },
+    { id: 9, name: "Free food parcels" },
+    { id: 10, name: "Incentive competition" },
+    { id: 11, name: "External restrictions" },
   ];
 
   // const [sendUserDetails, setSendUserDetails] = useState(false);
@@ -525,14 +563,33 @@ const Clinic: NextPage = () => {
 
       setStartingDate(userData?.date ?? new Date());
       setComments(userData.comments ?? "");
-      setConditionList(userData.conditions ?? "Select here");
+
+      const conditionData = userData?.conditions;
+      const conditions: Condition[] =
+        conditionData?.map((condition) => ({
+          id: condition.conditionID,
+          condition: condition.condition.condition,
+        })) ?? [];
+
+      setConditionList(conditions ?? "Select here");
+
+      const conditionIDs = conditions.map((condition) => condition.id);
 
       setConditionListOptions(
         conditionOptions.map((condition) => ({
-          condition: condition,
-          state: userData.conditions.includes(condition),
+          id: condition.id,
+          condition: condition.name,
+          state: conditionIDs.includes(condition.id),
         })),
       );
+      // setConditionList(userData.conditions ?? "Select here");
+
+      // setConditionListOptions(
+      //   conditionOptions.map((condition) => ({
+      //     condition: condition,
+      //     state: userData.conditions.includes(condition),
+      //   })),
+      // );
 
       setGreaterAreaID(userData.greaterAreaID ?? 0);
       setAreaID(userData.areaID ?? 0);
@@ -570,14 +627,34 @@ const Clinic: NextPage = () => {
       // }
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
-      setConditionList(userData.conditions ?? "Select here");
+
+      const conditionData = userData?.conditions;
+      const conditions: Condition[] =
+        conditionData?.map((condition) => ({
+          id: condition.conditionID,
+          condition: condition.condition.condition,
+        })) ?? [];
+
+      setConditionList(conditions ?? "Select here");
+
+      const conditionIDs = conditions.map((condition) => condition.id);
 
       setConditionListOptions(
         conditionOptions.map((condition) => ({
-          condition: condition,
-          state: userData.conditions.includes(condition),
+          id: condition.id,
+          condition: condition.name,
+          state: conditionIDs.includes(condition.id),
         })),
       );
+
+      // setConditionList(userData.conditions ?? "Select here");
+
+      // setConditionListOptions(
+      //   conditionOptions.map((condition) => ({
+      //     condition: condition,
+      //     state: userData.conditions.includes(condition),
+      //   })),
+      // );
 
       setGreaterAreaID(userData.greaterAreaID ?? 0);
       setAreaID(userData.areaID ?? 0);
@@ -594,12 +671,15 @@ const Clinic: NextPage = () => {
 
   const handleUpdateUser = async () => {
     setIsLoading(true);
+
+    const conditionIDList = conditionList.sort((a, b) => a.id - b.id).map((condition) => (condition.id ? condition.id : 0));
     await updateClinic.mutateAsync({
       clinicID: id,
       greaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
       //areaID: areaOption.area === "Select one" ? 0 : areaOption.id,
       date: startingDate,
-      conditions: conditionList.sort((a, b) => a.localeCompare(b)),
+      conditionsID: conditionIDList,
+      //conditions: conditionList.sort((a, b) => a.localeCompare(b)),
       comments: comments,
     });
     //After the newUser has been created make sure to set the fields back to empty
@@ -625,7 +705,7 @@ const Clinic: NextPage = () => {
     setStartingDate(new Date());
     setComments("");
     setConditionOption("Select here");
-    setConditionListOptions(conditionOptions.map((condition) => ({ condition: condition, state: false })));
+    setConditionListOptions(conditionOptions.map((condition) => ({ id: condition.id, condition: condition.name, state: false })));
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setIsCreate(true);
     setIsUpdate(false);
@@ -634,12 +714,15 @@ const Clinic: NextPage = () => {
 
   const handleNewUser = async () => {
     setIsLoading(true);
+
+    const conditionIDList = conditionList.sort((a, b) => a.id - b.id).map((condition) => (condition.id ? condition.id : 0));
     const newUser_ = await newClinic.mutateAsync({
       greaterAreaID: greaterAreaOption.area === "Select one" ? 0 : greaterAreaOption.id,
       //  areaID: areaOption.area === "Select one" ? 0 : areaOption.id,
       date: startingDate,
       comments: comments,
-      conditions: conditionList.sort((a, b) => a.localeCompare(b)),
+      conditionsID: conditionIDList,
+      //conditions: conditionList.sort((a, b) => a.localeCompare(b)),
     });
 
     setIsCreate(false);
@@ -685,14 +768,33 @@ const Clinic: NextPage = () => {
       setComments(userData.comments ?? "");
       //setConditionOption(userData.conditions ?? "Select here");
 
-      setConditionList(userData.conditions ?? "");
+      const conditionData = userData?.conditions;
+      const conditions: Condition[] =
+        conditionData?.map((condition) => ({
+          id: condition.conditionID,
+          condition: condition.condition.condition,
+        })) ?? [];
+
+      setConditionList(conditions ?? "");
+
+      const conditionIDs = conditions.map((condition) => condition.id);
 
       setConditionListOptions(
         conditionOptions.map((condition) => ({
-          condition: condition,
-          state: userData.conditions.includes(condition),
+          id: condition.id,
+          condition: condition.name,
+          state: conditionIDs.includes(condition.id),
         })),
       );
+
+      // setConditionList(userData.conditions ?? "");
+
+      // setConditionListOptions(
+      //   conditionOptions.map((condition) => ({
+      //     condition: condition,
+      //     state: userData.conditions.includes(condition),
+      //   })),
+      // );
 
       setGreaterAreaID(userData.greaterAreaID ?? 0);
       //setAreaID(userData.areaID ?? 0);
@@ -721,7 +823,20 @@ const Clinic: NextPage = () => {
 
       // setAreaOption(area);
 
-      setConditionList(userData.conditions ?? "");
+      const conditionData = userData?.conditions;
+      const conditions: Condition[] =
+        conditionData?.map((condition) => ({
+          id: condition.conditionID,
+          condition: condition.condition.condition,
+        })) ?? [];
+
+      if (isViewProfilePage) {
+        setConditionList(conditions ?? "");
+      } else {
+        setConditionList(conditions ?? "Select here");
+      }
+
+      // setConditionList(userData.conditions ?? "");
 
       //setGreaterAreaOption(userData.greaterArea.greaterArea ?? "");
       //setAreaOption(userData.area.area ?? "");
@@ -765,7 +880,8 @@ const Clinic: NextPage = () => {
     setComments("");
     setConditionList([]);
     setConditionOption("Select here");
-    setConditionListOptions(conditionOptions.map((condition) => ({ condition: condition, state: false })));
+    setConditionListOptions(conditionOptions.map((condition) => ({ id: condition.id, condition: condition.name, state: false })));
+    //setConditionListOptions(conditionOptions.map((condition) => ({ condition: condition, state: false })));
     setConditionSelection({ allSelected: false, clear: false });
 
     setDogVisits(0);
@@ -787,7 +903,8 @@ const Clinic: NextPage = () => {
     if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
     if (startingDate === null) mandatoryFields.push("Date");
     //if (areaOption.area === "Select one") mandatoryFields.push("Area");
-    if (conditionOption === "Select here") mandatoryFields.push("Condition");
+    //if (conditionOption === "Select here") mandatoryFields.push("Condition");
+    if (conditionList.length === 0) mandatoryFields.push("Condition");
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -837,6 +954,27 @@ const Clinic: NextPage = () => {
       {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
     </button>
   );
+
+  //-------------------------------------------New Conditions-------------------------------------------------------
+  const handleNewConditions = async () => {
+    const conditions_ = [
+      "Unknown",
+      "Fair",
+      "Light wind",
+      "Strong wind",
+      "Light rain",
+      "Heavy rain",
+      "Excessively hot",
+      "Excessively cold",
+      "Free food parcels",
+      "Incentive competition",
+      "External restrictions",
+    ];
+
+    await newConditions.mutateAsync({
+      conditions: conditions_,
+    });
+  };
 
   //------------------------------------------DOWNLOADING CLINIC TABLE TO EXCEL FILE------------------------------------------
   const downloadClinicTable = api.petClinic.download.useQuery({ searchQuery: query });
@@ -909,6 +1047,9 @@ const Clinic: NextPage = () => {
                   {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
                   </button> */}
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleNewConditions}>
+                    Add new Conditions
+                  </button> */}
                 </div>
               </div>
 
@@ -977,7 +1118,7 @@ const Clinic: NextPage = () => {
                               <td className="border px-2 py-1">{user.greaterArea.greaterArea}</td>
                               {/* <td className="border px-2 py-1">{user.area.area}</td> */}
 
-                              <td className="border px-2 py-1">{user.conditions.join(", ")}</td>
+                              <td className="border px-2 py-1">{user.conditions.map((condition) => condition.condition.condition).join(", ")}</td>
                               <td className=" border px-2 py-1">
                                 <div className="flex justify-center">{user.pet.filter((pet) => pet.pet.species === "Dog").length}</div>
                               </td>
@@ -1060,7 +1201,7 @@ const Clinic: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Pet Clinic Data" : "Create New Pet Clinic"}</b>
                 <div className="flex justify-center">
@@ -1205,7 +1346,7 @@ const Clinic: NextPage = () => {
                                   id="1"
                                   type="checkbox"
                                   checked={conditionSelection?.allSelected}
-                                  onChange={(e) => handleCondition("", e.target.checked, "allSelected")}
+                                  onChange={(e) => handleCondition(0, "", e.target.checked, "allSelected")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
                                 <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
@@ -1219,7 +1360,7 @@ const Clinic: NextPage = () => {
                                   id="2"
                                   type="checkbox"
                                   checked={conditionSelection?.clear}
-                                  onChange={(e) => handleCondition("", e.target.checked, "clear")}
+                                  onChange={(e) => handleCondition(0, "", e.target.checked, "clear")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
                                 <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
@@ -1228,13 +1369,13 @@ const Clinic: NextPage = () => {
                               </div>
                             </li>
                             {conditionListOptions?.map((option) => (
-                              <li key={option.condition}>
+                              <li key={option.id}>
                                 <div className="flex items-center px-4">
                                   <input
                                     id={String(option.condition)}
                                     type="checkbox"
                                     checked={option.state}
-                                    onChange={(e) => handleCondition(option.condition, e.target.checked, "normal")}
+                                    onChange={(e) => handleCondition(option.id, option.condition, e.target.checked, "normal")}
                                     className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                   />
                                   <label htmlFor={String(option.condition)} className="ms-2 text-sm font-medium text-gray-900">
@@ -1291,7 +1432,7 @@ const Clinic: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Pet Clinic Profile</div>
                 <div className="flex justify-center">
@@ -1337,9 +1478,13 @@ const Clinic: NextPage = () => {
                   <div className="mb-2 flex items-center">
                     <b className="mr-3">Condition(s):</b>{" "}
                     {conditionList
+                      .sort((a, b) => a.id - b.id)
+                      .map((condition) => condition.condition)
+                      .join(", ")}
+                    {/* {conditionList
                       .sort((a, b) => a.localeCompare(b))
                       .map((condition) => condition)
-                      .join(", ")}
+                      .join(", ")} */}
                   </div>
 
                   <div className="mb-2 flex items-center">

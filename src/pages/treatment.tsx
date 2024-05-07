@@ -45,14 +45,22 @@ const Treatment: NextPage = () => {
   };
 
   type TypeOptions = {
+    id: number;
     type: string;
     state: boolean;
+  };
+
+  type Type = {
+    id: number;
+    type: string;
   };
 
   type TypeSelect = {
     allSelected: boolean;
     clear: boolean;
   };
+
+  const newTypes = api.petTreatment.createTypes.useMutation();
 
   const newTreatment = api.petTreatment.create.useMutation();
   const updateTreatment = api.petTreatment.update.useMutation();
@@ -409,7 +417,7 @@ const Treatment: NextPage = () => {
       setPreviousTreatments(
         prevTreatments.data?.map((treatment) => ({
           treatmentID: treatment.treatmentID ?? 0,
-          type: treatment.type ?? "",
+          type: treatment.type.map((type) => type.type.type) ?? "",
           category: treatment.category ?? "",
           date:
             treatment.date.getDate().toString() ?? "" + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString() ?? "",
@@ -451,7 +459,7 @@ const Treatment: NextPage = () => {
     setPreviousTreatments(
       prevTreatments.data?.map((treatment) => ({
         treatmentID: treatment.treatmentID ?? 0,
-        type: treatment.type ?? "",
+        type: treatment.type.map((type) => type.type.type) ?? "",
         category: treatment.category ?? "",
         date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
         comments: treatment.comments ?? "",
@@ -531,15 +539,22 @@ const Treatment: NextPage = () => {
   const [typeListOptions, setTypeListOptions] = useState<TypeOptions[]>([]);
   const [typeSelection, setTypeSelection] = useState<TypeSelect>();
   //to select multiple roles
-  const [typeList, setTypeList] = useState<string[]>([]);
+  const [typeList, setTypeList] = useState<Type[]>([]);
 
-  const handleType = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+  const handleType = (id: number, option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
     if (selectionCategory === "allSelected") {
       setTypeOption("Select All");
       setTypeSelection({ allSelected: state, clear: false });
 
-      const types = typeListOptions.map((type) => type.type);
-      setTypeList(types);
+      // const types = typeListOptions.map((type) => type.type);
+      // setTypeList(types);
+
+      const types = typeListOptions.map((type) => ({
+        id: type.id,
+        type: type.type,
+      }));
+      setTypeList(types.sort((a, b) => a.id - b.id));
+
       //order the roleList in alphabetical order
       // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
       setTypeListOptions(typeListOptions.map((type) => ({ ...type, state: true })));
@@ -552,25 +567,49 @@ const Treatment: NextPage = () => {
     } else if (selectionCategory === "normal") {
       setTypeOption(option);
       setTypeSelection({ allSelected: false, clear: false });
+
       if (state) {
-        if (!typeList.includes(String(option))) {
-          setTypeList([...typeList, String(option)]);
+        const type: Type = {
+          id: id,
+          type: String(option),
+        };
+        //if (!conditionList.includes(String(option))) {
+        const typeIDList = typeList.map((type) => type.id);
+        if (!typeIDList.includes(id)) {
+          setTypeList([...typeList, type]);
           //order the roleList in alphabetical order
           // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
         }
 
-        setTypeListOptions(typeListOptions.map((type) => (type.type === option ? { ...type, state: true } : type)));
+        setTypeListOptions(typeListOptions.map((type) => (type.id === id ? { ...type, state: true } : type)));
         // console.log("Greater Area list: ", greaterAreaList);
         // console.log("Greater Area List Options: ", greaterAreaListOptions);
       } else {
-        const updatedTypeList = typeList.filter((type) => type !== option);
-        setTypeList(updatedTypeList);
-        //order the roleList in alphabetical order
-        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
-        setTypeListOptions(typeListOptions.map((type) => (type.type === option ? { ...type, state: false } : type)));
-        // console.log("Greater Area list: ", greaterAreaList);
-        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+        const updatedTypeList = typeList.filter((type) => type.id !== id);
+        setTypeList(updatedTypeList.sort((a, b) => a.id - b.id));
+
+        setTypeListOptions(typeListOptions.map((type) => (type.id === id ? { ...type, state: false } : type)));
       }
+
+      // if (state) {
+      //   if (!typeList.includes(String(option))) {
+      //     setTypeList([...typeList, String(option)]);
+      //     //order the roleList in alphabetical order
+      //     // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      //   }
+
+      //   setTypeListOptions(typeListOptions.map((type) => (type.type === option ? { ...type, state: true } : type)));
+      //   // console.log("Greater Area list: ", greaterAreaList);
+      //   // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      // } else {
+      //   const updatedTypeList = typeList.filter((type) => type !== option);
+      //   setTypeList(updatedTypeList);
+      //   //order the roleList in alphabetical order
+      //   // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      //   setTypeListOptions(typeListOptions.map((type) => (type.type === option ? { ...type, state: false } : type)));
+      //   // console.log("Greater Area list: ", greaterAreaList);
+      //   // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      // }
     }
   };
 
@@ -587,47 +626,90 @@ const Treatment: NextPage = () => {
     };
   }, []);
 
+  // const typeOptions = [
+  //   "Achilles",
+  //   "Amputation",
+  //   "Anxiety",
+  //   "Arthritis",
+  //   "Babesiosis",
+  //   "Cancer",
+  //   "Constipation",
+  //   "Cruciate",
+  //   "Dental",
+  //   "Diarrhoea",
+  //   "Distemper",
+  //   "Ear infection",
+  //   "Ehrlichia",
+  //   "Eye infection",
+  //   "Feline AIDS",
+  //   "Foreign body ingested",
+  //   "Fracture",
+  //   "Heart failure",
+  //   "Hernia",
+  //   "Hot spot",
+  //   "Kennel cough",
+  //   "Limping",
+  //   "Mange",
+  //   "Mastitis",
+  //   "MVA",
+  //   "Nail in paw",
+  //   "Nose bleed",
+  //   "Panleukopenia",
+  //   "Parvo",
+  //   "Pyometra",
+  //   "Renal",
+  //   "Snuffles",
+  //   "Steri complications",
+  //   "TVT",
+  //   "Urinary",
+  //   "Vaccinations (ad hoc)",
+  //   "Vomiting",
+  //   "Wound shave and clean",
+  //   "Wound stitch-up",
+  //   "Other",
+  // ];
+
   const typeOptions = [
-    "Achilles",
-    "Amputation",
-    "Anxiety",
-    "Arthritis",
-    "Babesiosis",
-    "Cancer",
-    "Constipation",
-    "Cruciate",
-    "Dental",
-    "Diarrhoea",
-    "Distemper",
-    "Ear infection",
-    "Ehrlichia",
-    "Eye infection",
-    "Feline AIDS",
-    "Foreign body ingested",
-    "Fracture",
-    "Heart failure",
-    "Hernia",
-    "Hot spot",
-    "Kennel cough",
-    "Limping",
-    "Mange",
-    "Mastitis",
-    "MVA",
-    "Nail in paw",
-    "Nose bleed",
-    "Panleukopenia",
-    "Parvo",
-    "Pyometra",
-    "Renal",
-    "Snuffles",
-    "Steri complications",
-    "TVT",
-    "Urinary",
-    "Vaccinations (ad hoc)",
-    "Vomiting",
-    "Wound shave and clean",
-    "Wound stitch-up",
-    "Other",
+    { id: 1, name: "Achilles" },
+    { id: 2, name: "Amputation" },
+    { id: 3, name: "Anxiety" },
+    { id: 4, name: "Arthritis" },
+    { id: 5, name: "Babesiosis" },
+    { id: 6, name: "Cancer" },
+    { id: 7, name: "Constipation" },
+    { id: 8, name: "Cruciate" },
+    { id: 9, name: "Dental" },
+    { id: 10, name: "Diarrhoea" },
+    { id: 11, name: "Distemper" },
+    { id: 12, name: "Ear infection" },
+    { id: 13, name: "Ehrlichia" },
+    { id: 14, name: "Eye infection" },
+    { id: 15, name: "Feline AIDS" },
+    { id: 16, name: "Foreign body ingested" },
+    { id: 17, name: "Fracture" },
+    { id: 18, name: "Heart failure" },
+    { id: 19, name: "Hernia" },
+    { id: 20, name: "Hot spot" },
+    { id: 21, name: "Kennel cough" },
+    { id: 22, name: "Limping" },
+    { id: 23, name: "Mange" },
+    { id: 24, name: "Mastitis" },
+    { id: 25, name: "MVA" },
+    { id: 26, name: "Nail in paw" },
+    { id: 27, name: "Nose bleed" },
+    { id: 28, name: "Panleukopenia" },
+    { id: 29, name: "Parvo" },
+    { id: 30, name: "Pyometra" },
+    { id: 31, name: "Renal" },
+    { id: 32, name: "Snuffles" },
+    { id: 33, name: "Steri complications" },
+    { id: 34, name: "TVT" },
+    { id: 35, name: "Urinary" },
+    { id: 36, name: "Vaccinations (ad hoc)" },
+    { id: 37, name: "Vomiting" },
+    { id: 38, name: "Wound shave and clean" },
+    { id: 39, name: "Wound stitch-up" },
+    { id: 40, name: "Other" },
   ];
 
   //the type of options depending on the category
@@ -635,10 +717,15 @@ const Treatment: NextPage = () => {
     const treatment = pet_treatment_data?.find((treatment) => treatment.treatmentID === id);
     if (categoryOption === "Pet clinic, Infield" || categoryOption === "Pet clinic (Infield)") {
       //remove the Vaccinations (ad hoc) option
-      const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
-      setTypeListOptions(newTypeOptions.map((type) => ({ type: type, state: treatment?.type.includes(type) ?? false })));
+      const newTypeOptions = typeOptions.filter((type) => type.name !== "Vaccinations (ad hoc)");
+      setTypeListOptions(
+        newTypeOptions.map((type) => ({ id: type.id, type: type.name, state: treatment?.type.map((type) => type.type.type).includes(type.name) ?? false })),
+      );
     } else {
-      setTypeListOptions(typeOptions.map((type) => ({ type: type, state: treatment?.type.includes(type) ?? false })));
+      // setTypeListOptions(typeOptions.map((type) => ({ type: type.name, state: treatment?.type.includes(type) ?? false })));
+      setTypeListOptions(
+        typeOptions.map((type) => ({ id: type.id, type: type.name, state: treatment?.type.map((type) => type.type.type).includes(type.name) ?? false })),
+      );
     }
   }, [categoryOption]);
 
@@ -662,7 +749,17 @@ const Treatment: NextPage = () => {
       setGreaterArea(userData.greaterArea ?? "");
 
       setCategoryOption(userData.category ?? "Select one");
-      setTypeList(userData.type ?? "Select here");
+
+      const typeData = userData?.type;
+      const types: Type[] =
+        typeData?.map((type) => ({
+          id: type.typeID,
+          type: type.type.type,
+        })) ?? [];
+
+      setTypeList(types ?? "Select here");
+
+      //setTypeList(userData.type ?? "Select here");
       //setTypeOption(userData.type ?? "Select one");
       setStartingDate(userData?.date ?? new Date());
       setComments(userData.comments ?? "");
@@ -670,22 +767,42 @@ const Treatment: NextPage = () => {
       console.log("Type list options from DB___: ", userData.type);
       if (userData.category === "Pet clinic, Infield") {
         //remove the Vaccinations (ad hoc) option
-        const newTypeOptions = typeOptions.filter((type) => type !== "Vaccinations (ad hoc)");
+        const newTypeOptions = typeOptions.filter((type) => type.name !== "Vaccinations (ad hoc)");
+
+        const typeIDs = types.map((type) => type.id);
+
         setTypeListOptions(
-          newTypeOptions.map((type: string) => ({
-            type: type,
-            state: userData.type.includes(type),
+          newTypeOptions.map((type) => ({
+            id: type.id,
+            type: type.name,
+            state: typeIDs.includes(type.id),
           })),
         );
-        console.log("We have a pet clinic infield!!");
+        // setTypeListOptions(
+        //   newTypeOptions.map((type: string) => ({
+        //     type: type,
+        //     state: userData.type.includes(type),
+        //   })),
+        // );
+        // console.log("We have a pet clinic infield!!");
       } else {
+        const typeIDs = types.map((type) => type.id);
+
         setTypeListOptions(
-          typeOptions.map((type: string) => ({
-            type: type,
-            state: userData.type.includes(type),
+          typeOptions.map((type) => ({
+            id: type.id,
+            type: type.name,
+            state: typeIDs.includes(type.id),
           })),
         );
-        console.log("We have do not have a pet clinic infield!!");
+
+        // setTypeListOptions(
+        //   typeOptions.map((type: string) => ({
+        //     type: type,
+        //     state: userData.type.includes(type),
+        //   })),
+        // );
+        // console.log("We have do not have a pet clinic infield!!");
       }
 
       console.log("Type list options___: ", typeListOptions);
@@ -710,10 +827,21 @@ const Treatment: NextPage = () => {
     //console.log("!!!Type list__: ", typeList);
     if (typeListOptions.filter((type) => type.state === true).length === typeList.length) {
       // console.log("Uneven for types!!!!");
+
+      // setTypeListOptions(
+      //   typeOptions.map((type: string) => ({
+      //     type: type,
+      //     state: typeList.includes(type),
+      //   })),
+      // );
+
+      const typeIDs = typeList.map((type) => type.id);
+
       setTypeListOptions(
-        typeOptions.map((type: string) => ({
-          type: type,
-          state: typeList.includes(type),
+        typeOptions.map((type) => ({
+          id: type.id,
+          type: type.name,
+          state: typeIDs.includes(type.id),
         })),
       );
     }
@@ -726,7 +854,16 @@ const Treatment: NextPage = () => {
       const userData = treatment;
       setCategoryOption(userData.category ?? "Select one");
       //setTypeOption(userData.type ?? "");
-      setTypeList(userData.type ?? "Select here");
+
+      const typeData = userData?.type;
+      const types: Type[] =
+        typeData?.map((type) => ({
+          id: type.typeID,
+          type: type.type.type,
+        })) ?? [];
+
+      setTypeList(types ?? "Select here");
+      //setTypeList(userData.type ?? "Select here");
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
 
@@ -763,13 +900,18 @@ const Treatment: NextPage = () => {
 
     const typeList_ =
       categoryOption === "Pet clinic, Infield" || categoryOption === "Pet clinic (Infield)"
-        ? typeList.filter((type) => type !== "Vaccinations (ad hoc)")
-        : typeList;
+        ? typeList
+            .filter((type) => type.type !== "Vaccinations (ad hoc)")
+            .sort((a, b) => a.id - b.id)
+            .map((condition) => (condition.id ? condition.id : 0))
+        : typeList.sort((a, b) => a.id - b.id).map((type) => (type.id ? type.id : 0));
+
+    // const conditionIDList = conditionList.sort((a, b) => a.id - b.id).map((condition) => (condition.id ? condition.id : 0));
 
     await updateTreatment.mutateAsync({
       treatmentID: id,
       category: categoryOption === "Select one" ? "" : categoryOption,
-      type: typeList_,
+      typesID: typeList_,
       date: startingDate,
       comments: comments,
     });
@@ -779,7 +921,8 @@ const Treatment: NextPage = () => {
     setTypeList([]);
     setTypeListOptions(
       typeOptions.map((type) => ({
-        type: type,
+        id: type.id,
+        type: type.name,
         state: false,
       })),
     );
@@ -829,7 +972,7 @@ const Treatment: NextPage = () => {
     setPreviousTreatments(
       prevTreatments.data?.map((treatment) => ({
         treatmentID: treatment.treatmentID ?? 0,
-        type: treatment.type ?? "",
+        type: treatment.type.map((type) => type.type.type) ?? "",
         category: treatment.category ?? "",
         date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
         comments: treatment.comments ?? "",
@@ -860,7 +1003,7 @@ const Treatment: NextPage = () => {
     setPreviousTreatments(
       prevTreatments.data?.map((treatment) => ({
         treatmentID: treatment.treatmentID ?? 0,
-        type: treatment.type ?? "",
+        type: treatment.type.map((type) => type.type.type) ?? "",
         category: treatment.category ?? "",
         date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
         comments: treatment.comments ?? "",
@@ -872,11 +1015,14 @@ const Treatment: NextPage = () => {
 
   const handleNewUser = async () => {
     setIsLoading(true);
+
+    const typeIDList = typeList.sort((a, b) => a.id - b.id).map((type) => (type.id ? type.id : 0));
     const query = router.asPath.split("?")[1] ?? "";
     const newUser_ = await newTreatment.mutateAsync({
       petID: petID === 0 ? Number(query?.split("&")[0]?.split("=")[1]) : petID,
       category: categoryOption === "Select one" ? "" : categoryOption,
-      type: typeList.sort((a, b) => a.localeCompare(b)),
+      typesID: typeIDList,
+      ///type: typeList.sort((a, b) => a.localeCompare(b)),
       date: startingDate,
       comments: comments,
     });
@@ -920,16 +1066,36 @@ const Treatment: NextPage = () => {
       setArea(userData.area ?? "");
       setGreaterArea(userData.greaterArea ?? "");
       setCategoryOption(userData.category ?? "");
-      setTypeList(userData.type ?? "");
-      setStartingDate(userData.date ?? new Date());
-      setComments(userData.comments ?? "");
+
+      const typeData = userData?.type;
+      const types: Type[] =
+        typeData?.map((type) => ({
+          id: type.typeID,
+          type: type.type.type,
+        })) ?? [];
+
+      setTypeList(types ?? "");
+
+      const typeIDs = types.map((type) => type.id);
 
       setTypeListOptions(
         typeOptions.map((type) => ({
-          type: type,
-          state: userData.type.includes(type),
+          id: type.id,
+          type: type.name,
+          state: typeIDs.includes(type.id),
         })),
       );
+
+      //setTypeList(userData.type ?? "");
+      setStartingDate(userData.date ?? new Date());
+      setComments(userData.comments ?? "");
+
+      // setTypeListOptions(
+      //   typeOptions.map((type) => ({
+      //     type: type,
+      //     state: userData.type.includes(type),
+      //   })),
+      // );
 
       // //Make sure thet area and street options have a value
       // if (userData.area === "Select one") {
@@ -951,7 +1117,17 @@ const Treatment: NextPage = () => {
     if (treatment) {
       const userData = treatment;
       setCategoryOption(userData.category ?? "");
-      setTypeList(userData.type ?? "");
+      //setTypeList(userData.type ?? "");
+
+      const typeData = userData?.type;
+      const types: Type[] =
+        typeData?.map((type) => ({
+          id: type.typeID,
+          type: type.type.type,
+        })) ?? [];
+
+      setTypeList(types ?? "");
+
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
       //console.log("Select one");
@@ -988,7 +1164,17 @@ const Treatment: NextPage = () => {
       setGreaterArea(userData.pet.owner.addressGreaterArea.greaterArea ?? "");
 
       setCategoryOption(userData.category ?? "");
-      setTypeList(userData.type ?? "");
+
+      const typeData = userData?.type;
+      const types: Type[] =
+        typeData?.map((type) => ({
+          id: type.typeID,
+          type: type.type.type,
+        })) ?? [];
+
+      setTypeList(types ?? "");
+
+      //setTypeList(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
       setComments(userData.comments ?? "");
     }
@@ -1018,7 +1204,8 @@ const Treatment: NextPage = () => {
     setTypeList([]);
     setTypeListOptions(
       typeOptions.map((type) => ({
-        type: type,
+        id: type.id,
+        type: type.name,
         state: false,
       })),
     );
@@ -1098,72 +1285,6 @@ const Treatment: NextPage = () => {
     });
   };
 
-  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  // const observerTarget = useRef<HTMLDivElement | null>(null);
-
-  // const [limit] = useState(12);
-  // const {
-  //   data: queryData,
-  //   fetchNextPage,
-  //   hasNextPage,
-  //   refetch,
-  // } = api.petTreatment.searchTreatmentsInfinite.useInfiniteQuery(
-  //   {
-  //     treatmentID: id,
-  //     limit: limit,
-  //     searchQuery: query,
-  //     order: order,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => {
-  //       console.log("Next Cursor: " + lastPage.nextCursor);
-  //       return lastPage.nextCursor;
-  //     },
-  //     enabled: false,
-  //   },
-  // );
-
-  // //Flattens the pages array into one array
-  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
-  // const pet_data = queryData?.pages.flatMap((page) => page.pet_data);
-  // const owner_data = queryData?.pages.flatMap((page) => page.owner_data);
-
-  // //combine the following two objects into one object
-  // const treatment_data = user_data?.map((user, index) => ({ ...user, ...pet_data?.[index] }));
-
-  // // Assuming each user object contains an ownerId or similar property to relate to the owner
-  // const pet_treatment_data = treatment_data?.map((pet) => {
-  //   // Find the owner that matches the user's ownerId
-  //   const owner = owner_data?.find((o) => (o.ownerID ?? 0) === pet.ownerID);
-  //   // Combine the user data with the found owner data
-  //   return { ...pet, ...owner };
-  // });
-
-  // //Checks intersection of the observer target and reassigns target element once true
-  // useEffect(() => {
-  //   if (!observerTarget.current || !fetchNextPage) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-  //     },
-  //     { threshold: 1 },
-  //   );
-
-  //   if (observerTarget.current) observer.observe(observerTarget.current);
-
-  //   const currentTarget = observerTarget.current;
-
-  //   return () => {
-  //     if (currentTarget) observer.unobserve(currentTarget);
-  //   };
-  // }, [fetchNextPage, hasNextPage, observerTarget]);
-
-  // //Make it retrieve the data from tab;e again when the user is updated, deleted or created
-  // useEffect(() => {
-  //   void refetch();
-  // }, [isUpdate, isDeleted, isCreate, query, order]);
-
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
   interface CustomInputProps {
@@ -1181,6 +1302,56 @@ const Treatment: NextPage = () => {
       {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
     </button>
   );
+
+  //-------------------------------------------New Types-------------------------------------------------------
+  const handleNewTypes = async () => {
+    const types_ = [
+      "Achilles",
+      "Amputation",
+      "Anxiety",
+      "Arthritis",
+      "Babesiosis",
+      "Cancer",
+      "Constipation",
+      "Cruciate",
+      "Dental",
+      "Diarrhoea",
+      "Distemper",
+      "Ear infection",
+      "Ehrlichia",
+      "Eye infection",
+      "Feline AIDS",
+      "Foreign body ingested",
+      "Fracture",
+      "Heart failure",
+      "Hernia",
+      "Hot spot",
+      "Kennel cough",
+      "Limping",
+      "Mange",
+      "Mastitis",
+      "MVA",
+      "Nail in paw",
+      "Nose bleed",
+      "Panleukopenia",
+      "Parvo",
+      "Pyometra",
+      "Renal",
+      "Snuffles",
+      "Steri complications",
+      "TVT",
+      "Urinary",
+      "Vaccinations (ad hoc)",
+      "Vomiting",
+      "Wound shave and clean",
+      "Wound stitch-up",
+      "Other",
+    ];
+
+    await newTypes.mutateAsync({
+      types: types_,
+    });
+  };
 
   //------------------------------------------DOWNLOADING OWNER TABLE TO EXCEL FILE------------------------------------------
   const downloadTreatmentTable = api.petTreatment.download.useQuery({ searchQuery: query });
@@ -1250,6 +1421,10 @@ const Treatment: NextPage = () => {
                 </button> */}
                   {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
+                  </button> */}
+
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleNewTypes}>
+                    Add new types
                   </button> */}
                 </div>
               </div>
@@ -1330,7 +1505,12 @@ const Treatment: NextPage = () => {
                               <td className="border px-2 py-1">{treatment.greaterArea}</td>
                               <td className="border px-2 py-1">{treatment.area}</td>
                               <td className="border px-2 py-1">{treatment.category}</td>
-                              <td className="border px-2 py-1">{treatment.type.slice(0, 8).join(", ")}</td>
+                              <td className="border px-2 py-1">
+                                {treatment.type
+                                  .map((type) => type.type.type)
+                                  .slice(0, 8)
+                                  .join(", ")}
+                              </td>
                               <td className=" border px-2 py-1">
                                 {treatment?.updatedAt?.getDate()?.toString() ?? ""}
                                 {"/"}
@@ -1555,7 +1735,7 @@ const Treatment: NextPage = () => {
                                   id="1"
                                   type="checkbox"
                                   checked={typeSelection?.allSelected}
-                                  onChange={(e) => handleType("", e.target.checked, "allSelected")}
+                                  onChange={(e) => handleType(0, "", e.target.checked, "allSelected")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
                                 <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
@@ -1569,7 +1749,7 @@ const Treatment: NextPage = () => {
                                   id="2"
                                   type="checkbox"
                                   checked={typeSelection?.clear}
-                                  onChange={(e) => handleType("", e.target.checked, "clear")}
+                                  onChange={(e) => handleType(0, "", e.target.checked, "clear")}
                                   className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                 />
                                 <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
@@ -1584,7 +1764,7 @@ const Treatment: NextPage = () => {
                                     id={String(option.type)}
                                     type="checkbox"
                                     checked={option.state}
-                                    onChange={(e) => handleType(option.type, e.target.checked, "normal")}
+                                    onChange={(e) => handleType(option.id, option.type, e.target.checked, "normal")}
                                     className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                   />
                                   <label htmlFor={String(option.type)} className="ms-2 text-sm font-medium text-gray-900">
@@ -1704,7 +1884,7 @@ const Treatment: NextPage = () => {
                       </div>
 
                       <div className="mb-2 flex items-center">
-                        <b className="mr-3">Type(s):</b> {typeList.join(", ")}
+                        <b className="mr-3">Type(s):</b> {typeList.map((type) => type.type).join(", ")}
                       </div>
 
                       <div className="mb-2 flex items-center">

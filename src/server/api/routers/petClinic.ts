@@ -15,7 +15,7 @@ export const petClinicRouter = createTRPCRouter({
       z.object({
         greaterAreaID: z.number(),
         //areaID: z.number(),
-        conditions: z.string().array(),
+        conditionsID: z.number().array(),
         comments: z.string(),
         date: z.date(),
       }),
@@ -26,7 +26,14 @@ export const petClinicRouter = createTRPCRouter({
           date: input.date,
           greaterArea: { connect: { greaterAreaID: input.greaterAreaID } },
           // area: { connect: { areaID: input.areaID } },
-          conditions: input.conditions,
+          //conditions: input.conditions,
+          conditions: {
+            createMany: {
+              data: input.conditionsID.map((conditionID) => ({
+                conditionID: conditionID,
+              })),
+            },
+          },
           comments: input.comments,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -43,7 +50,7 @@ export const petClinicRouter = createTRPCRouter({
         clinicID: z.number(),
         greaterAreaID: z.number(),
         // areaID: z.number(),
-        conditions: z.string().array(),
+        conditionsID: z.number().array(),
         comments: z.string(),
         date: z.date(),
       }),
@@ -56,12 +63,38 @@ export const petClinicRouter = createTRPCRouter({
         data: {
           greaterArea: { connect: { greaterAreaID: input.greaterAreaID } },
           // area: { connect: { areaID: input.areaID } },
-          conditions: input.conditions,
+          //: input.conditions,
           comments: input.comments,
           date: input.date,
           updatedAt: new Date(),
         },
       });
+
+      await ctx.db.conditionsOnClinic.deleteMany({
+        where: {
+          clinicID: input.clinicID,
+        },
+      });
+
+      //create new greater areas
+      const conditionsRelationships = input.conditionsID.map(async (conditionID) => {
+        await ctx.db.conditionsOnClinic.create({
+          data: {
+            clinic: {
+              connect: {
+                clinicID: petClinic.clinicID,
+              },
+            },
+            condition: {
+              connect: {
+                conditionID: conditionID,
+              },
+            },
+          },
+        });
+      });
+
+      await Promise.all(conditionsRelationships);
 
       return petClinic;
     }),
@@ -95,7 +128,18 @@ export const petClinicRouter = createTRPCRouter({
               { clinicID: { equals: Number(term.substring(1)) } },
               { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               // { area: { area: { contains: term } } },
-              { conditions: { hasSome: [term] } },
+              {
+                conditions: {
+                  some: {
+                    condition: {
+                      condition: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
@@ -104,7 +148,19 @@ export const petClinicRouter = createTRPCRouter({
             OR: [
               { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               // { area: { area: { contains: term } } },
-              { conditions: { hasSome: [term] } },
+              //{ conditions: { hasSome: [term] } },
+              {
+                conditions: {
+                  some: {
+                    condition: {
+                      condition: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               // dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
@@ -140,6 +196,16 @@ export const petClinicRouter = createTRPCRouter({
               },
             },
           },
+          conditions: {
+            select: {
+              condition: {
+                select: {
+                  condition: true,
+                },
+              },
+              conditionID: true,
+            },
+          },
         },
       });
 
@@ -163,6 +229,12 @@ export const petClinicRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      await ctx.db.conditionsOnClinic.deleteMany({
+        where: {
+          clinicID: input.clinicID,
+        },
+      });
+
       await ctx.db.petOnPetClinic.deleteMany({
         where: {
           clinicID: input.clinicID,
@@ -381,6 +453,30 @@ export const petClinicRouter = createTRPCRouter({
     };
   }),
 
+  //Conditions table create
+  createConditions: publicProcedure
+    .input(
+      z.object({
+        conditions: z.string().array(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const conditions = input.conditions;
+      const now = new Date();
+
+      for (const condition of conditions) {
+        await ctx.db.conditions.create({
+          data: {
+            condition: condition,
+            createdAt: now,
+            updatedAt: now,
+          },
+        });
+      }
+
+      return conditions;
+    }),
+
   // //Get all the clinics and sum these clinics for each year for the last 5 years
   // getClinicsHeld: protectedProcedure.query(async ({ ctx }) => {
   //   const clinics = await ctx.db.petClinic.findMany();
@@ -442,7 +538,18 @@ export const petClinicRouter = createTRPCRouter({
               { clinicID: { equals: Number(term.substring(1)) } },
               { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               //  { area: { contains: term } },
-              { conditions: { hasSome: [term] } },
+              {
+                conditions: {
+                  some: {
+                    condition: {
+                      condition: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions
           };
@@ -451,7 +558,18 @@ export const petClinicRouter = createTRPCRouter({
             OR: [
               { greaterArea: { greaterArea: { contains: term, mode: Prisma.QueryMode.insensitive } } },
               // { area: { contains: term } },
-              { conditions: { hasSome: [term] } },
+              {
+                conditions: {
+                  some: {
+                    condition: {
+                      condition: {
+                        contains: term,
+                        mode: Prisma.QueryMode.insensitive,
+                      },
+                    },
+                  },
+                },
+              },
               { comments: { contains: term, mode: Prisma.QueryMode.insensitive } },
               // dateCondition,
             ].filter((condition) => Object.keys(condition).length > 0), // Filter out empty conditions

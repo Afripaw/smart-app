@@ -264,7 +264,23 @@ export const petRouter = createTRPCRouter({
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term, mode: Prisma.QueryMode.insensitive } },
-              { petTreatments: { some: { type: { hasSome: [term] } } } },
+              //{ petTreatments: { some: { type: { hasSome: [term] } } } },
+              {
+                petTreatments: {
+                  some: {
+                    type: {
+                      some: {
+                        type: {
+                          type: {
+                            contains: term,
+                            mode: Prisma.QueryMode.insensitive,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               // { vaccinatedStatus: { contains: term } },
               //{ treatments: { contains: term } },
               { membership: { contains: term, mode: Prisma.QueryMode.insensitive } },
@@ -297,7 +313,23 @@ export const petRouter = createTRPCRouter({
               { sterilisedRequestSigned: { contains: term, mode: Prisma.QueryMode.insensitive } },
               //{ petTreatments: { some: { type: { contains: term } } } },
               // { petTreatments: { type: { hasSome: [term] } } },
-              { petTreatments: { some: { type: { hasSome: [term] } } } },
+              //{ petTreatments: { some: { type: { hasSome: [term] } } } },
+              {
+                petTreatments: {
+                  some: {
+                    type: {
+                      some: {
+                        type: {
+                          type: {
+                            contains: term,
+                            mode: Prisma.QueryMode.insensitive,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               // { vaccinatedStatus: { contains: term } },
               //{ treatments: { contains: term } },
               { membership: { contains: term, mode: Prisma.QueryMode.insensitive } },
@@ -326,7 +358,23 @@ export const petRouter = createTRPCRouter({
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term, mode: Prisma.QueryMode.insensitive } },
-              { petTreatments: { some: { type: { hasSome: [term] } } } },
+              //{ petTreatments: { some: { type: { hasSome: [term] } } } },
+              {
+                petTreatments: {
+                  some: {
+                    type: {
+                      some: {
+                        type: {
+                          type: {
+                            contains: term,
+                            mode: Prisma.QueryMode.insensitive,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               // { vaccinatedStatus: { contains: term } },
               //{ treatments: { contains: term } },
               { membership: { contains: term, mode: Prisma.QueryMode.insensitive } },
@@ -355,7 +403,23 @@ export const petRouter = createTRPCRouter({
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term, mode: Prisma.QueryMode.insensitive } },
-              { petTreatments: { some: { type: { hasSome: [term] } } } },
+              //{ petTreatments: { some: { type: { hasSome: [term] } } } },
+              {
+                petTreatments: {
+                  some: {
+                    type: {
+                      some: {
+                        type: {
+                          type: {
+                            contains: term,
+                            mode: Prisma.QueryMode.insensitive,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               // { vaccinatedStatus: { contains: term } },
               //{ treatments: { contains: term } },
               { membership: { contains: term, mode: Prisma.QueryMode.insensitive } },
@@ -443,7 +507,24 @@ export const petRouter = createTRPCRouter({
               addressStreetNumber: true,
             },
           },
-          petTreatments: true,
+          petTreatments: {
+            select: {
+              treatmentID: true,
+              petID: true,
+              category: true,
+              comments: true,
+              date: true,
+              type: {
+                select: {
+                  type: {
+                    select: {
+                      type: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           clinicsAttended: true,
         },
       });
@@ -588,6 +669,24 @@ export const petRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      //find all the treatmentIDs for this pet
+      const treatmentIDs = await ctx.db.petTreatment.findMany({
+        where: {
+          petID: input.petID,
+        },
+        select: {
+          treatmentID: true,
+        },
+      });
+
+      await ctx.db.typesOnTreatment.deleteMany({
+        where: {
+          treatmentID: {
+            in: treatmentIDs.map((treatment) => treatment.treatmentID),
+          },
+        },
+      });
+
       //delete all the relationships with the treatment
       await ctx.db.petTreatment.deleteMany({
         where: {
@@ -671,6 +770,22 @@ export const petRouter = createTRPCRouter({
       const treatments = await ctx.db.petTreatment.findMany({
         where: {
           petID: input.petID,
+        },
+        select: {
+          treatmentID: true,
+          petID: true,
+          category: true,
+          comments: true,
+          date: true,
+          type: {
+            select: {
+              type: {
+                select: {
+                  type: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -1219,6 +1334,22 @@ export const petRouter = createTRPCRouter({
               { size: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { markings: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              {
+                petTreatments: {
+                  some: {
+                    type: {
+                      some: {
+                        type: {
+                          type: {
+                            contains: term,
+                            mode: Prisma.QueryMode.insensitive,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term, mode: Prisma.QueryMode.insensitive } },
@@ -1242,6 +1373,22 @@ export const petRouter = createTRPCRouter({
               { size: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { markings: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              {
+                petTreatments: {
+                  some: {
+                    type: {
+                      some: {
+                        type: {
+                          type: {
+                            contains: term,
+                            mode: Prisma.QueryMode.insensitive,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
               // { sterilisedStatus: { contains: term } },
               // { sterilisedRequested: { contains: term } },
               { sterilisedRequestSigned: { contains: term, mode: Prisma.QueryMode.insensitive } },

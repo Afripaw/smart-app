@@ -8,6 +8,7 @@ import { volunteerRouter } from "./routers/volunteer";
 import { communicationRouter } from "./routers/communication";
 import { welcomePageRouter } from "./routers/welcomePage";
 import { geographicRouter } from "./routers/geographic";
+import { infoRouter } from "./routers/info";
 import { createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   communication: communicationRouter,
   welcomePage: welcomePageRouter,
   geographic: geographicRouter,
+  info: infoRouter,
 });
 
 // export type definition of API

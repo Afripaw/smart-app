@@ -1740,69 +1740,6 @@ const Volunteer: NextPage = () => {
     setOrder(field);
   };
 
-  // //-------------------------------INFINITE SCROLLING WITH INTERSECTION OBSERVER-----------------------------------------
-  // const observerTarget = useRef<HTMLDivElement | null>(null);
-
-  // const [limit] = useState(12);
-  // const {
-  //   data: queryData,
-  //   fetchNextPage,
-  //   hasNextPage,
-  //   refetch,
-  // } = api.volunteer.searchVolunteersInfinite.useInfiniteQuery(
-  //   {
-  //     volunteerID: id,
-  //     limit: limit,
-  //     searchQuery: query,
-  //     order: order,
-  //   },
-  //   {
-  //     getNextPageParam: (lastPage) => {
-  //       console.log("Next Cursor: " + lastPage.nextCursor);
-  //       return lastPage.nextCursor;
-  //     },
-  //     enabled: false,
-  //   },
-  // );
-
-  // //Flattens the pages array into one array
-  // const user_data = queryData?.pages.flatMap((page) => page.user_data);
-  // const clinics_data = queryData?.pages.flatMap((page) => page.clinics_data);
-  // const volunteer_data_with_clinics = user_data?.map((volunteer) => {
-  //   // Assuming each clinic object has a 'petID' that links it to a pet
-  //   const associatedClinics = clinics_data?.filter((clinic) => clinic.volunteerID === volunteer.volunteerID);
-
-  //   return {
-  //     ...volunteer,
-  //     clinics: associatedClinics,
-  //   };
-  // });
-
-  // //Checks intersection of the observer target and reassigns target element once true
-  // useEffect(() => {
-  //   if (!observerTarget.current || !fetchNextPage) return;
-
-  //   const observer = new IntersectionObserver(
-  //     (entries) => {
-  //       if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
-  //     },
-  //     { threshold: 1 },
-  //   );
-
-  //   if (observerTarget.current) observer.observe(observerTarget.current);
-
-  //   const currentTarget = observerTarget.current;
-
-  //   return () => {
-  //     if (currentTarget) observer.unobserve(currentTarget);
-  //   };
-  // }, [fetchNextPage, hasNextPage, observerTarget]);
-
-  // //Make it retrieve the data from tab;e again when the user is updated, deleted or created
-  // useEffect(() => {
-  //   void refetch();
-  // }, [isUpdate, isDeleted, isCreate, query, order, isViewProfilePage]);
-
   //-------------------------------------DATEPICKER--------------------------------------
   // Define the props for your custom input component
   interface CustomInputProps {

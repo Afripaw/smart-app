@@ -1086,7 +1086,7 @@ const Pet: NextPage = () => {
     console.log("Cat Colours: ", catColours);
     if (speciesOption == "Cat" && !catColours) {
       setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: false })));
-    } else if (speciesOption == "Dog" && catColours) {
+    } else if (speciesOption == "Dog" && isCreate) {
       setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: false })));
     }
   }, [speciesOption]);
@@ -1372,7 +1372,9 @@ const Pet: NextPage = () => {
       setSterilisationRequestSignedOption("Not Applicable");
       setSterilisationRequestSignedOptions(["Not Applicable"]);
     } else if (sterilisationRequestedOption === "Yes") {
-      setSterilisationRequestSignedOption("Select one");
+      if (sterilisationRequestSignedOption === "" || sterilisationRequestSignedOption === undefined) {
+        setSterilisationRequestSignedOption("Select one");
+      }
       setSterilisationRequestSignedOptions(sterilisationRequestConfirmedSignedOptions);
     }
   }, [sterilisationRequestedOption]); // Add dependencies here
@@ -2272,12 +2274,16 @@ const Pet: NextPage = () => {
       // setBreedOption(userData?.breed ?? "Select one");
       setBreedList(userData?.breed ?? "Select here");
       setColourList(userData?.colour ?? "Select here");
+      setColourOption("Select here");
       setSizeOption(userData?.size ?? "Select one");
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
+      console.log("Request signed at____ :", userData?.sterilisedRequestSigned);
       if (userData?.sterilisedRequestSigned === "") {
+        console.log("Requested signed not here!!!!____");
         setSterilisationRequestSignedOption("Select one");
       } else {
+        console.log("Requested signed here!!!!____");
         setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
       }
 
@@ -2484,7 +2490,10 @@ const Pet: NextPage = () => {
       setStatusOption(userData?.status ?? "Select one");
       //setSterilisationStatusOption(userData?.sterilisedStatus ?? "Select one");
       //setSterilisationRequestedOption(userData?.sterilisedRequested ?? "Select one");
+      //console.log("UseEffect Request signed at____ :", userData?.sterilisedRequestSigned);
+
       setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "Select one");
+
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
 
       if (userData?.vaccinationShot1.getFullYear() !== 1970) {
@@ -3266,6 +3275,7 @@ const Pet: NextPage = () => {
         setSizeOption(petData?.size ?? "Select one");
         setMarkings(petData?.markings ?? "");
         setStatusOption(petData?.status ?? "Select one");
+        console.log("URL UseEffect Request signed at____ :", petData?.sterilisedRequestSigned);
         setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "Select one");
         setSterilisationStatusOption(
           petData?.sterilisedStatus === undefined || petData?.sterilisedStatus === null
@@ -3383,6 +3393,8 @@ const Pet: NextPage = () => {
         setSizeOption(petData?.size ?? "");
         setMarkings(petData?.markings ?? "");
         setStatusOption(petData?.status ?? "");
+        console.log("View profile useEffect Request signed at____ :", petData?.sterilisedRequestSigned);
+
         setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "");
         setSterilisationStatusOption(
           petData?.sterilisedStatus === undefined || petData?.sterilisedStatus === null ? "" : petData?.sterilisedStatus.getFullYear() === 1970 ? "No" : "Yes",

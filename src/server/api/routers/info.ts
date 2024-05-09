@@ -65,6 +65,183 @@ export const infoRouter = createTRPCRouter({
       };
     }),
 
+  //membership queries
+  getMembershipInfinite: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number(),
+        cursor: z.number().default(0),
+        typeOfQuery: z.string(),
+        startDate: z.date(),
+        endDate: z.date(),
+        species: z.string(),
+        //order: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      //check what type of query it is and then decide what object will be in the where clause
+      const membershipQuery =
+        input.typeOfQuery === "Standard card holder"
+          ? { membership: { equals: "Standard card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
+          : input.typeOfQuery === "Gold card holder"
+            ? { membership: { equals: "Gold card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
+            : {};
+
+      const data = await ctx.db.pet.findMany({
+        where: {
+          AND: [membershipQuery, { species: input.species }],
+        },
+        //orderBy: order,
+        take: input.limit + 1,
+        cursor: input.cursor ? { petID: input.cursor } : undefined,
+        include: {
+          owner: {
+            select: {
+              firstName: true,
+              surname: true,
+              addressGreaterArea: { select: { greaterArea: true } },
+              addressArea: { select: { area: true } },
+              addressStreet: { select: { street: true } },
+              addressStreetCode: true,
+              addressStreetNumber: true,
+            },
+          },
+          clinicsAttended: {
+            select: {
+              clinic: {
+                select: {
+                  date: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      let newNextCursor: typeof input.cursor | undefined = undefined;
+      if (data.length > input.limit) {
+        const nextRow = data.pop();
+        newNextCursor = nextRow?.petID;
+      }
+
+      return {
+        data: data,
+        nextCursor: newNextCursor,
+      };
+    }),
+
+  //clinic queries
+  getClinicInfinite: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number(),
+        cursor: z.number().default(0),
+        typeOfQuery: z.string(),
+        startDate: z.date(),
+        endDate: z.date(),
+        singleDate: z.date(),
+        //order: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      //check what type of query it is and then decide what object will be in the where clause
+      const clinicQuery =
+        input.typeOfQuery === "Single Day"
+          ? { clinicsAttended: { some: { clinic: { date: input.singleDate } } } }
+          : { clinicsAttended: { some: { clinic: { date: { gte: input.startDate, lte: input.endDate } } } } };
+
+      const data = await ctx.db.pet.findMany({
+        where: {
+          AND: [clinicQuery],
+        },
+        //orderBy: order,
+        take: input.limit + 1,
+        cursor: input.cursor ? { petID: input.cursor } : undefined,
+        include: {
+          owner: {
+            select: {
+              firstName: true,
+              surname: true,
+              mobile: true,
+              addressGreaterArea: { select: { greaterArea: true } },
+              addressArea: { select: { area: true } },
+              addressStreet: { select: { street: true } },
+              addressStreetCode: true,
+              addressStreetNumber: true,
+            },
+          },
+          clinicsAttended: true,
+        },
+      });
+
+      let newNextCursor: typeof input.cursor | undefined = undefined;
+      if (data.length > input.limit) {
+        const nextRow = data.pop();
+        newNextCursor = nextRow?.petID;
+      }
+
+      return {
+        data: data,
+        nextCursor: newNextCursor,
+      };
+    }),
+
+  //treatment queries
+  getTreatmentInfinite: protectedProcedure
+    .input(
+      z.object({
+        limit: z.number(),
+        cursor: z.number().default(0),
+        typeOfQuery: z.string(),
+        startDate: z.date(),
+        endDate: z.date(),
+        singleDate: z.date(),
+        //order: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      //check what type of query it is and then decide what object will be in the where clause
+      const treatmentQuery =
+        input.typeOfQuery === "Single Day"
+          ? { petTreatments: { some: { date: input.singleDate } } }
+          : { petTreatments: { some: { date: { gte: input.startDate, lte: input.endDate } } } };
+
+      const data = await ctx.db.pet.findMany({
+        where: {
+          AND: [treatmentQuery],
+        },
+        //orderBy: order,
+        take: input.limit + 1,
+        cursor: input.cursor ? { petID: input.cursor } : undefined,
+        include: {
+          owner: {
+            select: {
+              firstName: true,
+              surname: true,
+              mobile: true,
+              addressGreaterArea: { select: { greaterArea: true } },
+              addressArea: { select: { area: true } },
+              addressStreet: { select: { street: true } },
+              addressStreetCode: true,
+              addressStreetNumber: true,
+            },
+          },
+          petTreatments: true,
+        },
+      });
+
+      let newNextCursor: typeof input.cursor | undefined = undefined;
+      if (data.length > input.limit) {
+        const nextRow = data.pop();
+        newNextCursor = nextRow?.petID;
+      }
+
+      return {
+        data: data,
+        nextCursor: newNextCursor,
+      };
+    }),
+
   //get all the pets where sterilisation requested is Yes and where the input is: two dates between which the sterilisation was requested as well as whether it is dogs or cats
   getRequestedSterilisation: protectedProcedure
     .input(

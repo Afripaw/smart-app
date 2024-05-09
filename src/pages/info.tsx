@@ -14,6 +14,20 @@ const Info: NextPage = () => {
 
   //Loading
   const [isLoading, setIsLoading] = useState(false);
+
+  //generate buttons
+  const [generatedSterilisation, setGeneratedSterilisation] = useState(false);
+  const [generatedMembership, setGeneratedMembership] = useState(false);
+  const [generatedClinic, setGeneratedClinic] = useState(false);
+
+  //formatting dates
+  // Function to format a date object as a string in "DD/MM/YYYY" format
+  function formatDate(date: Date): string {
+    const day = date.getDate().toString();
+    const month = (date.getMonth() + 1).toString();
+    const year = date.getFullYear().toString();
+    return `${day}/${month}/${year}`;
+  }
   //---------------------------------------STERILISATION DUE QUERIES------------------------------------------------
   //STERILISATION DUE
   const [sterilisationDue, setSterilisationDue] = useState(false);
@@ -110,14 +124,14 @@ const Info: NextPage = () => {
   const speciesSteriliseOptions = ["Dog", "Cat"];
 
   //STERILISATION INFINITE SCROLLING
-  const observerTarget = useRef<HTMLDivElement | null>(null);
+  const observerSterilisationTarget = useRef<HTMLDivElement | null>(null);
 
   const [limit] = useState(8);
   const {
-    data: queryData,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
+    data: querySterilisationData,
+    fetchNextPage: fetchNextSterilisationPage,
+    hasNextPage: hasNextSterilisationPage,
+    refetch: refetchSterilisation,
   } = api.info.getSterilisationInfinite.useInfiniteQuery(
     {
       limit: limit,
@@ -137,27 +151,27 @@ const Info: NextPage = () => {
   );
 
   //Flattens the pages array into one array
-  const data = queryData?.pages.flatMap((page) => page.data);
+  const sterilisationData = querySterilisationData?.pages.flatMap((page) => page.data);
 
   //Checks intersection of the observer target and reassigns target element once true
   useEffect(() => {
-    if (!observerTarget.current || !fetchNextPage) return;
+    if (!observerSterilisationTarget.current || !fetchNextSterilisationPage) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage) void fetchNextPage();
+        if (entries[0]?.isIntersecting && hasNextSterilisationPage) void fetchNextSterilisationPage();
       },
       { threshold: 1 },
     );
 
-    if (observerTarget.current) observer.observe(observerTarget.current);
+    if (observerSterilisationTarget.current) observer.observe(observerSterilisationTarget.current);
 
-    const currentTarget = observerTarget.current;
+    const currentTarget = observerSterilisationTarget.current;
 
     return () => {
       if (currentTarget) observer.unobserve(currentTarget);
     };
-  }, [fetchNextPage, hasNextPage, observerTarget]);
+  }, [fetchNextSterilisationPage, hasNextSterilisationPage, observerSterilisationTarget]);
 
   //for when order is implemented
   // useEffect(() => {
@@ -165,17 +179,18 @@ const Info: NextPage = () => {
   // }, [order]);
 
   //Generate table button
-  const [generated, setGenerated] = useState(false);
 
   //when dropdowns are selected again the table should dissappear
   useEffect(() => {
-    setGenerated(false);
+    setGeneratedSterilisation(false);
   }, [sterilisationDueOption, sterilisationStartingDate, sterilisationEndingDate, speciesSteriliseOption]);
 
   const handleSteriliseGenerate = async () => {
     setIsLoading(true);
-    void refetch();
-    setGenerated(true);
+    void refetchSterilisation();
+    setGeneratedSterilisation(true);
+    setGeneratedMembership(false);
+    setGeneratedClinic(false);
     setIsLoading(false);
   };
 
@@ -256,9 +271,74 @@ const Info: NextPage = () => {
 
   const speciesMembershipOptions = ["Dog", "Cat"];
 
+  //MEMBERSHIP INFINITE SCROLLING
+  const observerMembershipTarget = useRef<HTMLDivElement | null>(null);
+
+  const [limitMembership] = useState(8);
+  const {
+    data: queryMembershipData,
+    fetchNextPage: fetchNextMembershipPage,
+    hasNextPage: hasNextMembershipPage,
+    refetch: refetchMembership,
+  } = api.info.getMembershipInfinite.useInfiniteQuery(
+    {
+      limit: limitMembership,
+      typeOfQuery: membershipOption,
+      startDate: membershipStartingDate,
+      endDate: membershipEndingDate,
+      species: speciesMembershipOption,
+      //order
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        console.log("Next Cursor: " + lastPage.nextCursor);
+        return lastPage.nextCursor;
+      },
+      enabled: false,
+    },
+  );
+
+  //Flattens the pages array into one array
+  const membershipData = queryMembershipData?.pages.flatMap((page) => page.data);
+
+  //Checks intersection of the observer target and reassigns target element once true
+  useEffect(() => {
+    if (!observerMembershipTarget.current || !fetchNextMembershipPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextMembershipPage) void fetchNextMembershipPage();
+      },
+      { threshold: 1 },
+    );
+
+    if (observerMembershipTarget.current) observer.observe(observerMembershipTarget.current);
+
+    const currentTarget = observerMembershipTarget.current;
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [fetchNextMembershipPage, hasNextMembershipPage, observerMembershipTarget]);
+
+  //for when order is implemented
+  // useEffect(() => {
+  //   void refetch();
+  // }, [order]);
+
   //Generate table button
+
+  //when dropdowns are selected again the table should dissappear
+  useEffect(() => {
+    setGeneratedMembership(false);
+  }, [membershipOption, membershipStartingDate, membershipEndingDate, speciesMembershipOption]);
+
   const handleMembershipGenerate = async () => {
-    //setIsLoading(true);
+    setIsLoading(true);
+    void refetchMembership();
+    setGeneratedSterilisation(false);
+    setGeneratedMembership(true);
+    setGeneratedClinic(false);
     setIsLoading(false);
   };
 
@@ -331,16 +411,9 @@ const Info: NextPage = () => {
     };
   }, []);
 
-  const periodOptions = ["Period", "Single Day"];
+  const periodOptions = ["Time Period", "Single Day"];
 
   //DATES
-  // const [periodSelection, setPeriodSelection] = useState(true);
-  // //select period of time for clinic dates
-  // useEffect(() => {
-  //   if (periodOption === "Single Day") {
-  //     setPeriodSelection(false);
-  //   }
-  // }, [periodOption]);
 
   //startDate
   const [clinicStartingDate, setClinicStartingDate] = useState(new Date());
@@ -350,9 +423,131 @@ const Info: NextPage = () => {
   //singleDate
   const [clinicDate, setClinicDate] = useState(new Date());
 
+  //CLINIC INFINITE SCROLLING
+  const observerClinicTarget = useRef<HTMLDivElement | null>(null);
+
+  const [limitClinic] = useState(8);
+  const {
+    data: queryClinicData,
+    fetchNextPage: fetchNextClinicPage,
+    hasNextPage: hasNextClinicPage,
+    refetch: refetchClinic,
+  } = api.info.getClinicInfinite.useInfiniteQuery(
+    {
+      limit: limitClinic,
+      typeOfQuery: clinicOption,
+      startDate: clinicStartingDate,
+      endDate: clinicEndingDate,
+      singleDate: clinicDate,
+      //order
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        console.log("Next Cursor: " + lastPage.nextCursor);
+        return lastPage.nextCursor;
+      },
+      enabled: false,
+    },
+  );
+
+  //Flattens the pages array into one array
+  const clinicData = queryClinicData?.pages.flatMap((page) => page.data);
+
+  //Checks intersection of the observer target and reassigns target element once true
+  useEffect(() => {
+    if (!observerClinicTarget.current || !fetchNextClinicPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextClinicPage) void fetchNextClinicPage();
+      },
+      { threshold: 1 },
+    );
+
+    if (observerClinicTarget.current) observer.observe(observerClinicTarget.current);
+
+    const currentTarget = observerClinicTarget.current;
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [fetchNextClinicPage, hasNextClinicPage, observerClinicTarget]);
+
+  //for when order is implemented
+  // useEffect(() => {
+  //   void refetch();
+  // }, [order]);
+
+  //TREATMENT INFINITE SCROLLING
+  const observerTreatmentTarget = useRef<HTMLDivElement | null>(null);
+
+  const [limitTreatment] = useState(8);
+  const {
+    data: queryTreatmentData,
+    fetchNextPage: fetchNextTreatmentPage,
+    hasNextPage: hasNextTreatmentPage,
+    refetch: refetchTreatment,
+  } = api.info.getTreatmentInfinite.useInfiniteQuery(
+    {
+      limit: limitTreatment,
+      typeOfQuery: clinicOption,
+      startDate: clinicStartingDate,
+      endDate: clinicEndingDate,
+      singleDate: clinicDate,
+      //order
+    },
+    {
+      getNextPageParam: (lastPage) => {
+        console.log("Next Cursor: " + lastPage.nextCursor);
+        return lastPage.nextCursor;
+      },
+      enabled: false,
+    },
+  );
+
+  //Flattens the pages array into one array
+  const treatmentData = queryTreatmentData?.pages.flatMap((page) => page.data);
+
+  //Checks intersection of the observer target and reassigns target element once true
+  useEffect(() => {
+    if (!observerTreatmentTarget.current || !fetchNextTreatmentPage) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextTreatmentPage) void fetchNextTreatmentPage();
+      },
+      { threshold: 1 },
+    );
+
+    if (observerTreatmentTarget.current) observer.observe(observerTreatmentTarget.current);
+
+    const currentTarget = observerTreatmentTarget.current;
+
+    return () => {
+      if (currentTarget) observer.unobserve(currentTarget);
+    };
+  }, [fetchNextTreatmentPage, hasNextTreatmentPage, observerTreatmentTarget]);
+
   //Generate table button
+
+  //when dropdowns are selected again the table should dissappear
+  useEffect(() => {
+    setGeneratedClinic(false);
+  }, [clinicOption, clinicStartingDate, clinicEndingDate, periodOption]);
+
   const handleClinicGenerate = async () => {
-    //setIsLoading(true);
+    setIsLoading(true);
+    if (clinicOption === "Clinic Attendance") {
+      void refetchClinic();
+      setGeneratedSterilisation(false);
+      setGeneratedMembership(false);
+      setGeneratedClinic(true);
+    } else if (clinicOption === "Treatment Administered") {
+      void refetchTreatment();
+      setGeneratedSterilisation(false);
+      setGeneratedMembership(false);
+      setGeneratedClinic(true);
+    }
     setIsLoading(false);
   };
 
@@ -364,8 +559,8 @@ const Info: NextPage = () => {
       <main className="flex h-screen flex-col overflow-y-hidden text-normal">
         <Navbar />
 
-        <div className="grid h-full w-full grow grid-rows-2">
-          <div className="row-span-1 grid grid-rows-3">
+        <div className="grid h-full w-full grow grid-rows-6">
+          <div className="row-span-2 grid grid-rows-3">
             {/* STERILISATION DUE QUERIES */}
             <div className="row-span-1 grid grid-cols-5 border-2">
               <div className="col-span-4 grid grid-cols-2">
@@ -643,7 +838,7 @@ const Info: NextPage = () => {
                   <div className="mx-3 flex items-center">
                     <div className="mx-3 flex items-center">
                       <label className="">
-                        Time Period<span className="text-lg text-main-orange">*</span>:{" "}
+                        Time Filter<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                     </div>
                     <div className="relative flex flex-col">
@@ -673,7 +868,7 @@ const Info: NextPage = () => {
                   </div>
                 </div>
 
-                {periodOption === "Period" ? (
+                {periodOption === "Time Period" ? (
                   <div className="col-span-1 flex items-center gap-5">
                     <div className="flex items-center">
                       <label className="">
@@ -738,11 +933,11 @@ const Info: NextPage = () => {
             </div>
           </div>
           {/* TABLE */}
-          <div className="row-span-1 flex justify-center border-2">
-            {generated ? (
-              data ? (
-                <article className="my-5 flex w-full justify-center rounded-md shadow-inner">
-                  <div className="max-h-[70vh] max-w-[82rem] overflow-auto">
+          <div className="row-span-4 flex justify-center border-2">
+            {generatedSterilisation ? (
+              sterilisationData ? (
+                <article className="my-3 flex w-full justify-center rounded-md shadow-inner">
+                  <div className="max-h-[52vh] max-w-[85rem] overflow-auto">
                     {/* max-h-[60vh] */}
                     <table className="min-w-full divide-y divide-gray-200">
                       <thead className="z-30 bg-gray-50">
@@ -776,7 +971,7 @@ const Info: NextPage = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data?.map((user, index) => {
+                        {sterilisationData?.map((user, index) => {
                           return (
                             <tr className="items-center">
                               <td className=" border px-2 py-1">
@@ -784,7 +979,16 @@ const Info: NextPage = () => {
                               </td>
                               <td className="border px-2 py-1">{user.owner.firstName + " " + user.owner.surname}</td>
                               <td className="border px-2 py-1">
-                                {user.owner.addressGreaterArea.greaterArea +
+                                {[
+                                  user.owner.addressGreaterArea.greaterArea,
+                                  user.owner.addressArea?.area,
+                                  user.owner.addressStreet?.street,
+                                  user.owner.addressStreetCode,
+                                  user.owner.addressStreetNumber,
+                                ]
+                                  .filter((item) => item) // Only keep non-empty values
+                                  .join(", ")}
+                                {/* {user.owner.addressGreaterArea.greaterArea +
                                   ", " +
                                   user.owner.addressArea?.area +
                                   ", " +
@@ -792,7 +996,7 @@ const Info: NextPage = () => {
                                   ", " +
                                   user.owner.addressStreetCode +
                                   ", " +
-                                  user.owner.addressStreetNumber}
+                                  user.owner.addressStreetNumber} */}
                               </td>
                               <td className="border px-2 py-1">{user.owner.mobile}</td>
                               <td className="border px-2 py-1">{user.petName}</td>
@@ -811,32 +1015,126 @@ const Info: NextPage = () => {
                               </td>
                               <td className="border px-2 py-1">{user.sterilisedRequestSigned}</td>
                               <td className=" border px-2 py-1">
-                                {user?.vaccinationShot1?.getDate()?.toString() ?? ""}
-                                {"/"}
-                                {((user?.vaccinationShot1?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                                {"/"}
-                                {user?.vaccinationShot1?.getFullYear()?.toString() ?? ""}
+                                {user?.vaccinationShot1?.getFullYear() !== 1970
+                                  ? `${user.vaccinationShot1.getDate().toString().padStart(2, "0")}/` +
+                                    `${(user.vaccinationShot1.getMonth() + 1).toString().padStart(2, "0")}/` +
+                                    `${user.vaccinationShot1.getFullYear().toString()}`
+                                  : "Not yet"}
                               </td>
                               <td className=" border px-2 py-1">
-                                {user?.vaccinationShot2?.getDate()?.toString() ?? ""}
-                                {"/"}
-                                {((user?.vaccinationShot2?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                                {"/"}
-                                {user?.vaccinationShot2?.getFullYear()?.toString() ?? ""}
+                                {user?.vaccinationShot2?.getFullYear() !== 1970
+                                  ? `${user.vaccinationShot2?.getDate().toString().padStart(2, "0")}/` +
+                                    `${((user.vaccinationShot2?.getMonth() ?? 0) + 1).toString().padStart(2, "0")}/` +
+                                    `${user.vaccinationShot2?.getFullYear().toString()}`
+                                  : "Not yet"}
                               </td>
                               <td className=" border px-2 py-1">
-                                {user?.vaccinationShot3?.getDate()?.toString() ?? ""}
-                                {"/"}
-                                {((user?.vaccinationShot3?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                                {"/"}
-                                {user?.vaccinationShot3?.getFullYear()?.toString() ?? ""}
+                                {user?.vaccinationShot3?.getFullYear() !== 1970
+                                  ? `${user.vaccinationShot3?.getDate().toString().padStart(2, "0")}/` +
+                                    `${((user.vaccinationShot3?.getMonth() ?? 0) + 1).toString().padStart(2, "0")}/` +
+                                    `${user.vaccinationShot3?.getFullYear().toString()}`
+                                  : "Not yet"}
                               </td>
                             </tr>
                           );
                         })}
                         <tr>
                           <td className=" px-2 py-1">
-                            <div ref={observerTarget} />
+                            <div ref={observerSterilisationTarget} />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              ) : (
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                </div>
+              )
+            ) : generatedMembership ? (
+              membershipData ? (
+                <article className="my-3 flex w-full justify-center rounded-md shadow-inner">
+                  <div className="max-h-[52vh] max-w-[85rem] overflow-auto">
+                    {/* max-h-[60vh] */}
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="z-30 bg-gray-50">
+                        <tr>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Owner Name</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Address</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Pet Name</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Species</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Sex</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Age</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Breed</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Colour</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Card Status</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Clinic Dates Attended</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Total number of Clinics Attended</th>
+                          {/* <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                                Date
+                              </button>
+                              <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort reverse chronologically
+                              </span>
+                            </span>
+                          </th> */}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {membershipData?.map((user, index) => {
+                          return (
+                            <tr className="items-center">
+                              <td className=" border px-2 py-1">
+                                <div className="flex justify-center">{index + 1}</div>
+                              </td>
+                              <td className="border px-2 py-1">{user.owner.firstName + " " + user.owner.surname}</td>
+                              <td className="border px-2 py-1">
+                                {[
+                                  user.owner.addressGreaterArea.greaterArea,
+                                  user.owner.addressArea?.area,
+                                  user.owner.addressStreet?.street,
+                                  user.owner.addressStreetCode,
+                                  user.owner.addressStreetNumber,
+                                ]
+                                  .filter((item) => item) // Only keep non-empty values
+                                  .join(", ")}
+                                {/* {user.owner.addressGreaterArea.greaterArea +
+                                  ", " +
+                                  user.owner.addressArea?.area +
+                                  ", " +
+                                  user.owner.addressStreet?.street +
+                                  ", " +
+                                  user.owner.addressStreetCode +
+                                  ", " +
+                                  user.owner.addressStreetNumber} */}
+                              </td>
+                              <td className="border px-2 py-1">{user.petName}</td>
+                              <td className="border px-2 py-1">{user.species}</td>
+                              <td className="border px-2 py-1">{user.sex}</td>
+                              <td className="border px-2 py-1">{user.age}</td>
+                              <td className="border px-2 py-1">{user.breed.join(", ")}</td>
+                              <td className="border px-2 py-1">{user.colour.join(", ")}</td>
+                              <td className="border px-2 py-1">{user.cardStatus}</td>
+                              <td className=" border px-2 py-1">
+                                {user.clinicsAttended
+                                  ?.filter((item) => item?.clinic?.date) // Ensure the date exists
+                                  .map((item) => formatDate(new Date(item.clinic.date))) // Convert to readable string
+                                  .join(", ")}
+                              </td>
+                              <td className=" border px-2 py-1">{user?.clinicsAttended.length}</td>
+                            </tr>
+                          );
+                        })}
+                        <tr>
+                          <td className=" px-2 py-1">
+                            <div ref={observerSterilisationTarget} />
                           </td>
                         </tr>
                       </tbody>

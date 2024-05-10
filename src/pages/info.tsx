@@ -1187,7 +1187,7 @@ const Info: NextPage = () => {
                                   .map((item) => formatDate(new Date(item.clinic.date))) // Convert to readable string
                                   .join(", ")}
                               </td>
-                              <td className=" border px-2 py-1">{user?.clinicsAttended.length}</td>
+                              <td className=" border px-2 py-1 text-center">{user?.clinicsAttended.length}</td>
                             </tr>
                           );
                         })}
@@ -1292,7 +1292,7 @@ const Info: NextPage = () => {
                                   .map((item) => formatDate(new Date(item.clinic.date))) // Convert to readable string
                                   .join(", ")}
                               </td>
-                              <td className=" border px-2 py-1">{user?.clinicsAttended.length}</td>
+                              <td className=" border px-2 py-1 text-center">{user?.clinicsAttended.length}</td>
                               <td className=" border px-2 py-1">
                                 {user?.lastDeworming?.getFullYear() != null ? formatDate(new Date(user?.lastDeworming)) : "No Last Deworming"}
                               </td>
@@ -1404,7 +1404,7 @@ const Info: NextPage = () => {
                                 )}
                               </td>
                               <td className="border px-2 py-1">{user.cardStatus}</td>
-                              <td className=" border px-2 py-1">{user?.clinicsAttended.length}</td>
+                              <td className=" border px-2 py-1 text-center">{user?.clinicsAttended.length}</td>
                               <td className=" border px-2 py-1">
                                 {user?.lastDeworming?.getFullYear() != null ? formatDate(new Date(user?.lastDeworming)) : "No Last Deworming"}
                               </td>

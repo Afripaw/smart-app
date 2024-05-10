@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import Owner from "~/pages/owner";
 
 export const infoRouter = createTRPCRouter({
   //Database report queries
@@ -26,7 +27,7 @@ export const infoRouter = createTRPCRouter({
           ? { sterilisedRequested: { gte: input.startDate, lte: input.endDate } }
           : input.typeOfQuery === "Actioned"
             ? { sterilisationOutcome: { equals: "Actioned" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
-            : input.typeOfQuery === "No show"
+            : input.typeOfQuery === "No Show"
               ? { sterilisationOutcome: { equals: "No show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
               : {};
 
@@ -81,9 +82,9 @@ export const infoRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       //check what type of query it is and then decide what object will be in the where clause
       const membershipQuery =
-        input.typeOfQuery === "Standard card holder"
+        input.typeOfQuery === "Standard Card Holder"
           ? { membership: { equals: "Standard card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
-          : input.typeOfQuery === "Gold card holder"
+          : input.typeOfQuery === "Gold Card Holder"
             ? { membership: { equals: "Gold card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
             : {};
 
@@ -314,228 +315,512 @@ export const infoRouter = createTRPCRouter({
       };
     }),
 
-  //get all the pets where sterilisation requested is Yes and where the input is: two dates between which the sterilisation was requested as well as whether it is dogs or cats
-  getRequestedSterilisation: protectedProcedure
+  //Downloads
+  //sterilisation downloads
+  downloadSterilisation: protectedProcedure
     .input(
       z.object({
+        typeOfQuery: z.string(),
         startDate: z.date(),
         endDate: z.date(),
         species: z.string(),
+        //order: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const pets = await ctx.db.pet.findMany({
+      //check what type of query it is and then decide what object will be in the where clause
+      const sterilisationQuery =
+        input.typeOfQuery === "Requested"
+          ? { sterilisedRequested: { gte: input.startDate, lte: input.endDate } }
+          : input.typeOfQuery === "Actioned"
+            ? { sterilisationOutcome: { equals: "Actioned" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
+            : input.typeOfQuery === "No Show"
+              ? { sterilisationOutcome: { equals: "No show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
+              : {};
+
+      const rawData = await ctx.db.pet.findMany({
         where: {
-          AND: [
-            {
-              sterilisedRequested: {
-                gte: input.startDate,
-                lte: input.endDate,
-              },
-            },
-            {
-              species: input.species,
-            },
-          ],
+          AND: [sterilisationQuery, { species: input.species }],
         },
-        include: {
-          owner: true,
+        //orderBy: order,
+        select: {
+          petName: true,
+          species: true,
+          sex: true,
+          age: true,
+          breed: true,
+          colour: true,
+          size: true,
+          sterilisedRequested: true,
+          sterilisedRequestSigned: true,
+          vaccinationShot1: true,
+          vaccinationShot2: true,
+          vaccinationShot3: true,
+          owner: {
+            select: {
+              firstName: true,
+              surname: true,
+              mobile: true,
+              addressGreaterArea: { select: { greaterArea: true } },
+              addressArea: { select: { area: true } },
+              addressStreet: { select: { street: true } },
+              addressStreetCode: true,
+              addressStreetNumber: true,
+            },
+          },
         },
       });
 
-      return pets;
+      // Programmatically flatten the data into a more accessible structure
+      const data = rawData.map((pet) => ({
+        ownerFirstName: pet.owner?.firstName ?? "",
+        ownerSurname: pet.owner?.surname ?? "",
+        greaterArea: pet.owner?.addressGreaterArea?.greaterArea ?? "",
+        area: pet.owner?.addressArea?.area ?? "",
+        street: pet.owner?.addressStreet?.street ?? "",
+        streetCode: pet.owner?.addressStreetCode ?? "",
+        streetNumber: pet.owner?.addressStreetNumber ?? "",
+        ownerMobile: pet.owner?.mobile ?? "",
+        petName: pet.petName,
+        species: pet.species,
+        sex: pet.sex,
+        age: pet.age,
+        breed: pet.breed.join(", "),
+        colour: pet.colour.join(", "),
+        size: pet.size,
+        sterilisedRequested: pet.sterilisedRequested,
+        sterilisedRequestSignedAt: pet.sterilisedRequestSigned,
+        vaccinationShot1: pet.vaccinationShot1,
+        vaccinationShot2: pet.vaccinationShot2,
+        vaccinationShot3: pet.vaccinationShot3,
+      }));
+
+      //change data so that there is no nested objects
+
+      //take out the nested owner object
+      // const data = await ctx.db.pet.findMany({
+      //   where: {
+      //     AND: [sterilisationQuery, { species: input.species }],
+      //   },
+      //   //orderBy: order,
+      //   select: {
+      //     petID: true,
+      //     species: true,
+      //
+      //
+      //   },
+      //   include: {
+
+      return {
+        data: data,
+      };
     }),
 
-  //get all the pets where sterilisation Outcome is Actioned and where the input is: two dates between which the sterilisation outcome happened as well as whether it is dogs or cats
-  getSterilisationOutcomeActioned: protectedProcedure
+  //membership downloads
+  downloadMembership: protectedProcedure
     .input(
       z.object({
+        typeOfQuery: z.string(),
         startDate: z.date(),
         endDate: z.date(),
         species: z.string(),
+        //order: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const pets = await ctx.db.pet.findMany({
+      //check what type of query it is and then decide what object will be in the where clause
+      const membershipQuery =
+        input.typeOfQuery === "Standard Card Holder"
+          ? { membership: { equals: "Standard card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
+          : input.typeOfQuery === "Gold Card Holder"
+            ? { membership: { equals: "Gold card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
+            : {};
+
+      const rawData = await ctx.db.pet.findMany({
         where: {
-          AND: [
-            { sterilisationOutcome: { equals: "Actioned" } },
-            {
-              sterilisationOutcomeDate: {
-                gte: input.startDate,
-                lte: input.endDate,
-              },
-            },
-            {
-              species: input.species,
-            },
-          ],
+          AND: [membershipQuery, { species: input.species }],
         },
-        include: {
-          owner: true,
-        },
-      });
-
-      return pets;
-    }),
-
-  //get all the pets where sterilisation Outcome is No show and where the input is: two dates between which the sterilisation outcome happened as well as whether it is dogs or cats
-  getSterilisationOutcomeNoShow: protectedProcedure
-    .input(
-      z.object({
-        startDate: z.date(),
-        endDate: z.date(),
-        species: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const pets = await ctx.db.pet.findMany({
-        where: {
-          AND: [
-            { sterilisationOutcome: { equals: "No show" } },
-            {
-              sterilisationOutcomeDate: {
-                gte: input.startDate,
-                lte: input.endDate,
-              },
+        //orderBy: order,
+        select: {
+          petName: true,
+          species: true,
+          sex: true,
+          age: true,
+          breed: true,
+          colour: true,
+          cardStatus: true,
+          owner: {
+            select: {
+              firstName: true,
+              surname: true,
+              addressGreaterArea: { select: { greaterArea: true } },
+              addressArea: { select: { area: true } },
+              addressStreet: { select: { street: true } },
+              addressStreetCode: true,
+              addressStreetNumber: true,
             },
-            {
-              species: input.species,
-            },
-          ],
-        },
-        include: {
-          owner: true,
-        },
-      });
-
-      return pets;
-    }),
-
-  //get all pets that have a membership of standard card holder as well as the dates of the membership to and from and the species of the pets
-  getStandardCardHolder: protectedProcedure
-    .input(
-      z.object({
-        startDate: z.date(),
-        endDate: z.date(),
-        species: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const pets = await ctx.db.pet.findMany({
-        where: {
-          AND: [
-            { cardStatus: { not: "Lapsed card holder" } },
-            { membership: { equals: "Standard card holder" } },
-            {
-              membershipDate: {
-                gte: input.startDate,
-                lte: input.endDate,
-              },
-            },
-            {
-              species: input.species,
-            },
-          ],
-        },
-        include: {
-          owner: true,
-        },
-      });
-
-      return pets;
-    }),
-
-  //get all pets that have a membership of gold card holder as well as the dates of the membership to and from and the species of the pets
-  getGoldCardHolder: protectedProcedure
-    .input(
-      z.object({
-        startDate: z.date(),
-        endDate: z.date(),
-        species: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const pets = await ctx.db.pet.findMany({
-        where: {
-          AND: [
-            { cardStatus: { not: "Lapsed card holder" } },
-            { membership: { equals: "Gold card holder" } },
-            {
-              membershipDate: {
-                gte: input.startDate,
-                lte: input.endDate,
-              },
-            },
-            {
-              species: input.species,
-            },
-          ],
-        },
-        include: {
-          owner: true,
-        },
-      });
-
-      return pets;
-    }),
-
-  //get all pets that went on clinic dates to and from or only on a specific clinic date
-  getPetsAttendedClinic: protectedProcedure
-    .input(
-      z.object({
-        startDate: z.date(),
-        endDate: z.date(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const pets = await ctx.db.pet.findMany({
-        where: {
+          },
           clinicsAttended: {
-            some: {
+            select: {
               clinic: {
-                date: {
-                  gte: input.startDate,
-                  lte: input.endDate,
+                select: {
+                  date: true,
                 },
               },
             },
           },
         },
-        include: {
-          clinicsAttended: true,
-          owner: true,
-        },
       });
 
-      return pets;
+      //so that the dates look good on excel
+      function formatDateToExcel(date: Date): string {
+        return date.toLocaleString("en-UK", {
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+          //hour: "numeric",
+          //minute: "numeric",
+          //   second: "numeric",
+          //hour12: true, // Enables AM/PM formatting
+        });
+      }
+
+      const data = rawData.map((pet) => ({
+        ownerFirstName: pet.owner?.firstName ?? "",
+        ownerSurname: pet.owner?.surname ?? "",
+        greaterArea: pet.owner?.addressGreaterArea?.greaterArea ?? "",
+        area: pet.owner?.addressArea?.area ?? "",
+        street: pet.owner?.addressStreet?.street ?? "",
+        streetCode: pet.owner?.addressStreetCode ?? "",
+        streetNumber: pet.owner?.addressStreetNumber ?? "",
+        petName: pet.petName ?? "",
+        species: pet.species ?? "",
+        sex: pet.sex ?? "",
+        age: pet.age ?? "",
+        breed: pet.breed.join(", ") ?? "",
+        colour: pet.colour.join(", ") ?? "",
+        cardStatus: pet.cardStatus ?? "",
+        clinicsAttended: pet.clinicsAttended.map((clinic) => formatDateToExcel(new Date(clinic.clinic.date))).join(", ") ?? "",
+        totalClinicsAttended: pet.clinicsAttended.length,
+      }));
+
+      return {
+        data: data,
+      };
     }),
 
-  //get All Pets where Treatment Date is populated, with the Ability to search on specific to and from PetClinic Dates or just on a single Pet Clinic Date.
-  getPetsTreatmentDate: protectedProcedure
+  //clinic downloads
+  downloadClinic: protectedProcedure
     .input(
       z.object({
+        typeOfQuery: z.string(),
         startDate: z.date(),
         endDate: z.date(),
+        singleDate: z.date(),
+        //order: z.string(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const pets = await ctx.db.pet.findMany({
+      // Helper function to calculate the start and end of a given date
+      const getDayRange = (dateString: Date) => {
+        //const date = new Date(dateString);
+        const startOfDay = new Date(dateString);
+        startOfDay.setHours(0, 0, 0, 0); // Midnight (start of the day)
+
+        const endOfDay = new Date(dateString);
+        endOfDay.setHours(23, 59, 59, 999); // Last millisecond of the day
+
+        return { start: startOfDay, end: endOfDay };
+      };
+
+      // Generate the treatment query based on the type of query
+      const clinicQuery =
+        input.typeOfQuery === "Single Day"
+          ? (() => {
+              const { start, end } = getDayRange(input.singleDate);
+              return {
+                clinicsAttended: { some: { clinic: { date: { gte: start, lte: end } } } },
+              };
+            })()
+          : { clinicsAttended: { some: { clinic: { date: { gte: input.startDate, lte: input.endDate } } } } };
+
+      const rawData = await ctx.db.pet.findMany({
         where: {
-          petTreatments: {
-            some: {
-              date: {
-                gte: input.startDate,
-                lte: input.endDate,
+          AND: [clinicQuery],
+        },
+        //orderBy: order,
+        include: {
+          owner: {
+            select: {
+              firstName: true,
+              surname: true,
+              mobile: true,
+              addressGreaterArea: { select: { greaterArea: true } },
+              addressArea: { select: { area: true } },
+              addressStreet: { select: { street: true } },
+              addressStreetCode: true,
+              addressStreetNumber: true,
+            },
+          },
+          clinicsAttended: {
+            select: {
+              clinic: {
+                select: {
+                  date: true,
+                },
               },
             },
           },
         },
+      });
+
+      //Checks if card status of membership is lapsed or active
+      const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
+        if (membershipType === "Standard card holder" || membershipType === "Gold card holder") {
+          const currentDate = new Date();
+
+          // // Convert clinicList dates to Date objects
+          // const clinicDates = clinicsAttended.map((clinicDate) => {
+          //   const [day, month, year] = clinicDate.clinic.date.split("/").map(Number);
+          //   return new Date(year ?? 0, (month ?? 0) - 1, day);
+          // });
+
+          // Filter clinics within the last 'time' months
+          const filteredClinicsLapsedMember = clinicsAttended.filter((clinicDate) => {
+            const pastDate = new Date(currentDate);
+            pastDate.setMonth(currentDate.getMonth() - 3);
+            return clinicDate >= pastDate;
+          });
+
+          const filteredClinicsActiveMember = clinicsAttended.filter((clinicDate) => {
+            const pastDate = new Date(currentDate);
+            pastDate.setMonth(currentDate.getMonth() - 6);
+            return clinicDate >= pastDate;
+          });
+
+          if (filteredClinicsLapsedMember.length < 1) {
+            //setCardStatusOption("Lapsed card holder");
+            return "Lapsed";
+          } else if (filteredClinicsActiveMember.length >= 3) {
+            return "Active";
+          } else {
+            return "Not Applicable";
+          }
+        } else {
+          return "Not Applicable";
+        }
+      };
+
+      //so that the dates look good on excel
+      function formatDateToExcel(date: Date): string {
+        return date.toLocaleString("en-UK", {
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+          //hour: "numeric",
+          //minute: "numeric",
+          //   second: "numeric",
+          //hour12: true, // Enables AM/PM formatting
+        });
+      }
+
+      const data = rawData.map((pet) => ({
+        ownerFirstName: pet.owner?.firstName ?? "",
+        ownerSurname: pet.owner?.surname ?? "",
+        greaterArea: pet.owner?.addressGreaterArea?.greaterArea ?? "",
+        area: pet.owner?.addressArea?.area ?? "",
+        street: pet.owner?.addressStreet?.street ?? "",
+        streetCode: pet.owner?.addressStreetCode ?? "",
+        streetNumber: pet.owner?.addressStreetNumber ?? "",
+        ownerMobile: pet.owner?.mobile ?? "",
+        petName: pet.petName ?? "",
+        species: pet.species ?? "",
+        sex: pet.sex ?? "",
+        age: pet.age ?? "",
+        breed: pet.breed.join(", ") ?? "",
+        colour: pet.colour.join(", ") ?? "",
+        size: pet.size ?? "",
+        sterilised: pet.sterilisedStatus.getFullYear() != 1970 ? "Yes" : "No",
+        sterilisedDate: pet.sterilisedStatus.getFullYear() != 1970 ? pet.sterilisedStatus : "",
+        membership: pet.membership ?? "",
+        membershipStatus: membershipStatus(
+          pet.membership,
+          pet.clinicsAttended.map((clinic) => new Date(clinic.clinic.date)),
+        ),
+        cardStatus: pet.cardStatus ?? "",
+        clinicsAttended: pet.clinicsAttended.map((clinic) => formatDateToExcel(new Date(clinic.clinic.date))).join(", ") ?? "",
+        totalClinicsAttended: pet.clinicsAttended.length,
+        lastDeworming: formatDateToExcel(new Date(pet?.lastDeworming ?? "")) ?? "",
+      }));
+
+      return {
+        data: data,
+      };
+    }),
+
+  //treatment downloads
+  //clinic downloads
+  downloadTreatment: protectedProcedure
+    .input(
+      z.object({
+        typeOfQuery: z.string(),
+        startDate: z.date(),
+        endDate: z.date(),
+        singleDate: z.date(),
+        //order: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      // Helper function to calculate the start and end of a given date
+      const getDayRange = (dateString: Date) => {
+        //const date = new Date(dateString);
+        const startOfDay = new Date(dateString);
+        startOfDay.setHours(0, 0, 0, 0); // Midnight (start of the day)
+
+        const endOfDay = new Date(dateString);
+        endOfDay.setHours(23, 59, 59, 999); // Last millisecond of the day
+
+        return { start: startOfDay, end: endOfDay };
+      };
+
+      // Generate the treatment query based on the type of query
+      const treatmentQuery =
+        input.typeOfQuery === "Single Day"
+          ? (() => {
+              const { start, end } = getDayRange(input.singleDate);
+              return {
+                petTreatments: { some: { date: { gte: start, lte: end } } },
+              };
+            })()
+          : { petTreatments: { some: { date: { gte: input.startDate, lte: input.endDate } } } };
+
+      const rawData = await ctx.db.pet.findMany({
+        where: {
+          AND: [treatmentQuery],
+        },
+        //orderBy: order,
         include: {
-          owner: true,
+          owner: {
+            select: {
+              firstName: true,
+              surname: true,
+              mobile: true,
+              addressGreaterArea: { select: { greaterArea: true } },
+              addressArea: { select: { area: true } },
+              addressStreet: { select: { street: true } },
+              addressStreetCode: true,
+              addressStreetNumber: true,
+            },
+          },
+          clinicsAttended: {
+            select: {
+              clinic: {
+                select: {
+                  date: true,
+                },
+              },
+            },
+          },
+          petTreatments: {
+            select: {
+              category: true,
+              type: {
+                select: {
+                  type: true,
+                },
+              },
+              date: true,
+              comments: true,
+            },
+          },
         },
       });
 
-      return pets;
+      //Checks if card status of membership is lapsed or active
+      const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
+        if (membershipType === "Standard card holder" || membershipType === "Gold card holder") {
+          const currentDate = new Date();
+
+          // // Convert clinicList dates to Date objects
+          // const clinicDates = clinicsAttended.map((clinicDate) => {
+          //   const [day, month, year] = clinicDate.clinic.date.split("/").map(Number);
+          //   return new Date(year ?? 0, (month ?? 0) - 1, day);
+          // });
+
+          // Filter clinics within the last 'time' months
+          const filteredClinicsLapsedMember = clinicsAttended.filter((clinicDate) => {
+            const pastDate = new Date(currentDate);
+            pastDate.setMonth(currentDate.getMonth() - 3);
+            return clinicDate >= pastDate;
+          });
+
+          const filteredClinicsActiveMember = clinicsAttended.filter((clinicDate) => {
+            const pastDate = new Date(currentDate);
+            pastDate.setMonth(currentDate.getMonth() - 6);
+            return clinicDate >= pastDate;
+          });
+
+          if (filteredClinicsLapsedMember.length < 1) {
+            //setCardStatusOption("Lapsed card holder");
+            return "Lapsed";
+          } else if (filteredClinicsActiveMember.length >= 3) {
+            return "Active";
+          } else {
+            return "Not Applicable";
+          }
+        } else {
+          return "Not Applicable";
+        }
+      };
+
+      //so that the dates look good on excel
+      function formatDateToExcel(date: Date): string {
+        return date.toLocaleString("en-UK", {
+          year: "numeric",
+          month: "numeric",
+          day: "numeric",
+          //hour: "numeric",
+          //minute: "numeric",
+          //   second: "numeric",
+          //hour12: true, // Enables AM/PM formatting
+        });
+      }
+
+      const data = rawData.map((pet) => ({
+        ownerFirstName: pet.owner?.firstName ?? "",
+        ownerSurname: pet.owner?.surname ?? "",
+        greaterArea: pet.owner?.addressGreaterArea?.greaterArea ?? "",
+        area: pet.owner?.addressArea?.area ?? "",
+        street: pet.owner?.addressStreet?.street ?? "",
+        streetCode: pet.owner?.addressStreetCode ?? "",
+        streetNumber: pet.owner?.addressStreetNumber ?? "",
+        ownerMobile: pet.owner?.mobile ?? "",
+        petName: pet.petName ?? "",
+        species: pet.species ?? "",
+        sex: pet.sex ?? "",
+        age: pet.age ?? "",
+        breed: pet.breed.join(", ") ?? "",
+        colour: pet.colour.join(", ") ?? "",
+        size: pet.size ?? "",
+        sterilised: pet.sterilisedStatus.getFullYear() != 1970 ? "Yes" : "No",
+        sterilisedDate: pet.sterilisedStatus.getFullYear() != 1970 ? pet.sterilisedStatus : "",
+        membership: pet.membership ?? "",
+        membershipStatus: membershipStatus(
+          pet.membership,
+          pet.clinicsAttended.map((clinic) => new Date(clinic.clinic.date)),
+        ),
+        cardStatus: pet.cardStatus ?? "",
+        clinicsAttended: pet.clinicsAttended.map((clinic) => formatDateToExcel(new Date(clinic.clinic.date))).join(", ") ?? "",
+        totalClinicsAttended: pet.clinicsAttended.length,
+        lastDeworming: formatDateToExcel(new Date(pet?.lastDeworming ?? "")) ?? "",
+        treatmentDate: pet.petTreatments.map((treatment) => formatDateToExcel(new Date(treatment.date))).join(", ") ?? "",
+        treatmentCategory: pet.petTreatments.map((treatment) => treatment.category).join(". ") ?? "",
+        treatmentType: pet.petTreatments.map((treatment) => treatment.type.map((type) => type.type.type).join(", ")).join(". ") ?? "",
+        treatmentComments: pet.petTreatments.map((treatment) => treatment.comments).join(". ") ?? "",
+      }));
+
+      return {
+        data: data,
+      };
     }),
 });

@@ -9,6 +9,13 @@ import { api } from "~/utils/api";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
+//Excel
+import * as XLSX from "xlsx";
+
+//File saver
+//import FileSaver from "file-saver";
+import * as FileSaver from "file-saver";
+
 const Info: NextPage = () => {
   useSession({ required: true });
 
@@ -121,7 +128,7 @@ const Info: NextPage = () => {
     };
   }, []);
 
-  const sterilisationDueOptions = ["Requested", "Actioned", "No show"];
+  const sterilisationDueOptions = ["Requested", "Actioned", "No Show"];
 
   //DATES
   //startDate
@@ -253,6 +260,29 @@ const Info: NextPage = () => {
     setIsLoading(false);
   };
 
+  //Download sterilisation
+  const downloadSterilisationTable = api.info.downloadSterilisation.useQuery({
+    typeOfQuery: sterilisationDueOption,
+    startDate: sterilisationStartingDate,
+    endDate: sterilisationEndingDate,
+    species: speciesSteriliseOption,
+  });
+
+  const handleDownloadSterilisationTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+    const data = downloadSterilisationTable.data?.data;
+    const fileName = `Sterilisation ${sterilisationDueOption} Table`;
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws = XLSX.utils.json_to_sheet(data ?? []);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    const dataFile = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataFile, fileName + fileExtension);
+    setIsLoading(false);
+  };
+
   //------------------------------------------------MEMBERSHIP TYPE QUERIES-----------------------------------------
   //MEMBERSHIP TYPE
   const [membership, setMembership] = useState(false);
@@ -287,7 +317,7 @@ const Info: NextPage = () => {
     };
   }, []);
 
-  const membershipOptions = ["Standard card holder", "Gold card holder"];
+  const membershipOptions = ["Standard Card Holder", "Gold Card Holder"];
 
   //DATES
   //startDate
@@ -398,6 +428,29 @@ const Info: NextPage = () => {
     setGeneratedSterilisation(false);
     setGeneratedMembership(true);
     setGeneratedClinic(false);
+    setIsLoading(false);
+  };
+
+  //Download membership
+  const downloadMembershipTable = api.info.downloadMembership.useQuery({
+    typeOfQuery: membershipOption,
+    startDate: membershipStartingDate,
+    endDate: membershipEndingDate,
+    species: speciesMembershipOption,
+  });
+
+  const handleDownloadMembershipTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+    const data = downloadMembershipTable.data?.data;
+    const fileName = `${membershipOption} Membership Table`;
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const fileExtension = ".xlsx";
+    const ws = XLSX.utils.json_to_sheet(data ?? []);
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    const dataFile = new Blob([excelBuffer], { type: fileType });
+    FileSaver.saveAs(dataFile, fileName + fileExtension);
     setIsLoading(false);
   };
 
@@ -610,6 +663,50 @@ const Info: NextPage = () => {
     setIsLoading(false);
   };
 
+  //Download clinics
+  const downloadClinicsTable = api.info.downloadClinic.useQuery({
+    typeOfQuery: periodOption,
+    startDate: clinicStartingDate,
+    endDate: clinicEndingDate,
+    singleDate: clinicDate,
+  });
+
+  //Download treatment
+  const downloadTreatmentsTable = api.info.downloadTreatment.useQuery({
+    typeOfQuery: periodOption,
+    startDate: clinicStartingDate,
+    endDate: clinicEndingDate,
+    singleDate: clinicDate,
+  });
+
+  const handleDownloadClinicTable = async () => {
+    setIsLoading(true);
+    //take the download user table query data and put it in an excel file
+
+    if (clinicOption === "Clinic Attendance") {
+      const data = downloadClinicsTable.data?.data;
+      const fileName = `Clinic Attendance Table (${periodOption})`;
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const fileExtension = ".xlsx";
+      const ws = XLSX.utils.json_to_sheet(data ?? []);
+      const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+      const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+      const dataFile = new Blob([excelBuffer], { type: fileType });
+      FileSaver.saveAs(dataFile, fileName + fileExtension);
+    } else if (clinicOption === "Treatment Administered") {
+      const data = downloadTreatmentsTable.data?.data;
+      const fileName = `Treatment Administered Table (${periodOption})`;
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const fileExtension = ".xlsx";
+      const ws = XLSX.utils.json_to_sheet(data ?? []);
+      const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+      const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+      const dataFile = new Blob([excelBuffer], { type: fileType });
+      FileSaver.saveAs(dataFile, fileName + fileExtension);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <>
       <Head>
@@ -722,7 +819,7 @@ const Info: NextPage = () => {
                 </div>
               </div>
 
-              <div className="col-span-1 flex items-center justify-center">
+              <div className="col-span-1 flex items-center justify-around">
                 <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleSteriliseGenerate}>
                   {isLoading ? (
                     <div
@@ -731,6 +828,17 @@ const Info: NextPage = () => {
                     />
                   ) : (
                     <div>Generate Table</div>
+                  )}
+                </button>
+
+                <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadSterilisationTable}>
+                  {isLoading ? (
+                    <div
+                      className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                      role="status"
+                    />
+                  ) : (
+                    <div>Download Table</div>
                   )}
                 </button>
               </div>
@@ -841,7 +949,7 @@ const Info: NextPage = () => {
                 </div>
               </div>
 
-              <div className="col-span-1 flex items-center justify-center">
+              <div className="col-span-1 flex items-center justify-around">
                 <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleMembershipGenerate}>
                   {isLoading ? (
                     <div
@@ -850,6 +958,17 @@ const Info: NextPage = () => {
                     />
                   ) : (
                     <div>Generate Table</div>
+                  )}
+                </button>
+
+                <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadMembershipTable}>
+                  {isLoading ? (
+                    <div
+                      className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                      role="status"
+                    />
+                  ) : (
+                    <div>Download Table</div>
                   )}
                 </button>
               </div>
@@ -977,7 +1096,7 @@ const Info: NextPage = () => {
                 )}
               </div>
 
-              <div className="col-span-1 flex items-center justify-center">
+              <div className="col-span-1 flex items-center justify-around">
                 <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleClinicGenerate}>
                   {isLoading ? (
                     <div
@@ -986,6 +1105,17 @@ const Info: NextPage = () => {
                     />
                   ) : (
                     <div>Generate Table</div>
+                  )}
+                </button>
+
+                <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadClinicTable}>
+                  {isLoading ? (
+                    <div
+                      className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                      role="status"
+                    />
+                  ) : (
+                    <div>Download Table</div>
                   )}
                 </button>
               </div>

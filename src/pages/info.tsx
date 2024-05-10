@@ -28,6 +28,65 @@ const Info: NextPage = () => {
     const year = date.getFullYear().toString();
     return `${day}/${month}/${year}`;
   }
+
+  //Checks if card status of membership is lapsed or active
+  const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
+    if (membershipType === "Standard card holder" || membershipType === "Gold card holder") {
+      const currentDate = new Date();
+
+      // // Convert clinicList dates to Date objects
+      // const clinicDates = clinicsAttended.map((clinicDate) => {
+      //   const [day, month, year] = clinicDate.clinic.date.split("/").map(Number);
+      //   return new Date(year ?? 0, (month ?? 0) - 1, day);
+      // });
+
+      // Filter clinics within the last 'time' months
+      const filteredClinicsLapsedMember = clinicsAttended.filter((clinicDate) => {
+        const pastDate = new Date(currentDate);
+        pastDate.setMonth(currentDate.getMonth() - 3);
+        return clinicDate >= pastDate;
+      });
+
+      const filteredClinicsActiveMember = clinicsAttended.filter((clinicDate) => {
+        const pastDate = new Date(currentDate);
+        pastDate.setMonth(currentDate.getMonth() - 6);
+        return clinicDate >= pastDate;
+      });
+
+      if (filteredClinicsLapsedMember.length < 1) {
+        //setCardStatusOption("Lapsed card holder");
+        return "Lapsed";
+      } else if (filteredClinicsActiveMember.length >= 3) {
+        return "Active";
+      } else {
+        return "Not Applicable";
+      }
+    } else {
+      return "Not Applicable";
+    }
+  };
+
+  // //checks what dates are in the two given dates or on the single date
+  // const DatesInPeriod = (dates: Date[]): string[] =>{
+  //   if (periodOption === "Time Period"){
+  //     const dates_ = dates.map((date)=>{
+  //       if (clinicStartingDate <= date <= clinicEndingDate){
+  //         return formatDate(date);
+  //       }
+  //     })
+  //     return dates_;
+  //   }else if (periodOption === "Single Day"){
+  //     const date_ = dates.map((date)=>{
+  //       if (clinicSingleDate == date){
+  //         return formatDate(date);
+  //       }
+  //     })
+  //     return date_;
+  //   }else{
+  //     return "";
+  //   }
+  // }
+
   //---------------------------------------STERILISATION DUE QUERIES------------------------------------------------
   //STERILISATION DUE
   const [sterilisationDue, setSterilisationDue] = useState(false);
@@ -435,7 +494,7 @@ const Info: NextPage = () => {
   } = api.info.getClinicInfinite.useInfiniteQuery(
     {
       limit: limitClinic,
-      typeOfQuery: clinicOption,
+      typeOfQuery: periodOption,
       startDate: clinicStartingDate,
       endDate: clinicEndingDate,
       singleDate: clinicDate,
@@ -490,7 +549,7 @@ const Info: NextPage = () => {
   } = api.info.getTreatmentInfinite.useInfiniteQuery(
     {
       limit: limitTreatment,
-      typeOfQuery: clinicOption,
+      typeOfQuery: periodOption,
       startDate: clinicStartingDate,
       endDate: clinicEndingDate,
       singleDate: clinicDate,
@@ -533,7 +592,7 @@ const Info: NextPage = () => {
   //when dropdowns are selected again the table should dissappear
   useEffect(() => {
     setGeneratedClinic(false);
-  }, [clinicOption, clinicStartingDate, clinicEndingDate, periodOption]);
+  }, [clinicOption, clinicStartingDate, clinicEndingDate, periodOption, clinicDate]);
 
   const handleClinicGenerate = async () => {
     setIsLoading(true);
@@ -1149,36 +1208,261 @@ const Info: NextPage = () => {
                   />
                 </div>
               )
+            ) : generatedClinic && clinicOption === "Clinic Attendance" ? (
+              clinicData ? (
+                <article className="my-3 flex w-full justify-center rounded-md shadow-inner">
+                  <div className="max-h-[52vh] max-w-[85rem] overflow-auto">
+                    {/* max-h-[60vh] */}
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="z-30 bg-gray-50">
+                        <tr>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Owner Name</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Address</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Cell number</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Pet Name</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Species</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Sex</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Age</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Breed</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Colour</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Size</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Sterilised</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Membership Type</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Membership Status</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Card Status</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Clinic Dates Attended</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Total number of Clinics Attended</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Last Deworming</th>
+                          {/* <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                                Date
+                              </button>
+                              <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort reverse chronologically
+                              </span>
+                            </span>
+                          </th> */}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {clinicData?.map((user, index) => {
+                          return (
+                            <tr className="items-center">
+                              <td className=" border px-2 py-1">
+                                <div className="flex justify-center">{index + 1}</div>
+                              </td>
+                              <td className="border px-2 py-1">{user.owner.firstName + " " + user.owner.surname}</td>
+                              <td className="border px-2 py-1">
+                                {[
+                                  user.owner.addressGreaterArea.greaterArea,
+                                  user.owner.addressArea?.area,
+                                  user.owner.addressStreet?.street,
+                                  user.owner.addressStreetCode,
+                                  user.owner.addressStreetNumber,
+                                ]
+                                  .filter((item) => item) // Only keep non-empty values
+                                  .join(", ")}
+                              </td>
+                              <td className="border px-2 py-1">{user.owner.mobile}</td>
+                              <td className="border px-2 py-1">{user.petName}</td>
+                              <td className="border px-2 py-1">{user.species}</td>
+                              <td className="border px-2 py-1">{user.sex}</td>
+                              <td className="border px-2 py-1">{user.age}</td>
+                              <td className="border px-2 py-1">{user.breed.join(", ")}</td>
+                              <td className="border px-2 py-1">{user.colour.join(", ")}</td>
+                              <td className="border px-2 py-1">{user.size}</td>
+                              <td className="border px-2 py-1">
+                                {user.sterilisedStatus.getFullYear() != 1970 ? "Yes, " + formatDate(new Date(user.sterilisedStatus)) : "No"}
+                              </td>
+                              <td className="border px-2 py-1">{user.membership}</td>
+                              <td className="border px-2 py-1">
+                                {membershipStatus(
+                                  user.membership,
+                                  user.clinicsAttended.map((clinic) => {
+                                    return new Date(clinic.clinic.date);
+                                  }),
+                                )}
+                              </td>
+                              <td className="border px-2 py-1">{user.cardStatus}</td>
+                              <td className=" border px-2 py-1">
+                                {user.clinicsAttended
+                                  ?.filter((item) => item?.clinic?.date) // Ensure the date exists
+                                  .map((item) => formatDate(new Date(item.clinic.date))) // Convert to readable string
+                                  .join(", ")}
+                              </td>
+                              <td className=" border px-2 py-1">{user?.clinicsAttended.length}</td>
+                              <td className=" border px-2 py-1">
+                                {user?.lastDeworming?.getFullYear() != null ? formatDate(new Date(user?.lastDeworming)) : "No Last Deworming"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        <tr>
+                          <td className=" px-2 py-1">
+                            <div ref={observerSterilisationTarget} />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              ) : (
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                </div>
+              )
+            ) : generatedClinic && clinicOption === "Treatment Administered" ? (
+              treatmentData ? (
+                <article className="my-3 flex w-full justify-center rounded-md shadow-inner">
+                  <div className="max-h-[52vh] max-w-[85rem] overflow-auto">
+                    {/* max-h-[60vh] */}
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="z-30 bg-gray-50">
+                        <tr>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Owner Name</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Address</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Pet Name</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Species</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Sex</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Age</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Breed</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Colour</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Size</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Sterilised</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Membership Type</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Membership Status</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Card Status</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Total number of Clinics Attended</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Last Deworming</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Treatment Date</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Treatment Category</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Treatment Type</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Treatment Comments</th>
+                          {/* <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
+                            <span className="group relative inline-block">
+                              <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
+                                Date
+                              </button>
+                              <span className="absolute right-[-20px] top-full hidden w-[110px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                Sort reverse chronologically
+                              </span>
+                            </span>
+                          </th> */}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {treatmentData?.map((user, index) => {
+                          return (
+                            <tr className="items-center">
+                              <td className=" border px-2 py-1">
+                                <div className="flex justify-center">{index + 1}</div>
+                              </td>
+                              <td className="border px-2 py-1">{user.owner.firstName + " " + user.owner.surname}</td>
+                              <td className="border px-2 py-1">
+                                {[
+                                  user.owner.addressGreaterArea.greaterArea,
+                                  user.owner.addressArea?.area,
+                                  user.owner.addressStreet?.street,
+                                  user.owner.addressStreetCode,
+                                  user.owner.addressStreetNumber,
+                                ]
+                                  .filter((item) => item) // Only keep non-empty values
+                                  .join(", ")}
+                                {/* {user.owner.addressGreaterArea.greaterArea +
+                                  ", " +
+                                  user.owner.addressArea?.area +
+                                  ", " +
+                                  user.owner.addressStreet?.street +
+                                  ", " +
+                                  user.owner.addressStreetCode +
+                                  ", " +
+                                  user.owner.addressStreetNumber} */}
+                              </td>
+                              <td className="border px-2 py-1">{user.petName}</td>
+                              <td className="border px-2 py-1">{user.species}</td>
+                              <td className="border px-2 py-1">{user.sex}</td>
+                              <td className="border px-2 py-1">{user.age}</td>
+                              <td className="border px-2 py-1">{user.breed.join(", ")}</td>
+                              <td className="border px-2 py-1">{user.colour.join(", ")}</td>
+                              <td className="border px-2 py-1">{user.size}</td>
+                              <td className="border px-2 py-1">
+                                {user.sterilisedStatus.getFullYear() != 1970 ? "Yes, " + formatDate(new Date(user.sterilisedStatus)) : "No"}
+                              </td>
+                              <td className="border px-2 py-1">{user.membership}</td>
+                              <td className="border px-2 py-1">
+                                {membershipStatus(
+                                  user.membership,
+                                  user.clinicsAttended.map((clinic) => {
+                                    return new Date(clinic.clinic.date);
+                                  }),
+                                )}
+                              </td>
+                              <td className="border px-2 py-1">{user.cardStatus}</td>
+                              <td className=" border px-2 py-1">{user?.clinicsAttended.length}</td>
+                              <td className=" border px-2 py-1">
+                                {user?.lastDeworming?.getFullYear() != null ? formatDate(new Date(user?.lastDeworming)) : "No Last Deworming"}
+                              </td>
+                              <td className=" border px-2 py-1">
+                                {user.petTreatments
+                                  ?.filter((item) => item?.date) // Ensure the date exists
+                                  .map((item) => formatDate(new Date(item.date))) // Convert to readable string
+                                  .join(", ")}
+                              </td>
+                              <td className=" border px-2 py-1">
+                                {user.petTreatments
+                                  ?.filter((item) => item?.category) // Ensure the date exists
+                                  .map((item) => {
+                                    return <div>{item.category}.</div>;
+                                  }) // Convert to readable string
+                                }
+                              </td>
+                              <td className=" border px-2 py-1">
+                                {user.petTreatments
+                                  ?.filter((item) => item?.type) // Ensure the date exists
+                                  .map((item) => {
+                                    return <div>{item.type.map((type) => type?.type?.type).join(", ")}.</div>;
+                                  }) // Convert to readable string
+                                }
+                              </td>
+                              <td className=" border px-2 py-1">
+                                {user.petTreatments
+                                  ?.filter((item) => item?.comments) // Ensure the date exists
+                                  .map((item) => {
+                                    return <div>{item?.comments}.</div>;
+                                  }) // Convert to readable string
+                                }
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        <tr>
+                          <td className=" px-2 py-1">
+                            <div ref={observerSterilisationTarget} />
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </article>
+              ) : (
+                <div className="flex items-center justify-center pt-10">
+                  <div
+                    className="mx-2 inline-block h-24 w-24 animate-spin rounded-full border-8 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                </div>
+              )
             ) : (
               <div></div>
             )}
           </div>
         </div>
-
-        {/* Seven queries attempt */}
-        {/* <div className="grid-rows-7 grid h-full w-full grow">
-          <div className="row-span-3 grid grid-rows-3">
-            <div className="row-span-1 grid grid-cols-2 justify-around">
-              <div className="col-span-1 flex grow justify-center border-2 text-center">First query</div>
-              <div className="col-span-1 flex h-full grow justify-center border-2 text-center">Second query</div>
-            </div>
-            <div className="row-span-1 grid grid-cols-2">
-              <div className="col-span-1 flex h-full grow justify-center border-2 text-center">Third query</div>
-              <div className="col-span-1 flex h-full grow justify-center border-2 text-center">Fourth query</div>
-            </div>
-            <div className="row-span-1 grid grid-cols-2">
-              <div className="col-span-1 flex h-full grow justify-center border-2 text-center">Fifth query</div>
-              <div className="col-span-1 flex h-full grow justify-center border-2 text-center">Sixth query</div>
-            </div>
-          </div>
-
-          <div className="row-span-1 flex justify-center">
-            <div className="flex w-[50%] justify-center border-2 text-center">Seventh query</div>
-          </div>
-
-         
-          <div className="row-span-3 flex w-full grow justify-center bg-slate-300">TABLE</div>
-        </div> */}
       </main>
     </>
   );

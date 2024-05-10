@@ -144,10 +144,27 @@ export const infoRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      //check what type of query it is and then decide what object will be in the where clause
+      // Helper function to calculate the start and end of a given date
+      const getDayRange = (dateString: Date) => {
+        //const date = new Date(dateString);
+        const startOfDay = new Date(dateString);
+        startOfDay.setHours(0, 0, 0, 0); // Midnight (start of the day)
+
+        const endOfDay = new Date(dateString);
+        endOfDay.setHours(23, 59, 59, 999); // Last millisecond of the day
+
+        return { start: startOfDay, end: endOfDay };
+      };
+
+      // Generate the treatment query based on the type of query
       const clinicQuery =
         input.typeOfQuery === "Single Day"
-          ? { clinicsAttended: { some: { clinic: { date: input.singleDate } } } }
+          ? (() => {
+              const { start, end } = getDayRange(input.singleDate);
+              return {
+                clinicsAttended: { some: { clinic: { date: { gte: start, lte: end } } } },
+              };
+            })()
           : { clinicsAttended: { some: { clinic: { date: { gte: input.startDate, lte: input.endDate } } } } };
 
       const data = await ctx.db.pet.findMany({
@@ -170,7 +187,15 @@ export const infoRouter = createTRPCRouter({
               addressStreetNumber: true,
             },
           },
-          clinicsAttended: true,
+          clinicsAttended: {
+            select: {
+              clinic: {
+                select: {
+                  date: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -200,11 +225,38 @@ export const infoRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      //check what type of query it is and then decide what object will be in the where clause
+      // Helper function to calculate the start and end of a given date
+      const getDayRange = (dateString: Date) => {
+        //const date = new Date(dateString);
+        const startOfDay = new Date(dateString);
+        startOfDay.setHours(0, 0, 0, 0); // Midnight (start of the day)
+
+        const endOfDay = new Date(dateString);
+        endOfDay.setHours(23, 59, 59, 999); // Last millisecond of the day
+
+        return { start: startOfDay, end: endOfDay };
+      };
+
+      // Generate the treatment query based on the type of query
       const treatmentQuery =
         input.typeOfQuery === "Single Day"
-          ? { petTreatments: { some: { date: input.singleDate } } }
-          : { petTreatments: { some: { date: { gte: input.startDate, lte: input.endDate } } } };
+          ? (() => {
+              const { start, end } = getDayRange(input.singleDate);
+              return {
+                petTreatments: { some: { date: { gte: start, lte: end } } },
+              };
+            })()
+          : {
+              petTreatments: {
+                some: { date: { gte: new Date(input.startDate), lte: new Date(input.endDate) } },
+              },
+            };
+
+      //   //check what type of query it is and then decide what object will be in the where clause
+      //   const treatmentQuery =
+      //     input.typeOfQuery == "Single Day"
+      //       ? { petTreatments: { some: { date: input.singleDate } } }
+      //       : { petTreatments: { some: { date: { gte: input.startDate, lte: input.endDate } } } };
 
       const data = await ctx.db.pet.findMany({
         where: {
@@ -226,7 +278,27 @@ export const infoRouter = createTRPCRouter({
               addressStreetNumber: true,
             },
           },
-          petTreatments: true,
+          clinicsAttended: {
+            select: {
+              clinic: {
+                select: {
+                  date: true,
+                },
+              },
+            },
+          },
+          petTreatments: {
+            select: {
+              category: true,
+              type: {
+                select: {
+                  type: true,
+                },
+              },
+              date: true,
+              comments: true,
+            },
+          },
         },
       });
 

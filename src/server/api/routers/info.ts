@@ -500,7 +500,11 @@ export const infoRouter = createTRPCRouter({
         breed: pet.breed.join(", ") ?? "",
         colour: pet.colour.join(", ") ?? "",
         cardStatus: pet.cardStatus ?? "",
-        clinicsAttended: pet.clinicsAttended.map((clinic) => formatDateToExcel(new Date(clinic.clinic.date))).join(", ") ?? "",
+        clinicsAttended:
+          pet.clinicsAttended
+            .sort((a, b) => a.clinic.date.getTime() - b.clinic.date.getTime())
+            .map((clinic) => formatDateToExcel(new Date(clinic.clinic.date)))
+            .join(", ") ?? "",
         totalClinicsAttended: pet.clinicsAttended.length,
       }));
 
@@ -648,7 +652,11 @@ export const infoRouter = createTRPCRouter({
           pet.clinicsAttended.map((clinic) => new Date(clinic.clinic.date)),
         ),
         cardStatus: pet.cardStatus ?? "",
-        clinicsAttended: pet.clinicsAttended.map((clinic) => formatDateToExcel(new Date(clinic.clinic.date))).join(", ") ?? "",
+        clinicsAttended:
+          pet.clinicsAttended
+            .sort((a, b) => a.clinic.date.getTime() - b.clinic.date.getTime())
+            .map((clinic) => formatDateToExcel(new Date(clinic.clinic.date)))
+            .join(", ") ?? "",
         totalClinicsAttended: pet.clinicsAttended.length,
         lastDeworming: formatDateToExcel(new Date(pet?.lastDeworming ?? "")) ?? "",
       }));
@@ -810,10 +818,18 @@ export const infoRouter = createTRPCRouter({
           pet.clinicsAttended.map((clinic) => new Date(clinic.clinic.date)),
         ),
         cardStatus: pet.cardStatus ?? "",
-        clinicsAttended: pet.clinicsAttended.map((clinic) => formatDateToExcel(new Date(clinic.clinic.date))).join(", ") ?? "",
+        // clinicsAttended:
+        //   pet.clinicsAttended
+        //     .sort((a, b) => a.clinic.date.getTime() - b.clinic.date.getTime())
+        //     .map((clinic) => formatDateToExcel(new Date(clinic.clinic.date)))
+        //     .join(", ") ?? "",
         totalClinicsAttended: pet.clinicsAttended.length,
         lastDeworming: formatDateToExcel(new Date(pet?.lastDeworming ?? "")) ?? "",
-        treatmentDate: pet.petTreatments.map((treatment) => formatDateToExcel(new Date(treatment.date))).join(", ") ?? "",
+        treatmentDate:
+          pet.petTreatments
+            .sort((a, b) => a.date.getTime() - b.date.getTime())
+            .map((treatment) => formatDateToExcel(new Date(treatment.date)))
+            .join(", ") ?? "",
         treatmentCategory: pet.petTreatments.map((treatment) => treatment.category).join(". ") ?? "",
         treatmentType: pet.petTreatments.map((treatment) => treatment.type.map((type) => type.type.type).join(", ")).join(". ") ?? "",
         treatmentComments: pet.petTreatments.map((treatment) => treatment.comments).join(". ") ?? "",

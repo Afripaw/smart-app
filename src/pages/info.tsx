@@ -1314,6 +1314,7 @@ const Info: NextPage = () => {
                               <td className=" border px-2 py-1">
                                 {user.clinicsAttended
                                   ?.filter((item) => item?.clinic?.date) // Ensure the date exists
+                                  .sort((a, b) => a.clinic.date.getTime() - b.clinic.date.getTime())
                                   .map((item) => formatDate(new Date(item.clinic.date))) // Convert to readable string
                                   .join(", ")}
                               </td>
@@ -1419,6 +1420,7 @@ const Info: NextPage = () => {
                               <td className=" border px-2 py-1">
                                 {user.clinicsAttended
                                   ?.filter((item) => item?.clinic?.date) // Ensure the date exists
+                                  .sort((a, b) => a.clinic.date.getTime() - b.clinic.date.getTime())
                                   .map((item) => formatDate(new Date(item.clinic.date))) // Convert to readable string
                                   .join(", ")}
                               </td>
@@ -1541,6 +1543,7 @@ const Info: NextPage = () => {
                               <td className=" border px-2 py-1">
                                 {user.petTreatments
                                   ?.filter((item) => item?.date) // Ensure the date exists
+                                  .sort((a, b) => a.date.getTime() - b.date.getTime())
                                   .map((item) => formatDate(new Date(item.date))) // Convert to readable string
                                   .join(", ")}
                               </td>

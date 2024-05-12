@@ -3522,7 +3522,8 @@ const Pet: NextPage = () => {
         const ownerData = userData?.owner_data;
 
         console.log("Owner data line 3340: ", ownerData);
-        // setOwnerID(ownerData?.ownerID ?? 0);
+
+        setOwnerID(ownerData?.ownerID ?? 0);
         setFirstName(ownerData?.firstName ?? "");
         setSurname(ownerData?.surname ?? "");
         setGreaterArea(ownerData?.addressGreaterArea.greaterArea ?? "");

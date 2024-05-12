@@ -109,7 +109,7 @@ const Navbar = () => {
         />
       </div>
       <div className="mx-auto flex items-center xs:flex-col md:flex-row md:gap-1 xl:gap-2">
-        {NavbarLinks.filter((link) => link.access.includes(user?.role ?? "")).map((link) => (
+        {NavbarLinks.filter((link) => link.access.includes(user?.role ?? "System Administrator")).map((link) => (
           <div key={link.name}>
             <Link
               key={link.name}

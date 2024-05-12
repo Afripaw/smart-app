@@ -42,8 +42,13 @@ import { set } from "date-fns";
 import { router } from "@trpc/server";
 import Link from "next/link";
 
+//permissions
+import usePageAccess from "../hooks/usePageAccess";
+
 const Owner: NextPage = () => {
+  //checks user session and page access
   useSession({ required: true });
+  const hasAccess = usePageAccess(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]);
 
   //-------------------------------GREATER AREA-----------------------------------------
   type GreaterArea = {
@@ -99,7 +104,7 @@ const Owner: NextPage = () => {
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.petOwner.updateIdentification.useMutation();
   //get latest ownerID
-  const latestOwnerID = api.petOwner.getLatestOwnerID.useQuery();
+  const latestOwnerID = api.petOwner.getLatestOwnerID.useQuery(undefined, { enabled: hasAccess });
 
   //Excel upload
   const insertExcelData = api.petOwner.insertExcelData.useMutation();
@@ -432,8 +437,8 @@ const Owner: NextPage = () => {
   }, [router.asPath]);
 
   const owner = router.asPath.includes("ownerID")
-    ? api.petOwner.getOwnerByID.useQuery({ ownerID: Number(router.asPath.split("=")[1]) })
-    : api.petOwner.getOwnerByID.useQuery({ ownerID: 1000001 });
+    ? api.petOwner.getOwnerByID.useQuery({ ownerID: Number(router.asPath.split("=")[1]) }, { enabled: hasAccess })
+    : api.petOwner.getOwnerByID.useQuery({ ownerID: 1000001 }, { enabled: hasAccess });
 
   //-------------------------------UPDATE USER-----------------------------------------
   //const user = api.petOwner.getOwnerByID.useQuery({ petOwnerID: id });
@@ -506,7 +511,7 @@ const Owner: NextPage = () => {
   }, []);
 
   //const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
-  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery(undefined, { enabled: hasAccess })?.data ?? [];
 
   //ADDRESS STREET NUMBER
   const handleAddressStreetNumber = (e: string) => {
@@ -514,7 +519,7 @@ const Owner: NextPage = () => {
   };
 
   //AREA
-  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id })?.data ?? [];
+  const areaOptions = api.geographic.getAreasByGreaterID.useQuery({ greaterAreaID: greaterAreaOption.id }, { enabled: hasAccess })?.data ?? [];
   const handleToggleArea = () => {
     setIsAreaOpen(!isAreaOpen);
     setStreetOption({ street: "Select one", id: 0 });
@@ -568,7 +573,7 @@ const Owner: NextPage = () => {
   }, []);
 
   //
-  const streetOptions = api.geographic.getStreetsByAreaID.useQuery({ areaID: areaOption.id })?.data ?? [];
+  const streetOptions = api.geographic.getStreetsByAreaID.useQuery({ areaID: areaOption.id }, { enabled: hasAccess })?.data ?? [];
   const handleToggleStreet = () => {
     setIsStreetOpen(!isStreetOpen);
   };
@@ -1715,7 +1720,7 @@ const Owner: NextPage = () => {
   );
 
   //------------------------------------------DOWNLOADING OWNER TABLE TO EXCEL FILE------------------------------------------
-  const downloadOwnerTable = api.petOwner.download.useQuery({ searchQuery: query });
+  const downloadOwnerTable = api.petOwner.download.useQuery({ searchQuery: query }, { enabled: hasAccess });
   const handleDownloadOwnerTable = async () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file
@@ -1965,7 +1970,7 @@ const Owner: NextPage = () => {
         )}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isUpdate ? "Update Owner Data" : "Create New Owner"}</b>
                 <div className="flex justify-center">
@@ -2466,7 +2471,7 @@ const Owner: NextPage = () => {
               </div>
             ) : (
               <>
-                <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+                <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
                   <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                     <div className=" text-2xl">Owner Profile</div>
                     <div className="flex justify-center">

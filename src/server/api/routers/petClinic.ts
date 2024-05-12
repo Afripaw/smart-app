@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure, accessProcedure } from "~/server/api/trpc";
 
 import { Prisma } from "@prisma/client";
 
@@ -10,7 +10,7 @@ type Visits = {
 };
 
 export const petClinicRouter = createTRPCRouter({
-  create: publicProcedure
+  create: accessProcedure(["System Administrator", "Data Analyst"])
     .input(
       z.object({
         greaterAreaID: z.number(),
@@ -44,7 +44,7 @@ export const petClinicRouter = createTRPCRouter({
     }),
 
   // update the clinic
-  update: publicProcedure
+  update: accessProcedure(["System Administrator", "Data Analyst"])
     .input(
       z.object({
         clinicID: z.number(),
@@ -100,7 +100,7 @@ export const petClinicRouter = createTRPCRouter({
     }),
 
   //Infinite query and search for clinics
-  searchClinicsInfinite: publicProcedure
+  searchClinicsInfinite: accessProcedure(["System Administrator", "Data Analyst"])
     .input(
       z.object({
         clinicID: z.number(),
@@ -222,7 +222,7 @@ export const petClinicRouter = createTRPCRouter({
     }),
 
   //delete clinic
-  deleteClinic: publicProcedure
+  deleteClinic: accessProcedure(["System Administrator", "Data Analyst"])
     .input(
       z.object({
         clinicID: z.number(),
@@ -255,7 +255,7 @@ export const petClinicRouter = createTRPCRouter({
     }),
 
   //get one pet clinic
-  getClinicByID: publicProcedure
+  getClinicByID: accessProcedure(["System Administrator", "Data Analyst"])
     .input(
       z.object({
         clinicID: z.number(),
@@ -280,7 +280,7 @@ export const petClinicRouter = createTRPCRouter({
     }),
 
   //get all clinics
-  getAllClinics: publicProcedure.query(async ({ ctx }) => {
+  getAllClinics: protectedProcedure.query(async ({ ctx }) => {
     const petClinic = await ctx.db.petClinic.findMany({
       orderBy: {
         date: "desc",
@@ -294,12 +294,12 @@ export const petClinicRouter = createTRPCRouter({
   }),
 
   //delete all clinics
-  deleteAllClinics: publicProcedure.mutation(async ({ ctx }) => {
+  deleteAllClinics: accessProcedure(["System Administrator", "Data Analyst"]).mutation(async ({ ctx }) => {
     return await ctx.db.petClinic.deleteMany({});
   }),
 
   //Bulk upload of all the clinics
-  insertExcelData: protectedProcedure
+  insertExcelData: accessProcedure(["System Administrator", "Data Analyst"])
     .input(
       z.array(
         z.object({
@@ -319,7 +319,7 @@ export const petClinicRouter = createTRPCRouter({
     }),
 
   //Update identification
-  updateIdentification: publicProcedure
+  updateIdentification: accessProcedure(["System Administrator", "Data Analyst"])
     .input(
       z.object({
         clinicID: z.number(),
@@ -338,7 +338,7 @@ export const petClinicRouter = createTRPCRouter({
     }),
 
   //get latest clinicID from identification
-  getLatestClinicID: publicProcedure.query(async ({ ctx }) => {
+  getLatestClinicID: accessProcedure(["System Administrator", "Data Analyst"]).query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
         identificationID: 1,
@@ -382,7 +382,7 @@ export const petClinicRouter = createTRPCRouter({
   }),
 
   //GET CLINIC VISITS OF LAST 5 YEARS FOR DOGS AND CATS
-  getClinicVisits: protectedProcedure.query(async ({ ctx }) => {
+  getClinicVisits: accessProcedure(["System Administrator", "Data Analyst"]).query(async ({ ctx }) => {
     const currentYear = new Date().getFullYear();
     const clinicVisits: Record<number, number> = {};
 
@@ -454,7 +454,7 @@ export const petClinicRouter = createTRPCRouter({
   }),
 
   //Conditions table create
-  createConditions: publicProcedure
+  createConditions: accessProcedure(["System Administrator", "Data Analyst"])
     .input(
       z.object({
         conditions: z.string().array(),
@@ -514,7 +514,7 @@ export const petClinicRouter = createTRPCRouter({
   // }),
 
   //download
-  download: publicProcedure
+  download: accessProcedure(["System Administrator", "Data Analyst"])
     .input(
       z.object({
         searchQuery: z.string(),

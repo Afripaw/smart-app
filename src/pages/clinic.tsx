@@ -32,8 +32,13 @@ import { set } from "date-fns";
 import { router } from "@trpc/server";
 import Pet from "./pet";
 
+//permissions
+import usePageAccess from "../hooks/usePageAccess";
+
 const Clinic: NextPage = () => {
+  //checks user session and page access
   useSession({ required: true });
+  const hasAccess = usePageAccess(["System Administrator", "Data Analyst"]);
 
   //-------------------------------GREATER AREA-----------------------------------------
   type GreaterArea = {
@@ -83,7 +88,7 @@ const Clinic: NextPage = () => {
   const updateIdentification = api.petClinic.updateIdentification.useMutation();
 
   //get latest volunteerID
-  const latestClinicID = api.petClinic.getLatestClinicID.useQuery();
+  const latestClinicID = api.petClinic.getLatestClinicID.useQuery(undefined, { enabled: hasAccess });
 
   //Excel upload
   const insertExcelData = api.petClinic.insertExcelData.useMutation();
@@ -372,7 +377,7 @@ const Clinic: NextPage = () => {
   }, []);
 
   //const greaterAreaOptions = ["Flagship", "Replication area 1", "Replication area 2"];
-  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery(undefined, { enabled: hasAccess })?.data ?? [];
 
   //AREA
   const handleToggleArea = () => {
@@ -977,7 +982,7 @@ const Clinic: NextPage = () => {
   };
 
   //------------------------------------------DOWNLOADING CLINIC TABLE TO EXCEL FILE------------------------------------------
-  const downloadClinicTable = api.petClinic.download.useQuery({ searchQuery: query });
+  const downloadClinicTable = api.petClinic.download.useQuery({ searchQuery: query }, { enabled: hasAccess });
   const handleDownloadClinicTable = async () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file

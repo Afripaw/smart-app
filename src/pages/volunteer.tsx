@@ -35,8 +35,13 @@ import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 import { greaterArea } from "@prisma/client";
 
+//permissions
+import usePageAccess from "../hooks/usePageAccess";
+
 const Volunteer: NextPage = () => {
+  //checks user session and page access
   useSession({ required: true });
+  const hasAccess = usePageAccess(["System Administrator"]);
 
   const newVolunteer = api.volunteer.create.useMutation();
   const updateVolunteer = api.volunteer.update.useMutation();
@@ -55,7 +60,7 @@ const Volunteer: NextPage = () => {
   const updateIdentification = api.volunteer.updateIdentification.useMutation();
 
   //get latest volunteerID
-  const latestVolunteerID = api.volunteer.getLatestVolunteerID.useQuery();
+  const latestVolunteerID = api.volunteer.getLatestVolunteerID.useQuery(undefined, { enabled: hasAccess });
 
   //Excel upload
   const insertExcelData = api.volunteer.insertExcelData.useMutation();
@@ -546,7 +551,7 @@ const Volunteer: NextPage = () => {
     };
   }, []);
 
-  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery(undefined, { enabled: hasAccess })?.data ?? [];
 
   //ADDRESS STREET NUMBER
   const handleAddressStreetNumber = (e: string) => {
@@ -774,7 +779,7 @@ const Volunteer: NextPage = () => {
   const [clinicSelection, setClinicSelection] = useState<ClinicSelect>();
 
   //All clinics in petClinic table
-  const clinicsAttendedOptions = api.petClinic.getAllClinics.useQuery().data ?? [];
+  const clinicsAttendedOptions = api.petClinic.getAllClinics.useQuery(undefined, { enabled: hasAccess }).data ?? [];
 
   // const clinicsAttendedOptions = ["Clinic 1", "Clinic 2", "Clinic 3"];
   const [clinicsAttended, setClinicsAttended] = useState(false);
@@ -1959,7 +1964,7 @@ const Volunteer: NextPage = () => {
   }, [user, isCreate, isUpdate, isViewProfilePage]);
 
   //------------------------------------------DOWNLOADING USER TABLE TO EXCEL FILE------------------------------------------
-  const downloadUserTable = api.volunteer.download.useQuery({ searchQuery: query });
+  const downloadUserTable = api.volunteer.download.useQuery({ searchQuery: query }, { enabled: hasAccess });
   const handleDownloadVolunteerTable = async () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file

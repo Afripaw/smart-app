@@ -117,6 +117,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session?.user) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
+
   return next({
     ctx: {
       // infers the `session` as non-nullable
@@ -134,3 +135,26 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+
+export const accessProcedure = (access: string[]) => {
+  return t.procedure.use(async ({ ctx, next }) => {
+    //if user has no session
+    if (!ctx.session?.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
+
+    const role = (await ctx.db.user.findUnique({ where: { id: ctx.session.user.id }, select: { role: true } }))?.role;
+
+    //is user has no role or role is not in the access array
+    if (!role || !access.includes(role)) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+
+    return next({
+      ctx: {
+        // infers the `session` as non-nullable
+        session: { ...ctx.session, user: ctx.session.user },
+      },
+    });
+  });
+};

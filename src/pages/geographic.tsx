@@ -27,8 +27,14 @@ import { set } from "date-fns";
 import React from "react";
 import { useSession } from "next-auth/react";
 
+//permissions
+import usePageAccess from "../hooks/usePageAccess";
+
 const Geographic: NextPage = () => {
+  //checks user session and page access
   useSession({ required: true });
+  const hasAccess = usePageAccess(["System Administrator"]);
+
   type GreaterArea = {
     id: number;
     name: string;
@@ -185,7 +191,7 @@ const Geographic: NextPage = () => {
   //-------------------------------UPDATE IDENTIFICATION-----------------------------------------
   const updateIdentification = api.geographic.updateIdentification.useMutation();
   //get latest communicationID
-  const latestGreaterAreaID = api.geographic.getLatestGreaterAreaID.useQuery();
+  const latestGreaterAreaID = api.geographic.getLatestGreaterAreaID.useQuery(undefined, { enabled: hasAccess });
 
   //GREATER AREA
   const handleGreaterArea = (name: string) => {
@@ -847,7 +853,7 @@ const Geographic: NextPage = () => {
   //   updatedAt: Date;
   // };
 
-  const downloadGeographicTable = api.geographic.download.useQuery({ searchQuery: query });
+  const downloadGeographicTable = api.geographic.download.useQuery({ searchQuery: query }, { enabled: hasAccess });
   const handleDownloadGeographicTable = async () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file
@@ -1188,7 +1194,7 @@ const Geographic: NextPage = () => {
         {/*CREATE AND UPDATE USER*/}
         {(isCreate || isUpdate) && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{isCreate ? "Create New Greater Area" : "Update Greater Area"}</b>
                 <div className="flex justify-center">
@@ -1469,7 +1475,7 @@ const Geographic: NextPage = () => {
         {/*VIEW PROFILE PAGE*/}
         {isViewProfilePage && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Greater Area Profile</div>
                 <div className="flex justify-center">

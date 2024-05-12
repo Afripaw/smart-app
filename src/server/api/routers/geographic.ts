@@ -8,6 +8,8 @@ import {
   createTRPCRouter,
   //protectedProcedure,
   publicProcedure,
+  accessProcedure,
+  protectedProcedure,
 } from "~/server/api/trpc";
 
 //define type of area
@@ -20,7 +22,7 @@ type Area = {
 
 export const geographicRouter = createTRPCRouter({
   //create new greaterArea record
-  createGreaterArea: publicProcedure
+  createGreaterArea: accessProcedure(["System Administrator"])
     .input(
       z.object({
         greaterArea: z.string(),
@@ -38,7 +40,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //create new area record
-  createArea: publicProcedure
+  createArea: accessProcedure(["System Administrator"])
     .input(
       z.object({
         area: z.string(),
@@ -80,7 +82,7 @@ export const geographicRouter = createTRPCRouter({
   // }),
 
   //create new street record
-  createStreet: publicProcedure
+  createStreet: accessProcedure(["System Administrator"])
     .input(
       z.object({
         street: z.string(),
@@ -111,7 +113,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //update greaterArea
-  updateGreaterArea: publicProcedure
+  updateGreaterArea: accessProcedure(["System Administrator"])
     .input(
       z.object({
         greaterAreaID: z.number(),
@@ -130,7 +132,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //update area
-  updateArea: publicProcedure
+  updateArea: accessProcedure(["System Administrator"])
     .input(
       z.object({
         areaID: z.number(),
@@ -151,7 +153,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //update street
-  updateStreet: publicProcedure
+  updateStreet: accessProcedure(["System Administrator"])
     .input(
       z.object({
         streetID: z.number(),
@@ -172,7 +174,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //delete greaterArea
-  deleteGreaterArea: publicProcedure
+  deleteGreaterArea: accessProcedure(["System Administrator"])
     .input(
       z.object({
         greaterAreaID: z.number(),
@@ -247,7 +249,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //delete area
-  deleteArea: publicProcedure
+  deleteArea: accessProcedure(["System Administrator"])
     .input(
       z.object({
         areaID: z.number(),
@@ -268,7 +270,7 @@ export const geographicRouter = createTRPCRouter({
 
   //delete street
 
-  deleteStreet: publicProcedure
+  deleteStreet: accessProcedure(["System Administrator"])
     .input(
       z.object({
         streetID: z.number(),
@@ -283,7 +285,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //get greaterArea by ID
-  getGreaterAreaByID: publicProcedure
+  getGreaterAreaByID: protectedProcedure
     .input(
       z.object({
         greaterAreaID: z.number(),
@@ -306,7 +308,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //get all greater areas
-  getAllGreaterAreas: publicProcedure.query(async ({ ctx }) => {
+  getAllGreaterAreas: protectedProcedure.query(async ({ ctx }) => {
     const greaterAreas = await ctx.db.greaterArea.findMany({
       orderBy: {
         greaterArea: "asc",
@@ -319,7 +321,7 @@ export const geographicRouter = createTRPCRouter({
   }),
 
   //get area by ID
-  getAreaByID: publicProcedure
+  getAreaByID: protectedProcedure
     .input(
       z.object({
         areaID: z.number(),
@@ -335,7 +337,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //get all areas
-  getAllAreas: publicProcedure.query(async ({ ctx }) => {
+  getAllAreas: protectedProcedure.query(async ({ ctx }) => {
     const areas = await ctx.db.area.findMany({
       orderBy: {
         area: "asc",
@@ -345,7 +347,7 @@ export const geographicRouter = createTRPCRouter({
   }),
 
   //get street by ID
-  getStreetByID: publicProcedure
+  getStreetByID: protectedProcedure
     .input(
       z.object({
         streetID: z.number(),
@@ -361,7 +363,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //get all streets
-  getAllStreets: publicProcedure.query(async ({ ctx }) => {
+  getAllStreets: protectedProcedure.query(async ({ ctx }) => {
     const streets = await ctx.db.street.findMany({
       orderBy: {
         street: "asc",
@@ -371,7 +373,7 @@ export const geographicRouter = createTRPCRouter({
   }),
 
   //get getAreasByGreaterID
-  getAreasByGreaterID: publicProcedure
+  getAreasByGreaterID: protectedProcedure
     .input(
       z.object({
         greaterAreaID: z.number(),
@@ -387,7 +389,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //get getStreetsByAreaID
-  getStreetsByAreaID: publicProcedure
+  getStreetsByAreaID: protectedProcedure
     .input(
       z.object({
         areaID: z.number(),
@@ -403,14 +405,14 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //delete all greater areas and areas and streets
-  deleteAll: publicProcedure.mutation(async ({ ctx }) => {
+  deleteAll: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
     await ctx.db.street.deleteMany({});
     await ctx.db.area.deleteMany({});
     return await ctx.db.greaterArea.deleteMany({});
   }),
 
   //Infinite query and search for greaterAreas and areas and streets
-  searchInfinite: publicProcedure
+  searchInfinite: accessProcedure(["System Administrator"])
     .input(
       z.object({
         limit: z.number(),
@@ -500,7 +502,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //UPLOAD
-  upload: publicProcedure.mutation(async ({ ctx }) => {
+  upload: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
     const greaterArea = await ctx.db.greaterArea.create({
       data: {
         greaterArea: "Greater Area 1",
@@ -535,7 +537,7 @@ export const geographicRouter = createTRPCRouter({
   }),
 
   //Update identification
-  updateIdentification: publicProcedure
+  updateIdentification: accessProcedure(["System Administrator"])
     .input(
       z.object({
         greaterAreaID: z.number(),
@@ -554,7 +556,7 @@ export const geographicRouter = createTRPCRouter({
     }),
 
   //get latest communicationID from identification
-  getLatestGreaterAreaID: publicProcedure.query(async ({ ctx }) => {
+  getLatestGreaterAreaID: accessProcedure(["System Administrator"]).query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
         identificationID: 1,
@@ -565,7 +567,7 @@ export const geographicRouter = createTRPCRouter({
   }),
 
   //Download
-  download: publicProcedure
+  download: accessProcedure(["System Administrator"])
     .input(
       z.object({
         searchQuery: z.string(),

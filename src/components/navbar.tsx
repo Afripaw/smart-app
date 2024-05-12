@@ -4,66 +4,77 @@ import Image from "next/image";
 import { signOut } from "next-auth/react";
 //import { router } from "@trpc/server";
 import { useRouter } from "next/router";
+import { api } from "~/utils/api";
 
 const NavbarLinks = [
   {
     name: "Dashboard",
     href: "/dashboard",
     icon: <Gauge className="h-full w-full" />,
+    access: ["System Administrator", "Data Analyst", "Data Consumer", "Treatment Data Capturer", "General Data Capturer"],
   },
   {
     name: "Users",
     href: "/user",
     // icon: <User size={24} />,
     icon: <User className="h-full w-full" />,
+    access: ["System Administrator"],
   },
   {
     name: "Volunteers",
     href: "/volunteer",
     // icon: <Person size={24} />,
     icon: <Person className="h-full w-full" />,
+    access: ["System Administrator"],
   },
   {
     name: "Owners",
     href: "/owner",
     // icon: <Users size={24} />,
     icon: <Users className="h-full w-full" />,
+    access: ["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"],
   },
   {
     name: "Pets",
     href: "/pet",
     // icon: <Dog size={24} />,
     icon: <Dog className="h-full w-full" />,
+    access: ["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"],
   },
   {
     name: "Treatments",
     href: "/treatment",
     // icon: <FirstAidKit size={24} />,
     icon: <FirstAidKit className="h-full w-full" />,
+    access: ["System Administrator", "Data Analyst", "Treatment Data Capturer"],
   },
   {
     name: "Clinics",
     href: "/clinic",
     // icon: <Bed size={24} />,
     icon: <Bed className="h-full w-full" />,
+    access: ["System Administrator", "Data Analyst"],
   },
   {
     name: "Geographic",
     href: "/geographic",
     // icon: <GlobeHemisphereEast size={24} />,
     icon: <GlobeHemisphereEast className="h-full w-full" />,
+    access: ["System Administrator"],
   },
   {
     name: "Database",
     href: "/info",
     // icon: <Info size={24} />,
     icon: <Info className="h-full w-full" />,
+    access: ["System Administrator", "Data Analyst", "Data Consumer"],
   },
   {
     name: "Messages",
     href: "/communication",
     // icon: <Envelope size={24} />,
     icon: <Envelope className="h-full w-full" />,
+    access: ["System Administrator"],
   },
 ];
 
@@ -80,8 +91,11 @@ const Navbar = () => {
   const handleLogout = async () => {
     await signOut({ callbackUrl: `${window.location.origin}/` });
   };
+
+  const { data: user } = api.user.getOwnUser.useQuery();
+
   return (
-    <div className="xs:left-0 xs:flex-col sticky z-50 flex items-center justify-between bg-main-orange text-normal text-black md:top-0 md:flex-row md:p-2 md:text-xs xl:w-full xl:p-3 xl:text-normal">
+    <div className="sticky z-50 flex items-center justify-between bg-main-orange text-normal text-black xs:left-0 xs:flex-col md:top-0 md:flex-row md:p-2 md:text-xs xl:w-full xl:p-3 xl:text-normal">
       {/* <div className="justify-begin flex">
         <Image src={"/afripaw-logo.jpg"} alt="Afripaw Logo" className="ml-auto aspect-square h-max rounded-full" width={56} height={56} />
       </div> */}
@@ -94,8 +108,8 @@ const Navbar = () => {
           height={56}
         />
       </div>
-      <div className="xs:flex-col mx-auto flex items-center md:flex-row md:gap-1 xl:gap-2">
-        {NavbarLinks.map((link) => (
+      <div className="mx-auto flex items-center xs:flex-col md:flex-row md:gap-1 xl:gap-2">
+        {NavbarLinks.filter((link) => link.access.includes(user?.role ?? "")).map((link) => (
           <div key={link.name}>
             <Link
               key={link.name}

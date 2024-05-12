@@ -32,8 +32,13 @@ import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 import { router } from "@trpc/server";
 
+//permissions
+import usePageAccess from "../hooks/usePageAccess";
+
 const Treatment: NextPage = () => {
+  //checks user session and page access
   useSession({ required: true });
+  const hasAccess = usePageAccess(["System Administrator", "Data Analyst", "Treatment Data Capturer"]);
 
   //TYPES
   type previousTreatment = {
@@ -79,7 +84,7 @@ const Treatment: NextPage = () => {
   const updateIdentification = api.petTreatment.updateIdentification.useMutation();
 
   //get latest treatmentID
-  const latestTreatmentID = api.petTreatment.getLatestTreatmentID.useQuery();
+  const latestTreatmentID = api.petTreatment.getLatestTreatmentID.useQuery(undefined, { enabled: hasAccess });
 
   //Excel upload
   const insertExcelData = api.petTreatment.insertExcelData.useMutation();
@@ -383,7 +388,7 @@ const Treatment: NextPage = () => {
 
   //-------------------------------PREVIOUS TREATMENTS-----------------------------------------
   const [previousTreatments, setPreviousTreatments] = useState<previousTreatment[]>([]);
-  const prevTreatments = api.petTreatment.getAllTreatmentsForPet.useQuery({ petID: petID });
+  const prevTreatments = api.petTreatment.getAllTreatmentsForPet.useQuery({ petID: petID }, { enabled: hasAccess });
 
   //---------------------------------NAVIGATION OF PET TO TREATMENT----------------------------------
   useEffect(() => {
@@ -444,8 +449,8 @@ const Treatment: NextPage = () => {
 
   //get treatment by id. Specifically for the view profile page
   const treatmentByID = router.asPath.includes("treatmentID")
-    ? api.petTreatment.getTreatmentByID.useQuery({ treatmentID: Number(router.asPath.split("=")[1]) })
-    : api.petTreatment.getTreatmentByID.useQuery({ treatmentID: 1000001 });
+    ? api.petTreatment.getTreatmentByID.useQuery({ treatmentID: Number(router.asPath.split("=")[1]) }, { enabled: hasAccess })
+    : api.petTreatment.getTreatmentByID.useQuery({ treatmentID: 1000001 }, { enabled: hasAccess });
 
   //fetch previous treatments
   useEffect(() => {
@@ -1354,7 +1359,7 @@ const Treatment: NextPage = () => {
   };
 
   //------------------------------------------DOWNLOADING OWNER TABLE TO EXCEL FILE------------------------------------------
-  const downloadTreatmentTable = api.petTreatment.download.useQuery({ searchQuery: query });
+  const downloadTreatmentTable = api.petTreatment.download.useQuery({ searchQuery: query }, { enabled: hasAccess });
   const handleDownloadTreatmentTable = async () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file

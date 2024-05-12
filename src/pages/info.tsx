@@ -16,8 +16,13 @@ import * as XLSX from "xlsx";
 //import FileSaver from "file-saver";
 import * as FileSaver from "file-saver";
 
+//permissions
+import usePageAccess from "../hooks/usePageAccess";
+
 const Info: NextPage = () => {
+  //checks user session and page access
   useSession({ required: true });
+  const hasAccess = usePageAccess(["System Administrator", "Data Analyst", "Data Consumer"]);
 
   //Loading
   const [isLoading, setIsLoading] = useState(false);
@@ -261,12 +266,15 @@ const Info: NextPage = () => {
   };
 
   //Download sterilisation
-  const downloadSterilisationTable = api.info.downloadSterilisation.useQuery({
-    typeOfQuery: sterilisationDueOption,
-    startDate: sterilisationStartingDate,
-    endDate: sterilisationEndingDate,
-    species: speciesSteriliseOption,
-  });
+  const downloadSterilisationTable = api.info.downloadSterilisation.useQuery(
+    {
+      typeOfQuery: sterilisationDueOption,
+      startDate: sterilisationStartingDate,
+      endDate: sterilisationEndingDate,
+      species: speciesSteriliseOption,
+    },
+    { enabled: hasAccess },
+  );
 
   const handleDownloadSterilisationTable = async () => {
     setIsLoading(true);
@@ -432,12 +440,15 @@ const Info: NextPage = () => {
   };
 
   //Download membership
-  const downloadMembershipTable = api.info.downloadMembership.useQuery({
-    typeOfQuery: membershipOption,
-    startDate: membershipStartingDate,
-    endDate: membershipEndingDate,
-    species: speciesMembershipOption,
-  });
+  const downloadMembershipTable = api.info.downloadMembership.useQuery(
+    {
+      typeOfQuery: membershipOption,
+      startDate: membershipStartingDate,
+      endDate: membershipEndingDate,
+      species: speciesMembershipOption,
+    },
+    { enabled: hasAccess },
+  );
 
   const handleDownloadMembershipTable = async () => {
     setIsLoading(true);
@@ -664,20 +675,26 @@ const Info: NextPage = () => {
   };
 
   //Download clinics
-  const downloadClinicsTable = api.info.downloadClinic.useQuery({
-    typeOfQuery: periodOption,
-    startDate: clinicStartingDate,
-    endDate: clinicEndingDate,
-    singleDate: clinicDate,
-  });
+  const downloadClinicsTable = api.info.downloadClinic.useQuery(
+    {
+      typeOfQuery: periodOption,
+      startDate: clinicStartingDate,
+      endDate: clinicEndingDate,
+      singleDate: clinicDate,
+    },
+    { enabled: hasAccess },
+  );
 
   //Download treatment
-  const downloadTreatmentsTable = api.info.downloadTreatment.useQuery({
-    typeOfQuery: periodOption,
-    startDate: clinicStartingDate,
-    endDate: clinicEndingDate,
-    singleDate: clinicDate,
-  });
+  const downloadTreatmentsTable = api.info.downloadTreatment.useQuery(
+    {
+      typeOfQuery: periodOption,
+      startDate: clinicStartingDate,
+      endDate: clinicEndingDate,
+      singleDate: clinicDate,
+    },
+    { enabled: hasAccess },
+  );
 
   const handleDownloadClinicTable = async () => {
     setIsLoading(true);

@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure, accessProcedure } from "~/server/api/trpc";
 
 import { Prisma } from "@prisma/client";
 
 export const UserRouter = createTRPCRouter({
-  create: publicProcedure
+  create: accessProcedure(["System Administrator"])
     .input(
       z.object({
         firstName: z.string(),
@@ -84,7 +84,7 @@ export const UserRouter = createTRPCRouter({
       });
     }),
 
-  update: publicProcedure
+  update: accessProcedure(["System Administrator"])
     .input(
       z.object({
         id: z.string(),
@@ -296,7 +296,7 @@ export const UserRouter = createTRPCRouter({
       }
     }),
 
-  deleteAll: publicProcedure.mutation(async ({ ctx }) => {
+  deleteAll: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
     await ctx.db.greaterAreaOnUser.deleteMany();
     return await ctx.db.user.deleteMany();
   }),
@@ -307,12 +307,22 @@ export const UserRouter = createTRPCRouter({
     });
   }),
 
-  getAllUsers: publicProcedure.query(({ ctx }) => {
+  getUserData: accessProcedure(["System Administrator"])
+    .input(z.object({ id: z.string() }))
+    .query(({ ctx, input }) => {
+      return ctx.db.user.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
+    }),
+
+  getAllUsers: accessProcedure(["System Administrator"]).query(({ ctx }) => {
     return ctx.db.user.findMany();
   }),
 
   //get the las id of the user
-  getLastUserID: publicProcedure.query(async ({ ctx }) => {
+  getLastUserID: accessProcedure(["System Administrator"]).query(async ({ ctx }) => {
     return await ctx.db.user.findFirst({
       orderBy: {
         id: "desc",
@@ -320,47 +330,47 @@ export const UserRouter = createTRPCRouter({
     });
   }),
 
-  //implement full text search for users
-  searchUsers: publicProcedure
-    .input(
-      z.object({
-        searchQuery: z.string(),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.user.findMany({
-        where: {
-          OR: [
-            //{ userID: { contains: input.searchQuery } },
-            { name: { contains: input.searchQuery } },
-            { surname: { contains: input.searchQuery } },
-            { email: { contains: input.searchQuery } },
-            { role: { contains: input.searchQuery } },
-            { status: { contains: input.searchQuery } },
-            { mobile: { contains: input.searchQuery } },
-            { southAfricanID: { contains: input.searchQuery } },
-            //{ addressGreaterArea: { contains: input.searchQuery } },
-            { addressStreet: { contains: input.searchQuery } },
-            // { addressGreaterArea: { contains: input.searchQuery } },
-            // { addressArea: { contains: input.searchQuery } },
-            // { addressStreet: { contains: input.searchQuery } },
-            { addressStreetCode: { contains: input.searchQuery } },
-            // { addressStreetNumber: { equals: input.searchQuery } },
-            { addressSuburb: { contains: input.searchQuery } },
-            { addressPostalCode: { contains: input.searchQuery } },
-            { addressFreeForm: { contains: input.searchQuery } },
-            { preferredCommunication: { contains: input.searchQuery } },
-            { comments: { contains: input.searchQuery } },
-          ],
-        },
-        orderBy: {
-          userID: "asc",
-        },
-      });
-    }),
+  // //implement full text search for users
+  // searchUsers: publicProcedure
+  //   .input(
+  //     z.object({
+  //       searchQuery: z.string(),
+  //     }),
+  //   )
+  //   .query(async ({ ctx, input }) => {
+  //     return await ctx.db.user.findMany({
+  //       where: {
+  //         OR: [
+  //           //{ userID: { contains: input.searchQuery } },
+  //           { name: { contains: input.searchQuery } },
+  //           { surname: { contains: input.searchQuery } },
+  //           { email: { contains: input.searchQuery } },
+  //           { role: { contains: input.searchQuery } },
+  //           { status: { contains: input.searchQuery } },
+  //           { mobile: { contains: input.searchQuery } },
+  //           { southAfricanID: { contains: input.searchQuery } },
+  //           //{ addressGreaterArea: { contains: input.searchQuery } },
+  //           { addressStreet: { contains: input.searchQuery } },
+  //           // { addressGreaterArea: { contains: input.searchQuery } },
+  //           // { addressArea: { contains: input.searchQuery } },
+  //           // { addressStreet: { contains: input.searchQuery } },
+  //           { addressStreetCode: { contains: input.searchQuery } },
+  //           // { addressStreetNumber: { equals: input.searchQuery } },
+  //           { addressSuburb: { contains: input.searchQuery } },
+  //           { addressPostalCode: { contains: input.searchQuery } },
+  //           { addressFreeForm: { contains: input.searchQuery } },
+  //           { preferredCommunication: { contains: input.searchQuery } },
+  //           { comments: { contains: input.searchQuery } },
+  //         ],
+  //       },
+  //       orderBy: {
+  //         userID: "asc",
+  //       },
+  //     });
+  //   }),
 
   //Infinite query and search for users
-  searchUsersInfinite: publicProcedure
+  searchUsersInfinite: accessProcedure(["System Administrator"])
     .input(
       z.object({
         id: z.string(),
@@ -528,7 +538,7 @@ export const UserRouter = createTRPCRouter({
     }),
 
   //delete user
-  deleteUser: publicProcedure
+  deleteUser: accessProcedure(["System Administrator"])
     .input(
       z.object({
         userID: z.number(),
@@ -548,7 +558,7 @@ export const UserRouter = createTRPCRouter({
     }),
 
   //Create a new identification record
-  createIdentification: publicProcedure
+  createIdentification: accessProcedure(["System Administrator"])
     .input(
       z.object({
         userID: z.number(),
@@ -579,7 +589,7 @@ export const UserRouter = createTRPCRouter({
     }),
 
   //update identification
-  updateIdentification: publicProcedure
+  updateIdentification: accessProcedure(["System Administrator"])
     .input(
       z.object({
         userID: z.number(),
@@ -598,12 +608,12 @@ export const UserRouter = createTRPCRouter({
     }),
 
   //delete all identification
-  deleteAllIdentification: publicProcedure.mutation(async ({ ctx }) => {
+  deleteAllIdentification: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
     return await ctx.db.identification.deleteMany({});
   }),
 
   //get latest userID from identification
-  getLatestUserID: publicProcedure.query(async ({ ctx }) => {
+  getLatestUserID: accessProcedure(["System Administrator"]).query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
         identificationID: 1,
@@ -614,7 +624,7 @@ export const UserRouter = createTRPCRouter({
   }),
 
   //make a download
-  download: publicProcedure
+  download: accessProcedure(["System Administrator"])
     .input(
       z.object({
         searchQuery: z.string(),
@@ -711,4 +721,12 @@ export const UserRouter = createTRPCRouter({
 
       return users;
     }),
+
+  getOwnUser: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.user.findUnique({
+      where: {
+        id: ctx.session.user.id,
+      },
+    });
+  }),
 });

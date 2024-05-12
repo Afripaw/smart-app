@@ -2,13 +2,13 @@ import { z } from "zod";
 
 import { Prisma } from "@prisma/client";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure, accessProcedure } from "~/server/api/trpc";
 import Owner from "~/pages/owner";
 
 export const infoRouter = createTRPCRouter({
   //Database report queries
   //sterilisation queries
-  getSterilisationInfinite: protectedProcedure
+  getSterilisationInfinite: accessProcedure(["System Administrator", "Data Analyst", "Data Consumer"])
     .input(
       z.object({
         limit: z.number(),
@@ -67,7 +67,7 @@ export const infoRouter = createTRPCRouter({
     }),
 
   //membership queries
-  getMembershipInfinite: protectedProcedure
+  getMembershipInfinite: accessProcedure(["System Administrator", "Data Analyst", "Data Consumer"])
     .input(
       z.object({
         limit: z.number(),
@@ -132,7 +132,7 @@ export const infoRouter = createTRPCRouter({
     }),
 
   //clinic queries
-  getClinicInfinite: protectedProcedure
+  getClinicInfinite: accessProcedure(["System Administrator", "Data Analyst", "Data Consumer"])
     .input(
       z.object({
         limit: z.number(),
@@ -213,7 +213,7 @@ export const infoRouter = createTRPCRouter({
     }),
 
   //treatment queries
-  getTreatmentInfinite: protectedProcedure
+  getTreatmentInfinite: accessProcedure(["System Administrator", "Data Analyst", "Data Consumer"])
     .input(
       z.object({
         limit: z.number(),
@@ -317,7 +317,7 @@ export const infoRouter = createTRPCRouter({
 
   //Downloads
   //sterilisation downloads
-  downloadSterilisation: protectedProcedure
+  downloadSterilisation: accessProcedure(["System Administrator", "Data Analyst", "Data Consumer"])
     .input(
       z.object({
         typeOfQuery: z.string(),
@@ -417,7 +417,7 @@ export const infoRouter = createTRPCRouter({
     }),
 
   //membership downloads
-  downloadMembership: protectedProcedure
+  downloadMembership: accessProcedure(["System Administrator", "Data Analyst", "Data Consumer"])
     .input(
       z.object({
         typeOfQuery: z.string(),
@@ -514,7 +514,7 @@ export const infoRouter = createTRPCRouter({
     }),
 
   //clinic downloads
-  downloadClinic: protectedProcedure
+  downloadClinic: accessProcedure(["System Administrator", "Data Analyst", "Data Consumer"])
     .input(
       z.object({
         typeOfQuery: z.string(),
@@ -668,7 +668,7 @@ export const infoRouter = createTRPCRouter({
 
   //treatment downloads
   //clinic downloads
-  downloadTreatment: protectedProcedure
+  downloadTreatment: accessProcedure(["System Administrator", "Data Analyst", "Data Consumer"])
     .input(
       z.object({
         typeOfQuery: z.string(),

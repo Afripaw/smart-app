@@ -25,24 +25,24 @@ const Dashboard: NextPage = () => {
       <Head>
         <title>Dashboard</title>
       </Head>
-      <main className="xs:flex-row flex h-screen text-normal sm:flex-col md:text-xs xl:text-normal ">
+      <main className="flex h-screen text-normal xs:flex-row sm:flex-col md:text-xs xl:text-normal ">
         <Navbar />
-        <div className="xs:grid-cols-1 xs:grid-rows-4 xs:overflow-hidden grid h-full sm:grid-cols-3 sm:grid-rows-3">
-          <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
+        <div className="grid h-full xs:grid-cols-1 xs:grid-rows-4 xs:overflow-hidden sm:grid-cols-3 sm:grid-rows-3">
+          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16 xs:row-span-1">
             <LineGraph type="activeOwners" />
             <div className="md:pl-9 xl:pl-12">
               <div className="">New Pet Owners per Greater Area (Last 5 Years)</div>
             </div>
           </div>
-          <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
+          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16 xs:row-span-1">
             <BarGraph type="clinicsVisited" />
             <div className="pl-12">Clinic Visits by Pets (All Areas, Last 5 Years)</div>
           </div>
-          <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
+          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16 xs:row-span-1">
             <LineGraph type="activeVolunteers" />
             <div className="md:pl-9 xl:pl-12">New Volunteers per Greater Area (Last 5 Years)</div>
           </div>
-          <div className="xs:row-span-1 flex flex-col items-center justify-center border border-gray-300 pr-16">
+          <div className="flex flex-col items-center justify-center border border-gray-300 pr-16 xs:row-span-1">
             <LineGraph type="kennels" />
             <div className="md:pl-9 xl:pl-12">Kennels Provided per Greater Area (Last 5 Years)</div>
           </div>

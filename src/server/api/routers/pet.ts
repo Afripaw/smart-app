@@ -2,12 +2,12 @@ import { ChatText } from "phosphor-react";
 import { z } from "zod";
 //import Owner from "~/pages/owner";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure, accessProcedure } from "~/server/api/trpc";
 
 import { Prisma } from "@prisma/client";
 
 export const petRouter = createTRPCRouter({
-  create: publicProcedure
+  create: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         ownerID: z.number(),
@@ -99,7 +99,7 @@ export const petRouter = createTRPCRouter({
     }),
 
   //Delete pet
-  delete: protectedProcedure
+  delete: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         petID: z.number(),
@@ -122,7 +122,7 @@ export const petRouter = createTRPCRouter({
     }),
 
   //Update pet
-  update: protectedProcedure
+  update: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         petID: z.number(),
@@ -219,7 +219,7 @@ export const petRouter = createTRPCRouter({
     }),
 
   //Infinite query and search for volunteers
-  searchPetsInfinite: publicProcedure
+  searchPetsInfinite: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         petID: z.number(),
@@ -627,7 +627,7 @@ export const petRouter = createTRPCRouter({
     }),
 
   //Add clinic to pet
-  addClinicToPet: protectedProcedure
+  addClinicToPet: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         petID: z.number(),
@@ -662,7 +662,7 @@ export const petRouter = createTRPCRouter({
     }),
 
   //delete pet
-  deletePet: publicProcedure
+  deletePet: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         petID: z.number(),
@@ -711,7 +711,7 @@ export const petRouter = createTRPCRouter({
     }),
 
   //get one pet
-  getPetByID: protectedProcedure
+  getPetByID: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         petID: z.number(),
@@ -816,13 +816,13 @@ export const petRouter = createTRPCRouter({
     }),
 
   //get all pets
-  getAllPets: protectedProcedure.query(async ({ ctx }) => {
+  getAllPets: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).query(async ({ ctx }) => {
     const pet = await ctx.db.pet.findMany();
     return pet;
   }),
 
   //get all the pets that are sterilised
-  getAllPetsSterilised: protectedProcedure.query(async ({ ctx }) => {
+  getAllPetsSterilised: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).query(async ({ ctx }) => {
     const pet = await ctx.db.pet.findMany({
       where: {
         sterilisedStatus: {
@@ -846,14 +846,14 @@ export const petRouter = createTRPCRouter({
   // }),
 
   //Delete all pets
-  deleteAllPets: protectedProcedure.mutation(async ({ ctx }) => {
+  deleteAllPets: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).mutation(async ({ ctx }) => {
     await ctx.db.petTreatment.deleteMany();
     await ctx.db.petOnPetClinic.deleteMany();
     return await ctx.db.pet.deleteMany();
   }),
 
   //Bulk upload of all the owners
-  insertExcelData: protectedProcedure
+  insertExcelData: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.array(
         z.object({
@@ -911,7 +911,7 @@ export const petRouter = createTRPCRouter({
     }),
 
   //Update identification
-  updateIdentification: publicProcedure
+  updateIdentification: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         petID: z.number(),
@@ -930,7 +930,7 @@ export const petRouter = createTRPCRouter({
     }),
 
   //get latest petID from identification
-  getLatestPetID: publicProcedure.query(async ({ ctx }) => {
+  getLatestPetID: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
         identificationID: 1,
@@ -941,102 +941,106 @@ export const petRouter = createTRPCRouter({
   }),
 
   //get the amount of pets sterilised for each year and seperate into two variables. The first for dogs and the other for cats
-  getAmountOfPetsSterilised: protectedProcedure.query(async ({ ctx }) => {
-    const pets = await ctx.db.pet.findMany({
-      where: {
-        sterilisedStatus: {
-          not: "No",
+  getAmountOfPetsSterilised: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).query(
+    async ({ ctx }) => {
+      const pets = await ctx.db.pet.findMany({
+        where: {
+          sterilisedStatus: {
+            not: "No",
+          },
         },
-      },
-    });
+      });
 
-    const dogs = pets.filter((pet) => pet.species === "Dog");
-    const cats = pets.filter((pet) => pet.species === "Cat");
+      const dogs = pets.filter((pet) => pet.species === "Dog");
+      const cats = pets.filter((pet) => pet.species === "Cat");
 
-    //return all the pets that are sterilised in the last 5 years, and return an array of integers for each type of animal that is sterilised
-    const dogsLast5Years = dogs.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
-    const catsLast5Years = cats.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+      //return all the pets that are sterilised in the last 5 years, and return an array of integers for each type of animal that is sterilised
+      const dogsLast5Years = dogs.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+      const catsLast5Years = cats.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
 
-    //Now group the pets by year
-    const dogsGroupedByYear = dogsLast5Years.reduce(
-      (acc, pet) => {
-        const year = pet.updatedAt.getFullYear();
-        if (acc[year]) {
-          acc[year]++;
-        } else {
-          acc[year] = 1;
-        }
-        return acc;
-      },
-      {} as Record<number, number>,
-    );
+      //Now group the pets by year
+      const dogsGroupedByYear = dogsLast5Years.reduce(
+        (acc, pet) => {
+          const year = pet.updatedAt.getFullYear();
+          if (acc[year]) {
+            acc[year]++;
+          } else {
+            acc[year] = 1;
+          }
+          return acc;
+        },
+        {} as Record<number, number>,
+      );
 
-    const catsGroupedByYear = catsLast5Years.reduce(
-      (acc, pet) => {
-        const year = pet.updatedAt.getFullYear();
-        if (acc[year]) {
-          acc[year]++;
-        } else {
-          acc[year] = 1;
-        }
-        return acc;
-      },
-      {} as Record<number, number>,
-    );
+      const catsGroupedByYear = catsLast5Years.reduce(
+        (acc, pet) => {
+          const year = pet.updatedAt.getFullYear();
+          if (acc[year]) {
+            acc[year]++;
+          } else {
+            acc[year] = 1;
+          }
+          return acc;
+        },
+        {} as Record<number, number>,
+      );
 
-    return {
-      dogs: dogsGroupedByYear,
-      cats: catsGroupedByYear,
-    };
-  }),
+      return {
+        dogs: dogsGroupedByYear,
+        cats: catsGroupedByYear,
+      };
+    },
+  ),
 
   //get the amount of active pets for each year and seperate into two variables. The first for dogs and the other for cats
-  getAmountOfActivePets: protectedProcedure.query(async ({ ctx }) => {
-    const pets = await ctx.db.pet.findMany({
-      where: {
-        status: "Active",
-      },
-    });
+  getAmountOfActivePets: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).query(
+    async ({ ctx }) => {
+      const pets = await ctx.db.pet.findMany({
+        where: {
+          status: "Active",
+        },
+      });
 
-    const dogs = pets.filter((pet) => pet.species === "Dog");
-    const cats = pets.filter((pet) => pet.species === "Cat");
+      const dogs = pets.filter((pet) => pet.species === "Dog");
+      const cats = pets.filter((pet) => pet.species === "Cat");
 
-    //return all the pets that are sterilised in the last 5 years, and return an array of integers for each type of animal that is sterilised
-    const dogsLast5Years = dogs.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
-    const catsLast5Years = cats.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+      //return all the pets that are sterilised in the last 5 years, and return an array of integers for each type of animal that is sterilised
+      const dogsLast5Years = dogs.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
+      const catsLast5Years = cats.filter((pet) => pet.updatedAt.getFullYear() >= new Date().getFullYear() - 5); //SHOULD USE STERILISEDDATE. NOT UPDATEDAT
 
-    //Now group the pets by year
-    const dogsGroupedByYear = dogsLast5Years.reduce(
-      (acc, pet) => {
-        const year = pet.updatedAt.getFullYear();
-        if (acc[year]) {
-          acc[year]++;
-        } else {
-          acc[year] = 1;
-        }
-        return acc;
-      },
-      {} as Record<number, number>,
-    );
+      //Now group the pets by year
+      const dogsGroupedByYear = dogsLast5Years.reduce(
+        (acc, pet) => {
+          const year = pet.updatedAt.getFullYear();
+          if (acc[year]) {
+            acc[year]++;
+          } else {
+            acc[year] = 1;
+          }
+          return acc;
+        },
+        {} as Record<number, number>,
+      );
 
-    const catsGroupedByYear = catsLast5Years.reduce(
-      (acc, pet) => {
-        const year = pet.updatedAt.getFullYear();
-        if (acc[year]) {
-          acc[year]++;
-        } else {
-          acc[year] = 1;
-        }
-        return acc;
-      },
-      {} as Record<number, number>,
-    );
+      const catsGroupedByYear = catsLast5Years.reduce(
+        (acc, pet) => {
+          const year = pet.updatedAt.getFullYear();
+          if (acc[year]) {
+            acc[year]++;
+          } else {
+            acc[year] = 1;
+          }
+          return acc;
+        },
+        {} as Record<number, number>,
+      );
 
-    return {
-      dogs: dogsGroupedByYear,
-      cats: catsGroupedByYear,
-    };
-  }),
+      return {
+        dogs: dogsGroupedByYear,
+        cats: catsGroupedByYear,
+      };
+    },
+  ),
 
   // //get amount of pets sterilised for last 5 years. Seperate into data into respective greater areas
   // getSterilisedPets: protectedProcedure.query(async ({ ctx }) => {
@@ -1117,7 +1121,7 @@ export const petRouter = createTRPCRouter({
   }),
 
   //kennels provided over the last 5 years
-  getKennelsProvided: protectedProcedure.query(async ({ ctx }) => {
+  getKennelsProvided: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).query(async ({ ctx }) => {
     //get kennels received over the last 5 years
     const pets4yearsAgo = await ctx.db.pet.findMany({
       where: {
@@ -1302,7 +1306,7 @@ export const petRouter = createTRPCRouter({
   }),
 
   //download
-  download: publicProcedure
+  download: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         searchQuery: z.string(),

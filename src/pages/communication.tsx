@@ -35,8 +35,13 @@ import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 import { router } from "@trpc/server";
 
+//permissions
+import usePageAccess from "../hooks/usePageAccess";
+
 const Communication: NextPage = () => {
+  //checks user session and page access
   useSession({ required: true });
+  const hasAccess = usePageAccess(["System Administrator"]);
 
   //Types
   type Communication = {
@@ -100,7 +105,7 @@ const Communication: NextPage = () => {
   const updateIdentification = api.communication.updateIdentification.useMutation();
 
   //get latest communicationID
-  const latestCommunicationID = api.communication.getLatestCommunicationID.useQuery();
+  const latestCommunicationID = api.communication.getLatestCommunicationID.useQuery(undefined, { enabled: hasAccess });
 
   //Recipients
   const [recipients, setRecipients] = useState<string[]>([]);
@@ -415,7 +420,7 @@ const Communication: NextPage = () => {
   }, []);
 
   //Greater Area
-  const getAllGreaterAreas = api.geographic.getAllGreaterAreas.useQuery().data;
+  const getAllGreaterAreas = api.geographic.getAllGreaterAreas.useQuery(undefined, { enabled: hasAccess }).data;
   const allGreaterAreas = getAllGreaterAreas?.map((area) => {
     return { id: area.greaterAreaID, name: area.greaterArea };
   });
@@ -611,9 +616,9 @@ const Communication: NextPage = () => {
   const greaterAreaIDList = greaterAreaList.map((area) => area.id);
   const areaIDList = areaList.map((area) => area.id);
 
-  const allUsers = api.communication.getAllUsers.useQuery({ greaterAreaID: greaterAreaIDList, areaID: areaIDList });
-  const allPetOwners = api.communication.getAllPetOwners.useQuery({ greaterAreaID: greaterAreaIDList, areaID: areaIDList });
-  const allVolunteers = api.communication.getAllVolunteers.useQuery({ greaterAreaID: greaterAreaIDList });
+  const allUsers = api.communication.getAllUsers.useQuery({ greaterAreaID: greaterAreaIDList, areaID: areaIDList }, { enabled: hasAccess });
+  const allPetOwners = api.communication.getAllPetOwners.useQuery({ greaterAreaID: greaterAreaIDList, areaID: areaIDList }, { enabled: hasAccess });
+  const allVolunteers = api.communication.getAllVolunteers.useQuery({ greaterAreaID: greaterAreaIDList }, { enabled: hasAccess });
   const [userSuccess, setUserSuccess] = useState("Yes");
   const [petOwnerSuccess, setPetOwnerSuccess] = useState("Yes");
   const [volunteerSuccess, setVolunteerSuccess] = useState("Yes");
@@ -1033,7 +1038,7 @@ const Communication: NextPage = () => {
   };
 
   //------------------------------------------DOWNLOADING COMMUNICATION TABLE TO EXCEL FILE------------------------------------------
-  const downloadCommunicationTable = api.communication.download.useQuery({ searchQuery: query });
+  const downloadCommunicationTable = api.communication.download.useQuery({ searchQuery: query }, { enabled: hasAccess });
   const handleDownloadCommunicationTable = async () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file
@@ -1246,7 +1251,7 @@ const Communication: NextPage = () => {
         )}
         {isCreate && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <b className=" text-2xl">{"Create New Message"}</b>
                 <div className="flex justify-center">
@@ -1605,7 +1610,7 @@ const Communication: NextPage = () => {
 
         {isViewProfilePage && (
           <>
-            <div className="3xl:top-[8.5%] sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%]">
+            <div className="sticky z-50 flex justify-center md:top-[8.9%] xl:top-[11%] 3xl:top-[8.5%]">
               <div className="relative mb-4 flex grow flex-col items-center rounded-lg bg-slate-300 px-5 py-6">
                 <div className=" text-2xl">Message Profile</div>
                 <div className="flex justify-center">

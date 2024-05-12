@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure, accessProcedure } from "~/server/api/trpc";
 
 import { Prisma } from "@prisma/client";
 
 export const petOwnerRouter = createTRPCRouter({
-  create: publicProcedure
+  create: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         southAfricanID: z.string(),
@@ -69,7 +69,7 @@ export const petOwnerRouter = createTRPCRouter({
     }),
 
   //update pet owner
-  update: publicProcedure
+  update: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         petOwnerID: z.number(),
@@ -137,7 +137,7 @@ export const petOwnerRouter = createTRPCRouter({
     }),
 
   //get one pet owner
-  getOwnerByID: protectedProcedure
+  getOwnerByID: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         ownerID: z.number(),
@@ -160,7 +160,7 @@ export const petOwnerRouter = createTRPCRouter({
     }),
 
   //Infinite query and search for volunteers
-  searchOwnersInfinite: publicProcedure
+  searchOwnersInfinite: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         ownerID: z.number(),
@@ -360,7 +360,7 @@ export const petOwnerRouter = createTRPCRouter({
     }),
 
   //delete owner
-  deleteOwner: publicProcedure
+  deleteOwner: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         userID: z.number(),
@@ -400,13 +400,13 @@ export const petOwnerRouter = createTRPCRouter({
     }),
 
   //get all pet owners
-  getAllOwners: protectedProcedure.query(async ({ ctx }) => {
+  getAllOwners: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).query(async ({ ctx }) => {
     const petOwners = await ctx.db.petOwner.findMany();
     return petOwners;
   }),
 
   //delete all pet owners
-  deleteAllOwners: protectedProcedure.mutation(async ({ ctx }) => {
+  deleteAllOwners: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).mutation(async ({ ctx }) => {
     //delete all pet to petTreatment
     await ctx.db.petTreatment.deleteMany();
     //delete all pet to petClinic
@@ -417,7 +417,7 @@ export const petOwnerRouter = createTRPCRouter({
   }),
 
   //Bulk upload of all the owners
-  insertExcelData: protectedProcedure
+  insertExcelData: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.array(
         z.object({
@@ -453,7 +453,7 @@ export const petOwnerRouter = createTRPCRouter({
     }),
 
   //Update identification
-  updateIdentification: publicProcedure
+  updateIdentification: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         ownerID: z.number(),
@@ -472,7 +472,7 @@ export const petOwnerRouter = createTRPCRouter({
     }),
 
   //get latest ownerID from identification
-  getLatestOwnerID: publicProcedure.query(async ({ ctx }) => {
+  getLatestOwnerID: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
         identificationID: 1,
@@ -634,7 +634,7 @@ export const petOwnerRouter = createTRPCRouter({
   // }),
 
   //get all the dogs and cats respectively that are active and over the last 5 years since the owner's startingdate
-  getActivePets: protectedProcedure.query(async ({ ctx }) => {
+  getActivePets: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).query(async ({ ctx }) => {
     const ownersOf5Years = await ctx.db.petOwner.findMany({
       where: {
         startingDate: {
@@ -748,7 +748,7 @@ export const petOwnerRouter = createTRPCRouter({
   }),
 
   //download
-  download: publicProcedure
+  download: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         searchQuery: z.string(),
@@ -890,7 +890,7 @@ export const petOwnerRouter = createTRPCRouter({
     }),
 
   //update owners starting date
-  updateStartingDate: publicProcedure
+  updateStartingDate: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
       z.object({
         ownerID: z.number(),

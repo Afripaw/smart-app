@@ -36,8 +36,14 @@ import { set } from "date-fns";
 import { string } from "zod";
 import { error } from "console";
 
+//permissions
+import usePageAccess from "../hooks/usePageAccess";
+
 const Pet: NextPage = () => {
+  //checks user session and page access
   useSession({ required: true });
+  const hasAccess = usePageAccess(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]);
+  const { data: ownUser } = api.user.getOwnUser.useQuery();
 
   //For moving between different pages
   const router = useRouter();
@@ -58,7 +64,7 @@ const Pet: NextPage = () => {
   const updateIdentification = api.pet.updateIdentification.useMutation();
 
   //get latest petID
-  const latestPetID = api.pet.getLatestPetID.useQuery();
+  const latestPetID = api.pet.getLatestPetID.useQuery(undefined, { enabled: hasAccess });
 
   //-------------------------------TREATMENTS-----------------------------------------
   type Treatment = {
@@ -574,7 +580,7 @@ const Pet: NextPage = () => {
     }
   }, [router.asPath]);
 
-  const pet = router.asPath.includes("petID") ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) }) : null;
+  const pet_ = router.asPath.includes("petID") ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) }) : null;
   // const pet = router.asPath.includes("petID")
   //   ? api.pet.getPetByID.useQuery({ petID: Number(router.asPath.split("=")[1]) })
   //   : api.pet.getPetByID.useQuery({ petID: 0 });
@@ -1973,7 +1979,7 @@ const Pet: NextPage = () => {
   const [clinicSelection, setClinicSelection] = useState<ClinicSelect>();
   const [showClinicMessage, setShowClinicMessage] = useState(false);
   //All clinics in petClinic table
-  const clinicsAttendedOptions = api.petClinic.getAllClinics.useQuery().data ?? [];
+  const clinicsAttendedOptions = api.petClinic.getAllClinics.useQuery(undefined, { enabled: hasAccess }).data ?? [];
 
   // const clinicsAttendedOptions = ["Clinic 1", "Clinic 2", "Clinic 3"];
   const [clinicsAttended, setClinicsAttended] = useState(false);
@@ -3024,13 +3030,19 @@ const Pet: NextPage = () => {
   //-------------------------------VIEW PROFILE PAGE-----------------------------------------
 
   const handleViewProfilePage = async (id: number) => {
-    void pet?.refetch();
+    //12 may 2024
+    // if (router.asPath.includes("petID")) {
+    //   void pet_?.refetch();
+    // }
     setIsViewProfilePage(true);
     setID(id);
 
-    const user = router.asPath.includes("petID")
-      ? pet_data_with_clinics_and_treatments?.find((user) => user.petID === Number(router.asPath.split("=")[1]))
-      : pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
+    //commented out 12 may 2024
+    // const user = router.asPath.includes("petID")
+    //   ? pet_data_with_clinics_and_treatments?.find((user) => user.petID === Number(router.asPath.split("=")[1]))
+    //   : pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
+
+    const user = pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
 
     //console.log("View profile page: ", JSON.stringify(user));
 
@@ -3215,109 +3227,239 @@ const Pet: NextPage = () => {
       (speciesOption === "Select one" || speciesOption === "")
     ) {
       setRerenders(rerenders + 1);
-      void pet?.refetch();
+      void pet_?.refetch();
       console.log("Fetching pet data.......");
       console.log("Pet name: ", petName);
-      console.log("Pet data: ", pet?.data);
+      console.log("Pet data: ", pet_?.data);
       getPet ? setGetPet(false) : setGetPet(true);
     }
 
-    //Uncomment if doing brute force method
-    // if (ownerID === 0 && rerenders < 800 && router.asPath.includes("petID")) {
-    //   setRerenders(rerenders + 1);
-    //   setOwnerID(pet?.data?.owner_data?.ownerID ?? 0);
-    //   getPet ? setGetPet(false) : setGetPet(true);
-    // }
+    if (router.asPath.includes("petID")) {
+      //Uncomment if doing brute force method
+      // if (ownerID === 0 && rerenders < 800 && router.asPath.includes("petID")) {
+      //   setRerenders(rerenders + 1);
+      //   setOwnerID(pet?.data?.owner_data?.ownerID ?? 0);
+      //   getPet ? setGetPet(false) : setGetPet(true);
+      // }
 
-    //alternate method to get pet data
+      //alternate method to get pet data
 
-    // Assuming userQuery.data contains the user object
-    const userData = pet?.data;
-    if (userData) {
-      console.log("View profile page: ", JSON.stringify(userData));
-      //Get all the clinic dates and put in a string array
-      const clinicData = pet?.data?.clinic_data;
-      const clinicDates: Clinic[] =
-        clinicData?.map((clinic) => ({
-          id: clinic.clinicID,
-          date:
-            clinic.clinic.date.getDate().toString() +
-            "/" +
-            ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
-            "/" +
-            clinic.clinic.date.getFullYear().toString(),
-          area: clinic.clinic.greaterArea.greaterArea,
-        })) ?? [];
-      //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
+      // Assuming userQuery.data contains the user object
+      const userData = pet_?.data;
+      if (userData) {
+        console.log("View profile page: ", JSON.stringify(userData));
+        //Get all the clinic dates and put in a string array
+        const clinicData = pet_?.data?.clinic_data;
+        const clinicDates: Clinic[] =
+          clinicData?.map((clinic) => ({
+            id: clinic.clinicID,
+            date:
+              clinic.clinic.date.getDate().toString() +
+              "/" +
+              ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+              "/" +
+              clinic.clinic.date.getFullYear().toString(),
+            area: clinic.clinic.greaterArea.greaterArea,
+          })) ?? [];
+        //const clinicIDs = clinicData?.map((clinic) => clinic.clinicID) ?? [];
 
-      //treatments
-      const treatmentData: Treatment[] =
-        pet?.data?.treatment_data?.map((treatment) => ({
-          treatmentID: treatment.treatmentID,
-          date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
-          category: treatment.category,
-          type: treatment.type.map((type) => type.type.type),
-          comments: treatment.comments ?? "",
-        })) ?? [];
+        //treatments
+        const treatmentData: Treatment[] =
+          pet_?.data?.treatment_data?.map((treatment) => ({
+            treatmentID: treatment.treatmentID,
+            date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+            category: treatment.category,
+            type: treatment.type.map((type) => type.type.type),
+            comments: treatment.comments ?? "",
+          })) ?? [];
 
-      console.log("Treatment data: ", treatmentData);
+        console.log("Treatment data: ", treatmentData);
 
-      const petData = userData?.pet_data;
+        const petData = userData?.pet_data;
 
-      if (isUpdate && router.asPath.includes("petID")) {
-        setPetName(petData?.petName ?? "");
-        setSpeciesOption(petData?.species ?? "Select one");
-        setSexOption(petData?.sex ?? "Select one");
-        setAgeOption(petData?.age ?? "Select one");
-        //setBreedOption(petData?.breed ?? "Select one");
-        setBreedList(petData?.breed ?? ["Select here"]);
-        setColourList(petData?.colour ?? ["Select here"]);
-        setSizeOption(petData?.size ?? "Select one");
-        setMarkings(petData?.markings ?? "");
-        setStatusOption(petData?.status ?? "Select one");
-        console.log("URL UseEffect Request signed at____ :", petData?.sterilisedRequestSigned);
-        setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "Select one");
-        setSterilisationStatusOption(
-          petData?.sterilisedStatus === undefined || petData?.sterilisedStatus === null
-            ? "Select one"
-            : petData?.sterilisedStatus.getFullYear() === 1970
-              ? "No"
-              : "Yes",
-        );
-        setSterilisationRequestedOption(
-          petData?.sterilisedRequested === undefined || petData?.sterilisedRequested === null
-            ? "Select one"
-            : petData?.sterilisedRequested.getFullYear() === 1970
-              ? "No"
-              : "Yes",
-        );
-        setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "Select one");
+        if (isUpdate && router.asPath.includes("petID")) {
+          setPetName(petData?.petName ?? "");
+          setSpeciesOption(petData?.species ?? "Select one");
+          setSexOption(petData?.sex ?? "Select one");
+          setAgeOption(petData?.age ?? "Select one");
+          //setBreedOption(petData?.breed ?? "Select one");
+          setBreedList(petData?.breed ?? ["Select here"]);
+          setColourList(petData?.colour ?? ["Select here"]);
+          setSizeOption(petData?.size ?? "Select one");
+          setMarkings(petData?.markings ?? "");
+          setStatusOption(petData?.status ?? "Select one");
+          console.log("URL UseEffect Request signed at____ :", petData?.sterilisedRequestSigned);
+          setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "Select one");
+          setSterilisationStatusOption(
+            petData?.sterilisedStatus === undefined || petData?.sterilisedStatus === null
+              ? "Select one"
+              : petData?.sterilisedStatus.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
+          setSterilisationRequestedOption(
+            petData?.sterilisedRequested === undefined || petData?.sterilisedRequested === null
+              ? "Select one"
+              : petData?.sterilisedRequested.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
+          setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "Select one");
 
-        setMembershipTypeOption(petData?.membership ?? "Select one");
-        setCardStatusOption(petData?.cardStatus ?? "Select one");
+          setMembershipTypeOption(petData?.membership ?? "Select one");
+          setCardStatusOption(petData?.cardStatus ?? "Select one");
 
-        setVaccinationShot1Option(
-          petData?.vaccinationShot1 === undefined || petData?.vaccinationShot1 === null
-            ? "Select one"
-            : petData?.vaccinationShot1.getFullYear() === 1970
-              ? "No"
-              : "Yes",
-        );
-        setVaccinationShot2Option(
-          petData?.vaccinationShot2 === undefined || petData?.vaccinationShot2 === null
-            ? "Select one"
-            : petData?.vaccinationShot2.getFullYear() === 1970
-              ? "No"
-              : "Yes",
-        );
-        setVaccinationShot3Option(
-          petData?.vaccinationShot3 === undefined || petData?.vaccinationShot3 === null
-            ? "Select one"
-            : petData?.vaccinationShot3.getFullYear() === 1970
-              ? "No"
-              : "Yes",
-        );
+          setVaccinationShot1Option(
+            petData?.vaccinationShot1 === undefined || petData?.vaccinationShot1 === null
+              ? "Select one"
+              : petData?.vaccinationShot1.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
+          setVaccinationShot2Option(
+            petData?.vaccinationShot2 === undefined || petData?.vaccinationShot2 === null
+              ? "Select one"
+              : petData?.vaccinationShot2.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
+          setVaccinationShot3Option(
+            petData?.vaccinationShot3 === undefined || petData?.vaccinationShot3 === null
+              ? "Select one"
+              : petData?.vaccinationShot3.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
 
+          setClinicList(clinicDates);
+          setTreatmentList(treatmentData);
+
+          setClinicListOptions(
+            clinicsAttendedOptions.map((clinic) => ({
+              id: clinic.clinicID,
+              date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+              area: clinic.greaterArea.greaterArea,
+              state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+            })),
+          );
+
+          // console.log("This code may not execute now at all");
+
+          if (petData?.species == "Cat") {
+            //setColourOption("Select one");
+            console.log("Changing the colours to cat ones!!!");
+            setColourOptions(colourCatOptions);
+            setColourListOptions(
+              colourCatOptions.map((colour) => ({
+                colour: colour,
+                state: petData.colour.includes(colour) ?? false,
+              })),
+            );
+
+            setBreedOptions(breedCatOptions);
+            setBreedListOptions(
+              breedCatOptions.map((breed) => ({
+                breed: breed,
+                state: petData.breed.includes(breed) ?? false,
+              })),
+            );
+            // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+          } else if (petData?.species == "Dog") {
+            //setColourOption("Select one");
+
+            console.log("Changing the colours to dog ones!!!");
+            setColourOptions(colourDogOptions);
+            setColourListOptions(
+              colourDogOptions.map((colour) => ({
+                colour: colour,
+                state: petData.colour.includes(colour) ?? false,
+              })),
+            );
+
+            setBreedOptions(breedDogOptions);
+            setBreedListOptions(
+              breedDogOptions.map((breed) => ({
+                breed: breed,
+                state: petData.breed.includes(breed) ?? false,
+              })),
+            );
+            // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+          }
+
+          setKennelListOptions(
+            kennelsReceivedOptions.map((kennel) => ({
+              year: kennel,
+              state: petData?.kennelReceived.includes(kennel) ?? false,
+            })),
+          );
+
+          setKennelList(petData?.kennelReceived ?? []);
+        }
+        if (isViewProfilePage) {
+          console.log("This should not execute because only view porifle button pressed");
+          setPetName(petData?.petName ?? "");
+          setSpeciesOption(petData?.species ?? "");
+          setSexOption(petData?.sex ?? "");
+          setAgeOption(petData?.age ?? "");
+          //setBreedOption(petData?.breed ?? "");
+          setBreedList(petData?.breed ?? ["Select here"]);
+          setColourList(petData?.colour ?? ["Select here"]);
+          setSizeOption(petData?.size ?? "");
+          setMarkings(petData?.markings ?? "");
+          setStatusOption(petData?.status ?? "");
+          console.log("View profile useEffect Request signed at____ :", petData?.sterilisedRequestSigned);
+
+          setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "");
+          setSterilisationStatusOption(
+            petData?.sterilisedStatus === undefined || petData?.sterilisedStatus === null
+              ? ""
+              : petData?.sterilisedStatus.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
+          setSterilisationRequestedOption(
+            petData?.sterilisedRequested === undefined || petData?.sterilisedRequested === null
+              ? ""
+              : petData?.sterilisedRequested.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
+          setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "");
+          setMembershipTypeOption(petData?.membership ?? "");
+          setCardStatusOption(petData?.cardStatus ?? "");
+
+          setVaccinationShot1Option(
+            petData?.vaccinationShot1 === undefined || petData?.vaccinationShot1 === null
+              ? ""
+              : petData?.vaccinationShot1.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
+          setVaccinationShot2Option(
+            petData?.vaccinationShot2 === undefined || petData?.vaccinationShot2 === null
+              ? ""
+              : petData?.vaccinationShot2.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
+          setVaccinationShot3Option(
+            petData?.vaccinationShot3 === undefined || petData?.vaccinationShot3 === null
+              ? ""
+              : petData?.vaccinationShot3.getFullYear() === 1970
+                ? "No"
+                : "Yes",
+          );
+        }
+
+        setVaccinationShot1Date(petData?.vaccinationShot1 ?? new Date());
+        setVaccinationShot2Date(petData?.vaccinationShot2 ?? new Date());
+        setVaccinationShot3Date(petData?.vaccinationShot3 ?? new Date());
+        setSterilisationStatusDate(petData?.sterilisedStatus ?? new Date());
+        setSterilisationRequestedDate(petData?.sterilisedRequested ?? new Date());
+
+        setKennelList(petData?.kennelReceived ?? []);
+        setLastDeworming(petData?.lastDeworming ?? new Date());
+        setComments(petData?.comments ?? "");
         setClinicList(clinicDates);
         setTreatmentList(treatmentData);
 
@@ -3330,48 +3472,44 @@ const Pet: NextPage = () => {
           })),
         );
 
-        console.log("This code may not execute now at all");
+        /////////////////////////////Commented out because maybe overriding the breed and colour options (4 May 2024)
+        // if (petData?.species == "Cat") {
+        //   //setColourOption("Select one");
+        //   setColourOptions(colourCatOptions);
+        //   setColourListOptions(
+        //     colourCatOptions.map((colour) => ({
+        //       colour: colour,
+        //       state: petData.colour.includes(colour) ?? false,
+        //     })),
+        //   );
 
-        if (petData?.species == "Cat") {
-          //setColourOption("Select one");
-          console.log("Changing the colours to cat ones!!!");
-          setColourOptions(colourCatOptions);
-          setColourListOptions(
-            colourCatOptions.map((colour) => ({
-              colour: colour,
-              state: petData.colour.includes(colour) ?? false,
-            })),
-          );
+        //   setBreedOptions(breedCatOptions);
+        //   setBreedListOptions(
+        //     breedCatOptions.map((breed) => ({
+        //       breed: breed,
+        //       state: petData.breed.includes(breed) ?? false,
+        //     })),
+        //   );
+        //   // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+        // } else if (petData?.species == "Dog") {
+        //   //setColourOption("Select one");
+        //   setColourOptions(colourDogOptions);
+        //   setColourListOptions(
+        //     colourDogOptions.map((colour) => ({
+        //       colour: colour,
+        //       state: petData.colour.includes(colour) ?? false,
+        //     })),
+        //   );
 
-          setBreedOptions(breedCatOptions);
-          setBreedListOptions(
-            breedCatOptions.map((breed) => ({
-              breed: breed,
-              state: petData.breed.includes(breed) ?? false,
-            })),
-          );
-          // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-        } else if (petData?.species == "Dog") {
-          //setColourOption("Select one");
-
-          console.log("Changing the colours to dog ones!!!");
-          setColourOptions(colourDogOptions);
-          setColourListOptions(
-            colourDogOptions.map((colour) => ({
-              colour: colour,
-              state: petData.colour.includes(colour) ?? false,
-            })),
-          );
-
-          setBreedOptions(breedDogOptions);
-          setBreedListOptions(
-            breedDogOptions.map((breed) => ({
-              breed: breed,
-              state: petData.breed.includes(breed) ?? false,
-            })),
-          );
-          // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-        }
+        //   setBreedOptions(breedDogOptions);
+        //   setBreedListOptions(
+        //     breedDogOptions.map((breed) => ({
+        //       breed: breed,
+        //       state: petData.breed.includes(breed) ?? false,
+        //     })),
+        //   );
+        //   // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+        // }
 
         setKennelListOptions(
           kennelsReceivedOptions.map((kennel) => ({
@@ -3380,123 +3518,16 @@ const Pet: NextPage = () => {
           })),
         );
 
-        setKennelList(petData?.kennelReceived ?? []);
+        // setClinicIDList(clinicIDs ?? []);
+        const ownerData = userData?.owner_data;
+
+        console.log("Owner data line 3340: ", ownerData);
+        // setOwnerID(ownerData?.ownerID ?? 0);
+        setFirstName(ownerData?.firstName ?? "");
+        setSurname(ownerData?.surname ?? "");
+        setGreaterArea(ownerData?.addressGreaterArea.greaterArea ?? "");
+        setArea(ownerData?.addressArea?.area ?? "");
       }
-      if (isViewProfilePage) {
-        setPetName(petData?.petName ?? "");
-        setSpeciesOption(petData?.species ?? "");
-        setSexOption(petData?.sex ?? "");
-        setAgeOption(petData?.age ?? "");
-        //setBreedOption(petData?.breed ?? "");
-        setBreedList(petData?.breed ?? ["Select here"]);
-        setColourList(petData?.colour ?? ["Select here"]);
-        setSizeOption(petData?.size ?? "");
-        setMarkings(petData?.markings ?? "");
-        setStatusOption(petData?.status ?? "");
-        console.log("View profile useEffect Request signed at____ :", petData?.sterilisedRequestSigned);
-
-        setSterilisationRequestSignedOption(petData?.sterilisedRequestSigned ?? "");
-        setSterilisationStatusOption(
-          petData?.sterilisedStatus === undefined || petData?.sterilisedStatus === null ? "" : petData?.sterilisedStatus.getFullYear() === 1970 ? "No" : "Yes",
-        );
-        setSterilisationRequestedOption(
-          petData?.sterilisedRequested === undefined || petData?.sterilisedRequested === null
-            ? ""
-            : petData?.sterilisedRequested.getFullYear() === 1970
-              ? "No"
-              : "Yes",
-        );
-        setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "");
-        setMembershipTypeOption(petData?.membership ?? "");
-        setCardStatusOption(petData?.cardStatus ?? "");
-
-        setVaccinationShot1Option(
-          petData?.vaccinationShot1 === undefined || petData?.vaccinationShot1 === null ? "" : petData?.vaccinationShot1.getFullYear() === 1970 ? "No" : "Yes",
-        );
-        setVaccinationShot2Option(
-          petData?.vaccinationShot2 === undefined || petData?.vaccinationShot2 === null ? "" : petData?.vaccinationShot2.getFullYear() === 1970 ? "No" : "Yes",
-        );
-        setVaccinationShot3Option(
-          petData?.vaccinationShot3 === undefined || petData?.vaccinationShot3 === null ? "" : petData?.vaccinationShot3.getFullYear() === 1970 ? "No" : "Yes",
-        );
-      }
-
-      setVaccinationShot1Date(petData?.vaccinationShot1 ?? new Date());
-      setVaccinationShot2Date(petData?.vaccinationShot2 ?? new Date());
-      setVaccinationShot3Date(petData?.vaccinationShot3 ?? new Date());
-      setSterilisationStatusDate(petData?.sterilisedStatus ?? new Date());
-      setSterilisationRequestedDate(petData?.sterilisedRequested ?? new Date());
-
-      setKennelList(petData?.kennelReceived ?? []);
-      setLastDeworming(petData?.lastDeworming ?? new Date());
-      setComments(petData?.comments ?? "");
-      setClinicList(clinicDates);
-      setTreatmentList(treatmentData);
-
-      setClinicListOptions(
-        clinicsAttendedOptions.map((clinic) => ({
-          id: clinic.clinicID,
-          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
-          area: clinic.greaterArea.greaterArea,
-          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
-        })),
-      );
-
-      /////////////////////////////Commented out because maybe overriding the breed and colour options (4 May 2024)
-      // if (petData?.species == "Cat") {
-      //   //setColourOption("Select one");
-      //   setColourOptions(colourCatOptions);
-      //   setColourListOptions(
-      //     colourCatOptions.map((colour) => ({
-      //       colour: colour,
-      //       state: petData.colour.includes(colour) ?? false,
-      //     })),
-      //   );
-
-      //   setBreedOptions(breedCatOptions);
-      //   setBreedListOptions(
-      //     breedCatOptions.map((breed) => ({
-      //       breed: breed,
-      //       state: petData.breed.includes(breed) ?? false,
-      //     })),
-      //   );
-      //   // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-      // } else if (petData?.species == "Dog") {
-      //   //setColourOption("Select one");
-      //   setColourOptions(colourDogOptions);
-      //   setColourListOptions(
-      //     colourDogOptions.map((colour) => ({
-      //       colour: colour,
-      //       state: petData.colour.includes(colour) ?? false,
-      //     })),
-      //   );
-
-      //   setBreedOptions(breedDogOptions);
-      //   setBreedListOptions(
-      //     breedDogOptions.map((breed) => ({
-      //       breed: breed,
-      //       state: petData.breed.includes(breed) ?? false,
-      //     })),
-      //   );
-      //   // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
-      // }
-
-      setKennelListOptions(
-        kennelsReceivedOptions.map((kennel) => ({
-          year: kennel,
-          state: petData?.kennelReceived.includes(kennel) ?? false,
-        })),
-      );
-
-      // setClinicIDList(clinicIDs ?? []);
-      const ownerData = userData?.owner_data;
-
-      console.log("Owner data line 3340: ", ownerData);
-      // setOwnerID(ownerData?.ownerID ?? 0);
-      setFirstName(ownerData?.firstName ?? "");
-      setSurname(ownerData?.surname ?? "");
-      setGreaterArea(ownerData?.addressGreaterArea.greaterArea ?? "");
-      setArea(ownerData?.addressArea?.area ?? "");
     }
   }, [getPet]); // Effect runs when userQuery.data changes
   //[isViewProfilePage, user]
@@ -3630,6 +3661,7 @@ const Pet: NextPage = () => {
   const [isTreatmentModalOpen, setIsTreatmentModalOpen] = useState(false);
   const [treatmentModal, setTreatmentModal] = useState<Treatment>();
   const handleTreatmentModal = (id: number, category: string, type: string[], date: string, comments: string) => {
+    if (ownUser?.role === "General Data Capturer") return;
     setTreatmentModal({ treatmentID: id, category: category, type: type, date: date, comments: comments });
     setIsTreatmentModalOpen(true);
   };
@@ -3696,6 +3728,8 @@ const Pet: NextPage = () => {
 
   //------------------------------------GO TO TREATMENT PROFILE--------------------------------------
   const handleGoToTreatmentProfile = async (treatmentID: number) => {
+    if (ownUser?.role === "General Data Capturer") return;
+
     console.log("Going to treatment profile: ", treatmentID);
     await router.push({
       pathname: "/treatment",
@@ -3706,6 +3740,8 @@ const Pet: NextPage = () => {
   //------------------------------------CREATE A NEW TREATMENT FOR PET--------------------------------------
   //When button is pressed the browser needs to go to the treatment's page. The treatment's page needs to know the pet's ID
   const handleCreateNewTreatment = async (id: number) => {
+    if (ownUser?.role === "General Data Capturer") return;
+
     await router.push({
       pathname: "/treatment",
       query: {
@@ -3932,7 +3968,7 @@ const Pet: NextPage = () => {
   }, [user, isCreate, isUpdate, isViewProfilePage]);
 
   //------------------------------------------DOWNLOADING PET TABLE TO EXCEL FILE------------------------------------------
-  const downloadPetTable = api.pet.download.useQuery({ searchQuery: query });
+  const downloadPetTable = api.pet.download.useQuery({ searchQuery: query }, { enabled: hasAccess });
   const handleDownloadPetTable = async () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file
@@ -4190,14 +4226,16 @@ const Pet: NextPage = () => {
                                   </span>
                                 </div>
 
-                                <div className="relative flex items-center justify-center">
-                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                    <FirstAidKit size={24} className="block" onClick={() => handleCreateNewTreatment(pet.petID)} />
-                                    <span className="absolute bottom-full z-50 hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                      Create new treatment
+                                {ownUser?.role != "General Data Capturer" && (
+                                  <div className="relative flex items-center justify-center">
+                                    <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                      <FirstAidKit size={24} className="block" onClick={() => handleCreateNewTreatment(pet.petID)} />
+                                      <span className="absolute bottom-full z-50 hidden w-[82px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                        Create new treatment
+                                      </span>
                                     </span>
-                                  </span>
-                                </div>
+                                  </div>
+                                )}
 
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 mr-[31px] flex items-center justify-center rounded-lg hover:bg-orange-200">
@@ -5045,7 +5083,7 @@ const Pet: NextPage = () => {
                     </div>
                   )}
 
-                  {isUpdate && treatmentList.length > 0 && (
+                  {isUpdate && treatmentList.length > 0 && ownUser?.role != "General Data Capturer" && (
                     // <div className="flex items-start">
                     //   <div className="mr-3 flex items-center pt-5">
                     //     <div className=" flex">Treatments: </div>
@@ -5740,22 +5778,24 @@ const Pet: NextPage = () => {
                       {/* <div className="mb-2 flex items-center">
                         <b className="mr-3">Treatments:</b> {treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join("; ")}
                       </div> */}
-                      <div className="mb-2 flex items-start">
-                        <b className="mr-3">Treatment(s):</b>{" "}
-                        <div className="flex flex-col items-start">
-                          {treatmentList.map((treatment) => (
-                            <button
-                              key={treatment?.treatmentID}
-                              className="underline hover:text-blue-400"
-                              onClick={() => handleGoToTreatmentProfile(treatment?.treatmentID)}
-                            >
-                              {treatment?.type[0] != undefined
-                                ? treatment?.date.toString() + " " + treatment?.type.join(", ") + " " + "(" + (treatment?.category ?? "") + ")"
-                                : treatment?.date.toString() + " (" + (treatment?.category ?? "") + ")"}
-                            </button>
-                          ))}
+                      {ownUser?.role != "General Data Capturer" && (
+                        <div className="mb-2 flex items-start">
+                          <b className="mr-3">Treatment(s):</b>{" "}
+                          <div className="flex flex-col items-start">
+                            {treatmentList.map((treatment) => (
+                              <button
+                                key={treatment?.treatmentID}
+                                className="underline hover:text-blue-400"
+                                onClick={() => handleGoToTreatmentProfile(treatment?.treatmentID)}
+                              >
+                                {treatment?.type[0] != undefined
+                                  ? treatment?.date.toString() + " " + treatment?.type.join(", ") + " " + "(" + (treatment?.category ?? "") + ")"
+                                  : treatment?.date.toString() + " (" + (treatment?.category ?? "") + ")"}
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
 
                     <div className="my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">

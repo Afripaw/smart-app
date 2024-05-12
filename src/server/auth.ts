@@ -6,6 +6,10 @@ import GoogleProvider from "next-auth/providers/google";
 import { env } from "~/env";
 import { db } from "~/server/db";
 
+//user details
+import { User } from "@prisma/client";
+import { api } from "~/utils/api";
+
 import CredentialsProvider from "next-auth/providers/credentials";
 import { hash } from "~/utils/security";
 //import bcrypt from "bcrypt";
@@ -22,7 +26,7 @@ declare module "next-auth" {
       id: string;
 
       // ...other properties
-      // role: UserRole;
+      role: string;
     };
   }
 
@@ -45,9 +49,23 @@ export const authOptions: NextAuthOptions = {
         user: {
           ...session.user,
           id: token.sub,
+          //role: token.role,
         },
       };
     },
+
+    // async jwt({ token, account, user }) {
+    //   if (account && user) {
+    //     // fetch user role
+    //     //const userData = api.user.getUserData.useQuery({ id: user.id });
+    //     //token.role = userData.data?.role; // Save the role into the JWT
+
+    //     token.id = user.id;
+    //     token.role = user.role;
+    //   }
+    //   return token;
+    // },
+
     /* async redirect({ }) {
       return "/dashboard"; // Redirect to dashboard after sign-in
     }, */
@@ -69,6 +87,11 @@ export const authOptions: NextAuthOptions = {
           type: "text",
           placeholder: "jsmith",
         },
+        // role: {
+        //   label: "Role",
+        //   type: "text",
+        //   placeholder: "System Administrator",
+        // },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
@@ -106,6 +129,7 @@ export const authOptions: NextAuthOptions = {
           console.error("Password does not match for credentials:", credentials);
           return null;
         }
+        // credentials.role = user.role;
 
         console.log("User logged in with credentials:", credentials, user);
 
@@ -128,6 +152,13 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
 };
+
+// //fetch user details
+// async function fetchUserDetails() {
+//   // Fetch from your database
+//   const userData = await api.user.getUserDetails();
+//   return userData; // Assuming userData contains a 'role' property
+// }
 
 /**
  * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.

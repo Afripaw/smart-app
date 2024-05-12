@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure, accessProcedure } from "~/server/api/trpc";
 
 import { Prisma } from "@prisma/client";
 
 export const volunteerRouter = createTRPCRouter({
-  create: publicProcedure
+  create: accessProcedure(["System Administrator"])
     .input(
       z.object({
         firstName: z.string(),
@@ -134,7 +134,7 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //update volunteer
-  update: publicProcedure
+  update: accessProcedure(["System Administrator"])
     .input(
       z.object({
         volunteerID: z.number(),
@@ -256,7 +256,7 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //Infinite query and search for volunteers
-  searchVolunteersInfinite: publicProcedure
+  searchVolunteersInfinite: accessProcedure(["System Administrator"])
     .input(
       z.object({
         volunteerID: z.number(),
@@ -423,7 +423,7 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //Add clinic to volunteer
-  addClinicToVolunteer: protectedProcedure
+  addClinicToVolunteer: accessProcedure(["System Administrator"])
     .input(
       z.object({
         volunteerID: z.number(),
@@ -458,7 +458,7 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //delete volunteer
-  deleteVolunteer: publicProcedure
+  deleteVolunteer: accessProcedure(["System Administrator"])
     .input(
       z.object({
         volunteerID: z.number(),
@@ -480,7 +480,7 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //get user by it's userID
-  getVolunteerByID: publicProcedure
+  getVolunteerByID: accessProcedure(["System Administrator"])
     .input(
       z.object({
         volunteerID: z.number(),
@@ -498,7 +498,7 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //get one volunteer
-  getVolunteer: publicProcedure
+  getVolunteer: accessProcedure(["System Administrator"])
     .input(
       z.object({
         volunteerID: z.number(),
@@ -515,14 +515,14 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //get all volunteers
-  getVolunteers: protectedProcedure.query(async ({ ctx }) => {
+  getVolunteers: accessProcedure(["System Administrator"]).query(async ({ ctx }) => {
     const volunteers = await ctx.db.volunteer.findMany();
 
     return volunteers;
   }),
 
   //get all the volunteers that are active
-  getActiveVolunteers: protectedProcedure.query(async ({ ctx }) => {
+  getActiveVolunteers: accessProcedure(["System Administrator"]).query(async ({ ctx }) => {
     const volunteers = await ctx.db.volunteer.findMany({
       where: {
         status: {
@@ -535,7 +535,7 @@ export const volunteerRouter = createTRPCRouter({
   }),
 
   //delete all volunteers
-  deleteAllVolunteers: publicProcedure.mutation(async ({ ctx }) => {
+  deleteAllVolunteers: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
     //delete all volunteer clinic
     await ctx.db.greaterAreaOnVolunteer.deleteMany({});
     await ctx.db.volunteerOnPetClinic.deleteMany({});
@@ -543,7 +543,7 @@ export const volunteerRouter = createTRPCRouter({
   }),
 
   //Bulk upload of all the owners
-  insertExcelData: protectedProcedure
+  insertExcelData: accessProcedure(["System Administrator"])
     .input(
       z.array(
         z.object({
@@ -575,7 +575,7 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //Update identification
-  updateIdentification: publicProcedure
+  updateIdentification: accessProcedure(["System Administrator"])
     .input(
       z.object({
         volunteerID: z.number(),
@@ -595,7 +595,7 @@ export const volunteerRouter = createTRPCRouter({
 
   //get latest volunteer
   //get latest volunteerID from identification
-  getLatestVolunteerID: publicProcedure.query(async ({ ctx }) => {
+  getLatestVolunteerID: accessProcedure(["System Administrator"]).query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
         identificationID: 1,
@@ -689,7 +689,7 @@ export const volunteerRouter = createTRPCRouter({
   }),
 
   //download
-  download: publicProcedure
+  download: accessProcedure(["System Administrator"])
     .input(
       z.object({
         searchQuery: z.string(),
@@ -782,7 +782,7 @@ export const volunteerRouter = createTRPCRouter({
     }),
 
   //update owners starting date
-  updateStartingDate: publicProcedure
+  updateStartingDate: accessProcedure(["System Administrator"])
     .input(
       z.object({
         volunteerID: z.number(),

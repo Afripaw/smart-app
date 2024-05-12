@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure, accessProcedure } from "~/server/api/trpc";
 
 import { Prisma } from "@prisma/client";
 
 export const petTreatmentRouter = createTRPCRouter({
-  create: publicProcedure
+  create: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.object({
         petID: z.number(),
@@ -40,7 +40,7 @@ export const petTreatmentRouter = createTRPCRouter({
     }),
 
   //update specific treatment
-  update: publicProcedure
+  update: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.object({
         treatmentID: z.number(),
@@ -94,7 +94,7 @@ export const petTreatmentRouter = createTRPCRouter({
     }),
 
   //Infinite query and search for volunteers
-  searchTreatmentsInfinite: publicProcedure
+  searchTreatmentsInfinite: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.object({
         treatmentID: z.number(),
@@ -362,7 +362,7 @@ export const petTreatmentRouter = createTRPCRouter({
     }),
 
   //get one pet's treatment
-  getTreatmentByID: publicProcedure
+  getTreatmentByID: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.object({
         treatmentID: z.number(),
@@ -408,7 +408,7 @@ export const petTreatmentRouter = createTRPCRouter({
     }),
 
   //delete treatment
-  deleteTreatment: publicProcedure
+  deleteTreatment: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.object({
         treatmentID: z.number(),
@@ -429,19 +429,19 @@ export const petTreatmentRouter = createTRPCRouter({
     }),
 
   //get all treatments
-  getAllTreatments: protectedProcedure.query(async ({ ctx }) => {
+  getAllTreatments: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"]).query(async ({ ctx }) => {
     const petTreatment = await ctx.db.petTreatment.findMany();
     return petTreatment;
   }),
 
   //delete all treatments
-  deleteAllTreatments: publicProcedure.mutation(async ({ ctx }) => {
+  deleteAllTreatments: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"]).mutation(async ({ ctx }) => {
     await ctx.db.typesOnTreatment.deleteMany({});
     return await ctx.db.petTreatment.deleteMany({});
   }),
 
   //Bulk upload of all the owners
-  insertExcelData: protectedProcedure
+  insertExcelData: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.array(
         z.object({
@@ -461,7 +461,7 @@ export const petTreatmentRouter = createTRPCRouter({
     }),
 
   //Update identification
-  updateIdentification: publicProcedure
+  updateIdentification: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.object({
         treatmentID: z.number(),
@@ -480,7 +480,7 @@ export const petTreatmentRouter = createTRPCRouter({
     }),
 
   //get latest treatmentID from identification
-  getLatestTreatmentID: publicProcedure.query(async ({ ctx }) => {
+  getLatestTreatmentID: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"]).query(async ({ ctx }) => {
     const identification = await ctx.db.identification.findUnique({
       where: {
         identificationID: 1,
@@ -491,7 +491,7 @@ export const petTreatmentRouter = createTRPCRouter({
   }),
 
   //Types table create
-  createTypes: publicProcedure
+  createTypes: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.object({
         types: z.string().array(),
@@ -515,7 +515,7 @@ export const petTreatmentRouter = createTRPCRouter({
     }),
 
   //download
-  download: publicProcedure
+  download: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.object({
         searchQuery: z.string(),
@@ -658,7 +658,7 @@ export const petTreatmentRouter = createTRPCRouter({
       return treatment;
     }),
 
-  getAllTreatmentsForPet: publicProcedure
+  getAllTreatmentsForPet: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer"])
     .input(
       z.object({
         petID: z.number(),

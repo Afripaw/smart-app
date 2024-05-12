@@ -1,15 +1,12 @@
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  //protectedProcedure,
-  publicProcedure,
-} from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, accessProcedure, publicProcedure } from "~/server/api/trpc";
 
 import { Prisma } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
 export const communicationRouter = createTRPCRouter({
-  create: publicProcedure
+  create: accessProcedure(["System Administrator"])
     .input(
       z.object({
         message: z.string(),
@@ -74,7 +71,7 @@ export const communicationRouter = createTRPCRouter({
     }),
 
   //Infinite query and search for clinics
-  searchCommunicationsInfinite: publicProcedure
+  searchCommunicationsInfinite: accessProcedure(["System Administrator"])
     .input(
       z.object({
         communicationID: z.number(),
@@ -166,7 +163,7 @@ export const communicationRouter = createTRPCRouter({
     }),
 
   //delete clinic
-  deleteCommunication: publicProcedure
+  deleteCommunication: accessProcedure(["System Administrator"])
     .input(
       z.object({
         communicationID: z.number(),
@@ -193,7 +190,7 @@ export const communicationRouter = createTRPCRouter({
     }),
 
   //get one pet clinic
-  getCommunicationByID: publicProcedure
+  getCommunicationByID: accessProcedure(["System Administrator"])
     .input(
       z.object({
         communicationID: z.number(),
@@ -209,18 +206,18 @@ export const communicationRouter = createTRPCRouter({
     }),
 
   //get all clinics
-  getAllCommunications: publicProcedure.query(async ({ ctx }) => {
+  getAllCommunications: accessProcedure(["System Administrator"]).query(async ({ ctx }) => {
     const communication = await ctx.db.communication.findMany();
     return communication;
   }),
 
   //delete all clinics
-  deleteAllCommunications: publicProcedure.mutation(async ({ ctx }) => {
+  deleteAllCommunications: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
     return await ctx.db.communication.deleteMany({});
   }),
 
   //get all the users with a given that their greaterArea is in an greaterArea array. As well as the Area
-  getAllUsers: publicProcedure
+  getAllUsers: accessProcedure(["System Administrator"])
     .input(
       z.object({
         greaterAreaID: z.number().array(),
@@ -243,7 +240,7 @@ export const communicationRouter = createTRPCRouter({
     }),
 
   // get all the pet owners with a given that their greaterArea is in an greaterArea array. As well as the Area
-  getAllPetOwners: publicProcedure
+  getAllPetOwners: accessProcedure(["System Administrator"])
     .input(
       z.object({
         greaterAreaID: z.number().array(),
@@ -263,7 +260,7 @@ export const communicationRouter = createTRPCRouter({
     }),
 
   //get all the volunteers with a given that their greaterArea is in an greaterArea array. As well as the Area
-  getAllVolunteers: publicProcedure
+  getAllVolunteers: accessProcedure(["System Administrator"])
     .input(
       z.object({
         greaterAreaID: z.number().array(),
@@ -285,7 +282,7 @@ export const communicationRouter = createTRPCRouter({
     }),
 
   //Update identification
-  updateIdentification: publicProcedure
+  updateIdentification: accessProcedure(["System Administrator"])
     .input(
       z.object({
         communicationID: z.number(),
@@ -304,7 +301,12 @@ export const communicationRouter = createTRPCRouter({
     }),
 
   //get latest communicationID from identification
-  getLatestCommunicationID: publicProcedure.query(async ({ ctx }) => {
+  getLatestCommunicationID: accessProcedure(["System Administrator"]).query(async ({ ctx }) => {
+    // const role = (await ctx.db.findUnique({ where: { id: ctx.session.user.id }, select: { role: true } }))?.role;
+    // const access = ["sysadmin"];
+
+    // if (!access.includes(role)) throw new TRPCError({ code: "UNAUTHORIZED" });
+
     const identification = await ctx.db.identification.findUnique({
       where: {
         identificationID: 1,
@@ -315,7 +317,7 @@ export const communicationRouter = createTRPCRouter({
   }),
 
   //download
-  download: publicProcedure
+  download: accessProcedure(["System Administrator"])
     .input(
       z.object({
         searchQuery: z.string(),

@@ -26,6 +26,10 @@ import Input from "~/components/Base/Input";
 import { bg } from "date-fns/locale";
 import { set } from "date-fns";
 
+//permissions
+import { hasRequiredRole } from "../utils/auth";
+import { useRouter } from "next/router";
+
 //Excel
 import * as XLSX from "xlsx";
 
@@ -33,8 +37,30 @@ import * as XLSX from "xlsx";
 //import FileSaver from "file-saver";
 import * as FileSaver from "file-saver";
 
+//permissions
+import usePageAccess from "../hooks/usePageAccess";
+
 const User: NextPage = () => {
+  //checks user session and page access
   useSession({ required: true });
+  const hasAccess = usePageAccess(["System Administrator"]);
+
+  //const { data: session } = useSession({ required: true });
+  //const router = useRouter();
+
+  // useEffect(() => {
+  //   // Check if the session exists and if the user does not have the required role
+  //   console.log("User ID from session: ", session?.user.id);
+  //   console.log("User name from session: ", session?.user.name);
+  //   console.log("User role from session: ", session?.user.role);
+  //   //if (session && !hasRequiredRole(session.user.role, ["System Administrator"])) {
+  //   // void router.push("/"); // Redirect
+  //   //}
+  // }, [session, router]);
+
+  // if (!session || !hasRequiredRole(session.user.role, ["System Administrator"])) {
+  //   return <div>Loading or not authorized...</div>;
+  // }
 
   //-------------------------------GREATER AREA-----------------------------------------
   type GreaterArea = {
@@ -157,7 +183,7 @@ const User: NextPage = () => {
   };
 
   //get latest userID
-  const latestUserID = api.user.getLatestUserID.useQuery();
+  const latestUserID = api.user.getLatestUserID.useQuery(undefined, { enabled: hasAccess });
 
   //-------------------------------TABLE-----------------------------------------
   //const data = api.user.searchUsers.useQuery({ searchQuery: query });
@@ -548,7 +574,7 @@ const User: NextPage = () => {
     };
   }, []);
 
-  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery()?.data ?? [];
+  const greaterAreaOptions = api.geographic.getAllGreaterAreas.useQuery(undefined, { enabled: hasAccess })?.data ?? [];
 
   //ADDRESS STREET NUMBER
   const handleAddressStreetNumber = (e: string) => {
@@ -1655,7 +1681,7 @@ const User: NextPage = () => {
   }, [user, isCreate, isUpdate, isViewProfilePage]);
 
   //------------------------------------------DOWNLOADING USER TABLE TO EXCEL FILE------------------------------------------
-  const downloadUserTable = api.user.download.useQuery({ searchQuery: query });
+  const downloadUserTable = api.user.download.useQuery({ searchQuery: query }, { enabled: hasAccess });
   const handleDownloadUserTable = async () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file

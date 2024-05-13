@@ -373,43 +373,27 @@ export const infoRouter = createTRPCRouter({
 
       // Programmatically flatten the data into a more accessible structure
       const data = rawData.map((pet) => ({
-        ownerFirstName: pet.owner?.firstName ?? "",
-        ownerSurname: pet.owner?.surname ?? "",
-        greaterArea: pet.owner?.addressGreaterArea?.greaterArea ?? "",
-        area: pet.owner?.addressArea?.area ?? "",
-        street: pet.owner?.addressStreet?.street ?? "",
-        streetCode: pet.owner?.addressStreetCode ?? "",
-        streetNumber: pet.owner?.addressStreetNumber ?? "",
-        ownerMobile: pet.owner?.mobile ?? "",
-        petName: pet.petName,
-        species: pet.species,
-        sex: pet.sex,
-        age: pet.age,
-        breed: pet.breed.join(", "),
-        colour: pet.colour.join(", "),
-        size: pet.size,
-        sterilisedRequested: pet.sterilisedRequested,
-        sterilisedRequestSignedAt: pet.sterilisedRequestSigned,
-        vaccinationShot1: pet.vaccinationShot1,
-        vaccinationShot2: pet.vaccinationShot2,
-        vaccinationShot3: pet.vaccinationShot3,
+        "Owner First name": pet.owner?.firstName ?? "",
+        "Owner Surname": pet.owner?.surname ?? "",
+        "Greater Area": pet.owner?.addressGreaterArea?.greaterArea ?? "",
+        Area: pet.owner?.addressArea?.area ?? "",
+        Street: pet.owner?.addressStreet?.street ?? "",
+        "Street Code": pet.owner?.addressStreetCode ?? "",
+        "Street Number": pet.owner?.addressStreetNumber ?? "",
+        "Owner Mobile Number": pet.owner?.mobile ?? "",
+        "Pet Name": pet.petName,
+        Species: pet.species,
+        Sex: pet.sex,
+        Age: pet.age,
+        Breed: pet.breed.join(", "),
+        Colour: pet.colour.join(", "),
+        Size: pet.size,
+        "Sterilisation Requested": pet.sterilisedRequested,
+        "Sterilisation Request Signed At": pet.sterilisedRequestSigned,
+        "Vaccination Shot 1": pet.vaccinationShot1,
+        "Vaccination Shot 2": pet.vaccinationShot2,
+        "Vaccination Shot 3": pet.vaccinationShot3,
       }));
-
-      //change data so that there is no nested objects
-
-      //take out the nested owner object
-      // const data = await ctx.db.pet.findMany({
-      //   where: {
-      //     AND: [sterilisationQuery, { species: input.species }],
-      //   },
-      //   //orderBy: order,
-      //   select: {
-      //     petID: true,
-      //     species: true,
-      //
-      //
-      //   },
-      //   include: {
 
       return {
         data: data,
@@ -486,26 +470,26 @@ export const infoRouter = createTRPCRouter({
       }
 
       const data = rawData.map((pet) => ({
-        ownerFirstName: pet.owner?.firstName ?? "",
-        ownerSurname: pet.owner?.surname ?? "",
-        greaterArea: pet.owner?.addressGreaterArea?.greaterArea ?? "",
-        area: pet.owner?.addressArea?.area ?? "",
-        street: pet.owner?.addressStreet?.street ?? "",
-        streetCode: pet.owner?.addressStreetCode ?? "",
-        streetNumber: pet.owner?.addressStreetNumber ?? "",
-        petName: pet.petName ?? "",
-        species: pet.species ?? "",
-        sex: pet.sex ?? "",
-        age: pet.age ?? "",
-        breed: pet.breed.join(", ") ?? "",
-        colour: pet.colour.join(", ") ?? "",
-        cardStatus: pet.cardStatus ?? "",
-        clinicsAttended:
+        "Owner First Name": pet.owner?.firstName ?? "",
+        "Owner Surname": pet.owner?.surname ?? "",
+        "Greater Area": pet.owner?.addressGreaterArea?.greaterArea ?? "",
+        Area: pet.owner?.addressArea?.area ?? "",
+        Street: pet.owner?.addressStreet?.street ?? "",
+        "Street Code": pet.owner?.addressStreetCode ?? "",
+        "Street Number": pet.owner?.addressStreetNumber ?? "",
+        "Pet Name": pet.petName ?? "",
+        Species: pet.species ?? "",
+        Sex: pet.sex ?? "",
+        Age: pet.age ?? "",
+        Breed: pet.breed.join(", ") ?? "",
+        Colour: pet.colour.join(", ") ?? "",
+        "Card Status": pet.cardStatus ?? "",
+        "Clinics Attended":
           pet.clinicsAttended
             .sort((a, b) => a.clinic.date.getTime() - b.clinic.date.getTime())
             .map((clinic) => formatDateToExcel(new Date(clinic.clinic.date)))
             .join(", ") ?? "",
-        totalClinicsAttended: pet.clinicsAttended.length,
+        "Total Clinics Attended": pet.clinicsAttended.length,
       }));
 
       return {
@@ -629,36 +613,36 @@ export const infoRouter = createTRPCRouter({
       }
 
       const data = rawData.map((pet) => ({
-        ownerFirstName: pet.owner?.firstName ?? "",
-        ownerSurname: pet.owner?.surname ?? "",
-        greaterArea: pet.owner?.addressGreaterArea?.greaterArea ?? "",
-        area: pet.owner?.addressArea?.area ?? "",
-        street: pet.owner?.addressStreet?.street ?? "",
-        streetCode: pet.owner?.addressStreetCode ?? "",
-        streetNumber: pet.owner?.addressStreetNumber ?? "",
-        ownerMobile: pet.owner?.mobile ?? "",
-        petName: pet.petName ?? "",
-        species: pet.species ?? "",
-        sex: pet.sex ?? "",
-        age: pet.age ?? "",
-        breed: pet.breed.join(", ") ?? "",
-        colour: pet.colour.join(", ") ?? "",
-        size: pet.size ?? "",
-        sterilised: pet.sterilisedStatus.getFullYear() != 1970 ? "Yes" : "No",
-        sterilisedDate: pet.sterilisedStatus.getFullYear() != 1970 ? pet.sterilisedStatus : "",
-        membership: pet.membership ?? "",
-        membershipStatus: membershipStatus(
+        "Owner First Name": pet.owner?.firstName ?? "",
+        "Owner Surname": pet.owner?.surname ?? "",
+        "Greater Area": pet.owner?.addressGreaterArea?.greaterArea ?? "",
+        Area: pet.owner?.addressArea?.area ?? "",
+        Street: pet.owner?.addressStreet?.street ?? "",
+        "Street Code": pet.owner?.addressStreetCode ?? "",
+        "Street Number": pet.owner?.addressStreetNumber ?? "",
+        "Owner Mobile Number": pet.owner?.mobile ?? "",
+        "Pet Name": pet.petName ?? "",
+        Species: pet.species ?? "",
+        Sex: pet.sex ?? "",
+        Age: pet.age ?? "",
+        Breed: pet.breed.join(", ") ?? "",
+        Colour: pet.colour.join(", ") ?? "",
+        Size: pet.size ?? "",
+        Sterilised: pet.sterilisedStatus.getFullYear() != 1970 ? "Yes" : "No",
+        "Sterilisation Date": pet.sterilisedStatus.getFullYear() != 1970 ? pet.sterilisedStatus : "",
+        "Membership Type": pet.membership ?? "",
+        "Membership Status": membershipStatus(
           pet.membership,
           pet.clinicsAttended.map((clinic) => new Date(clinic.clinic.date)),
         ),
-        cardStatus: pet.cardStatus ?? "",
-        clinicsAttended:
+        "Card Status": pet.cardStatus ?? "",
+        "Clinics Attended":
           pet.clinicsAttended
             .sort((a, b) => a.clinic.date.getTime() - b.clinic.date.getTime())
             .map((clinic) => formatDateToExcel(new Date(clinic.clinic.date)))
             .join(", ") ?? "",
-        totalClinicsAttended: pet.clinicsAttended.length,
-        lastDeworming: formatDateToExcel(new Date(pet?.lastDeworming ?? "")) ?? "",
+        "Total Clinics Attended": pet.clinicsAttended.length,
+        "Last Deworming": formatDateToExcel(new Date(pet?.lastDeworming ?? "")) ?? "",
       }));
 
       return {
@@ -795,44 +779,44 @@ export const infoRouter = createTRPCRouter({
       }
 
       const data = rawData.map((pet) => ({
-        ownerFirstName: pet.owner?.firstName ?? "",
-        ownerSurname: pet.owner?.surname ?? "",
-        greaterArea: pet.owner?.addressGreaterArea?.greaterArea ?? "",
-        area: pet.owner?.addressArea?.area ?? "",
-        street: pet.owner?.addressStreet?.street ?? "",
-        streetCode: pet.owner?.addressStreetCode ?? "",
-        streetNumber: pet.owner?.addressStreetNumber ?? "",
-        ownerMobile: pet.owner?.mobile ?? "",
-        petName: pet.petName ?? "",
-        species: pet.species ?? "",
-        sex: pet.sex ?? "",
-        age: pet.age ?? "",
-        breed: pet.breed.join(", ") ?? "",
-        colour: pet.colour.join(", ") ?? "",
-        size: pet.size ?? "",
-        sterilised: pet.sterilisedStatus.getFullYear() != 1970 ? "Yes" : "No",
-        sterilisedDate: pet.sterilisedStatus.getFullYear() != 1970 ? pet.sterilisedStatus : "",
-        membership: pet.membership ?? "",
-        membershipStatus: membershipStatus(
+        "Owner First Name": pet.owner?.firstName ?? "",
+        "Owner Surname": pet.owner?.surname ?? "",
+        "Greater Area": pet.owner?.addressGreaterArea?.greaterArea ?? "",
+        Area: pet.owner?.addressArea?.area ?? "",
+        Street: pet.owner?.addressStreet?.street ?? "",
+        "Street Code": pet.owner?.addressStreetCode ?? "",
+        "Street Number": pet.owner?.addressStreetNumber ?? "",
+        "Owner Mobile Number": pet.owner?.mobile ?? "",
+        "Pet Name": pet.petName ?? "",
+        Species: pet.species ?? "",
+        Sex: pet.sex ?? "",
+        Age: pet.age ?? "",
+        Breed: pet.breed.join(", ") ?? "",
+        Colour: pet.colour.join(", ") ?? "",
+        Size: pet.size ?? "",
+        Sterilised: pet.sterilisedStatus.getFullYear() != 1970 ? "Yes" : "No",
+        "Sterilisation Date": pet.sterilisedStatus.getFullYear() != 1970 ? pet.sterilisedStatus : "",
+        "Membership Type": pet.membership ?? "",
+        "Membership Status": membershipStatus(
           pet.membership,
           pet.clinicsAttended.map((clinic) => new Date(clinic.clinic.date)),
         ),
-        cardStatus: pet.cardStatus ?? "",
+        "Card Status": pet.cardStatus ?? "",
         // clinicsAttended:
         //   pet.clinicsAttended
         //     .sort((a, b) => a.clinic.date.getTime() - b.clinic.date.getTime())
         //     .map((clinic) => formatDateToExcel(new Date(clinic.clinic.date)))
         //     .join(", ") ?? "",
-        totalClinicsAttended: pet.clinicsAttended.length,
-        lastDeworming: formatDateToExcel(new Date(pet?.lastDeworming ?? "")) ?? "",
-        treatmentDate:
+        "Total Clinics Attended": pet.clinicsAttended.length,
+        "Last Deworming": formatDateToExcel(new Date(pet?.lastDeworming ?? "")) ?? "",
+        "Treatment Dates":
           pet.petTreatments
             .sort((a, b) => a.date.getTime() - b.date.getTime())
             .map((treatment) => formatDateToExcel(new Date(treatment.date)))
             .join(", ") ?? "",
-        treatmentCategory: pet.petTreatments.map((treatment) => treatment.category).join(". ") ?? "",
-        treatmentType: pet.petTreatments.map((treatment) => treatment.type.map((type) => type.type.type).join(", ")).join(". ") ?? "",
-        treatmentComments: pet.petTreatments.map((treatment) => treatment.comments).join(". ") ?? "",
+        "Treatment Category": pet.petTreatments.map((treatment) => treatment.category).join(". ") ?? "",
+        "Treatment Type": pet.petTreatments.map((treatment) => treatment.type.map((type) => type.type.type).join(", ")).join(". ") ?? "",
+        "Treatment Comments": pet.petTreatments.map((treatment) => treatment.comments).join(". ") ?? "",
       }));
 
       return {

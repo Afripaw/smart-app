@@ -280,6 +280,8 @@ const Info: NextPage = () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file
     const data = downloadSterilisationTable.data?.data;
+
+    console.log("Sterilisation Data: ", data);
     const fileName = `Sterilisation ${sterilisationDueOption} Table`;
     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";

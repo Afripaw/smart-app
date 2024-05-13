@@ -276,20 +276,46 @@ const Info: NextPage = () => {
     { enabled: hasAccess },
   );
 
+  //variable for checking if buttton was pressed
+  const [downloadSterilise, setDownloadSterilise] = useState(false);
+
+  useEffect(() => {
+    if (downloadSterilisationTable.isSuccess && !downloadSterilisationTable.isFetching && downloadSterilise) {
+      //take the download user table query data and put it in an excel file
+      const data = downloadSterilisationTable.data?.data;
+
+      console.log("Sterilisation Data: ", data);
+      const fileName = `Sterilisation ${sterilisationDueOption} Table`;
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const fileExtension = ".xlsx";
+      const ws = XLSX.utils.json_to_sheet(data ?? []);
+      const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+      const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+      const dataFile = new Blob([excelBuffer], { type: fileType });
+      FileSaver.saveAs(dataFile, fileName + fileExtension);
+      setDownloadSterilise(false);
+      setIsLoading(false);
+    }
+  }, [downloadSterilisationTable.isFetched, downloadSterilisationTable.isSuccess, downloadSterilisationTable.isFetching]);
+
   const handleDownloadSterilisationTable = async () => {
     setIsLoading(true);
-    //take the download user table query data and put it in an excel file
-    const data = downloadSterilisationTable.data?.data;
 
-    console.log("Sterilisation Data: ", data);
-    const fileName = `Sterilisation ${sterilisationDueOption} Table`;
-    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-    const fileExtension = ".xlsx";
-    const ws = XLSX.utils.json_to_sheet(data ?? []);
-    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
-    const dataFile = new Blob([excelBuffer], { type: fileType });
-    FileSaver.saveAs(dataFile, fileName + fileExtension);
+    void downloadSterilisationTable.refetch();
+    setDownloadSterilise(true);
+
+    // //take the download user table query data and put it in an excel file
+    // const data = downloadSterilisationTable.data?.data;
+
+    // console.log("Sterilisation Data: ", data);
+    // const fileName = `Sterilisation ${sterilisationDueOption} Table`;
+    // const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    // const fileExtension = ".xlsx";
+    // const ws = XLSX.utils.json_to_sheet(data ?? []);
+    // const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    // const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    // const dataFile = new Blob([excelBuffer], { type: fileType });
+    // FileSaver.saveAs(dataFile, fileName + fileExtension);
     setIsLoading(false);
   };
 
@@ -452,18 +478,40 @@ const Info: NextPage = () => {
     { enabled: hasAccess },
   );
 
+  //variable for checking if buttton was pressed
+  const [downloadMembership, setDownloadMembership] = useState(false);
+
+  useEffect(() => {
+    if (downloadMembershipTable.isSuccess && !downloadMembershipTable.isFetching && downloadMembership) {
+      //take the download user table query data and put it in an excel file
+      const data = downloadMembershipTable.data?.data;
+      const fileName = `${membershipOption} Membership Table`;
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const fileExtension = ".xlsx";
+      const ws = XLSX.utils.json_to_sheet(data ?? []);
+      const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+      const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+      const dataFile = new Blob([excelBuffer], { type: fileType });
+      FileSaver.saveAs(dataFile, fileName + fileExtension);
+      setDownloadMembership(false);
+    }
+  }, [downloadMembershipTable.isFetched, downloadMembershipTable.isSuccess, downloadMembershipTable.isFetching]);
+
   const handleDownloadMembershipTable = async () => {
     setIsLoading(true);
-    //take the download user table query data and put it in an excel file
-    const data = downloadMembershipTable.data?.data;
-    const fileName = `${membershipOption} Membership Table`;
-    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-    const fileExtension = ".xlsx";
-    const ws = XLSX.utils.json_to_sheet(data ?? []);
-    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-    const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
-    const dataFile = new Blob([excelBuffer], { type: fileType });
-    FileSaver.saveAs(dataFile, fileName + fileExtension);
+
+    void downloadMembershipTable.refetch();
+    setDownloadMembership(true);
+    // //take the download user table query data and put it in an excel file
+    // const data = downloadMembershipTable.data?.data;
+    // const fileName = `${membershipOption} Membership Table`;
+    // const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    // const fileExtension = ".xlsx";
+    // const ws = XLSX.utils.json_to_sheet(data ?? []);
+    // const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    // const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    // const dataFile = new Blob([excelBuffer], { type: fileType });
+    // FileSaver.saveAs(dataFile, fileName + fileExtension);
     setIsLoading(false);
   };
 
@@ -698,31 +746,80 @@ const Info: NextPage = () => {
     { enabled: hasAccess },
   );
 
+  //variable for checking if buttton was pressed
+  const [downloadClinic, setDownloadClinic] = useState(false);
+
+  useEffect(() => {
+    if (
+      ((downloadClinicsTable.isSuccess && !downloadClinicsTable.isFetching) || (downloadTreatmentsTable.isSuccess && !downloadTreatmentsTable.isFetching)) &&
+      downloadClinic
+    ) {
+      if (clinicOption === "Clinic Attendance") {
+        const data = downloadClinicsTable.data?.data;
+        const fileName = `Clinic Attendance Table (${periodOption})`;
+        const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+        const fileExtension = ".xlsx";
+        const ws = XLSX.utils.json_to_sheet(data ?? []);
+        const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+        const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+        const dataFile = new Blob([excelBuffer], { type: fileType });
+        FileSaver.saveAs(dataFile, fileName + fileExtension);
+        setDownloadClinic(false);
+      } else if (clinicOption === "Treatment Administered") {
+        const data = downloadTreatmentsTable.data?.data;
+        const fileName = `Treatment Administered Table (${periodOption})`;
+        const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+        const fileExtension = ".xlsx";
+        const ws = XLSX.utils.json_to_sheet(data ?? []);
+        const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+        const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+        const dataFile = new Blob([excelBuffer], { type: fileType });
+        FileSaver.saveAs(dataFile, fileName + fileExtension);
+        setDownloadClinic(false);
+      }
+    }
+  }, [
+    downloadClinicsTable.isFetched,
+    downloadClinicsTable.isSuccess,
+    downloadClinicsTable.isFetching,
+    downloadTreatmentsTable.isFetched,
+    downloadTreatmentsTable.isSuccess,
+    downloadTreatmentsTable.isFetching,
+  ]);
+
   const handleDownloadClinicTable = async () => {
     setIsLoading(true);
-    //take the download user table query data and put it in an excel file
 
     if (clinicOption === "Clinic Attendance") {
-      const data = downloadClinicsTable.data?.data;
-      const fileName = `Clinic Attendance Table (${periodOption})`;
-      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-      const fileExtension = ".xlsx";
-      const ws = XLSX.utils.json_to_sheet(data ?? []);
-      const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-      const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
-      const dataFile = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(dataFile, fileName + fileExtension);
+      void downloadClinicsTable.refetch();
+      setDownloadClinic(true);
     } else if (clinicOption === "Treatment Administered") {
-      const data = downloadTreatmentsTable.data?.data;
-      const fileName = `Treatment Administered Table (${periodOption})`;
-      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-      const fileExtension = ".xlsx";
-      const ws = XLSX.utils.json_to_sheet(data ?? []);
-      const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
-      const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
-      const dataFile = new Blob([excelBuffer], { type: fileType });
-      FileSaver.saveAs(dataFile, fileName + fileExtension);
+      void downloadTreatmentsTable.refetch();
+      setDownloadClinic(true);
     }
+    // //take the download user table query data and put it in an excel file
+
+    // if (clinicOption === "Clinic Attendance") {
+    //   const data = downloadClinicsTable.data?.data;
+    //   const fileName = `Clinic Attendance Table (${periodOption})`;
+    //   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    //   const fileExtension = ".xlsx";
+    //   const ws = XLSX.utils.json_to_sheet(data ?? []);
+    //   const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    //   const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    //   const dataFile = new Blob([excelBuffer], { type: fileType });
+    //   FileSaver.saveAs(dataFile, fileName + fileExtension);
+    // } else if (clinicOption === "Treatment Administered") {
+    //   const data = downloadTreatmentsTable.data?.data;
+    //   const fileName = `Treatment Administered Table (${periodOption})`;
+    //   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    //   const fileExtension = ".xlsx";
+    //   const ws = XLSX.utils.json_to_sheet(data ?? []);
+    //   const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    //   const excelBuffer: Uint8Array = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as Uint8Array;
+    //   const dataFile = new Blob([excelBuffer], { type: fileType });
+    //   FileSaver.saveAs(dataFile, fileName + fileExtension);
+    // }
     setIsLoading(false);
   };
 
@@ -851,7 +948,7 @@ const Info: NextPage = () => {
                 </button>
 
                 <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadSterilisationTable}>
-                  {isLoading ? (
+                  {downloadSterilise ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                       role="status"
@@ -981,7 +1078,7 @@ const Info: NextPage = () => {
                 </button>
 
                 <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadMembershipTable}>
-                  {isLoading ? (
+                  {downloadMembership ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                       role="status"
@@ -1128,7 +1225,7 @@ const Info: NextPage = () => {
                 </button>
 
                 <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadClinicTable}>
-                  {isLoading ? (
+                  {downloadClinic ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                       role="status"

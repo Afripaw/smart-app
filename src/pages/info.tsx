@@ -43,7 +43,12 @@ const Info: NextPage = () => {
 
   //Checks if card status of membership is lapsed or active
   const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
-    if (membershipType === "Standard card holder" || membershipType === "Gold card holder") {
+    if (
+      membershipType === "Standard card holder" ||
+      membershipType === "Gold card holder" ||
+      membershipType === "Standard Card Holder" ||
+      membershipType === "Gold Card Holder"
+    ) {
       const currentDate = new Date();
 
       // // Convert clinicList dates to Date objects

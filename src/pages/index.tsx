@@ -105,7 +105,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Afripaw Smart App</title>
+        <title>AfriPaw Smart App</title>
         <meta name="description" content="Smart App" />
         <link rel="icon" href="/favicon.ico" />
       </Head>

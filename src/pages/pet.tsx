@@ -1092,9 +1092,12 @@ const Pet: NextPage = () => {
     console.log("Cat Colours: ", catColours);
     if (speciesOption == "Cat" && !catColours) {
       setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: false })));
-    } else if (speciesOption == "Dog" && isCreate) {
+    } else if (speciesOption == "Dog" && catColours) {
       setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: false })));
     }
+    // else if (speciesOption == "Dog" && isCreate) {
+    //   setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: false })));
+    // }
   }, [speciesOption]);
 
   const handleColour = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
@@ -1435,7 +1438,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const sterilisationOutcomeOptions = ["Actioned", "No show"];
+  const sterilisationOutcomeOptions = ["Actioned", "No Show"];
 
   //Sterilisation Outcome Date
   //const [sterilisationOutcomeDate, setSterilisationOutcomeDate] = useState(new Date());
@@ -1675,7 +1678,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const membershipTypeOptions = ["Non-card holder", "Standard card holder", "Gold card holder"];
+  const membershipTypeOptions = ["Non-card Holder", "Standard Card Holder", "Gold Card Holder"];
 
   const qualifiesWithAttendance = (time: number): boolean => {
     const currentDate = new Date();
@@ -1714,13 +1717,18 @@ const Pet: NextPage = () => {
       sterilisationStatusOption === "Yes"
     ) {
       // console.log("Yesss we are changing it to standard card holder");
-      setMembershipTypeOption("Standard card holder");
+      setMembershipTypeOption("Standard Card Holder");
     }
   }, [clinicList, sterilisationStatusOption]);
 
   //Checks if card status of membership is lapsed or active
   const membershipStatus = (): string => {
-    if (membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder") {
+    if (
+      membershipTypeOption === "Standard Card Holder" ||
+      membershipTypeOption === "Standard card holder" ||
+      membershipTypeOption === "Gold Card Holder" ||
+      membershipTypeOption === "Gold card holder"
+    ) {
       const currentDate = new Date();
 
       // Convert clinicList dates to Date objects
@@ -1761,7 +1769,11 @@ const Pet: NextPage = () => {
 
   //checks to see what membership message should be displayed
   const membershipMessage = (membership: string): string => {
-    if ((membership == "Non-card holder" || cardStatusOption == "Lapsed card holder") && sterilisationStatusOption === "Yes" && qualifiesWithAttendance(6)) {
+    if (
+      (membership == "Non-card Holder" || membership == "Non-card holder" || cardStatusOption == "Lapsed card holder") &&
+      sterilisationStatusOption === "Yes" &&
+      qualifiesWithAttendance(6)
+    ) {
       return "Qualifies For Standard Card";
     } else if (membership == "Standard card holder" && sterilisationStatusOption === "Yes" && qualifiesWithAttendance(24)) {
       return "Qualifies For Gold Card";
@@ -1811,7 +1823,7 @@ const Pet: NextPage = () => {
     };
   }, []);
 
-  const cardStatusOptions = membershipTypeOption == "Non-card holder" ? ["Not applicable"] : ["Not applicable", "Collect", "Issued", "Re-print"];
+  const cardStatusOptions = membershipTypeOption == "Non-card holder" ? ["Not Applicable"] : ["Not Applicable", "Collect", "Issued", "Re-print"];
 
   useEffect(() => {
     if (membershipTypeOption != "Select one" && cardStatusOption == "") {
@@ -1819,13 +1831,13 @@ const Pet: NextPage = () => {
     }
   }, [membershipTypeOption]);
 
-  useEffect(() => {
-    if (membershipStatus() === "(Lapsed)" && cardStatusOption !== "Lapsed card holder") {
-      setCardStatusOption("Lapsed card holder");
-    } else if (membershipStatus() === "(Active)" && cardStatusOption === "Lapsed card holder") {
-      setCardStatusOption("Select one");
-    }
-  }, [membershipStatus, clinicList]);
+  // useEffect(() => {
+  //   if (membershipStatus() === "(Lapsed)" && cardStatusOption !== "Lapsed card holder") {
+  //     setCardStatusOption("Lapsed card holder");
+  //   } else if (membershipStatus() === "(Active)" && cardStatusOption === "Lapsed card holder") {
+  //     setCardStatusOption("Select one");
+  //   }
+  // }, [membershipStatus, clinicList]);
 
   //VET FEES
   const VetFees = (): string => {
@@ -2340,7 +2352,7 @@ const Pet: NextPage = () => {
       // setSterilisationRequestedOption(userData?.sterilisedRequested?.getFullYear() === 1970 ? "Select one" : "Yes");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
       const sterilisationOutcomeDate_ =
-        userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No show"
+        userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No Show" || userData?.sterilisationOutcome === "No show"
           ? userData?.sterilisationOutcomeDate ?? new Date()
           : new Date();
       setSterilisationOutcomeDate(sterilisationOutcomeDate_);
@@ -2412,7 +2424,12 @@ const Pet: NextPage = () => {
       // setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
       setMembershipTypeOption(userData?.membership ?? "Select one");
       const membershipDate_ =
-        userData?.membership === "Gold card holder" || userData?.membership === "Standard card holder" ? userData?.membershipDate ?? new Date() : new Date();
+        userData?.membership === "Gold card holder" ||
+        userData?.membership === "Standard card holder" ||
+        userData?.membership === "Gold Card Holder" ||
+        userData?.membership === "Standard Card Holder"
+          ? userData?.membershipDate ?? new Date()
+          : new Date();
       setMembershipDate(membershipDate_);
 
       setCardStatusOption(userData?.cardStatus ?? "Select one");
@@ -2645,7 +2662,7 @@ const Pet: NextPage = () => {
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
-      breed: speciesOption === "Dog" ? breedList : ["Not applicable"],
+      breed: speciesOption === "Dog" ? breedList : ["Not Applicable"],
       colour: colourList,
       size: speciesOption === "Dog" ? (sizeOption === "Select one" ? "" : sizeOption) : "",
       markings: markings,
@@ -2654,13 +2671,22 @@ const Pet: NextPage = () => {
       sterilisedRequested: sterilisationRequestedOption === "Yes" ? sterilisationRequestedDate : new Date(0),
       sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisedOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
-      sterilisationOutcomeDate: sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show" ? sterilisationOutcomeDate : new Date(0),
+      sterilisationOutcomeDate:
+        sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show" || sterilisationOutcomeOption === "No Show"
+          ? sterilisationOutcomeDate
+          : new Date(0),
       vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
       vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
       vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
-      membershipDate: membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder" ? membershipDate : new Date(0),
+      membershipDate:
+        membershipTypeOption === "Standard card holder" ||
+        membershipTypeOption === "Gold card holder" ||
+        membershipTypeOption === "Standard Card Holder" ||
+        membershipTypeOption === "Gold Card Holder"
+          ? membershipDate
+          : new Date(0),
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
       kennelReceived: kennelList,
       clinicsAttended: clinicIDList,
@@ -2795,9 +2821,9 @@ const Pet: NextPage = () => {
     setVaccinationShot1Date(new Date());
     setVaccinationShot2Date(new Date());
     setVaccinationShot3Date(new Date());
-    setMembershipTypeOption("Non-card Holder");
+    setMembershipTypeOption("Non-card holder");
     setMembershipDate(new Date());
-    setCardStatusOption("Not Applicable");
+    setCardStatusOption("Select one");
     setKennelsReceivedOption("No kennels received");
     setStartingDate(new Date());
     setLastDeworming(new Date());
@@ -2983,7 +3009,7 @@ const Pet: NextPage = () => {
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
-      breed: speciesOption === "Dog" ? breedList : ["Not applicable"],
+      breed: speciesOption === "Dog" ? breedList : ["Not Applicable"],
       colour: colourList,
       size: speciesOption === "Dog" ? (sizeOption === "Select one" ? "" : sizeOption) : "",
       markings: markings,
@@ -2992,7 +3018,10 @@ const Pet: NextPage = () => {
       sterilisedRequested: sterilisationRequestedOption === "Yes" ? sterilisationRequestedDate : new Date(0),
       sterilisedRequestSigned: sterilisationRequestSignedOption === "Select one" ? "" : sterilisationRequestSignedOption,
       sterilisationOutcome: sterilisationOutcomeOption === "Select one" ? "" : sterilisationOutcomeOption,
-      sterilisationOutcomeDate: sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show" ? sterilisationOutcomeDate : new Date(0),
+      sterilisationOutcomeDate:
+        sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show" || sterilisationOutcomeOption === "No Show"
+          ? sterilisationOutcomeDate
+          : new Date(0),
       vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
       vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
       vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
@@ -3001,7 +3030,13 @@ const Pet: NextPage = () => {
       // vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
-      membershipDate: membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder" ? membershipDate : new Date(0),
+      membershipDate:
+        membershipTypeOption === "Standard card holder" ||
+        membershipTypeOption === "Gold card holder" ||
+        membershipTypeOption === "Standard Card Holder" ||
+        membershipTypeOption === "Gold Card Holder"
+          ? membershipDate
+          : new Date(0),
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
       kennelReceived: kennelList,
       clinicsAttended: clinicIDList,
@@ -3090,7 +3125,7 @@ const Pet: NextPage = () => {
       //setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
       const sterilisationOutcomeDate_ =
-        userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No show"
+        userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No show" || userData?.sterilisationOutcome === "No Show"
           ? userData?.sterilisationOutcomeDate ?? new Date()
           : new Date();
       setSterilisationOutcomeDate(sterilisationOutcomeDate_);
@@ -3138,7 +3173,13 @@ const Pet: NextPage = () => {
       setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date());
 
       setMembershipTypeOption(userData?.membership ?? "");
-      const membershipDate_ = userData?.membership === "Actioned" || userData?.membership === "No show" ? userData?.membershipDate ?? new Date() : new Date();
+      const membershipDate_ =
+        userData?.membership === "Gold card holder" ||
+        userData?.membership === "Standard card holder" ||
+        userData?.membership === "Gold Card Holder" ||
+        userData?.membership === "Standard Card Holder"
+          ? userData?.membershipDate ?? new Date()
+          : new Date();
       setSterilisationOutcomeDate(membershipDate_);
 
       setCardStatusOption(userData?.cardStatus ?? "");
@@ -4921,7 +4962,7 @@ const Pet: NextPage = () => {
                           </div>
                         )}
                       </div>
-                      {(sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show") && (
+                      {(sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show" || sterilisationOutcomeOption === "No Show") && (
                         <div className="flex items-start">
                           <div className="mr-3 flex items-center pt-5">
                             <div className=" flex pl-3">Sterilisation Outcome Date: </div>
@@ -5251,7 +5292,7 @@ const Pet: NextPage = () => {
                     {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && (
                       <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
                         <Info size={24} className="block" />
-                        <span className="absolute left-[90%] top-[90%] hidden w-[12rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                        <span className="absolute left-[90%] top-[90%] z-20 hidden w-[12rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                           A dog is due for deworming if its last deworming was more than 6 months ago. A cat is due for deworming if its last deworming was more
                           than 3 months ago.
                         </span>
@@ -5320,7 +5361,10 @@ const Pet: NextPage = () => {
                       )}
                     </div>
 
-                    {(membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder") && (
+                    {(membershipTypeOption === "Standard card holder" ||
+                      membershipTypeOption === "Gold card holder" ||
+                      membershipTypeOption === "Standard Card Holder" ||
+                      membershipTypeOption === "Gold Card Holder") && (
                       <div className="flex items-start">
                         <div className="mr-3 flex items-center pt-5">
                           <div className=" flex pl-3">Membership Date: </div>
@@ -5355,46 +5399,63 @@ const Pet: NextPage = () => {
                   </div>
 
                   {/* membershipTypeOption !== "Non-card holder" && membershipTypeOption !== "Select one" */}
-                  {(membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder") && (
-                    <div className="flex items-start">
-                      <div className="mr-3 flex items-center pt-5">
-                        <div className=" flex">Card Status: </div>
-                      </div>
-                      <div className="flex flex-col">
-                        <button
-                          ref={btnCardStatusRef}
-                          className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
-                          type="button"
-                          onClick={handleToggleCardStatus}
-                        >
-                          {cardStatusOption + " "}
-                          <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                          </svg>
-                        </button>
-                        {cardStatus && (
-                          <div ref={cardStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
-                            <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
-                              {cardStatusOptions.map((option) => (
-                                <li key={option} onClick={() => handleCardStatusOption(option)}>
-                                  <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                  {(membershipTypeOption === "Standard card holder" ||
+                    membershipTypeOption === "Gold card holder" ||
+                    membershipTypeOption === "Standard Card Holder" ||
+                    membershipTypeOption === "Gold Card Holder") && (
+                    <>
+                      <div className="my-5 flex items-start">
+                        <div className="mr-3 flex items-center">
+                          <div className=" flex">Membership Status: </div>
+                        </div>
+                        {membershipStatus().slice(1, membershipStatus().length - 1) === "" ? (
+                          <span className=" text-black">Not Applicable</span>
+                        ) : membershipStatus().slice(1, membershipStatus().length - 1) === "Lapsed" ? (
+                          <span className=" text-red-600">{membershipStatus().slice(1, membershipStatus().length - 1)}</span>
+                        ) : (
+                          <span className=" text-black">{membershipStatus().slice(1, membershipStatus().length - 1)}</span>
                         )}
+                        {/* {membershipStatus() !== "" && ( */}
+                        <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                          <Info size={24} className="block" />
+                          <span className="absolute left-[90%] top-[90%] z-50 hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            The status of a card holder lapses if the pet has not attended a pet clinic for 3 months in a row. A lapsed card holder can become
+                            active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
+                          </span>
+                        </div>
+                        {/* )} */}
                       </div>
 
-                      {/* {membershipStatus() !== "" && ( */}
-                      <div className="group relative mx-[5px] mt-5 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                        <Info size={24} className="block" />
-                        <span className="absolute left-[90%] top-[90%] z-50 hidden w-[17rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                          The status of a card holder lapses if the pet has not attended a pet clinic for 3 months in a row. A lapsed card holder can become
-                          active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
-                        </span>
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-5">
+                          <div className=" flex">Card Status: </div>
+                        </div>
+                        <div className="flex flex-col">
+                          <button
+                            ref={btnCardStatusRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                            type="button"
+                            onClick={handleToggleCardStatus}
+                          >
+                            {cardStatusOption + " "}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {cardStatus && (
+                            <div ref={cardStatusRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                              <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
+                                {cardStatusOptions.map((option) => (
+                                  <li key={option} onClick={() => handleCardStatusOption(option)}>
+                                    <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      {/* )} */}
-                    </div>
+                    </>
                   )}
 
                   <div className="flex items-start">
@@ -5732,7 +5793,7 @@ const Pet: NextPage = () => {
                         <div className="mb-2 flex items-center">
                           <b className="mr-3">Sterilisation Outcome:</b>{" "}
                           {sterilisationStatusOption === "No"
-                            ? sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show"
+                            ? sterilisationOutcomeOption === "Actioned" || sterilisationOutcomeOption === "No show" || sterilisationOutcomeOption === "No Show"
                               ? `${sterilisationOutcomeOption}, ${sterilisationOutcomeDate.getDate().toString()}/${(
                                   (sterilisationOutcomeDate.getMonth() ?? 0) + 1
                                 ).toString()}/${sterilisationOutcomeDate.getFullYear().toString()}`
@@ -5865,7 +5926,7 @@ const Pet: NextPage = () => {
                         {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && (
                           <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
                             <Info size={24} className="block" />
-                            <span className="absolute left-[90%] top-[90%] hidden w-[14rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                            <span className="absolute left-[90%] top-[90%] z-20 hidden w-[14rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
                               A dog is due for deworming if its last deworming was more than 6 months ago. A cat is due for deworming if its last deworming was
                               more than 3 months ago.
                             </span>
@@ -5875,7 +5936,10 @@ const Pet: NextPage = () => {
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Membership Type:</b>{" "}
-                        {membershipTypeOption === "Standard card holder" || membershipTypeOption === "Gold card holder"
+                        {membershipTypeOption === "Standard card holder" ||
+                        membershipTypeOption === "Gold card holder" ||
+                        membershipTypeOption === "Standard Card Holder" ||
+                        membershipTypeOption === "Gold Card Holder"
                           ? `${membershipTypeOption}, ${membershipDate.getDate().toString()}/${(
                               (membershipDate.getMonth() ?? 0) + 1
                             ).toString()}/${membershipDate.getFullYear().toString()}`
@@ -5883,7 +5947,7 @@ const Pet: NextPage = () => {
                         {/* {membershipTypeOption && membershipMessage(membershipTypeOption) && (
                           <div className="ml-3 text-red-600">({membershipMessage(membershipTypeOption)})</div>
                         )} */}
-                        {membershipTypeOption !== "Non-card holder" &&
+                        {/* {membershipTypeOption !== "Non-card holder" &&
                           (membershipStatus() === "(Lapsed)" ? (
                             <div className="ml-3 text-red-600">{membershipStatus()}</div>
                           ) : (
@@ -5897,12 +5961,27 @@ const Pet: NextPage = () => {
                               active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
                             </span>
                           </div>
-                        )}
+                        )} */}
                       </div>
 
-                      <div className="mb-2 flex items-center">
-                        <b className="mr-3">Card Status:</b> {cardStatusOption === "Select one" ? user?.cardStatus : cardStatusOption}
-                      </div>
+                      {membershipTypeOption !== "Non-card holder" && membershipTypeOption !== "Non-card Holder" && (
+                        <>
+                          <div className="mb-2 flex items-center">
+                            <b className="mr-3">Membership Status:</b> {membershipStatus().slice(1, membershipStatus().length - 1)}
+                            <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                              <Info size={24} className="block" />
+                              <span className="absolute left-[90%] top-[90%] z-20 hidden w-[14rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                The status of a card holder lapses if the pet has not attended a pet clinic for 3 months in a row. A lapsed card holder can
+                                become active again upon having attended at least 3 out of any 6 pet clinics following the lapse.
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="mb-2 flex items-center">
+                            <b className="mr-3">Card Status:</b> {cardStatusOption === "Select one" ? user?.cardStatus : cardStatusOption}
+                          </div>
+                        </>
+                      )}
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Veterinary Fees Covered?:</b>{" "}

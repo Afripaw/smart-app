@@ -1092,7 +1092,7 @@ const Pet: NextPage = () => {
     console.log("Cat Colours: ", catColours);
     if (speciesOption == "Cat" && !catColours) {
       setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: false })));
-    } else if (speciesOption == "Dog" && catColours) {
+    } else if (speciesOption == "Dog" && (catColours || isCreate)) {
       setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: false })));
     }
     // else if (speciesOption == "Dog" && isCreate) {

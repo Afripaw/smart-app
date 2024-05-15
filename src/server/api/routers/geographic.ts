@@ -505,7 +505,7 @@ export const geographicRouter = createTRPCRouter({
   upload: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
     const greaterArea = await ctx.db.greaterArea.create({
       data: {
-        greaterArea: "Greater Area 1",
+        greaterArea: "Flagship",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -597,6 +597,13 @@ export const geographicRouter = createTRPCRouter({
         },
       });
 
+      const greaterArea = greaterArea_.map((greaterArea) => {
+        return {
+          "Greater Area ID": greaterArea.greaterAreaID,
+          "Greater Area": greaterArea.greaterArea,
+        };
+      });
+
       // const all_data_for_areas_streets = await ctx.db.greaterArea.findMany({
       //   where: {
       //     AND: searchConditions,
@@ -656,6 +663,15 @@ export const geographicRouter = createTRPCRouter({
         },
       });
 
+      const area = _area.map((area) => {
+        return {
+          "Area ID": area.areaID,
+          Area: area.area,
+          "Greater Area ID": area.greaterAreaID,
+          "Greater Area": greaterArea_.find((greaterArea) => greaterArea.greaterAreaID === area.greaterAreaID)?.greaterArea,
+        };
+      });
+
       const _street = await ctx.db.street.findMany({
         where: {
           areaID: {
@@ -672,6 +688,18 @@ export const geographicRouter = createTRPCRouter({
           createdAt: true,
           updatedAt: true,
         },
+      });
+
+      const street = _street.map((street) => {
+        return {
+          "Street ID": street.streetID,
+          Street: street.street,
+          "Area ID": street.areaID,
+          Area: _area.find((area) => area.areaID === street.areaID)?.area,
+          "Greater Area ID": _area.find((area) => area.areaID === street.areaID)?.greaterAreaID,
+          "Greater Area": greaterArea_.find((greaterArea) => greaterArea.greaterAreaID === _area.find((area) => area.areaID === street.areaID)?.greaterAreaID)
+            ?.greaterArea,
+        };
       });
 
       // type Street_ = {
@@ -756,9 +784,9 @@ export const geographicRouter = createTRPCRouter({
       // });
 
       return {
-        greaterAreas: greaterArea_,
-        areas: _area,
-        streets: _street,
+        greaterAreas: greaterArea,
+        areas: area,
+        streets: street,
       };
     }),
 });

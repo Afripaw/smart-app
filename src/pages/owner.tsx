@@ -980,7 +980,7 @@ const Owner: NextPage = () => {
     setIsLoading(true);
     const owner = await updateOwner.mutateAsync({
       petOwnerID: id,
-      southAfricanID: southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
+      southAfricanID: southAfricanIDOption === "Select one" ? "" : southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
       firstName: firstName,
       email: email,
       surname: surname,
@@ -1116,7 +1116,7 @@ const Owner: NextPage = () => {
     setIsLoading(true);
     try {
       const newUser_ = await newOwner.mutateAsync({
-        southAfricanID: southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
+        southAfricanID: southAfricanIDOption === "Select one" ? "" : southAfricanIDOption === "Yes" ? southAfricanID : southAfricanIDOption,
         firstName: firstName,
         email: email,
         surname: surname,

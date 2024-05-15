@@ -1437,7 +1437,7 @@ export const petRouter = createTRPCRouter({
         }
       });
 
-      const pet = await ctx.db.pet.findMany({
+      const pet_data = await ctx.db.pet.findMany({
         where: {
           OR: [
             {
@@ -1452,11 +1452,41 @@ export const petRouter = createTRPCRouter({
         },
 
         orderBy: { petID: "asc" },
-        // include: {
-        //   owner: true,
-        //   petTreatments: true,
-        //   clinicsAttended: true,
-        // },
+        include: {
+          owner: true,
+          // petTreatments: true,
+          // clinicsAttended: true,
+        },
+      });
+
+      const pet = pet_data.map((pet) => {
+        return {
+          "Pet ID": pet.petID,
+          "Pet Name": pet.petName,
+          "Owner ID": pet.ownerID,
+          "First Name": pet.owner.firstName,
+          Surname: pet.owner.surname,
+          Species: pet.species,
+          Sex: pet.sex,
+          Age: pet.age,
+          Breed: pet.breed.join(", "),
+          Colour: pet.colour.join(", "),
+          Size: pet.size,
+          Markings: pet.markings,
+          Status: pet.status,
+          "Sterilised Status": pet.sterilisedStatus.getFullYear() === 1970 ? "Not Sterilised" : pet.sterilisedStatus,
+          "Sterilised Requested": pet.sterilisedRequested?.getFullYear() === 1970 ? "No Sterilisation Requested" : pet.sterilisedRequested,
+          "Sterilised Request Signed": pet.sterilisedRequestSigned,
+          "Sterilisation Outcome": pet.sterilisationOutcome,
+          "Vaccination Shot 1": pet.vaccinationShot1?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot1,
+          "Vaccination Shot 2": pet.vaccinationShot2?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot2,
+          "Vaccination Shot 3": pet.vaccinationShot3?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot3,
+          "Last Deworming": pet.lastDeworming,
+          Membership: pet.membership,
+          "Card Status": pet.cardStatus,
+          "Kennel Received": pet.kennelReceived.join(", "),
+          Comments: pet.comments,
+        };
       });
 
       return pet;

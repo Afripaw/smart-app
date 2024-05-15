@@ -710,13 +710,42 @@ export const UserRouter = createTRPCRouter({
         }
       });
 
-      const users = await ctx.db.user.findMany({
+      const users_data = await ctx.db.user.findMany({
         where: {
           AND: searchConditions,
         },
         orderBy: {
           userID: "asc",
         },
+        include: {
+          addressGreaterArea: {
+            include: {
+              greaterArea: true,
+            },
+          },
+        },
+      });
+
+      const users = users_data.map((user) => {
+        return {
+          "User ID": user.userID,
+          "First Name": user.name,
+          Surname: user.surname,
+          Email: user.email,
+          "Mobile Number": user.mobile,
+          Role: user.role,
+          Status: user.status,
+          "South African ID": user.southAfricanID,
+          "Greater Area(s)": user.addressGreaterArea.map((area) => area.greaterArea.greaterArea).join(", "),
+          Street: user.addressStreet,
+          "Street Code": user.addressStreetCode,
+          "Street Number": user.addressStreetNumber == 0 || user.addressStreetNumber == null ? "" : user.addressStreetNumber,
+          "Postal Code": user.addressPostalCode,
+          "Address Free Form": user.addressFreeForm,
+          "Preferred Communication": user.preferredCommunication,
+          "Starting Date": user.startingDate,
+          Comments: user.comments,
+        };
       });
 
       return users;

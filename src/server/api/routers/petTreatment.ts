@@ -623,7 +623,7 @@ export const petTreatmentRouter = createTRPCRouter({
         }
       });
 
-      const treatment = await ctx.db.petTreatment.findMany({
+      const treatment_data = await ctx.db.petTreatment.findMany({
         where: {
           OR: [
             {
@@ -646,13 +646,37 @@ export const petTreatmentRouter = createTRPCRouter({
         orderBy: {
           treatmentID: "asc",
         },
-        // include: {
-        //   pet: {
-        //     include: {
-        //       owner: true,
-        //     },
-        //   },
-        // },
+        include: {
+          pet: {
+            include: {
+              owner: true,
+            },
+          },
+          type: {
+            select: {
+              typeID: true,
+              type: {
+                select: {
+                  type: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const treatment = treatment_data.map((treatment) => {
+        return {
+          "Treatment ID": treatment.treatmentID,
+          "Pet Name": treatment.pet.petName,
+          Species: treatment.pet.species,
+          "Owner First Name": treatment.pet.owner.firstName,
+          "Owner Surname": treatment.pet.owner.surname,
+          Date: treatment.date,
+          Category: treatment.category,
+          Types: treatment.type.map((type) => type.type.type).join(", "),
+          Comments: treatment.comments,
+        };
       });
 
       return treatment;

@@ -1043,7 +1043,7 @@ const Communication: NextPage = () => {
     setIsLoading(true);
     //take the download user table query data and put it in an excel file
     const data = downloadCommunicationTable.data;
-    const fileName = "Communication Table";
+    const fileName = "Message Table";
     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
     const ws = XLSX.utils.json_to_sheet(data ?? []);

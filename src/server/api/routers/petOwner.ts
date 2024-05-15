@@ -877,13 +877,39 @@ export const petOwnerRouter = createTRPCRouter({
         }
       });
 
-      const owners = await ctx.db.petOwner.findMany({
+      const owners_data = await ctx.db.petOwner.findMany({
         where: {
           AND: searchConditions,
         },
         orderBy: {
           ownerID: "asc",
         },
+        include: {
+          addressGreaterArea: true,
+          addressArea: true,
+          addressStreet: true,
+        },
+      });
+
+      const owners = owners_data.map((owner) => {
+        return {
+          "Owner ID": owner.ownerID,
+          "Owner First Name": owner.firstName,
+          "Owner Surname": owner.surname,
+          "South African ID": owner.southAfricanID,
+          Email: owner.email,
+          "Mobile Number": owner.mobile,
+          "Greater Area": owner.addressGreaterArea.greaterArea,
+          Area: owner.addressArea?.area,
+          Street: owner.addressStreet?.street,
+          "Street Code": owner.addressStreetCode,
+          "Street Number": owner.addressStreetNumber == 0 || owner.addressStreetNumber == null ? "" : owner.addressStreetNumber,
+          "Address Free Form": owner.addressFreeForm,
+          "Preferred Communication": owner.preferredCommunication,
+          "Starting Date": owner.startingDate,
+          Status: owner.status,
+          Comments: owner.comments,
+        };
       });
 
       return owners;

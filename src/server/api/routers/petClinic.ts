@@ -577,13 +577,47 @@ export const petClinicRouter = createTRPCRouter({
         }
       });
 
-      const clinic = await ctx.db.petClinic.findMany({
+      const clinic_data = await ctx.db.petClinic.findMany({
         where: {
           AND: searchConditions,
         },
         orderBy: {
           clinicID: "asc",
         },
+        include: {
+          greaterArea: true,
+          pet: {
+            include: {
+              pet: {
+                select: {
+                  species: true,
+                },
+              },
+            },
+          },
+          //area: true,
+          conditions: {
+            select: {
+              condition: {
+                select: {
+                  condition: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const clinic = clinic_data.map((clinic) => {
+        return {
+          "Clinic ID": clinic.clinicID,
+          Date: clinic.date,
+          "Greater Area": clinic.greaterArea.greaterArea,
+          Conditions: clinic.conditions.map((condition) => condition.condition.condition).join(", "),
+          "Dog visits": clinic.pet.filter((pet) => pet.pet.species === "Dog").length,
+          "Cat visits": clinic.pet.filter((pet) => pet.pet.species === "Cat").length,
+          Comments: clinic.comments,
+        };
       });
 
       return clinic;

@@ -769,13 +769,43 @@ export const volunteerRouter = createTRPCRouter({
         }
       });
 
-      const volunteers = await ctx.db.volunteer.findMany({
+      const volunteers_data = await ctx.db.volunteer.findMany({
         where: {
           AND: searchConditions,
         },
         orderBy: {
           volunteerID: "asc",
         },
+        include: {
+          addressGreaterArea: {
+            include: {
+              greaterArea: true,
+            },
+          },
+        },
+      });
+
+      const volunteers = volunteers_data.map((volunteer) => {
+        return {
+          "Volunteer ID": volunteer.volunteerID,
+          "First Name": volunteer.firstName,
+          Surname: volunteer.surname,
+          "South African ID": volunteer.southAfricanID,
+          Mobile: volunteer.mobile,
+          Email: volunteer.email,
+          Status: volunteer.status,
+          "Greater Area(s)": volunteer.addressGreaterArea.map((area) => area.greaterArea.greaterArea).join(", "),
+          Street: volunteer.addressStreet,
+          "Street Code": volunteer.addressStreetCode,
+          "Street Number": volunteer.addressStreetNumber == 0 || volunteer.addressStreetNumber == null ? "" : volunteer.addressStreetNumber,
+          "Postal Code": volunteer.addressPostalCode,
+          "Address Free Form": volunteer.addressFreeForm,
+          "Preferred Communication": volunteer.preferredCommunication,
+          Role: volunteer.role,
+          "Collaborator Org": volunteer.collaboratorOrg,
+          "Starting Date": volunteer.startingDate,
+          Comments: volunteer.comments,
+        };
       });
 
       return volunteers;

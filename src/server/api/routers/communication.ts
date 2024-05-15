@@ -358,13 +358,37 @@ export const communicationRouter = createTRPCRouter({
         }
       });
 
-      const communication = await ctx.db.communication.findMany({
+      const communication_data = await ctx.db.communication.findMany({
         where: {
           AND: searchConditions,
         },
         orderBy: {
           communicationID: "asc",
         },
+        include: {
+          greaterArea: {
+            include: {
+              greaterArea: true,
+            },
+          },
+          area: {
+            include: {
+              area: true,
+            },
+          },
+        },
+      });
+
+      const communication = communication_data.map((communication) => {
+        return {
+          "Message ID": communication.communicationID,
+          Message: communication.message,
+          Recipients: communication.recipients.join(", "),
+          Success: communication.success,
+          Type: communication.type,
+          "Recipient Greater Area(s)": communication.greaterArea.map((greaterArea) => greaterArea.greaterArea.greaterArea).join(", "),
+          "Recipient Area(s)": communication.area.map((area) => area.area.area).join(", "),
+        };
       });
 
       return communication;

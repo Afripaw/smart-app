@@ -407,10 +407,21 @@ export const petOwnerRouter = createTRPCRouter({
 
   //delete all pet owners
   deleteAllOwners: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"]).mutation(async ({ ctx }) => {
+    //delete all types of treatments
+    await ctx.db.typesOnTreatment.deleteMany();
+    //delete treatment types
+    await ctx.db.type.deleteMany();
     //delete all pet to petTreatment
     await ctx.db.petTreatment.deleteMany();
+
     //delete all pet to petClinic
     await ctx.db.petOnPetClinic.deleteMany();
+    //delete all  condiions on clinic
+    await ctx.db.conditionsOnClinic.deleteMany();
+    //delete all conditions
+    await ctx.db.conditions.deleteMany();
+    //delete all clinics
+    await ctx.db.petClinic.deleteMany();
     //delete all pets
     await ctx.db.pet.deleteMany();
     return await ctx.db.petOwner.deleteMany();

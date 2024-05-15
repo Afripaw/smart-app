@@ -213,6 +213,8 @@ export const communicationRouter = createTRPCRouter({
 
   //delete all clinics
   deleteAllCommunications: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
+    await ctx.db.greaterAreaOnCommunication.deleteMany({});
+    await ctx.db.areaOnCommunication.deleteMany({});
     return await ctx.db.communication.deleteMany({});
   }),
 

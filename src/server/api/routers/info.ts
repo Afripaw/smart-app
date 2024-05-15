@@ -28,7 +28,7 @@ export const infoRouter = createTRPCRouter({
           : input.typeOfQuery === "Actioned"
             ? { sterilisationOutcome: { equals: "Actioned" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
             : input.typeOfQuery === "No Show"
-              ? { sterilisationOutcome: { equals: "No show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
+              ? { sterilisationOutcome: { equals: "No Show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
               : {};
 
       const data = await ctx.db.pet.findMany({
@@ -83,9 +83,9 @@ export const infoRouter = createTRPCRouter({
       //check what type of query it is and then decide what object will be in the where clause
       const membershipQuery =
         input.typeOfQuery === "Standard Card Holder"
-          ? { membership: { equals: "Standard card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
+          ? { membership: { equals: "Standard Card Holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
           : input.typeOfQuery === "Gold Card Holder"
-            ? { membership: { equals: "Gold card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
+            ? { membership: { equals: "Gold Card Holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
             : {};
 
       const data = await ctx.db.pet.findMany({
@@ -335,7 +335,7 @@ export const infoRouter = createTRPCRouter({
           : input.typeOfQuery === "Actioned"
             ? { sterilisationOutcome: { equals: "Actioned" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
             : input.typeOfQuery === "No Show"
-              ? { sterilisationOutcome: { equals: "No show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
+              ? { sterilisationOutcome: { equals: "No Show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
               : {};
 
       const rawData = await ctx.db.pet.findMany({
@@ -415,9 +415,9 @@ export const infoRouter = createTRPCRouter({
       //check what type of query it is and then decide what object will be in the where clause
       const membershipQuery =
         input.typeOfQuery === "Standard Card Holder"
-          ? { membership: { equals: "Standard card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
+          ? { membership: { equals: "Standard Card Holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
           : input.typeOfQuery === "Gold Card Holder"
-            ? { membership: { equals: "Gold card holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
+            ? { membership: { equals: "Gold Card Holder" }, membershipDate: { gte: input.startDate, lte: input.endDate } }
             : {};
 
       const rawData = await ctx.db.pet.findMany({

@@ -938,7 +938,7 @@ const Geographic: NextPage = () => {
                   >
                     Create New Greater Area
                   </button>
-                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteArea}>
                     Delete all users
                   </button> */}
                 </div>
@@ -1127,7 +1127,7 @@ const Geographic: NextPage = () => {
                                 {geo?.updatedAt?.getFullYear()?.toString() ?? ""}
                               </td>
                               <div className="flex">
-                                {/* <div className="relative flex items-center justify-center">
+                                <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-2 my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
                                     <Trash
                                       size={24}
@@ -1138,7 +1138,7 @@ const Geographic: NextPage = () => {
                                       Delete greater area
                                     </span>
                                   </span>
-                                </div> */}
+                                </div>
 
                                 <div className="relative flex items-center justify-center">
                                   <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">

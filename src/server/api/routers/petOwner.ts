@@ -416,12 +416,15 @@ export const petOwnerRouter = createTRPCRouter({
 
     //delete all pet to petClinic
     await ctx.db.petOnPetClinic.deleteMany();
-    //delete all  condiions on clinic
-    await ctx.db.conditionsOnClinic.deleteMany();
-    //delete all conditions
-    await ctx.db.conditions.deleteMany();
-    //delete all clinics
-    await ctx.db.petClinic.deleteMany();
+
+    //Also deletes clinics
+    // //delete all  condiions on clinic
+    // await ctx.db.conditionsOnClinic.deleteMany();
+    // //delete all conditions
+    // await ctx.db.conditions.deleteMany();
+    // //delete all clinics
+    // await ctx.db.petClinic.deleteMany();
+
     //delete all pets
     await ctx.db.pet.deleteMany();
     return await ctx.db.petOwner.deleteMany();

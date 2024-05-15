@@ -133,7 +133,7 @@ export default function Home() {
                   {/* className="m-2 ml-2 aspect-square h-max rounded-full" */}
                   {/* className="m-2 ml-2 aspect-square h-[3.5rem] w-[3.5rem] rounded-full md:h-[2.7rem] md:w-[2.7rem] xl:h-[3.5rem] xl:w-[3.5rem]" */}
                 </div>
-                <div className="md:text-xl xl:text-3xl">Welcome to the Afripaw Smart App</div>
+                <div className="md:text-xl xl:text-3xl">Welcome to the AfriPaw Smart App</div>
                 <button
                   className=" m-2 rounded-lg border-black bg-white p-2 text-black duration-150 hover:bg-gray-200/30 md:text-base xl:text-lg"
                   onClick={() => void handleSignIn()}

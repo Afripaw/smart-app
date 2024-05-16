@@ -3316,6 +3316,22 @@ const Pet: NextPage = () => {
       if (user) {
         const userData = user;
 
+        //Clinic data
+        const clinicData = user?.clinic_data ?? [];
+        const clinicDates: Clinic[] =
+          clinicData?.map((clinic) => ({
+            id: clinic.clinicID,
+            date:
+              clinic.clinic.date.getDate().toString() +
+              "/" +
+              ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+              "/" +
+              clinic.clinic.date.getFullYear().toString(),
+            area: clinic.clinic.greaterArea.greaterArea,
+          })) ?? [];
+        setClinicList(clinicDates);
+
+        //Vaccination Data
         if (userData?.vaccinationShot1.getFullYear() !== 1970) {
           setVaccinationShot1Option("Yes");
         } else {

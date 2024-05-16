@@ -155,53 +155,52 @@ export const petRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       //find pet with same id and update that pet
-      const pet = await ctx.db.pet.update({
-        where: {
-          petID: input.petID,
-        },
-        data: {
-          petName: input.petName,
-          species: input.species,
-          sex: input.sex,
-          age: input.age,
-          breed: input.breed,
-          colour: input.colour,
-          size: input.size,
-          markings: input.markings,
-          status: input.status,
-          sterilisedStatus: input.sterilisedStatus,
-          sterilisedRequested: input.sterilisedRequested,
-          sterilisedRequestSigned: input.sterilisedRequestSigned,
-          sterilisationOutcome: input.sterilisedOutcome,
-          sterilisationOutcomeDate: input.sterilisationOutcomeDate,
-          vaccinationShot1: input.vaccinationShot1,
-          vaccinationShot2: input.vaccinationShot2,
-          vaccinationShot3: input.vaccinationShot3,
-          lastDeworming: input.lastDeWorming,
-          membership: input.membership,
-          membershipDate: input.membershipDate,
-          cardStatus: input.cardStatus,
-          kennelReceived: input.kennelReceived,
-          comments: input.comments,
-          updatedAt: new Date(),
-        },
-      });
+      const pet = await ctx.db.$transaction(async (prisma) => {
+        const updatedPet = await prisma.pet.update({
+          where: {
+            petID: input.petID,
+          },
+          data: {
+            petName: input.petName,
+            species: input.species,
+            sex: input.sex,
+            age: input.age,
+            breed: input.breed,
+            colour: input.colour,
+            size: input.size,
+            markings: input.markings,
+            status: input.status,
+            sterilisedStatus: input.sterilisedStatus,
+            sterilisedRequested: input.sterilisedRequested,
+            sterilisedRequestSigned: input.sterilisedRequestSigned,
+            sterilisationOutcome: input.sterilisedOutcome,
+            sterilisationOutcomeDate: input.sterilisationOutcomeDate,
+            vaccinationShot1: input.vaccinationShot1,
+            vaccinationShot2: input.vaccinationShot2,
+            vaccinationShot3: input.vaccinationShot3,
+            lastDeworming: input.lastDeWorming,
+            membership: input.membership,
+            membershipDate: input.membershipDate,
+            cardStatus: input.cardStatus,
+            kennelReceived: input.kennelReceived,
+            comments: input.comments,
+            updatedAt: new Date(),
+          },
+        });
 
-      // Handle clinicsAttended
-      // First, remove existing relationships
-      await ctx.db.petOnPetClinic.deleteMany({
-        where: {
-          petID: input.petID,
-        },
-      });
+        // Remove existing relationships
+        await prisma.petOnPetClinic.deleteMany({
+          where: {
+            petID: input.petID,
+          },
+        });
 
-      // Then, create new relationships with clinics
-      const clinicRelationships = input.clinicsAttended.map(async (clinicID) => {
-        await ctx.db.petOnPetClinic.create({
+        // Prepare new clinic relationships
+        const clinicRelationships = input.clinicsAttended.map((clinicID) => ({
           data: {
             pet: {
               connect: {
-                petID: pet.petID,
+                petID: updatedPet.petID,
               },
             },
             clinic: {
@@ -210,10 +209,45 @@ export const petRouter = createTRPCRouter({
               },
             },
           },
-        });
-      });
+        }));
 
-      await Promise.all(clinicRelationships);
+        // Create new relationships in batch
+        await prisma.petOnPetClinic.createMany({
+          data: clinicRelationships.map(({ data }) => ({
+            petID: data.pet.connect.petID,
+            clinicID: data.clinic.connect.clinicID,
+          })),
+        });
+
+        return updatedPet;
+
+        // // First, remove existing relationships
+        // await prisma.petOnPetClinic.deleteMany({
+        //   where: {
+        //     petID: input.petID,
+        //   },
+        // });
+
+        // // Then, create new relationships with clinics
+        // const clinicRelationships = input.clinicsAttended.map(async (clinicID) => {
+        //   await prisma.petOnPetClinic.create({
+        //     data: {
+        //       pet: {
+        //         connect: {
+        //           petID: updatedPet.petID,
+        //         },
+        //       },
+        //       clinic: {
+        //         connect: {
+        //           clinicID: clinicID,
+        //         },
+        //       },
+        //     },
+        //   });
+        // });
+
+        // await Promise.all(clinicRelationships);
+      });
 
       return pet;
     }),
@@ -444,30 +478,7 @@ export const petRouter = createTRPCRouter({
       const user = await ctx.db.pet.findMany({
         where: {
           AND: searchConditions,
-          // OR: [
-          //   {
-          //     AND: searchConditions,
-          //   },
-          //   {
-          //     owner: {
-          //       AND: searchConditionsOwner,
-          //     },
-          //   },
-          // ],
         },
-
-        // orderBy: input.order === "address" ? {
-        //   owner: {
-        //     addressStreet: {
-        //       street: "asc",
-        //     },
-        //     addressStreetNumber: "asc",
-        //     addressGreaterArea: {
-        //       greaterArea: "asc",
-        //     },
-        //   },
-        // } : order,
-
         orderBy:
           input.order === "address"
             ? [

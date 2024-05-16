@@ -63,7 +63,7 @@ const Dashboard: NextPage = () => {
             <div className="flex w-full flex-col items-center justify-around">
               <div className="flex w-2/3 justify-around gap-1 pt-4 xl:pb-2">
                 <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
-                  {clinicVisits.data != 0 ? (
+                  {!clinicVisits.data && clinicVisits.data != 0 ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                       role="status"
@@ -76,7 +76,7 @@ const Dashboard: NextPage = () => {
                   <div className="text-center text-xs">Pet Clinic visits</div>
                 </div>
                 <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
-                  {vaccinatedPets.data != 0 ? (
+                  {!vaccinatedPets.data && vaccinatedPets.data != 0 ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                       role="status"
@@ -104,7 +104,7 @@ const Dashboard: NextPage = () => {
               </div>
               <div className="flex w-2/3 justify-around gap-1 pt-2 xl:pb-2">
                 <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
-                  {kennels.data != 0 ? (
+                  {!kennels.data && kennels.data != 0 ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                       role="status"
@@ -118,7 +118,7 @@ const Dashboard: NextPage = () => {
                 </div>
 
                 <div className=" flex w-[104px] flex-col items-center justify-center rounded-lg bg-main-orange p-2 text-white">
-                  {treatments.data != 0 ? (
+                  {!treatments.data && treatments.data != 0 ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
                       role="status"

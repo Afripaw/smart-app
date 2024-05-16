@@ -160,100 +160,163 @@ export const volunteerRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      //find volunteer with same id and update that volunteer
-      const volunteer = await ctx.db.volunteer.update({
-        where: {
-          volunteerID: input.volunteerID,
-        },
-        data: {
-          firstName: input.firstName,
-          email: input.email,
-          surname: input.surname,
-          southAfricanID: input.southAfricanID,
-          mobile: input.mobile,
-          // addressGreaterArea: {
-          //   create: input.addressGreaterAreaID.map((areaID) => ({
-          //     greaterArea: {
-          //       connect: {
-          //         greaterAreaID: areaID,
-          //       },
-          //     },
-          //   })),
-          // },
-          addressStreet: input.addressStreet,
-          addressStreetCode: input.addressStreetCode,
-          addressStreetNumber: input.addressStreetNumber,
-          addressSuburb: input.addressSuburb,
-          addressPostalCode: input.addressPostalCode,
-          addressFreeForm: input.addressFreeForm,
-          preferredCommunication: input.preferredCommunication,
-          role: input.role,
-          collaboratorOrg: input.collaboratorOrg,
-          startingDate: input.startingDate,
-          status: input.status,
-          comments: input.comments,
-          updatedAt: new Date(),
-        },
-      });
-
-      //greater areas
-      //delete all the greater areas
-      await ctx.db.greaterAreaOnVolunteer.deleteMany({
-        where: {
-          volunteerID: input.volunteerID,
-        },
-      });
-
-      //create new greater areas
-      const greaterAreaRelationships = input.addressGreaterAreaID.map(async (areaID) => {
-        await ctx.db.greaterAreaOnVolunteer.create({
+      const volunteer = await ctx.db.$transaction(async (prisma) => {
+        // Update volunteer details
+        const updatedVolunteer = await prisma.volunteer.update({
+          where: {
+            volunteerID: input.volunteerID,
+          },
           data: {
-            volunteer: {
-              connect: {
-                volunteerID: volunteer.volunteerID,
-              },
-            },
-            greaterArea: {
-              connect: {
-                greaterAreaID: areaID,
-              },
-            },
+            firstName: input.firstName,
+            email: input.email,
+            surname: input.surname,
+            southAfricanID: input.southAfricanID,
+            mobile: input.mobile,
+            addressStreet: input.addressStreet,
+            addressStreetCode: input.addressStreetCode,
+            addressStreetNumber: input.addressStreetNumber,
+            addressSuburb: input.addressSuburb,
+            addressPostalCode: input.addressPostalCode,
+            addressFreeForm: input.addressFreeForm,
+            preferredCommunication: input.preferredCommunication,
+            role: input.role,
+            collaboratorOrg: input.collaboratorOrg,
+            startingDate: input.startingDate,
+            status: input.status,
+            comments: input.comments,
+            updatedAt: new Date(),
           },
         });
-      });
 
-      await Promise.all(greaterAreaRelationships);
-
-      // Handle clinicsAttended
-      // First, remove existing relationships
-      await ctx.db.volunteerOnPetClinic.deleteMany({
-        where: {
-          volunteerID: input.volunteerID,
-        },
-      });
-
-      // Then, create new relationships with clinics
-      const clinicRelationships = input.clinicAttended.map(async (clinicID) => {
-        await ctx.db.volunteerOnPetClinic.create({
-          data: {
-            volunteer: {
-              connect: {
-                volunteerID: volunteer.volunteerID,
-              },
-            },
-            clinic: {
-              connect: {
-                clinicID: clinicID,
-              },
-            },
+        // Remove existing greater area relationships
+        await prisma.greaterAreaOnVolunteer.deleteMany({
+          where: {
+            volunteerID: input.volunteerID,
           },
         });
-      });
 
-      await Promise.all(clinicRelationships);
+        // Create new greater area relationships
+        await prisma.greaterAreaOnVolunteer.createMany({
+          data: input.addressGreaterAreaID.map((areaID) => ({
+            volunteerID: updatedVolunteer.volunteerID,
+            greaterAreaID: areaID,
+          })),
+        });
+
+        // Remove existing clinic relationships
+        await prisma.volunteerOnPetClinic.deleteMany({
+          where: {
+            volunteerID: input.volunteerID,
+          },
+        });
+
+        // Create new clinic relationships
+        await prisma.volunteerOnPetClinic.createMany({
+          data: input.clinicAttended.map((clinicID) => ({
+            volunteerID: updatedVolunteer.volunteerID,
+            clinicID: clinicID,
+          })),
+        });
+
+        return updatedVolunteer;
+      });
 
       return volunteer;
     }),
+  //   //find volunteer with same id and update that volunteer
+  //   const volunteer = await ctx.db.volunteer.update({
+  //     where: {
+  //       volunteerID: input.volunteerID,
+  //     },
+  //     data: {
+  //       firstName: input.firstName,
+  //       email: input.email,
+  //       surname: input.surname,
+  //       southAfricanID: input.southAfricanID,
+  //       mobile: input.mobile,
+  //       // addressGreaterArea: {
+  //       //   create: input.addressGreaterAreaID.map((areaID) => ({
+  //       //     greaterArea: {
+  //       //       connect: {
+  //       //         greaterAreaID: areaID,
+  //       //       },
+  //       //     },
+  //       //   })),
+  //       // },
+  //       addressStreet: input.addressStreet,
+  //       addressStreetCode: input.addressStreetCode,
+  //       addressStreetNumber: input.addressStreetNumber,
+  //       addressSuburb: input.addressSuburb,
+  //       addressPostalCode: input.addressPostalCode,
+  //       addressFreeForm: input.addressFreeForm,
+  //       preferredCommunication: input.preferredCommunication,
+  //       role: input.role,
+  //       collaboratorOrg: input.collaboratorOrg,
+  //       startingDate: input.startingDate,
+  //       status: input.status,
+  //       comments: input.comments,
+  //       updatedAt: new Date(),
+  //     },
+  //   });
+
+  //   //greater areas
+  //   //delete all the greater areas
+  //   await ctx.db.greaterAreaOnVolunteer.deleteMany({
+  //     where: {
+  //       volunteerID: input.volunteerID,
+  //     },
+  //   });
+
+  //   //create new greater areas
+  //   const greaterAreaRelationships = input.addressGreaterAreaID.map(async (areaID) => {
+  //     await ctx.db.greaterAreaOnVolunteer.create({
+  //       data: {
+  //         volunteer: {
+  //           connect: {
+  //             volunteerID: volunteer.volunteerID,
+  //           },
+  //         },
+  //         greaterArea: {
+  //           connect: {
+  //             greaterAreaID: areaID,
+  //           },
+  //         },
+  //       },
+  //     });
+  //   });
+
+  //   await Promise.all(greaterAreaRelationships);
+
+  //   // Handle clinicsAttended
+  //   // First, remove existing relationships
+  //   await ctx.db.volunteerOnPetClinic.deleteMany({
+  //     where: {
+  //       volunteerID: input.volunteerID,
+  //     },
+  //   });
+
+  //   // Then, create new relationships with clinics
+  //   const clinicRelationships = input.clinicAttended.map(async (clinicID) => {
+  //     await ctx.db.volunteerOnPetClinic.create({
+  //       data: {
+  //         volunteer: {
+  //           connect: {
+  //             volunteerID: volunteer.volunteerID,
+  //           },
+  //         },
+  //         clinic: {
+  //           connect: {
+  //             clinicID: clinicID,
+  //           },
+  //         },
+  //       },
+  //     });
+  //   });
+
+  //   await Promise.all(clinicRelationships);
+
+  //   return volunteer;
+  // }),
 
   //Infinite query and search for volunteers
   searchVolunteersInfinite: accessProcedure(["System Administrator"])

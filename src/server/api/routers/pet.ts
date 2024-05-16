@@ -39,49 +39,49 @@ export const petRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Create pet
-      const pet = await ctx.db.pet.create({
-        data: {
-          petName: input.petName,
-          owner: {
-            connect: {
-              ownerID: input.ownerID,
+      const pet = await ctx.db.$transaction(async (prisma) => {
+        // Create pet
+        const createdPet = await prisma.pet.create({
+          data: {
+            petName: input.petName,
+            owner: {
+              connect: {
+                ownerID: input.ownerID,
+              },
             },
+            species: input.species,
+            sex: input.sex,
+            age: input.age,
+            breed: input.breed,
+            colour: input.colour,
+            size: input.size,
+            markings: input.markings,
+            status: input.status,
+            sterilisedStatus: input.sterilisedStatus,
+            sterilisedRequested: input.sterilisedRequested,
+            sterilisedRequestSigned: input.sterilisedRequestSigned,
+            sterilisationOutcome: input.sterilisationOutcome,
+            sterilisationOutcomeDate: input.sterilisationOutcomeDate,
+            vaccinationShot1: input.vaccinationShot1,
+            vaccinationShot2: input.vaccinationShot2,
+            vaccinationShot3: input.vaccinationShot3,
+            lastDeworming: input.lastDeWorming,
+            membership: input.membership,
+            membershipDate: input.membershipDate,
+            cardStatus: input.cardStatus,
+            kennelReceived: input.kennelReceived,
+            comments: input.comments,
+            createdAt: new Date(),
+            updatedAt: new Date(),
           },
-          species: input.species,
-          sex: input.sex,
-          age: input.age,
-          breed: input.breed,
-          colour: input.colour,
-          size: input.size,
-          markings: input.markings,
-          status: input.status,
-          sterilisedStatus: input.sterilisedStatus,
-          sterilisedRequested: input.sterilisedRequested,
-          sterilisedRequestSigned: input.sterilisedRequestSigned,
-          sterilisationOutcome: input.sterilisationOutcome,
-          sterilisationOutcomeDate: input.sterilisationOutcomeDate,
-          vaccinationShot1: input.vaccinationShot1,
-          vaccinationShot2: input.vaccinationShot2,
-          vaccinationShot3: input.vaccinationShot3,
-          lastDeworming: input.lastDeWorming,
-          membership: input.membership,
-          membershipDate: input.membershipDate,
-          cardStatus: input.cardStatus,
-          kennelReceived: input.kennelReceived,
-          comments: input.comments,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      });
+        });
 
-      // Create relationships with clinics
-      const clinicRelationships = input.clinicsAttended.map(async (clinicID) => {
-        await ctx.db.petOnPetClinic.create({
+        // Prepare new clinic relationships
+        const clinicRelationships = input.clinicsAttended.map((clinicID) => ({
           data: {
             pet: {
               connect: {
-                petID: pet.petID,
+                petID: createdPet.petID,
               },
             },
             clinic: {
@@ -90,10 +90,38 @@ export const petRouter = createTRPCRouter({
               },
             },
           },
+        }));
+
+        // Create new relationships in batch
+        await prisma.petOnPetClinic.createMany({
+          data: clinicRelationships.map(({ data }) => ({
+            petID: data.pet.connect.petID,
+            clinicID: data.clinic.connect.clinicID,
+          })),
         });
+
+        return createdPet;
       });
 
-      await Promise.all(clinicRelationships);
+      // // Create relationships with clinics
+      // const clinicRelationships = input.clinicsAttended.map(async (clinicID) => {
+      //   await ctx.db.petOnPetClinic.create({
+      //     data: {
+      //       pet: {
+      //         connect: {
+      //           petID: pet.petID,
+      //         },
+      //       },
+      //       clinic: {
+      //         connect: {
+      //           clinicID: clinicID,
+      //         },
+      //       },
+      //     },
+      //   });
+      // });
+
+      // await Promise.all(clinicRelationships);
 
       return pet;
     }),

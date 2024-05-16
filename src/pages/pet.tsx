@@ -1278,7 +1278,7 @@ const Pet: NextPage = () => {
 
   //if sterilisation outcome is actioned the sterilisation yes
   useEffect(() => {
-    if (sterilisationOutcomeOption === "Actioned") {
+    if (sterilisationOutcomeOption === "Actioned" && sterilisationStatusDate.getFullYear() === 1970) {
       setSterilisationStatusOption("Yes");
       setSterilisationStatusDate(new Date());
     }
@@ -1315,7 +1315,7 @@ const Pet: NextPage = () => {
   const sterilisationRequestedOptions = ["Yes", "No"];
 
   useEffect(() => {
-    if (sterilisationRequestedOption === "Yes") {
+    if (sterilisationRequestedOption === "Yes" && sterilisationRequestedDate.getFullYear() === 1970) {
       setSterilisationRequestedDate(new Date());
     }
   }, [sterilisationRequestedOption]);
@@ -2330,11 +2330,11 @@ const Pet: NextPage = () => {
       // setSterilisationStatusOption(userData?.sterilisedStatus.getFullYear() === 1970 ? "Select one" : "Yes");
       // setSterilisationRequestedOption(userData?.sterilisedRequested?.getFullYear() === 1970 ? "Select one" : "Yes");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
-      const sterilisationOutcomeDate_ =
-        userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No Show" || userData?.sterilisationOutcome === "No show"
-          ? userData?.sterilisationOutcomeDate ?? new Date()
-          : new Date();
-      setSterilisationOutcomeDate(sterilisationOutcomeDate_);
+      // const sterilisationOutcomeDate_ =
+      //   userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No Show" || userData?.sterilisationOutcome === "No show"
+      //     ? userData?.sterilisationOutcomeDate ?? new Date()
+      //     : new Date();
+      // setSterilisationOutcomeDate(sterilisationOutcomeDate_);
 
       if (userData?.vaccinationShot1?.getFullYear() !== 1970) {
         setVaccinationShot1Option("Yes");
@@ -2394,26 +2394,30 @@ const Pet: NextPage = () => {
       setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
       setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
 
-      sterilisationStatusOption === "Yes" ? setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date()) : setSterilisationStatusDate(new Date());
-      sterilisationRequestedOption === "Yes"
-        ? setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date())
-        : setSterilisationRequestedDate(new Date());
+      sterilisationStatusOption === "Yes" ? setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date(0)) : setSterilisationStatusDate(new Date(0));
+
+      setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date(0));
+
+      setSterilisationOutcomeDate(userData?.sterilisationOutcomeDate ?? new Date(0));
 
       // setVaccinationShot1Option(userData?.vaccinationShot1 ?? "Select one");
       // setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
       // setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
       setMembershipTypeOption(userData?.membership ?? "Select one");
+
+      console.log("Very important!!! membershipDate in update user: ", userData?.membershipDate);
       const membershipDate_ =
         userData?.membership === "Gold card holder" ||
         userData?.membership === "Standard card holder" ||
         userData?.membership === "Gold Card Holder" ||
         userData?.membership === "Standard Card Holder"
-          ? userData?.membershipDate ?? new Date()
-          : new Date();
+          ? userData?.membershipDate ?? new Date(0)
+          : new Date(0);
       setMembershipDate(membershipDate_);
 
       setCardStatusOption(userData?.cardStatus ?? "Select one");
       setKennelList(userData?.kennelReceived ?? []);
+      setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date(0));
       setLastDeworming(userData?.lastDeworming ?? new Date());
       //setClinicIDList(clinicIDs ?? []);
       setClinicList(clinicDates);
@@ -2530,6 +2534,8 @@ const Pet: NextPage = () => {
 
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "Select one");
 
+      setSterilisationOutcomeDate(userData?.sterilisationOutcomeDate ?? new Date(0));
+
       if (userData?.vaccinationShot1.getFullYear() !== 1970) {
         setVaccinationShot1Option("Yes");
       } else {
@@ -2570,7 +2576,7 @@ const Pet: NextPage = () => {
       setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
       setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
 
-      setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date());
+      setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date(0));
       setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date());
       //setVaccinationShot2Option(userData?.vaccinationShot2 ?? "Select one");
       //setVaccinationShot3Option(userData?.vaccinationShot3 ?? "Select one");
@@ -2582,6 +2588,7 @@ const Pet: NextPage = () => {
       }
       setKennelList(userData?.kennelReceived ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
+      setMembershipDate(userData?.membershipDate ?? new Date(0));
       setStatusOption(userData?.status ?? "Select one");
       setComments(userData?.comments ?? "");
       setClinicList(clinicDates);
@@ -2734,6 +2741,7 @@ const Pet: NextPage = () => {
     setMarkings("");
     setStatusOption("Select one");
     setSterilisationStatusOption("Select one");
+    setSterilisationStatusDate(new Date(0));
     setSterilisationRequestedOption("Select one");
     setSterilisationRequestSignedOption("Select one");
     setSterilisationOutcomeOption("Select one");
@@ -2745,7 +2753,7 @@ const Pet: NextPage = () => {
     setVaccinationShot2Date(new Date());
     setVaccinationShot3Date(new Date());
     setMembershipTypeOption("Select one");
-    setMembershipDate(new Date());
+    setMembershipDate(new Date(0));
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select here");
     setLastDeworming(new Date());
@@ -2841,7 +2849,7 @@ const Pet: NextPage = () => {
     setSterilisationStatusOption("Select one");
     setSterilisationRequestedOption("Select one");
     setSterilisationRequestSignedOption("Select one");
-    setSterilisationStatusDate(new Date());
+    setSterilisationStatusDate(new Date(0));
     setSterilisationRequestedDate(new Date());
     setSterilisationOutcomeOption("Select one");
     setSterilisationOutcomeDate(new Date());
@@ -3168,11 +3176,13 @@ const Pet: NextPage = () => {
       //setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
       //setSterilisationRequestedOption(userData?.sterilisedRequested ?? "");
       setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
-      const sterilisationOutcomeDate_ =
-        userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No show" || userData?.sterilisationOutcome === "No Show"
-          ? userData?.sterilisationOutcomeDate ?? new Date()
-          : new Date();
-      setSterilisationOutcomeDate(sterilisationOutcomeDate_);
+      // const sterilisationOutcomeDate_ =
+      //   userData?.sterilisationOutcome === "Actioned" || userData?.sterilisationOutcome === "No show" || userData?.sterilisationOutcome === "No Show"
+      //     ? userData?.sterilisationOutcomeDate ?? new Date()
+      //     : new Date();
+      // setSterilisationOutcomeDate(sterilisationOutcomeDate_);
+
+      setSterilisationOutcomeDate(userData?.sterilisationOutcomeDate ?? new Date(0));
 
       if (userData?.vaccinationShot1.getFullYear() !== 1970) {
         setVaccinationShot1Option("Yes");
@@ -3216,7 +3226,7 @@ const Pet: NextPage = () => {
       setVaccinationShot2Date(userData?.vaccinationShot2 ?? new Date());
       setVaccinationShot3Date(userData?.vaccinationShot3 ?? new Date());
 
-      setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date());
+      setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date(0));
       setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date());
 
       setMembershipTypeOption(userData?.membership ?? "");
@@ -3226,8 +3236,8 @@ const Pet: NextPage = () => {
         userData?.membership === "Gold Card Holder" ||
         userData?.membership === "Standard Card Holder"
           ? userData?.membershipDate ?? new Date()
-          : new Date();
-      setSterilisationOutcomeDate(membershipDate_);
+          : new Date(0);
+      setMembershipDate(membershipDate_);
 
       setCardStatusOption(userData?.cardStatus ?? "");
       setKennelList(userData?.kennelReceived ?? []);
@@ -3305,8 +3315,30 @@ const Pet: NextPage = () => {
     setIsViewProfilePage(true);
   };
 
+  //sterilisation status
+  useEffect(() => {
+    if (sterilisationStatusOption === "Yes" && sterilisationStatusDate.getFullYear() === 1970) {
+      setSterilisationStatusDate(new Date());
+    }
+  }, [sterilisationStatusOption]);
+
+  //sterilisation requested date
+  useEffect(() => {
+    if (sterilisationRequestedOption === "Yes" && sterilisationRequestedDate.getFullYear() === 1970) {
+      setSterilisationRequestedDate(new Date());
+    }
+  }, [sterilisationRequestedOption]);
+
+  //sterilisation outcome
+  useEffect(() => {
+    if (sterilisationOutcomeOption === "No Show" && sterilisationOutcomeDate.getFullYear() === 1970) {
+      setSterilisationOutcomeDate(new Date());
+    }
+  }, [sterilisationOutcomeOption]);
+
   //view profile useeffect incase data changes:
   useEffect(() => {
+    //setDataReturned(true);
     if (isViewProfilePage) {
       const user = pet_data_with_clinics_and_treatments?.find((user) => user.petID === id);
 
@@ -3315,6 +3347,27 @@ const Pet: NextPage = () => {
       // const pet = user ? user : user_individual_route.data;
       if (user) {
         const userData = user;
+
+        //sterilisationStatus
+        setSterilisationStatusOption(userData?.sterilisedStatus.getFullYear() != 1970 ? "Yes" : "No");
+        setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date(0));
+
+        //sterilisation requested
+        setSterilisationRequestedOption(userData?.sterilisedRequested?.getFullYear() != 1970 ? "Yes" : "No");
+        setSterilisationRequestedDate(userData?.sterilisedRequested ?? new Date(0));
+
+        //sterilisation signed At
+        setSterilisationRequestSignedOption(userData?.sterilisedRequestSigned ?? "");
+
+        //sterilisationOutcome
+        setSterilisationOutcomeOption(userData?.sterilisationOutcome ?? "");
+        setSterilisationOutcomeDate(userData?.sterilisationOutcomeDate ?? new Date(0));
+
+        //membership date
+        setMembershipDate(user?.membershipDate ?? new Date(0));
+
+        //last deworming
+        setLastDeworming(user?.lastDeworming ?? new Date(0));
 
         //Clinic data
         const clinicData = user?.clinic_data ?? [];
@@ -3600,11 +3653,15 @@ const Pet: NextPage = () => {
         // setVaccinationShot1Date(petData?.vaccinationShot1 ?? new Date());
         // setVaccinationShot2Date(petData?.vaccinationShot2 ?? new Date());
         // setVaccinationShot3Date(petData?.vaccinationShot3 ?? new Date());
-        setSterilisationStatusDate(petData?.sterilisedStatus ?? new Date());
+        setSterilisationStatusDate(petData?.sterilisedStatus ?? new Date(0));
         setSterilisationRequestedDate(petData?.sterilisedRequested ?? new Date());
+
+        setSterilisationOutcomeOption(petData?.sterilisationOutcome ?? "");
+        setSterilisationOutcomeDate(petData?.sterilisationOutcomeDate ?? new Date(0));
 
         setKennelList(petData?.kennelReceived ?? []);
         setLastDeworming(petData?.lastDeworming ?? new Date());
+        setMembershipDate(petData?.membershipDate ?? new Date(0));
         setComments(petData?.comments ?? "");
         setClinicList(clinicDates);
         setTreatmentList(treatmentData);
@@ -3724,7 +3781,7 @@ const Pet: NextPage = () => {
     setVaccinationShot3Date(new Date());
     setClinicsAttendedOption("Select here");
     setMembershipTypeOption("Select one");
-    setMembershipDate(new Date());
+    // setMembershipDate(new Date(0));
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select here");
     setComments("");
@@ -5480,22 +5537,23 @@ const Pet: NextPage = () => {
                     {(membershipTypeOption === "Standard card holder" ||
                       membershipTypeOption === "Gold card holder" ||
                       membershipTypeOption === "Standard Card Holder" ||
-                      membershipTypeOption === "Gold Card Holder") && (
-                      <div className="flex items-start">
-                        <div className="mr-3 flex items-center pt-5">
-                          <div className=" flex pl-3">Membership Date: </div>
+                      membershipTypeOption === "Gold Card Holder") &&
+                      membershipDate.getFullYear() != 1970 && (
+                        <div className="flex items-start">
+                          <div className="mr-3 flex items-center pt-5">
+                            <div className=" flex pl-3">Membership Date: </div>
+                          </div>
+                          <div className=" pt-2">
+                            <DatePicker
+                              selected={membershipDate}
+                              onChange={(date) => setMembershipDate(date!)}
+                              dateFormat="dd/MM/yyyy"
+                              customInput={<CustomMembershipInput />}
+                              className="form-input z-30 rounded-md border py-2"
+                            />
+                          </div>
                         </div>
-                        <div className=" pt-2">
-                          <DatePicker
-                            selected={membershipDate}
-                            onChange={(date) => setMembershipDate(date!)}
-                            dateFormat="dd/MM/yyyy"
-                            customInput={<CustomMembershipInput />}
-                            className="form-input z-30 rounded-md border py-2"
-                          />
-                        </div>
-                      </div>
-                    )}
+                      )}
 
                     {/* {membershipTypeOption !== "Non-card holder" &&
                       (membershipStatus() === "(Lapsed)" ? (
@@ -6052,10 +6110,11 @@ const Pet: NextPage = () => {
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Membership Type:</b>{" "}
-                        {membershipTypeOption === "Standard card holder" ||
-                        membershipTypeOption === "Gold card holder" ||
-                        membershipTypeOption === "Standard Card Holder" ||
-                        membershipTypeOption === "Gold Card Holder"
+                        {(membershipTypeOption === "Standard card holder" ||
+                          membershipTypeOption === "Gold card holder" ||
+                          membershipTypeOption === "Standard Card Holder" ||
+                          membershipTypeOption === "Gold Card Holder") &&
+                        membershipDate.getFullYear() != 1970
                           ? `${membershipTypeOption}, ${membershipDate.getDate().toString()}/${(
                               (membershipDate.getMonth() ?? 0) + 1
                             ).toString()}/${membershipDate.getFullYear().toString()}`

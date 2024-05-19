@@ -671,17 +671,30 @@ export const petRouter = createTRPCRouter({
       z.object({
         petID: z.number(),
         clinicID: z.number(),
+        due: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.pet.update({
-        where: {
-          petID: input.petID,
-        },
-        data: {
-          updatedAt: new Date(),
-        },
-      });
+      if (input.due === "Yes") {
+        await ctx.db.pet.update({
+          where: {
+            petID: input.petID,
+          },
+          data: {
+            lastDeworming: new Date(),
+            updatedAt: new Date(),
+          },
+        });
+      } else {
+        await ctx.db.pet.update({
+          where: {
+            petID: input.petID,
+          },
+          data: {
+            updatedAt: new Date(),
+          },
+        });
+      }
 
       const pet = await ctx.db.petOnPetClinic.create({
         data: {
@@ -1517,9 +1530,12 @@ export const petRouter = createTRPCRouter({
           "Sterilised Requested": pet.sterilisedRequested?.getFullYear() === 1970 ? "No Sterilisation Requested" : pet.sterilisedRequested,
           "Sterilised Request Signed": pet.sterilisedRequestSigned,
           "Sterilisation Outcome": pet.sterilisationOutcome,
-          "Vaccination Shot 1": pet.vaccinationShot1?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot1,
-          "Vaccination Shot 2": pet.vaccinationShot2?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot2,
-          "Vaccination Shot 3": pet.vaccinationShot3?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot3,
+          "Vaccination Shot 1":
+            pet.vaccinationShot1?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot1?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot1,
+          "Vaccination Shot 2":
+            pet.vaccinationShot2?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot2?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot2,
+          "Vaccination Shot 3":
+            pet.vaccinationShot3?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot3?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot3,
           "Last Deworming": pet.lastDeworming,
           Membership: pet.membership,
           "Card Status": pet.cardStatus,

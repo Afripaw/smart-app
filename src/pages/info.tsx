@@ -18,6 +18,7 @@ import * as FileSaver from "file-saver";
 
 //permissions
 import usePageAccess from "../hooks/usePageAccess";
+import { FastForwardCircle } from "phosphor-react";
 
 const Info: NextPage = () => {
   //checks user session and page access
@@ -164,30 +165,96 @@ const Info: NextPage = () => {
     </button>
   );
 
-  //SPECIES
-  const [speciesSterilise, setSpeciesSterilise] = useState(false);
-  const [speciesSteriliseOption, setSpeciesSteriliseOption] = useState("Select one");
-  const speciesSteriliseRef = useRef<HTMLDivElement>(null);
-  const btnSpeciesSteriliseRef = useRef<HTMLButtonElement>(null);
+  // //SPECIES
+  // const [speciesSterilise, setSpeciesSterilise] = useState(false);
+  // const [speciesSteriliseOption, setSpeciesSteriliseOption] = useState("Select one");
+  // const speciesSteriliseRef = useRef<HTMLDivElement>(null);
+  // const btnSpeciesSteriliseRef = useRef<HTMLButtonElement>(null);
 
-  const handleToggleSpeciesSterilise = () => {
-    setSpeciesSterilise(!speciesSterilise);
+  // const handleToggleSpeciesSterilise = () => {
+  //   setSpeciesSterilise(!speciesSterilise);
+  // };
+
+  // const handleSpeciesSteriliseOption = (option: SetStateAction<string>) => {
+  //   setSpeciesSteriliseOption(option);
+  //   setSpeciesSterilise(false);
+  // };
+
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     if (
+  //       speciesSteriliseRef.current &&
+  //       !speciesSteriliseRef.current.contains(event.target as Node) &&
+  //       btnSpeciesSteriliseRef.current &&
+  //       !btnSpeciesSteriliseRef.current.contains(event.target as Node)
+  //     ) {
+  //       setSpeciesSterilise(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
+
+  // const speciesSteriliseOptions = ["Dog", "Cat"];
+
+  //SPECIES
+  //------------------------------SPECIES-----------------------------------------
+  type SpecieOptions = {
+    species: string;
+    state: boolean;
   };
 
-  const handleSpeciesSteriliseOption = (option: SetStateAction<string>) => {
-    setSpeciesSteriliseOption(option);
-    setSpeciesSterilise(false);
+  const [species, setSpecies] = useState(false);
+  const [speciesOption, setSpeciesOption] = useState("Select here");
+  const speciesRef = useRef<HTMLDivElement>(null);
+  const btnSpeciesRef = useRef<HTMLButtonElement>(null);
+
+  const [specieListOptions, setSpecieListOptions] = useState<SpecieOptions[]>([]);
+  //to select multiple species
+  const [specieList, setSpecieList] = useState<string[]>([]);
+
+  const handleSpecie = (option: SetStateAction<string>, state: boolean) => {
+    setSpeciesOption(option);
+    // setSpecieSelection({ allSelected: false, clear: false });
+    if (state) {
+      if (!specieList.includes(String(option))) {
+        setSpecieList([...specieList, String(option)]);
+      }
+      setSpecieListOptions(specieListOptions.map((specie) => (specie.species === option ? { ...specie, state: true } : specie)));
+    } else {
+      const updatedSpecieList = specieList.filter((specie) => specie !== option);
+      setSpecieList(updatedSpecieList);
+      setSpecieListOptions(specieListOptions.map((specie) => (specie.species === option ? { ...specie, state: false } : specie)));
+    }
+  };
+
+  //show all available options
+  const speciesOptions = ["Dog", "Cat"];
+
+  const handleToggleSpecies = () => {
+    setSpecies(!species);
+  };
+
+  const handleSpeciesOption = (option: SetStateAction<string>) => {
+    setSpeciesOption(option);
+    setSpecies(false);
+    if (!specieList.includes(String(option))) {
+      setSpecieList([...specieList, String(option)]);
+    }
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        speciesSteriliseRef.current &&
-        !speciesSteriliseRef.current.contains(event.target as Node) &&
-        btnSpeciesSteriliseRef.current &&
-        !btnSpeciesSteriliseRef.current.contains(event.target as Node)
+        speciesRef.current &&
+        !speciesRef.current.contains(event.target as Node) &&
+        btnSpeciesRef.current &&
+        !btnSpeciesRef.current.contains(event.target as Node)
       ) {
-        setSpeciesSterilise(false);
+        setSpecies(false);
       }
     };
 
@@ -197,7 +264,15 @@ const Info: NextPage = () => {
     };
   }, []);
 
-  const speciesSteriliseOptions = ["Dog", "Cat"];
+  //set specieListOptions at startup
+  useEffect(() => {
+    setSpecieListOptions(
+      speciesOptions.map((specie) => ({
+        species: specie,
+        state: false,
+      })),
+    );
+  }, []);
 
   //STERILISATION INFINITE SCROLLING
   const observerSterilisationTarget = useRef<HTMLDivElement | null>(null);
@@ -214,7 +289,8 @@ const Info: NextPage = () => {
       typeOfQuery: sterilisationDueOption,
       startDate: sterilisationStartingDate,
       endDate: sterilisationEndingDate,
-      species: speciesSteriliseOption,
+      //species: speciesSteriliseOption,
+      species: specieList,
       //order
     },
     {
@@ -259,7 +335,8 @@ const Info: NextPage = () => {
   //when dropdowns are selected again the table should dissappear
   useEffect(() => {
     setGeneratedSterilisation(false);
-  }, [sterilisationDueOption, sterilisationStartingDate, sterilisationEndingDate, speciesSteriliseOption]);
+  }, [sterilisationDueOption, sterilisationStartingDate, sterilisationEndingDate, specieList]);
+  //speciesSteriliseOption
 
   const handleSteriliseGenerate = async () => {
     setIsLoading(true);
@@ -276,7 +353,8 @@ const Info: NextPage = () => {
       typeOfQuery: sterilisationDueOption,
       startDate: sterilisationStartingDate,
       endDate: sterilisationEndingDate,
-      species: speciesSteriliseOption,
+      // species: speciesSteriliseOption,
+      species: specieList,
     },
     { enabled: hasAccess },
   );
@@ -366,11 +444,71 @@ const Info: NextPage = () => {
   //endDate
   const [membershipEndingDate, setMembershipEndingDate] = useState(new Date());
 
-  //SPECIES
+  //Old radio button species dropdown
+  // //SPECIES
+  // const [speciesMembership, setSpeciesMembership] = useState(false);
+  // const [speciesMembershipOption, setSpeciesMembershipOption] = useState("Select one");
+  // const speciesMembershipRef = useRef<HTMLDivElement>(null);
+  // const btnSpeciesMembershipRef = useRef<HTMLButtonElement>(null);
+
+  // const handleToggleSpeciesMembership = () => {
+  //   setSpeciesMembership(!speciesMembership);
+  // };
+
+  // const handleSpeciesMembershipOption = (option: SetStateAction<string>) => {
+  //   setSpeciesMembershipOption(option);
+  //   setSpeciesMembership(false);
+  // };
+
+  // useEffect(() => {
+  //   const handleClickOutside = (event: MouseEvent) => {
+  //     if (
+  //       speciesMembershipRef.current &&
+  //       !speciesMembershipRef.current.contains(event.target as Node) &&
+  //       btnSpeciesMembershipRef.current &&
+  //       !btnSpeciesMembershipRef.current.contains(event.target as Node)
+  //     ) {
+  //       setSpeciesMembership(false);
+  //     }
+  //   };
+
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, []);
+
+  // const speciesMembershipOptions = ["Dog", "Cat"];
+
+  //SPECIES MEMBERSHIP
+  //------------------------------SPECIES MEMBERSHIP-----------------------------------------
+
   const [speciesMembership, setSpeciesMembership] = useState(false);
-  const [speciesMembershipOption, setSpeciesMembershipOption] = useState("Select one");
+  const [speciesMembershipOption, setSpeciesMembershipOption] = useState("Select here");
   const speciesMembershipRef = useRef<HTMLDivElement>(null);
   const btnSpeciesMembershipRef = useRef<HTMLButtonElement>(null);
+
+  const [specieMembershipListOptions, setSpecieMembershipListOptions] = useState<SpecieOptions[]>([]);
+  //to select multiple species
+  const [specieMembershipList, setSpecieMembershipList] = useState<string[]>([]);
+
+  const handleSpecieMembership = (option: SetStateAction<string>, state: boolean) => {
+    setSpeciesMembershipOption(option);
+    // setSpecieSelection({ allSelected: false, clear: false });
+    if (state) {
+      if (!specieMembershipList.includes(String(option))) {
+        setSpecieMembershipList([...specieMembershipList, String(option)]);
+      }
+      setSpecieMembershipListOptions(specieMembershipListOptions.map((specie) => (specie.species === option ? { ...specie, state: true } : specie)));
+    } else {
+      const updatedSpecieList = specieList.filter((specie) => specie !== option);
+      setSpecieMembershipList(updatedSpecieList);
+      setSpecieMembershipListOptions(specieMembershipListOptions.map((specie) => (specie.species === option ? { ...specie, state: false } : specie)));
+    }
+  };
+  // const [kennelList, setKennelList] = useState<string[]>([]);
+  //show all available options
+  const speciesMembershipOptions = ["Dog", "Cat"];
 
   const handleToggleSpeciesMembership = () => {
     setSpeciesMembership(!speciesMembership);
@@ -379,6 +517,9 @@ const Info: NextPage = () => {
   const handleSpeciesMembershipOption = (option: SetStateAction<string>) => {
     setSpeciesMembershipOption(option);
     setSpeciesMembership(false);
+    if (!specieMembershipList.includes(String(option))) {
+      setSpecieMembershipList([...specieMembershipList, String(option)]);
+    }
   };
 
   useEffect(() => {
@@ -399,7 +540,15 @@ const Info: NextPage = () => {
     };
   }, []);
 
-  const speciesMembershipOptions = ["Dog", "Cat"];
+  //set specieListOptions at startup
+  useEffect(() => {
+    setSpecieMembershipListOptions(
+      speciesMembershipOptions.map((specie) => ({
+        species: specie,
+        state: false,
+      })),
+    );
+  }, []);
 
   //MEMBERSHIP INFINITE SCROLLING
   const observerMembershipTarget = useRef<HTMLDivElement | null>(null);
@@ -416,7 +565,8 @@ const Info: NextPage = () => {
       typeOfQuery: membershipOption,
       startDate: membershipStartingDate,
       endDate: membershipEndingDate,
-      species: speciesMembershipOption,
+      //species: speciesMembershipOption,
+      species: specieMembershipList,
       //order
     },
     {
@@ -461,7 +611,8 @@ const Info: NextPage = () => {
   //when dropdowns are selected again the table should dissappear
   useEffect(() => {
     setGeneratedMembership(false);
-  }, [membershipOption, membershipStartingDate, membershipEndingDate, speciesMembershipOption]);
+  }, [membershipOption, membershipStartingDate, membershipEndingDate, specieMembershipList]);
+  //speciesMembershipOption
 
   const handleMembershipGenerate = async () => {
     setIsLoading(true);
@@ -478,7 +629,8 @@ const Info: NextPage = () => {
       typeOfQuery: membershipOption,
       startDate: membershipStartingDate,
       endDate: membershipEndingDate,
-      species: speciesMembershipOption,
+      //species: speciesMembershipOption,
+      species: specieMembershipList,
     },
     { enabled: hasAccess },
   );
@@ -874,7 +1026,7 @@ const Info: NextPage = () => {
                     </div>
                   </div>
 
-                  <div className="mx-3 flex items-center">
+                  {/* <div className="mx-3 flex items-center">
                     <div className="mx-3 flex items-center">
                       <label className="">
                         Species<span className="text-lg text-main-orange">*</span>:{" "}
@@ -898,6 +1050,49 @@ const Info: NextPage = () => {
                             {speciesSteriliseOptions.map((option) => (
                               <li key={option} onClick={() => handleSpeciesSteriliseOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div> */}
+
+                  <div className="mx-3 flex items-center">
+                    <div className="mx-3 flex items-center">
+                      <label className="">
+                        Species<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
+                    </div>
+                    <div className="relative flex flex-col">
+                      <button
+                        ref={btnSpeciesRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                        type="button"
+                        onClick={handleToggleSpecies}
+                      >
+                        {speciesOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {species && (
+                        <div ref={speciesRef} className="absolute top-[60px] z-10 w-full divide-y divide-gray-100 rounded-lg bg-white shadow">
+                          <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
+                            {specieListOptions?.map((option) => (
+                              <li key={option.species}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.species)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleSpecie(option.species, e.target.checked)}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.species)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.species}
+                                  </label>
+                                </div>
                               </li>
                             ))}
                           </ul>
@@ -1004,7 +1199,7 @@ const Info: NextPage = () => {
                     </div>
                   </div>
 
-                  <div className="mx-3 flex items-center">
+                  {/* <div className="mx-3 flex items-center">
                     <div className="mx-3 flex items-center">
                       <label className="">
                         Species<span className="text-lg text-main-orange">*</span>:{" "}
@@ -1028,6 +1223,49 @@ const Info: NextPage = () => {
                             {speciesMembershipOptions.map((option) => (
                               <li key={option} onClick={() => handleSpeciesMembershipOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  </div> */}
+
+                  <div className="mx-3 flex items-center">
+                    <div className="mx-3 flex items-center">
+                      <label className="">
+                        Species<span className="text-lg text-main-orange">*</span>:{" "}
+                      </label>
+                    </div>
+                    <div className="relative flex flex-col">
+                      <button
+                        ref={btnSpeciesMembershipRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                        type="button"
+                        onClick={handleToggleSpeciesMembership}
+                      >
+                        {speciesMembershipOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {speciesMembership && (
+                        <div ref={speciesMembershipRef} className="absolute top-[60px] z-10 w-full divide-y divide-gray-100 rounded-lg bg-white shadow">
+                          <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
+                            {specieMembershipListOptions?.map((option) => (
+                              <li key={option.species}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.species)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleSpecieMembership(option.species, e.target.checked)}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.species)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.species}
+                                  </label>
+                                </div>
                               </li>
                             ))}
                           </ul>
@@ -1325,25 +1563,32 @@ const Info: NextPage = () => {
                               </td>
                               <td className="border px-2 py-1">{user.sterilisedRequestSigned}</td>
                               <td className=" border px-2 py-1">
-                                {user?.vaccinationShot1?.getFullYear() !== 1970
-                                  ? `${user.vaccinationShot1.getDate().toString().padStart(2, "0")}/` +
-                                    `${(user.vaccinationShot1.getMonth() + 1).toString().padStart(2, "0")}/` +
-                                    `${user.vaccinationShot1.getFullYear().toString()}`
-                                  : "Not yet"}
+                                {user?.vaccinationShot1?.getFullYear() === 1970
+                                  ? "Not yet"
+                                  : user?.vaccinationShot1?.getFullYear() === 1971
+                                    ? "Unknown"
+                                    : `${user.vaccinationShot1.getDate().toString()}/` +
+                                      `${(user.vaccinationShot1.getMonth() + 1).toString()}/` +
+                                      `${user.vaccinationShot1.getFullYear().toString()}`}
                               </td>
                               <td className=" border px-2 py-1">
-                                {user?.vaccinationShot2?.getFullYear() !== 1970
-                                  ? `${user.vaccinationShot2?.getDate().toString().padStart(2, "0")}/` +
-                                    `${((user.vaccinationShot2?.getMonth() ?? 0) + 1).toString().padStart(2, "0")}/` +
-                                    `${user.vaccinationShot2?.getFullYear().toString()}`
-                                  : "Not yet"}
+                                {user?.vaccinationShot2?.getFullYear() === 1970
+                                  ? "Not yet"
+                                  : user?.vaccinationShot2?.getFullYear() === 1971
+                                    ? "Unknown"
+                                    : `${user.vaccinationShot2?.getDate().toString()}/` +
+                                      `${((user.vaccinationShot2?.getMonth() ?? 0) + 1).toString()}/` +
+                                      `${user.vaccinationShot2?.getFullYear().toString()}`}
+                                {/* .toString().padStart(2, "0") */}
                               </td>
                               <td className=" border px-2 py-1">
-                                {user?.vaccinationShot3?.getFullYear() !== 1970
-                                  ? `${user.vaccinationShot3?.getDate().toString().padStart(2, "0")}/` +
-                                    `${((user.vaccinationShot3?.getMonth() ?? 0) + 1).toString().padStart(2, "0")}/` +
-                                    `${user.vaccinationShot3?.getFullYear().toString()}`
-                                  : "Not yet"}
+                                {user?.vaccinationShot3?.getFullYear() === 1970
+                                  ? "Not yet"
+                                  : user?.vaccinationShot3?.getFullYear() === 1971
+                                    ? "Unknown"
+                                    : `${user.vaccinationShot3?.getDate().toString()}/` +
+                                      `${((user.vaccinationShot3?.getMonth() ?? 0) + 1).toString()}/` +
+                                      `${user.vaccinationShot3?.getFullYear().toString()}`}
                               </td>
                             </tr>
                           );
@@ -1445,7 +1690,7 @@ const Info: NextPage = () => {
                         })}
                         <tr>
                           <td className=" px-2 py-1">
-                            <div ref={observerSterilisationTarget} />
+                            <div ref={observerMembershipTarget} />
                           </td>
                         </tr>
                       </tbody>
@@ -1554,7 +1799,7 @@ const Info: NextPage = () => {
                         })}
                         <tr>
                           <td className=" px-2 py-1">
-                            <div ref={observerSterilisationTarget} />
+                            <div ref={observerClinicTarget} />
                           </td>
                         </tr>
                       </tbody>
@@ -1697,7 +1942,7 @@ const Info: NextPage = () => {
                         })}
                         <tr>
                           <td className=" px-2 py-1">
-                            <div ref={observerSterilisationTarget} />
+                            <div ref={observerTreatmentTarget} />
                           </td>
                         </tr>
                       </tbody>

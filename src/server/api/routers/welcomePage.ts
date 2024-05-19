@@ -83,7 +83,7 @@ export const welcomePageRouter = createTRPCRouter({
         OR: [
           {
             vaccinationShot3: {
-              gt: new Date("1970-12-31T23:59:59.999Z"),
+              gt: new Date("1971-12-31T23:59:59.999Z"),
             },
           },
           {

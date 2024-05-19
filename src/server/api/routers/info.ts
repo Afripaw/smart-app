@@ -16,7 +16,7 @@ export const infoRouter = createTRPCRouter({
         typeOfQuery: z.string(),
         startDate: z.date(),
         endDate: z.date(),
-        species: z.string(),
+        species: z.string().array(),
         //order: z.string(),
       }),
     )
@@ -26,14 +26,14 @@ export const infoRouter = createTRPCRouter({
         input.typeOfQuery === "Requested"
           ? { sterilisedRequested: { gte: input.startDate, lte: input.endDate } }
           : input.typeOfQuery === "Actioned"
-            ? { sterilisationOutcome: { equals: "Actioned" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
+            ? { sterilisationOutcome: { equals: "Actioned" }, sterilisedStatus: { gte: input.startDate, lte: input.endDate } }
             : input.typeOfQuery === "No Show"
               ? { sterilisationOutcome: { equals: "No Show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
               : {};
 
       const data = await ctx.db.pet.findMany({
         where: {
-          AND: [sterilisationQuery, { species: input.species }],
+          AND: [sterilisationQuery, { species: { in: input.species } }],
         },
         //orderBy: order,
         take: input.limit + 1,
@@ -75,7 +75,7 @@ export const infoRouter = createTRPCRouter({
         typeOfQuery: z.string(),
         startDate: z.date(),
         endDate: z.date(),
-        species: z.string(),
+        species: z.string().array(),
         //order: z.string(),
       }),
     )
@@ -90,7 +90,7 @@ export const infoRouter = createTRPCRouter({
 
       const data = await ctx.db.pet.findMany({
         where: {
-          AND: [membershipQuery, { species: input.species }],
+          AND: [membershipQuery, { species: { in: input.species } }],
         },
         //orderBy: order,
         take: input.limit + 1,
@@ -323,7 +323,7 @@ export const infoRouter = createTRPCRouter({
         typeOfQuery: z.string(),
         startDate: z.date(),
         endDate: z.date(),
-        species: z.string(),
+        species: z.string().array(),
         //order: z.string(),
       }),
     )
@@ -333,14 +333,14 @@ export const infoRouter = createTRPCRouter({
         input.typeOfQuery === "Requested"
           ? { sterilisedRequested: { gte: input.startDate, lte: input.endDate } }
           : input.typeOfQuery === "Actioned"
-            ? { sterilisationOutcome: { equals: "Actioned" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
+            ? { sterilisationOutcome: { equals: "Actioned" }, sterilisedStatus: { gte: input.startDate, lte: input.endDate } }
             : input.typeOfQuery === "No Show"
               ? { sterilisationOutcome: { equals: "No Show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
               : {};
 
       const rawData = await ctx.db.pet.findMany({
         where: {
-          AND: [sterilisationQuery, { species: input.species }],
+          AND: [sterilisationQuery, { species: { in: input.species } }],
         },
         //orderBy: order,
         select: {
@@ -407,7 +407,7 @@ export const infoRouter = createTRPCRouter({
         typeOfQuery: z.string(),
         startDate: z.date(),
         endDate: z.date(),
-        species: z.string(),
+        species: z.string().array(),
         //order: z.string(),
       }),
     )
@@ -422,7 +422,7 @@ export const infoRouter = createTRPCRouter({
 
       const rawData = await ctx.db.pet.findMany({
         where: {
-          AND: [membershipQuery, { species: input.species }],
+          AND: [membershipQuery, { species: { in: input.species } }],
         },
         //orderBy: order,
         select: {

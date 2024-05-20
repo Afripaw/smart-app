@@ -1227,7 +1227,7 @@ const Pet: NextPage = () => {
     setSterilisationStatusOption(option);
     setSterilisationStatus(false);
 
-    if (option === "Yes") {
+    if (option === "No") {
       setSterilisationRequestSignedOption("Select one");
       setSterilisationRequestedOption("Select one");
       setSterilisationOutcomeOption("Select one");

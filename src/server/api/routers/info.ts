@@ -31,6 +31,15 @@ export const infoRouter = createTRPCRouter({
               ? { sterilisationOutcome: { equals: "No Show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
               : {};
 
+      // const sterilisationQuery =
+      //   input.typeOfQuery === "Requested"
+      //     ? { sterilisedRequested: { gte: input.startDate, lte: input.endDate } }
+      //     : input.typeOfQuery === "Actioned"
+      //       ? { sterilisedStatus: { gte: input.startDate, lte: input.endDate, gt: new Date("1970-12-31T23:59:59.999Z") } }
+      //       : input.typeOfQuery === "No Show"
+      //         ? { sterilisationOutcome: { equals: "No Show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
+      //         : {};
+
       const data = await ctx.db.pet.findMany({
         where: {
           AND: [sterilisationQuery, { species: { in: input.species } }],

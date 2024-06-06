@@ -32,8 +32,18 @@ import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "pho
 import { sendSMS } from "~/pages/api/smsPortal";
 
 //Date picker
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+// //MUI Date picker
+import dayjs, { Dayjs } from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import type {} from "@mui/x-date-pickers/themeAugmentation";
+
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+
 import { UploadButton } from "~/utils/uploadthing";
 import { useSession } from "next-auth/react";
 import Input from "~/components/Base/Input";
@@ -86,6 +96,58 @@ const Owner: NextPage = () => {
     name: string;
     breed: string;
   };
+
+  //MUI Datepicker fontsize
+  const theme = createTheme({
+    typography: {
+      fontSize: 12,
+    },
+    components: {
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              fontSize: 14, // Font size for the DatePicker input
+            },
+          },
+        },
+      },
+      MuiPickersDay: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for the calendar days
+          },
+        },
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for general text within the calendar
+          },
+        },
+      },
+
+      MuiPickersCalendarHeader: {
+        styleOverrides: {
+          switchViewButton: {
+            fontSize: "1rem", // Font size for the header view buttons
+          },
+          label: {
+            fontSize: "1rem", // Font size for the header label
+          },
+        },
+      },
+      MuiPickersToolbar: {
+        styleOverrides: {
+          root: {
+            "& .MuiTypography-root": {
+              fontSize: "1rem", // Font size for the toolbar text
+            },
+          },
+        },
+      },
+    },
+  });
 
   const newOwner = api.petOwner.create.useMutation();
   const updateOwner = api.petOwner.update.useMutation();
@@ -395,6 +457,7 @@ const Owner: NextPage = () => {
   const [addressPostalCode, setAddressPostalCode] = useState("");
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
+  const [startingDatejs, setStartingDatejs] = useState(dayjs(new Date()));
   const [image, setImage] = useState("");
 
   //---------------------------------NON-EDITABLE BOXES----------------------------------
@@ -770,6 +833,7 @@ const Owner: NextPage = () => {
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "Select one");
       setStartingDate(userData.startingDate ?? new Date());
+      setStartingDatejs(dayjs(userData.startingDate ?? new Date()));
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
 
@@ -878,6 +942,7 @@ const Owner: NextPage = () => {
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "Select one");
       setStartingDate(userData.startingDate ?? new Date());
+      setStartingDatejs(dayjs(userData.startingDate ?? new Date()));
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
 
@@ -1218,6 +1283,7 @@ const Owner: NextPage = () => {
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "");
       setStartingDate(userData.startingDate ?? new Date());
+      setStartingDatejs(dayjs(userData.startingDate ?? new Date()));
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
       setImage(userData.image ?? "");
@@ -1320,6 +1386,7 @@ const Owner: NextPage = () => {
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "");
       setStartingDate(userData.startingDate ?? new Date());
+      setStartingDatejs(dayjs(userData.startingDate ?? new Date()));
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
       setImage(userData.image ?? "");
@@ -1602,12 +1669,13 @@ const Owner: NextPage = () => {
     if (preferredOption === "SMS" && mobile === "") mandatoryFields.push("SMS is preferred communication but is empty");
 
     if (statusOption === "Select one") mandatoryFields.push("Status");
-    if (startingDate === null) mandatoryFields.push("Starting Date");
+    // if (startingDate === null) mandatoryFields.push("Starting Date");
 
     if (mobileMessage !== "") errorFields.push({ field: "Mobile", message: mobileMessage });
     if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
+    if (startingDate.toString() === "Invalid Date") errorFields.push({ field: "Starting Date", message: "Invalid date" });
     if (southAfricanIDMessage !== "") errorFields.push({ field: "South African ID", message: southAfricanIDMessage });
     if (southAfricanIDOption === "Yes" && southAfricanID === "")
       errorFields.push({ field: "South African ID", message: "South African ID is selected but no ID is provided" });
@@ -1708,16 +1776,16 @@ const Owner: NextPage = () => {
     }
   }, [user, isCreate, isUpdate, isViewProfilePage]);
 
-  // CustomInput component with explicit types for the props
-  const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
-      <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-      </svg>
-      <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
-    </button>
-  );
+  // // CustomInput component with explicit types for the props
+  // const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
+  //   <button className="form-input flex items-center rounded-md border px-4 py-2" onClick={onClick}>
+  //     <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+  //       <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+  //     </svg>
+  //     <div className="m-1 mr-2">(Select here): </div>
+  //     {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
+  //   </button>
+  // );
 
   //------------------------------------------DOWNLOADING OWNER TABLE TO EXCEL FILE------------------------------------------
   const downloadOwnerTable = api.petOwner.download.useQuery({ searchQuery: query }, { enabled: hasAccess });
@@ -2365,13 +2433,29 @@ const Owner: NextPage = () => {
                       Starting Date<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
                     <div className="p-4">
-                      <DatePicker
+                      {/* MUI Datepicker */}
+                      <ThemeProvider theme={theme}>
+                        <Typography>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              value={startingDatejs}
+                              onChange={(datejs_) => {
+                                setStartingDatejs(datejs_ ?? dayjs(new Date()));
+                                setStartingDate(datejs_?.toDate() ?? new Date());
+                              }}
+                              format="DD/MM/YYYY"
+                              slotProps={{ textField: { size: "small" } }}
+                            />
+                          </LocalizationProvider>
+                        </Typography>
+                      </ThemeProvider>
+                      {/* <DatePicker
                         selected={startingDate}
                         onChange={(date) => setStartingDate(date!)}
                         dateFormat="dd/MM/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-4 py-2"
-                      />
+                      /> */}
                     </div>
                   </div>
 

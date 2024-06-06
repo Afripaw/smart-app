@@ -26,8 +26,19 @@ import { AddressBook, Pencil, Printer, Trash, UserCircle, Users, Bed } from "pho
 import { sendSMS } from "~/pages/api/smsPortal";
 
 //Date picker
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+
+// //MUI Date picker
+import dayjs, { Dayjs } from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import type {} from "@mui/x-date-pickers/themeAugmentation";
+
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+
 import { UploadButton } from "~/utils/uploadthing";
 import { useSession } from "next-auth/react";
 import Input from "~/components/Base/Input";
@@ -42,6 +53,58 @@ const Volunteer: NextPage = () => {
   //checks user session and page access
   useSession({ required: true });
   const hasAccess = usePageAccess(["System Administrator"]);
+
+  //MUI Datepicker fontsize
+  const theme = createTheme({
+    typography: {
+      fontSize: 12,
+    },
+    components: {
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              fontSize: 14, // Font size for the DatePicker input
+            },
+          },
+        },
+      },
+      MuiPickersDay: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for the calendar days
+          },
+        },
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for general text within the calendar
+          },
+        },
+      },
+
+      MuiPickersCalendarHeader: {
+        styleOverrides: {
+          switchViewButton: {
+            fontSize: "1rem", // Font size for the header view buttons
+          },
+          label: {
+            fontSize: "1rem", // Font size for the header label
+          },
+        },
+      },
+      MuiPickersToolbar: {
+        styleOverrides: {
+          root: {
+            "& .MuiTypography-root": {
+              fontSize: "1rem", // Font size for the toolbar text
+            },
+          },
+        },
+      },
+    },
+  });
 
   const newVolunteer = api.volunteer.create.useMutation();
   const updateVolunteer = api.volunteer.update.useMutation();
@@ -409,6 +472,7 @@ const Volunteer: NextPage = () => {
   const [addressPostalCode, setAddressPostalCode] = useState("");
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
+  const [startingDatejs, setStartingDatejs] = useState<Dayjs>(dayjs(new Date()));
   const [image, setImage] = useState("");
   const [collaboratorOrg, setCollaboratorOrg] = useState("");
 
@@ -1003,6 +1067,7 @@ const Volunteer: NextPage = () => {
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "Select one");
       setStartingDate(userData.startingDate ?? new Date());
+      setStartingDatejs(dayjs(userData.startingDate ?? new Date()));
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
       setRoleList(userData.role ?? "Select here");
@@ -1085,6 +1150,7 @@ const Volunteer: NextPage = () => {
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "Select one");
       setStartingDate(userData.startingDate ?? new Date());
+      setStartingDatejs(dayjs(userData.startingDate ?? new Date()));
       setStatusOption(userData.status ?? "Select one");
       setComments(userData.comments ?? "");
       setCollaboratorOrg(userData.collaboratorOrg ?? "");
@@ -1222,6 +1288,7 @@ const Volunteer: NextPage = () => {
     setGreaterAreaOption("Select here");
     setRoleOption("Select here");
     setStartingDate(new Date());
+    setStartingDatejs(dayjs(new Date()));
     setClinicsAttendedOption("Select here");
     setStreet("");
     setAddressStreetCode("");
@@ -1252,6 +1319,7 @@ const Volunteer: NextPage = () => {
     setPreferredCommunicationOption("Select one");
     setStatusOption("Active");
     setStartingDate(new Date());
+    setStartingDatejs(dayjs(new Date()));
     setComments("");
     setCollaboratorOrg("");
     setFirstName("");
@@ -1427,6 +1495,7 @@ const Volunteer: NextPage = () => {
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "");
       setStartingDate(userData.startingDate ?? new Date());
+      setStartingDatejs(dayjs(userData.startingDate ?? new Date()));
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
       setRoleList(userData.role ?? "");
@@ -1517,6 +1586,7 @@ const Volunteer: NextPage = () => {
       setAddressPostalCode(userData.addressPostalCode ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "");
       setStartingDate(userData.startingDate ?? new Date());
+      setStartingDatejs(dayjs(userData.startingDate ?? new Date()));
       setStatusOption(userData.status ?? "");
       setComments(userData.comments ?? "");
       setRoleList(userData.role ?? "");
@@ -1554,6 +1624,7 @@ const Volunteer: NextPage = () => {
     setGreaterAreaOption("Select here");
     setRoleOption("Select here");
     setStartingDate(new Date());
+    setStartingDatejs(dayjs(new Date()));
     setClinicsAttendedOption("Select here");
     setStreet("");
     setAddressStreetCode("");
@@ -1667,7 +1738,7 @@ const Volunteer: NextPage = () => {
     if (greaterAreaList.length === 0) mandatoryFields.push("Greater Area");
     // if (preferredOption === "Select one") mandatoryFields.push("Preferred Communication");
     if (statusOption === "Select one") mandatoryFields.push("Status");
-    if (startingDate === null) mandatoryFields.push("Starting Date");
+    // if (startingDate === null) mandatoryFields.push("Starting Date");
     if (preferredOption === "Email" && email === "") mandatoryFields.push("Email is preferred communication but is empty");
     if (preferredOption === "SMS" && mobile === "") mandatoryFields.push("SMS is preferred communication but is empty");
     if (roleList.length === 0) mandatoryFields.push("Role");
@@ -1676,6 +1747,7 @@ const Volunteer: NextPage = () => {
     if (streetCodeMessage !== "") errorFields.push({ field: "Street Code", message: streetCodeMessage });
     if (streetNumberMessage !== "") errorFields.push({ field: "Street Number", message: streetNumberMessage });
     if (postalCodeMessage !== "") errorFields.push({ field: "Postal Code", message: postalCodeMessage });
+    if (startingDate.toString() === "Invalid Date") errorFields.push({ field: "Starting Date", message: "Invalid date" });
     if (southAfricanIDMessage !== "") errorFields.push({ field: "South African ID", message: southAfricanIDMessage });
     if (southAfricanIDOption === "Yes" && southAfricanID === "")
       errorFields.push({ field: "South African ID", message: "South African ID is selected but no ID is provided" });
@@ -2788,13 +2860,29 @@ const Volunteer: NextPage = () => {
                       Starting Date<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
                     <div className="p-4">
-                      <DatePicker
+                      {/* MUI Datepicker */}
+                      <ThemeProvider theme={theme}>
+                        <Typography>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              value={startingDatejs}
+                              onChange={(datejs_) => {
+                                setStartingDatejs(datejs_ ?? dayjs(new Date()));
+                                setStartingDate(datejs_?.toDate() ?? new Date());
+                              }}
+                              format="DD/MM/YYYY"
+                              slotProps={{ textField: { size: "small" } }}
+                            />
+                          </LocalizationProvider>
+                        </Typography>
+                      </ThemeProvider>
+                      {/* <DatePicker
                         selected={startingDate}
                         onChange={(date) => setStartingDate(date!)}
                         dateFormat="dd/MM/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-4 py-2"
-                      />
+                      /> */}
                     </div>
                   </div>
 

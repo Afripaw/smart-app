@@ -15,8 +15,16 @@ import DeleteButtonModal from "~/components/deleteButtonModal";
 import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "phosphor-react";
 
 //Date picker
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+//--------------old datepicker
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+//--------------old datepicker
+
+// //MUI Date picker
+import dayjs, { Dayjs } from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 //Communication
 import { sendSMS } from "~/pages/api/smsPortal";
@@ -42,6 +50,14 @@ const Communication: NextPage = () => {
   //checks user session and page access
   useSession({ required: true });
   const hasAccess = usePageAccess(["System Administrator"]);
+
+  const [date, setDate] = useState(new Date());
+  const [datejs, setDatejs] = useState<Dayjs>(dayjs(new Date()));
+
+  useEffect(() => {
+    console.log("Datejs: ", datejs);
+    console.log("Date: ", date);
+  }, [datejs, date]);
 
   //Types
   type Communication = {
@@ -1275,6 +1291,18 @@ const Communication: NextPage = () => {
                 {/*<div className="p-2">User ID: {(lastUserCreated?.data?.userID ?? 1000000) + 1}</div>*/}
                 <div className="relative my-2 flex w-full flex-col rounded-lg border-2 bg-slate-200 p-4">
                   <b className="mb-3 text-center text-xl">Communication Data</b>
+
+                  {/* MUI Datepicker */}
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      value={datejs}
+                      onChange={(datejs_) => {
+                        setDatejs(datejs_ ?? dayjs(new Date()));
+                        setDate(datejs_?.toDate() ?? new Date());
+                      }}
+                      format="DD/MM/YYYY"
+                    />
+                  </LocalizationProvider>
 
                   <div className="flex py-2">
                     Message ID: <div className="px-3">M{isCreate ? String((latestCommunicationID?.data?.communicationID ?? 0) + 1) : id}</div>

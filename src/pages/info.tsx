@@ -6,8 +6,17 @@ import Navbar from "../components/navbar";
 import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 //Date picker
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+
+// //MUI Date picker
+import dayjs, { Dayjs } from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import type {} from "@mui/x-date-pickers/themeAugmentation";
 
 //Excel
 import * as XLSX from "xlsx";
@@ -18,12 +27,65 @@ import * as FileSaver from "file-saver";
 
 //permissions
 import usePageAccess from "../hooks/usePageAccess";
+
 import { FastForwardCircle } from "phosphor-react";
 
 const Info: NextPage = () => {
   //checks user session and page access
   useSession({ required: true });
   const hasAccess = usePageAccess(["System Administrator", "Data Analyst", "Data Consumer"]);
+
+  //MUI Datepicker fontsize
+  const theme = createTheme({
+    typography: {
+      fontSize: 12,
+    },
+    components: {
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              fontSize: 14, // Font size for the DatePicker input
+            },
+          },
+        },
+      },
+      MuiPickersDay: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for the calendar days
+          },
+        },
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for general text within the calendar
+          },
+        },
+      },
+
+      MuiPickersCalendarHeader: {
+        styleOverrides: {
+          switchViewButton: {
+            fontSize: "1rem", // Font size for the header view buttons
+          },
+          label: {
+            fontSize: "1rem", // Font size for the header label
+          },
+        },
+      },
+      MuiPickersToolbar: {
+        styleOverrides: {
+          root: {
+            "& .MuiTypography-root": {
+              fontSize: "1rem", // Font size for the toolbar text
+            },
+          },
+        },
+      },
+    },
+  });
 
   //Loading
   const [isLoading, setIsLoading] = useState(false);
@@ -144,8 +206,10 @@ const Info: NextPage = () => {
   //DATES
   //startDate
   const [sterilisationStartingDate, setSterilisationStartingDate] = useState(new Date());
+  const [sterilisationStartingDatejs, setSterilisationStartingDatejs] = useState(dayjs(new Date()));
   //endDate
   const [sterilisationEndingDate, setSterilisationEndingDate] = useState(new Date());
+  const [sterilisationEndingDatejs, setSterilisationEndingDatejs] = useState(dayjs(new Date()));
 
   // Define the props for your custom input component
   interface CustomInputProps {
@@ -441,8 +505,10 @@ const Info: NextPage = () => {
   //DATES
   //startDate
   const [membershipStartingDate, setMembershipStartingDate] = useState(new Date());
+  const [membershipStartingDatejs, setMembershipStartingDatejs] = useState(dayjs(new Date()));
   //endDate
   const [membershipEndingDate, setMembershipEndingDate] = useState(new Date());
+  const [membershipEndingDatejs, setMembershipEndingDatejs] = useState(dayjs(new Date()));
 
   //Old radio button species dropdown
   // //SPECIES
@@ -747,11 +813,14 @@ const Info: NextPage = () => {
 
   //startDate
   const [clinicStartingDate, setClinicStartingDate] = useState(new Date());
+  const [clinicStartingDatejs, setClinicStartingDatejs] = useState(dayjs(new Date()));
   //endDate
   const [clinicEndingDate, setClinicEndingDate] = useState(new Date());
+  const [clinicEndingDatejs, setClinicEndingDatejs] = useState(dayjs(new Date()));
 
   //singleDate
   const [clinicDate, setClinicDate] = useState(new Date());
+  const [clinicDatejs, setClinicDatejs] = useState(dayjs(new Date()));
 
   //CLINIC INFINITE SCROLLING
   const observerClinicTarget = useRef<HTMLDivElement | null>(null);
@@ -1108,13 +1177,29 @@ const Info: NextPage = () => {
                       From<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
                     <div className="z-50 p-4">
-                      <DatePicker
+                      {/* MUI Datepicker */}
+                      <ThemeProvider theme={theme}>
+                        <Typography>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              value={sterilisationStartingDatejs}
+                              onChange={(datejs_) => {
+                                setSterilisationStartingDatejs(datejs_ ?? dayjs(new Date()));
+                                setSterilisationStartingDate(datejs_?.toDate() ?? new Date());
+                              }}
+                              format="DD/MM/YYYY"
+                              slotProps={{ textField: { size: "small" } }}
+                            />
+                          </LocalizationProvider>
+                        </Typography>
+                      </ThemeProvider>
+                      {/* <DatePicker
                         selected={sterilisationStartingDate}
                         onChange={(date) => setSterilisationStartingDate(date!)}
                         dateFormat="dd/MM/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-4 py-2"
-                      />
+                      /> */}
                     </div>
                   </div>
 
@@ -1123,13 +1208,29 @@ const Info: NextPage = () => {
                       To<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
                     <div className="z-50 p-4">
-                      <DatePicker
+                      {/* MUI Datepicker */}
+                      <ThemeProvider theme={theme}>
+                        <Typography>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              value={sterilisationEndingDatejs}
+                              onChange={(datejs_) => {
+                                setSterilisationEndingDatejs(datejs_ ?? dayjs(new Date()));
+                                setSterilisationEndingDate(datejs_?.toDate() ?? new Date());
+                              }}
+                              format="DD/MM/YYYY"
+                              slotProps={{ textField: { size: "small" } }}
+                            />
+                          </LocalizationProvider>
+                        </Typography>
+                      </ThemeProvider>
+                      {/* <DatePicker
                         selected={sterilisationEndingDate}
                         onChange={(date) => setSterilisationEndingDate(date!)}
                         dateFormat="dd/MM/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-4 py-2"
-                      />
+                      /> */}
                     </div>
                   </div>
                 </div>
@@ -1281,13 +1382,29 @@ const Info: NextPage = () => {
                       From<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
                     <div className="z-40 p-4">
-                      <DatePicker
+                      {/* MUI Datepicker */}
+                      <ThemeProvider theme={theme}>
+                        <Typography>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              value={membershipStartingDatejs}
+                              onChange={(datejs_) => {
+                                setMembershipStartingDatejs(datejs_ ?? dayjs(new Date()));
+                                setMembershipStartingDate(datejs_?.toDate() ?? new Date());
+                              }}
+                              format="DD/MM/YYYY"
+                              slotProps={{ textField: { size: "small" } }}
+                            />
+                          </LocalizationProvider>
+                        </Typography>
+                      </ThemeProvider>
+                      {/* <DatePicker
                         selected={membershipStartingDate}
                         onChange={(date) => setMembershipStartingDate(date!)}
                         dateFormat="dd/MM/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-4 py-2"
-                      />
+                      /> */}
                     </div>
                   </div>
 
@@ -1296,13 +1413,29 @@ const Info: NextPage = () => {
                       To<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
                     <div className="z-40 p-4">
-                      <DatePicker
+                      {/* MUI Datepicker */}
+                      <ThemeProvider theme={theme}>
+                        <Typography>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              value={membershipEndingDatejs}
+                              onChange={(datejs_) => {
+                                setMembershipEndingDatejs(datejs_ ?? dayjs(new Date()));
+                                setMembershipEndingDate(datejs_?.toDate() ?? new Date());
+                              }}
+                              format="DD/MM/YYYY"
+                              slotProps={{ textField: { size: "small" } }}
+                            />
+                          </LocalizationProvider>
+                        </Typography>
+                      </ThemeProvider>
+                      {/* <DatePicker
                         selected={membershipEndingDate}
                         onChange={(date) => setMembershipEndingDate(date!)}
                         dateFormat="dd/MM/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-4 py-2"
-                      />
+                      /> */}
                     </div>
                   </div>
                 </div>
@@ -1412,13 +1545,29 @@ const Info: NextPage = () => {
                         From<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                       <div className="z-30 p-4">
-                        <DatePicker
+                        {/* MUI Datepicker */}
+                        <ThemeProvider theme={theme}>
+                          <Typography>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DatePicker
+                                value={clinicStartingDatejs}
+                                onChange={(datejs_) => {
+                                  setClinicStartingDatejs(datejs_ ?? dayjs(new Date()));
+                                  setClinicStartingDate(datejs_?.toDate() ?? new Date());
+                                }}
+                                format="DD/MM/YYYY"
+                                slotProps={{ textField: { size: "small" } }}
+                              />
+                            </LocalizationProvider>
+                          </Typography>
+                        </ThemeProvider>
+                        {/* <DatePicker
                           selected={clinicStartingDate}
                           onChange={(date) => setClinicStartingDate(date!)}
                           dateFormat="dd/MM/yyyy"
                           customInput={<CustomInput />}
                           className="form-input rounded-md border px-4 py-2"
-                        />
+                        /> */}
                       </div>
                     </div>
 
@@ -1427,13 +1576,29 @@ const Info: NextPage = () => {
                         To<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                       <div className="z-30 p-4">
-                        <DatePicker
+                        {/* MUI Datepicker */}
+                        <ThemeProvider theme={theme}>
+                          <Typography>
+                            <LocalizationProvider dateAdapter={AdapterDayjs}>
+                              <DatePicker
+                                value={clinicEndingDatejs}
+                                onChange={(datejs_) => {
+                                  setClinicEndingDatejs(datejs_ ?? dayjs(new Date()));
+                                  setClinicEndingDate(datejs_?.toDate() ?? new Date());
+                                }}
+                                format="DD/MM/YYYY"
+                                slotProps={{ textField: { size: "small" } }}
+                              />
+                            </LocalizationProvider>
+                          </Typography>
+                        </ThemeProvider>
+                        {/* <DatePicker
                           selected={clinicEndingDate}
                           onChange={(date) => setClinicEndingDate(date!)}
                           dateFormat="dd/MM/yyyy"
                           customInput={<CustomInput />}
                           className="form-input rounded-md border px-4 py-2"
-                        />
+                        /> */}
                       </div>
                     </div>
                   </div>
@@ -1443,13 +1608,29 @@ const Info: NextPage = () => {
                       Date<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
                     <div className="z-30 p-4">
-                      <DatePicker
+                      {/* MUI Datepicker */}
+                      <ThemeProvider theme={theme}>
+                        <Typography>
+                          <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                              value={clinicDatejs}
+                              onChange={(datejs_) => {
+                                setClinicDatejs(datejs_ ?? dayjs(new Date()));
+                                setClinicDate(datejs_?.toDate() ?? new Date());
+                              }}
+                              format="DD/MM/YYYY"
+                              slotProps={{ textField: { size: "small" } }}
+                            />
+                          </LocalizationProvider>
+                        </Typography>
+                      </ThemeProvider>
+                      {/* <DatePicker
                         selected={clinicDate}
                         onChange={(date) => setClinicDate(date!)}
                         dateFormat="dd/MM/yyyy"
                         customInput={<CustomInput />}
                         className="form-input rounded-md border px-4 py-2"
-                      />
+                      /> */}
                     </div>
                   </div>
                 )}

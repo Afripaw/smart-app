@@ -22,8 +22,18 @@ import * as FileSaver from "file-saver";
 import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "phosphor-react";
 
 //Date picker
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+// //MUI Date picker
+import dayjs, { Dayjs } from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import type {} from "@mui/x-date-pickers/themeAugmentation";
+
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+
 import { UploadButton } from "~/utils/uploadthing";
 import { useSession } from "next-auth/react";
 import Input from "~/components/Base/Input";
@@ -68,6 +78,58 @@ const Clinic: NextPage = () => {
     allSelected: boolean;
     clear: boolean;
   };
+
+  //MUI Datepicker fontsize
+  const theme = createTheme({
+    typography: {
+      fontSize: 12,
+    },
+    components: {
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              fontSize: 14, // Font size for the DatePicker input
+            },
+          },
+        },
+      },
+      MuiPickersDay: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for the calendar days
+          },
+        },
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for general text within the calendar
+          },
+        },
+      },
+
+      MuiPickersCalendarHeader: {
+        styleOverrides: {
+          switchViewButton: {
+            fontSize: "1rem", // Font size for the header view buttons
+          },
+          label: {
+            fontSize: "1rem", // Font size for the header label
+          },
+        },
+      },
+      MuiPickersToolbar: {
+        styleOverrides: {
+          root: {
+            "& .MuiTypography-root": {
+              fontSize: "1rem", // Font size for the toolbar text
+            },
+          },
+        },
+      },
+    },
+  });
 
   const newClinic = api.petClinic.create.useMutation();
   const updateClinic = api.petClinic.update.useMutation();
@@ -311,6 +373,7 @@ const Clinic: NextPage = () => {
   //---------------------------------EDIT BOXES----------------------------------
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
+  const [startingDatejs, setStartingDatejs] = useState(dayjs(new Date()));
 
   //--------------------------------UNEDITABLE-------------------------------------
   const [dogVisits, setDogVisits] = useState(0);
@@ -567,6 +630,7 @@ const Clinic: NextPage = () => {
       // }
 
       setStartingDate(userData?.date ?? new Date());
+      setStartingDatejs(dayjs(userData?.date ?? new Date()));
       setComments(userData.comments ?? "");
 
       const conditionData = userData?.conditions;
@@ -631,6 +695,7 @@ const Clinic: NextPage = () => {
       //   setAreaOption({ area: "Select one", id: 0 });
       // }
       setStartingDate(userData.date ?? new Date());
+      setStartingDatejs(dayjs(userData?.date ?? new Date()));
       setComments(userData.comments ?? "");
 
       const conditionData = userData?.conditions;
@@ -708,6 +773,7 @@ const Clinic: NextPage = () => {
     setGreaterAreaOption({ area: "Select one", id: 0 });
     // setAreaOption({ area: "Select one", id: 0 });
     setStartingDate(new Date());
+    setStartingDatejs(dayjs(new Date()));
     setComments("");
     setConditionOption("Select here");
     setConditionListOptions(conditionOptions.map((condition) => ({ id: condition.id, condition: condition.name, state: false })));
@@ -770,6 +836,7 @@ const Clinic: NextPage = () => {
       //   setAreaOption({ area: "Select one", id: 0 });
       // }
       setStartingDate(userData.date ?? new Date());
+      setStartingDatejs(dayjs(userData?.date ?? new Date()));
       setComments(userData.comments ?? "");
       //setConditionOption(userData.conditions ?? "Select here");
 
@@ -846,6 +913,7 @@ const Clinic: NextPage = () => {
       //setGreaterAreaOption(userData.greaterArea.greaterArea ?? "");
       //setAreaOption(userData.area.area ?? "");
       setStartingDate(userData.date ?? new Date());
+      setStartingDatejs(dayjs(userData?.date ?? new Date()));
       setComments(userData.comments ?? "");
 
       //setGreaterAreaID(userData.greaterAreaID ?? 0);
@@ -906,10 +974,12 @@ const Clinic: NextPage = () => {
     const errorFields: { field: string; message: string }[] = [];
 
     if (greaterAreaOption.area === "Select one") mandatoryFields.push("Greater Area");
-    if (startingDate === null) mandatoryFields.push("Date");
+    //if (startingDate === null) mandatoryFields.push("Date");
     //if (areaOption.area === "Select one") mandatoryFields.push("Area");
     //if (conditionOption === "Select here") mandatoryFields.push("Condition");
     if (conditionList.length === 0) mandatoryFields.push("Condition");
+
+    if (startingDate.toString() === "Invalid Date") errorFields.push({ field: "Starting Date", message: "Invalid date" });
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -942,23 +1012,23 @@ const Clinic: NextPage = () => {
     setOrder(field);
   };
 
-  //-------------------------------------DATEPICKER--------------------------------------
-  // Define the props for your custom input component
-  interface CustomInputProps {
-    value?: string;
-    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  }
+  // //-------------------------------------DATEPICKER--------------------------------------
+  // // Define the props for your custom input component
+  // interface CustomInputProps {
+  //   value?: string;
+  //   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  // }
 
-  // CustomInput component with explicit types for the props
-  const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-3 py-2" onClick={onClick}>
-      <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-      </svg>
-      <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
-    </button>
-  );
+  // // CustomInput component with explicit types for the props
+  // const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
+  //   <button className="form-input flex items-center rounded-md border px-3 py-2" onClick={onClick}>
+  //     <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+  //       <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+  //     </svg>
+  //     <div className="m-1 mr-2">(Select here): </div>
+  //     {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
+  //   </button>
+  // );
 
   //-------------------------------------------New Conditions-------------------------------------------------------
   const handleNewConditions = async () => {
@@ -1235,18 +1305,34 @@ const Clinic: NextPage = () => {
                     Clinic ID: <div className="px-3">C{isCreate ? String((latestClinicID?.data?.clinicID ?? 0) + 1) : id}</div>
                   </div>
                   {/*DATEPICKER*/}
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-3">
                     <label>
                       Date<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
+                    {/* MUI Datepicker */}
+                    <ThemeProvider theme={theme}>
+                      <Typography>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker
+                            value={startingDatejs}
+                            onChange={(datejs_) => {
+                              setStartingDatejs(datejs_ ?? dayjs(new Date()));
+                              setStartingDate(datejs_?.toDate() ?? new Date());
+                            }}
+                            format="DD/MM/YYYY"
+                            slotProps={{ textField: { size: "small" } }}
+                          />
+                        </LocalizationProvider>
+                      </Typography>
+                    </ThemeProvider>
 
-                    <DatePicker
+                    {/* <DatePicker
                       selected={startingDate}
                       onChange={(date) => setStartingDate(date!)}
                       dateFormat="dd/MM/yyyy"
                       customInput={<CustomInput />}
                       className="form-input rounded-md border py-2"
-                    />
+                    /> */}
                   </div>
 
                   <div className="flex items-start">

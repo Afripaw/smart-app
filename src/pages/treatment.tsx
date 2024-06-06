@@ -23,8 +23,18 @@ import * as FileSaver from "file-saver";
 import { AddressBook, Pencil, Dog, Printer, Trash, UserCircle, Users } from "phosphor-react";
 
 //Date picker
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+// //MUI Date picker
+import dayjs, { Dayjs } from "dayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import type {} from "@mui/x-date-pickers/themeAugmentation";
+
+// import DatePicker from "react-datepicker";
+// import "react-datepicker/dist/react-datepicker.css";
+
 import { UploadButton } from "~/utils/uploadthing";
 import { useSession } from "next-auth/react";
 import Input from "~/components/Base/Input";
@@ -64,6 +74,58 @@ const Treatment: NextPage = () => {
     allSelected: boolean;
     clear: boolean;
   };
+
+  //MUI Datepicker fontsize
+  const theme = createTheme({
+    typography: {
+      fontSize: 12,
+    },
+    components: {
+      MuiTextField: {
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              fontSize: 14, // Font size for the DatePicker input
+            },
+          },
+        },
+      },
+      MuiPickersDay: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for the calendar days
+          },
+        },
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+            fontSize: "1rem", // Font size for general text within the calendar
+          },
+        },
+      },
+
+      MuiPickersCalendarHeader: {
+        styleOverrides: {
+          switchViewButton: {
+            fontSize: "1rem", // Font size for the header view buttons
+          },
+          label: {
+            fontSize: "1rem", // Font size for the header label
+          },
+        },
+      },
+      MuiPickersToolbar: {
+        styleOverrides: {
+          root: {
+            "& .MuiTypography-root": {
+              fontSize: "1rem", // Font size for the toolbar text
+            },
+          },
+        },
+      },
+    },
+  });
 
   const newTypes = api.petTreatment.createTypes.useMutation();
 
@@ -372,6 +434,7 @@ const Treatment: NextPage = () => {
   //---------------------------------EDIT BOXES----------------------------------
   const [comments, setComments] = useState("");
   const [startingDate, setStartingDate] = useState(new Date());
+  const [startingDatejs, setStartingDatejs] = useState(dayjs(new Date()));
   const [petID, setPetID] = useState(0);
   const [petName, setPetName] = useState("");
   const [ownerID, setOwnerID] = useState(0);
@@ -767,6 +830,7 @@ const Treatment: NextPage = () => {
       //setTypeList(userData.type ?? "Select here");
       //setTypeOption(userData.type ?? "Select one");
       setStartingDate(userData?.date ?? new Date());
+      setStartingDatejs(dayjs(userData?.date ?? new Date()));
       setComments(userData.comments ?? "");
 
       console.log("Type list options from DB___: ", userData.type);
@@ -870,6 +934,7 @@ const Treatment: NextPage = () => {
       setTypeList(types ?? "Select here");
       //setTypeList(userData.type ?? "Select here");
       setStartingDate(userData.date ?? new Date());
+      setStartingDatejs(dayjs(userData?.date ?? new Date()));
       setComments(userData.comments ?? "");
 
       // console.log("Type list options from DB___: ", userData.type);
@@ -944,6 +1009,7 @@ const Treatment: NextPage = () => {
     setCategoryOption("Select one");
     setTypeOption("Select one");
     setStartingDate(new Date());
+    setStartingDatejs(dayjs(new Date()));
     setComments("");
     //isCreate ? setIsCreate(false) : setIsCreate(true);
     setIsCreate(true);
@@ -1093,6 +1159,7 @@ const Treatment: NextPage = () => {
 
       //setTypeList(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
+      setStartingDatejs(dayjs(userData?.date ?? new Date()));
       setComments(userData.comments ?? "");
 
       // setTypeListOptions(
@@ -1134,6 +1201,7 @@ const Treatment: NextPage = () => {
       setTypeList(types ?? "");
 
       setStartingDate(userData.date ?? new Date());
+      setStartingDatejs(dayjs(userData?.date ?? new Date()));
       setComments(userData.comments ?? "");
       //console.log("Select one");
       // //Make sure thet area and street options have a value
@@ -1181,6 +1249,7 @@ const Treatment: NextPage = () => {
 
       //setTypeList(userData.type ?? "");
       setStartingDate(userData.date ?? new Date());
+      setStartingDatejs(dayjs(userData?.date ?? new Date()));
       setComments(userData.comments ?? "");
     }
   }, [getTreatment]);
@@ -1231,9 +1300,11 @@ const Treatment: NextPage = () => {
     const errorFields: { field: string; message: string }[] = [];
 
     if (categoryOption === "Select one") mandatoryFields.push("Category");
-    if (startingDate === null) mandatoryFields.push("Date");
+    // if (startingDate === null) mandatoryFields.push("Date");
     //if (typeOption === "Select one") mandatoryFields.push("Type");
     if (typeList.length === 0) mandatoryFields.push("Type");
+
+    if (startingDate.toString() === "Invalid Date") errorFields.push({ field: "Starting Date", message: "Invalid date" });
 
     setMandatoryFields(mandatoryFields);
     setErrorFields(errorFields);
@@ -1290,23 +1361,23 @@ const Treatment: NextPage = () => {
     });
   };
 
-  //-------------------------------------DATEPICKER--------------------------------------
-  // Define the props for your custom input component
-  interface CustomInputProps {
-    value?: string;
-    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  }
+  // //-------------------------------------DATEPICKER--------------------------------------
+  // // Define the props for your custom input component
+  // interface CustomInputProps {
+  //   value?: string;
+  //   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  // }
 
-  // CustomInput component with explicit types for the props
-  const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-3 py-2" onClick={onClick}>
-      <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-      </svg>
-      <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
-    </button>
-  );
+  // // CustomInput component with explicit types for the props
+  // const CustomInput: React.FC<CustomInputProps> = ({ value, onClick }) => (
+  //   <button className="form-input flex items-center rounded-md border px-3 py-2" onClick={onClick}>
+  //     <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+  //       <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+  //     </svg>
+  //     <div className="m-1 mr-2">(Select here): </div>
+  //     {isUpdate ? startingDate?.getDate().toString() + "/" + (startingDate.getMonth() + 1).toString() + "/" + startingDate.getFullYear().toString() : value}
+  //   </button>
+  // );
 
   //-------------------------------------------New Types-------------------------------------------------------
   const handleNewTypes = async () => {
@@ -1626,18 +1697,34 @@ const Treatment: NextPage = () => {
                     Treatment ID: <div className="px-3">T{isCreate ? String((latestTreatmentID?.data?.treatmentID ?? 0) + 1) : id}</div>
                   </div>
                   {/*DATEPICKER*/}
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-3">
                     <label>
                       Date<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
 
-                    <DatePicker
+                    {/* MUI Datepicker */}
+                    <ThemeProvider theme={theme}>
+                      <Typography>
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                          <DatePicker
+                            value={startingDatejs}
+                            onChange={(datejs_) => {
+                              setStartingDatejs(datejs_ ?? dayjs(new Date()));
+                              setStartingDate(datejs_?.toDate() ?? new Date());
+                            }}
+                            format="DD/MM/YYYY"
+                            slotProps={{ textField: { size: "small" } }}
+                          />
+                        </LocalizationProvider>
+                      </Typography>
+                    </ThemeProvider>
+                    {/* <DatePicker
                       selected={startingDate}
                       onChange={(date) => setStartingDate(date!)}
                       dateFormat="dd/MM/yyyy"
                       customInput={<CustomInput />}
                       className="form-input rounded-md border py-2"
-                    />
+                    /> */}
                   </div>
 
                   {/*PET ID do not make it editable*/}

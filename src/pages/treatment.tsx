@@ -968,6 +968,9 @@ const Treatment: NextPage = () => {
   const handleUpdateUser = async () => {
     setIsLoading(true);
 
+    //show that record is busy updating
+    setRecordBusy({ state: true, record: id });
+
     const typeList_ =
       categoryOption === "Pet clinic, Infield" || categoryOption === "Pet clinic (Infield)"
         ? typeList
@@ -1286,6 +1289,22 @@ const Treatment: NextPage = () => {
     setTypeSelection({ allSelected: false, clear: false });
     setComments("");
   };
+
+  //--------------------------------------RECORD BUSY-----------------------------------------------
+  //when the searchinfinitequery comes back successful notify that the record is available.
+  type BusyRecord = {
+    state: boolean;
+    record: number;
+  };
+  const [recordBusy, setRecordBusy] = useState<BusyRecord>();
+  useEffect(() => {
+    const userRecord: BusyRecord = {
+      state: false,
+      record: 0,
+    };
+
+    setRecordBusy(userRecord);
+  }, [queryData]);
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
 
@@ -1619,23 +1638,34 @@ const Treatment: NextPage = () => {
                                   </span>
                                 </div>
 
-                                <div className="relative flex items-center justify-center">
-                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                    <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)} />
-                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                      Update treatment
-                                    </span>
-                                  </span>
-                                </div>
+                                {recordBusy?.state && recordBusy?.record === treatment.treatmentID ? (
+                                  <div className="justify center flex items-center">
+                                    <div
+                                      className="m-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                      role="status"
+                                    />
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div className="relative flex items-center justify-center">
+                                      <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                        <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(treatment.treatmentID ?? 0)} />
+                                        <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                          Update treatment
+                                        </span>
+                                      </span>
+                                    </div>
 
-                                <div className="relative flex items-center justify-center">
-                                  <span className="group relative mx-[5px] my-3 mr-[30px] flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                    <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)} />
-                                    <span className="absolute bottom-full z-50 hidden w-[75px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                      View treatment profile
-                                    </span>
-                                  </span>
-                                </div>
+                                    <div className="relative flex items-center justify-center">
+                                      <span className="group relative mx-[5px] my-3 mr-[30px] flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                        <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(treatment.treatmentID ?? 0)} />
+                                        <span className="absolute bottom-full z-50 hidden w-[75px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                          View treatment profile
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             </tr>
                           );

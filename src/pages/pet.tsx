@@ -2745,7 +2745,7 @@ const Pet: NextPage = () => {
   const handleUpdateUser = async () => {
     setIsLoading(true);
 
-    //shwo that record is busy updating
+    //show that record is busy updating
     setRecordBusy({ state: true, record: id });
 
     //clinics attendance

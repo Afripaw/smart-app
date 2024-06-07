@@ -1224,6 +1224,10 @@ const Volunteer: NextPage = () => {
 
   const handleUpdateUser = async () => {
     setIsLoading(true);
+
+    //show that record is busy updating
+    setRecordBusy({ state: true, record: id });
+
     const clinicIDList = clinicList.sort((a, b) => a.id - b.id).map((clinic) => (clinic.id ? clinic.id : 0));
     console.log("Helloo!! Clinic ID List: ", clinicIDList);
     const greaterAreaIDList = greaterAreaList.sort((a, b) => a.id - b.id).map((area) => (area.id ? area.id : 0));
@@ -1656,6 +1660,22 @@ const Volunteer: NextPage = () => {
     setGreaterAreaListOptions(greaterAreaOptions.map((area) => ({ id: area.greaterAreaID, area: area.greaterArea, state: false })));
   };
 
+  //--------------------------------------RECORD BUSY-----------------------------------------------
+  //when the searchinfinitequery comes back successful notify that the record is available.
+  type BusyRecord = {
+    state: boolean;
+    record: number;
+  };
+  const [recordBusy, setRecordBusy] = useState<BusyRecord>();
+  useEffect(() => {
+    const userRecord: BusyRecord = {
+      state: false,
+      record: 0,
+    };
+
+    setRecordBusy(userRecord);
+  }, [queryData]);
+
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
   //South African ID
   const [southAfricanIDMessage, setSouthAfricanIDMessage] = useState("");
@@ -2006,6 +2026,10 @@ const Volunteer: NextPage = () => {
       setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID) ?? { id: 0, date: "", area: "" }]);
       //setClinicList([...clinicList, todayClinicList.find((clinic) => clinic.id === clinicID)?.date ?? ""]);
       //setClinicIDList([...clinicIDList, clinicID]);
+
+      //show that record is busy updating
+      setRecordBusy({ state: true, record: volunteerID });
+
       //update the pet table to add the clinic to the pet
       await addClinic.mutateAsync({
         volunteerID: volunteerID,
@@ -2219,23 +2243,34 @@ const Volunteer: NextPage = () => {
                                   </span>
                                 </div>
 
-                                <div className="relative flex items-center justify-center">
-                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                    <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.volunteerID)} />
-                                    <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                      Update volunteer
-                                    </span>
-                                  </span>
-                                </div>
+                                {recordBusy?.state && recordBusy?.record === user.volunteerID ? (
+                                  <div className="justify center flex items-center">
+                                    <div
+                                      className="m-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-main-orange border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                                      role="status"
+                                    />
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div className="relative flex items-center justify-center">
+                                      <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                        <Pencil size={24} className="block" onClick={() => handleUpdateUserProfile(user.volunteerID)} />
+                                        <span className="absolute bottom-full z-50 hidden rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                          Update volunteer
+                                        </span>
+                                      </span>
+                                    </div>
 
-                                <div className="relative flex items-center justify-center">
-                                  <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
-                                    <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.volunteerID)} />
-                                    <span className="absolute bottom-full z-50 hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
-                                      View volunteer profile
-                                    </span>
-                                  </span>
-                                </div>
+                                    <div className="relative flex items-center justify-center">
+                                      <span className="group relative mx-[5px] my-3 flex items-center justify-center rounded-lg hover:bg-orange-200">
+                                        <AddressBook size={24} className="block" onClick={() => handleViewProfilePage(user.volunteerID)} />
+                                        <span className="absolute bottom-full z-50 hidden w-[105px] rounded-md border border-gray-300 bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
+                                          View volunteer profile
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </>
+                                )}
                                 {/* <div className="relative flex items-center justify-center">
                                 <button
                                   onClick={() => handleRandomDate(user.volunteerID)}
@@ -2524,16 +2559,16 @@ const Volunteer: NextPage = () => {
                               {greaterAreaListOptions
                                 ?.sort((a, b) => a.area.localeCompare(b.area))
                                 .map((option) => (
-                                  <li key={option.id}>
+                                  <li key={option.id + 2}>
                                     <div className="flex items-center px-4">
                                       <input
-                                        id={String(option.id)}
+                                        id={String(option.id + 2)}
                                         type="checkbox"
                                         checked={option.state}
                                         onChange={(e) => handleGreaterArea(option.id, option.area, e.target.checked, "normal")}
                                         className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                       />
-                                      <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
+                                      <label htmlFor={String(option.id + 2)} className="ms-2 text-sm font-medium text-gray-900">
                                         {option.area}
                                       </label>
                                     </div>

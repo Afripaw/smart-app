@@ -2230,16 +2230,16 @@ const User: NextPage = () => {
                               {greaterAreaListOptions
                                 ?.sort((a, b) => a.area.localeCompare(b.area))
                                 .map((option) => (
-                                  <li key={option.id}>
+                                  <li key={option.id + 2}>
                                     <div className="flex items-center px-4">
                                       <input
-                                        id={String(option.id)}
+                                        id={String(option.id + 2)}
                                         type="checkbox"
                                         checked={option.state}
                                         onChange={(e) => handleGreaterArea(option.id, option.area, e.target.checked, "normal")}
                                         className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
                                       />
-                                      <label htmlFor={String(option.id)} className="ms-2 text-sm font-medium text-gray-900">
+                                      <label htmlFor={String(option.id + 2)} className="ms-2 text-sm font-medium text-gray-900">
                                         {option.area}
                                       </label>
                                     </div>

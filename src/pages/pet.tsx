@@ -3445,6 +3445,11 @@ const Pet: NextPage = () => {
     setShowClinicMessage(false);
     setIsUpdate(false);
     setIsCreate(false);
+
+    // if (vaccination1TypeList_.length > 0 || vaccination2TypeList_.length > 0 || vaccination3TypeList_.length > 0) {
+    window.location.reload();
+    //  }
+
     setIsLoading(false);
   };
 

@@ -569,7 +569,9 @@ const Pet: NextPage = () => {
   //Make it retrieve the data from table again when table is reordered or queried or the user is updated, deleted or created
   useEffect(() => {
     void refetch();
-  }, [isUpdate, isDeleted, isCreate, query, order, clinicList]);
+  }, [isUpdate, isDeleted, isCreate, query, order]);
+  //[isUpdate, isDeleted, isCreate, query, order, clinicList]
+
   //clinicList,  isDoneUploading
   //[isUpdate, isDeleted, isCreate, query, order, clinicIDList, clinicList]
 
@@ -2042,8 +2044,13 @@ const Pet: NextPage = () => {
 
   //Make sure it has Select one and not nothing
   useEffect(() => {
+    console.log("Before setting vaccination 3 paid to Select one!");
+    console.log("vaccinationShot3Option: ", vaccinationShot3Option);
+    console.log("vaccination3PaidOption: ", vaccination3PaidOption);
+    console.log("isViewProfilePage: ", isViewProfilePage);
     if (vaccinationShot3Option === "Yes" && vaccination3PaidOption === "" && !isViewProfilePage) {
       setVaccination3PaidOption("Select one");
+      console.log("Set vaccination 3 paid to Select one!");
     }
   }, [vaccinationShot3Option, isUpdate]);
 
@@ -2700,9 +2707,24 @@ const Pet: NextPage = () => {
       setVaccination3TypeOption("Select here");
 
       setSizeOption(userData?.size ?? "Select one");
-      setVaccination1PaidOption(userData?.vaccination1Paid ?? "Select one");
-      setVaccination2PaidOption(userData?.vaccination2Paid ?? "Select one");
-      setVaccination3PaidOption(userData?.vaccination3Paid ?? "Select one");
+      // setVaccination1PaidOption(userData?.vaccination1Paid ?? "Select one");
+      // setVaccination2PaidOption(userData?.vaccination2Paid ?? "Select one");
+      // setVaccination3PaidOption(userData?.vaccination3Paid ?? "Select one");
+      if (userData?.vaccination1Paid !== "") {
+        setVaccination1PaidOption(userData?.vaccination1Paid ?? "Select one");
+      } else {
+        setVaccination1PaidOption("Select one");
+      }
+      if (userData?.vaccination2Paid !== "") {
+        setVaccination2PaidOption(userData?.vaccination2Paid ?? "Select one");
+      } else {
+        setVaccination2PaidOption("Select one");
+      }
+      if (userData?.vaccination3Paid !== "") {
+        setVaccination3PaidOption(userData?.vaccination3Paid ?? "Select one");
+      } else {
+        setVaccination3PaidOption("Select one");
+      }
 
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
@@ -3034,9 +3056,21 @@ const Pet: NextPage = () => {
       setBreedList(userData?.breed ?? "Select here");
       setColourList(userData?.colour ?? "Select here");
       setSizeOption(userData?.size ?? "Select one");
-      setVaccination1PaidOption(userData?.vaccination1Paid ?? "Select one");
-      setVaccination2PaidOption(userData?.vaccination2Paid ?? "Select one");
-      setVaccination3PaidOption(userData?.vaccination3Paid ?? "Select one");
+      if (userData?.vaccination1Paid !== "") {
+        setVaccination1PaidOption(userData?.vaccination1Paid ?? "Select one");
+      } else {
+        setVaccination1PaidOption("Select one");
+      }
+      if (userData?.vaccination2Paid !== "") {
+        setVaccination2PaidOption(userData?.vaccination2Paid ?? "Select one");
+      } else {
+        setVaccination2PaidOption("Select one");
+      }
+      if (userData?.vaccination3Paid !== "") {
+        setVaccination3PaidOption(userData?.vaccination3Paid ?? "Select one");
+      } else {
+        setVaccination3PaidOption("Select one");
+      }
 
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
@@ -3195,7 +3229,8 @@ const Pet: NextPage = () => {
         })),
       );
     }
-  }, [isUpdate]); // Effect runs when userQuery.data changes
+  }, [isUpdate]);
+
   //[user, isUpdate, isCreate];
   const handleUpdateUser = async () => {
     setIsLoading(true);
@@ -3233,9 +3268,30 @@ const Pet: NextPage = () => {
           : new Date(0)
         : new Date(0);
 
+    const vaccination1TypeList_ = vaccination1TypeListOptions.filter((type) => type.state == true).map((type) => type.type);
+
+    const vaccination2TypeList_ = vaccination2TypeListOptions.filter((type) => type.state == true).map((type) => type.type);
+
+    const vaccination3TypeList_ = vaccination3TypeListOptions.filter((type) => type.state == true).map((type) => type.type);
+
+    console.log("Vaccination1TypeListOptions: ", vaccination1TypeListOptions);
+    console.log("Vaccination1TypeList_: ", vaccination1TypeList_);
+
+    console.log("Vaccination2TypeListOptions: ", vaccination2TypeListOptions);
+    console.log("Vaccination2TypeList_: ", vaccination2TypeList_);
+    console.log("Vaccination3TypeListOptions: ", vaccination3TypeListOptions);
+    console.log("Vaccination3TypeList_: ", vaccination3TypeList_);
+
     const vaccination1Type_ = vaccination1TypeList.filter((type) => type != "");
     const vaccination2Type_ = vaccination2TypeList.filter((type) => type != "");
     const vaccination3Type_ = vaccination3TypeList.filter((type) => type != "");
+
+    console.log("Vaccination1TypeList: ", vaccination1TypeList);
+    console.log("Vaccination1Type_: ", vaccination1Type_);
+    console.log("Vaccination2TypeList: ", vaccination2TypeList);
+    console.log("Vaccination2Type_: ", vaccination2Type_);
+    console.log("Vaccination3TypeList: ", vaccination3TypeList);
+    console.log("Vaccination3Type_: ", vaccination3Type_);
 
     await updatePet.mutateAsync({
       petID: id,
@@ -3261,9 +3317,9 @@ const Pet: NextPage = () => {
       vaccinationShot1: vaccine1,
       vaccinationShot2: vaccine2,
       vaccinationShot3: vaccine3,
-      vaccination1Type: vaccinationShot1Option === "Yes" ? vaccination1Type_ : [""],
-      vaccination2Type: vaccinationShot2Option === "Yes" ? vaccination2Type_ : [""],
-      vaccination3Type: vaccinationShot3Option === "Yes" ? vaccination3Type_ : [""],
+      vaccination1Type: vaccinationShot1Option === "Yes" ? vaccination1TypeList_ : [""],
+      vaccination2Type: vaccinationShot2Option === "Yes" ? vaccination2TypeList_ : [""],
+      vaccination3Type: vaccinationShot3Option === "Yes" ? vaccination3TypeList_ : [""],
       vaccination1Paid: vaccinationShot1Option === "Yes" ? (vaccination1PaidOption != "Select one" ? vaccination1PaidOption : "") : "",
       vaccination2Paid: vaccinationShot2Option === "Yes" ? (vaccination2PaidOption != "Select one" ? vaccination2PaidOption : "") : "",
       vaccination3Paid: vaccinationShot3Option === "Yes" ? (vaccination3PaidOption != "Select one" ? vaccination3PaidOption : "") : "",
@@ -3863,9 +3919,24 @@ const Pet: NextPage = () => {
       setVaccination3TypeList(userData?.vaccination3Type ?? "");
 
       setSizeOption(userData?.size ?? "");
-      setVaccination1PaidOption(userData?.vaccination1Paid ?? "");
-      setVaccination2PaidOption(userData?.vaccination2Paid ?? "");
-      setVaccination3PaidOption(userData?.vaccination3Paid ?? "");
+      // setVaccination1PaidOption(userData?.vaccination1Paid ?? "Select one");
+      // setVaccination2PaidOption(userData?.vaccination2Paid ?? "Select one");
+      // setVaccination3PaidOption(userData?.vaccination3Paid ?? "Select one");
+      if (userData?.vaccination1Paid !== "") {
+        setVaccination1PaidOption(userData?.vaccination1Paid ?? "Select one");
+      } else {
+        setVaccination1PaidOption("Select one");
+      }
+      if (userData?.vaccination2Paid !== "") {
+        setVaccination2PaidOption(userData?.vaccination2Paid ?? "Select one");
+      } else {
+        setVaccination2PaidOption("Select one");
+      }
+      if (userData?.vaccination3Paid !== "") {
+        setVaccination3PaidOption(userData?.vaccination3Paid ?? "Select one");
+      } else {
+        setVaccination3PaidOption("Select one");
+      }
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "");
       //setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
@@ -4262,9 +4333,24 @@ const Pet: NextPage = () => {
           setBreedList(petData?.breed ?? ["Select here"]);
           setColourList(petData?.colour ?? ["Select here"]);
           setSizeOption(petData?.size ?? "Select one");
-          setVaccination1PaidOption(petData?.vaccination1Paid ?? "Select one");
-          setVaccination2PaidOption(petData?.vaccination2Paid ?? "Select one");
-          setVaccination3PaidOption(petData?.vaccination3Paid ?? "Select one");
+          // setVaccination1PaidOption(petData?.vaccination1Paid ?? "Select one");
+          // setVaccination2PaidOption(petData?.vaccination2Paid ?? "Select one");
+          // setVaccination3PaidOption(petData?.vaccination3Paid ?? "Select one");
+          if (petData?.vaccination1Paid !== "") {
+            setVaccination1PaidOption(petData?.vaccination1Paid ?? "Select one");
+          } else {
+            setVaccination1PaidOption("Select one");
+          }
+          if (petData?.vaccination2Paid !== "") {
+            setVaccination2PaidOption(petData?.vaccination2Paid ?? "Select one");
+          } else {
+            setVaccination2PaidOption("Select one");
+          }
+          if (petData?.vaccination3Paid !== "") {
+            setVaccination3PaidOption(petData?.vaccination3Paid ?? "Select one");
+          } else {
+            setVaccination3PaidOption("Select one");
+          }
           setMarkings(petData?.markings ?? "");
           setStatusOption(petData?.status ?? "Select one");
           console.log("URL UseEffect Request signed at____ :", petData?.sterilisedRequestSigned);
@@ -4433,9 +4519,24 @@ const Pet: NextPage = () => {
           setVaccination2TypeList(petData?.vaccination2Type ?? ["Select here"]);
           setVaccination3TypeList(petData?.vaccination3Type ?? ["Select here"]);
           setSizeOption(petData?.size ?? "");
-          setVaccination1PaidOption(petData?.vaccination1Paid ?? "");
-          setVaccination2PaidOption(petData?.vaccination2Paid ?? "");
-          setVaccination3PaidOption(petData?.vaccination3Paid ?? "");
+          // setVaccination1PaidOption(petData?.vaccination1Paid ?? "Select one");
+          // setVaccination2PaidOption(petData?.vaccination2Paid ?? "Select one");
+          // setVaccination3PaidOption(petData?.vaccination3Paid ?? "Select one");
+          if (petData?.vaccination1Paid !== "") {
+            setVaccination1PaidOption(petData?.vaccination1Paid ?? "Select one");
+          } else {
+            setVaccination1PaidOption("Select one");
+          }
+          if (petData?.vaccination2Paid !== "") {
+            setVaccination2PaidOption(petData?.vaccination2Paid ?? "Select one");
+          } else {
+            setVaccination2PaidOption("Select one");
+          }
+          if (petData?.vaccination3Paid !== "") {
+            setVaccination3PaidOption(petData?.vaccination3Paid ?? "Select one");
+          } else {
+            setVaccination3PaidOption("Select one");
+          }
           setMarkings(petData?.markings ?? "");
           setStatusOption(petData?.status ?? "");
           console.log("View profile useEffect Request signed at____ :", petData?.sterilisedRequestSigned);
@@ -5039,7 +5140,10 @@ const Pet: NextPage = () => {
   //retrieves the data from the table again when the clinicsAttended is updated
   useEffect(() => {
     void refetch();
-  }, [todayClinicList, addClinic.isSuccess, newPet.isSuccess, updatePet.isSuccess]);
+  }, [todayClinicList, addClinic.isSuccess, newPet.isSuccess]);
+
+  //[todayClinicList, addClinic.isSuccess, newPet.isSuccess, updatePet.isSuccess]
+
   //isClinicLoading, clinicList
 
   // ----------------------------------------Uploading Image----------------------------------------
@@ -7348,7 +7452,7 @@ const Pet: NextPage = () => {
 
                       {vaccinationShot1Option === "Yes" && (
                         <div className="mb-2 flex items-center">
-                          <b className="mr-3">Vaccination Shot 1 Paid:</b> {vaccination1PaidOption}
+                          <b className="mr-3">Vaccination Shot 1 Paid:</b> {vaccination1PaidOption === "Select one" ? "" : vaccination1PaidOption}
                         </div>
                       )}
 
@@ -7377,7 +7481,7 @@ const Pet: NextPage = () => {
 
                       {vaccinationShot2Option === "Yes" && (
                         <div className="mb-2 flex items-center">
-                          <b className="mr-3">Vaccination Shot 2 Paid:</b> {vaccination2PaidOption}
+                          <b className="mr-3">Vaccination Shot 2 Paid:</b> {vaccination2PaidOption === "Select one" ? "" : vaccination2PaidOption}
                         </div>
                       )}
 
@@ -7406,7 +7510,7 @@ const Pet: NextPage = () => {
 
                       {vaccinationShot3Option === "Yes" && (
                         <div className="mb-2 flex items-center">
-                          <b className="mr-3">Vaccination Shot 3 Paid:</b> {vaccination3PaidOption}
+                          <b className="mr-3">Vaccination Shot 3 Paid:</b> {vaccination3PaidOption === "Select one" ? "" : vaccination3PaidOption}
                         </div>
                       )}
 

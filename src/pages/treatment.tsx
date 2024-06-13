@@ -591,7 +591,14 @@ const Treatment: NextPage = () => {
     };
   }, []);
 
-  const categoryOptions = ["Pet clinic, Infield", "Pet clinic, Admission to TEARS", "Pet Clinic, Mobile to Collect", "Reported outside of pet clinic"];
+  const categoryOptions = [
+    "Pet Clinic, Admission to TEARS",
+    "Pet Clinic, Drop off Meds",
+    "Pet Clinic, Follow up Visit",
+    "Pet Clinic, Infield",
+    "Pet Clinic, Mobile to Collect",
+    "Reported Outside of Pet Clinic",
+  ];
 
   //TYPE
   const handleToggleType = () => {

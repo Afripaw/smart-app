@@ -1588,6 +1588,8 @@ const Owner: NextPage = () => {
 
   //--------------------------------------RECORD BUSY-----------------------------------------------
   //when the searchinfinitequery comes back successful notify that the record is available.
+
+  // const ownersDataFromDB = queryData?.pages.find((user_) => user_.user_data.find((user) => user.ownerID === id));
   type BusyRecord = {
     state: boolean;
     record: number;
@@ -1601,6 +1603,7 @@ const Owner: NextPage = () => {
 
     setRecordBusy(userRecord);
   }, [queryData]);
+  //ownersDataFromDB
 
   //-----------------------------PREVENTATIVE ERROR MESSAGES---------------------------
   //South African ID

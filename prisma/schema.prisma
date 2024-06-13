@@ -155,6 +155,12 @@ model pet {
     vaccinationShot1         DateTime
     vaccinationShot2         DateTime?
     vaccinationShot3         DateTime?
+    vaccination1Type         String[]
+    vaccination2Type         String[]
+    vaccination3Type         String[]
+    vaccination1Paid         String?
+    vaccination2Paid         String?
+    vaccination3Paid         String?
     clinicsAttended          petOnPetClinic[]
     lastDeworming            DateTime?
     membership               String

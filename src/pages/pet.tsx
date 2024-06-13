@@ -451,6 +451,17 @@ const Pet: NextPage = () => {
     allSelected: boolean;
     clear: boolean;
   };
+
+  //------------------------------VACCINATION TYPE------------------------------------------
+  type VaccinationTypeOptions = {
+    type: string;
+    state: boolean;
+  };
+
+  type VaccinationTypeSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
   // //-------------------------------CLINICS ATTENDED-----------------------------------------
   // type Clinic = {
   //   id: number;
@@ -804,6 +815,38 @@ const Pet: NextPage = () => {
   const [kennelsReceivedOption, setKennelsReceivedOption] = useState("Select here");
   const kennelsReceivedRef = useRef<HTMLDivElement>(null);
   const btnKennelsReceivedRef = useRef<HTMLButtonElement>(null);
+
+  //VaccinationType
+  const [isVaccination1TypeOpen, setIsVaccination1TypeOpen] = useState(false);
+  const [vaccination1TypeOption, setVaccination1TypeOption] = useState("Select here");
+  const vaccination1TypeRef = useRef<HTMLDivElement>(null);
+  const btnVaccination1TypeRef = useRef<HTMLButtonElement>(null);
+
+  const [isVaccination2TypeOpen, setIsVaccination2TypeOpen] = useState(false);
+  const [vaccination2TypeOption, setVaccination2TypeOption] = useState("Select here");
+  const vaccination2TypeRef = useRef<HTMLDivElement>(null);
+  const btnVaccination2TypeRef = useRef<HTMLButtonElement>(null);
+
+  const [isVaccination3TypeOpen, setIsVaccination3TypeOpen] = useState(false);
+  const [vaccination3TypeOption, setVaccination3TypeOption] = useState("Select here");
+  const vaccination3TypeRef = useRef<HTMLDivElement>(null);
+  const btnVaccination3TypeRef = useRef<HTMLButtonElement>(null);
+
+  //Vaccination paid
+  const [vaccination1Paid, setVaccination1Paid] = useState(false);
+  const [vaccination1PaidOption, setVaccination1PaidOption] = useState("Select one");
+  const vaccination1PaidRef = useRef<HTMLDivElement>(null);
+  const btnVaccination1PaidRef = useRef<HTMLButtonElement>(null);
+
+  const [vaccination2Paid, setVaccination2Paid] = useState(false);
+  const [vaccination2PaidOption, setVaccination2PaidOption] = useState("Select one");
+  const vaccination2PaidRef = useRef<HTMLDivElement>(null);
+  const btnVaccination2PaidRef = useRef<HTMLButtonElement>(null);
+
+  const [vaccination3Paid, setVaccination3Paid] = useState(false);
+  const [vaccination3PaidOption, setVaccination3PaidOption] = useState("Select one");
+  const vaccination3PaidRef = useRef<HTMLDivElement>(null);
+  const btnVaccination3PaidRef = useRef<HTMLButtonElement>(null);
 
   //SPECIES
   const handleToggleSpecies = () => {
@@ -1274,28 +1317,6 @@ const Pet: NextPage = () => {
 
   const sterilisationStatusOptions = ["Yes", "No"];
 
-  // interface CustomInput {
-  //   value?: string;
-  //   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-  // }
-
-  // // CustomInput component with explicit types for the props
-  // const CustomSterilisationStatusInput: React.FC<CustomInput> = ({ value, onClick }) => (
-  //   <button className="form-input z-0 flex items-center rounded-md border px-1 py-2" onClick={onClick}>
-  //     <svg className=" mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-  //       <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-  //     </svg>
-  //     <div className="m-1 mr-2">(Select here): </div>
-  //     {isUpdate
-  //       ? sterilisationStatusDate.getDate().toString() +
-  //         "/" +
-  //         (sterilisationStatusDate.getMonth() + 1).toString() +
-  //         "/" +
-  //         sterilisationStatusDate.getFullYear().toString()
-  //       : value}
-  //   </button>
-  // );
-
   //if sterilisation outcome is actioned the sterilisation yes
   useEffect(() => {
     //took away the && sterilisationStatusDate.getFullYear() === 1970) on 19 may 2024
@@ -1478,6 +1499,10 @@ const Pet: NextPage = () => {
 
   const handleVaccinationShot1Option = (option: SetStateAction<string>) => {
     setVaccinationShot1Option(option);
+    if (option != "Yes") {
+      setVaccinationShot2Option(option);
+      setVaccinationShot3Option(option);
+    }
     setVaccinationShot1(false);
   };
 
@@ -1543,6 +1568,9 @@ const Pet: NextPage = () => {
 
   const handleVaccinationShot2Option = (option: SetStateAction<string>) => {
     setVaccinationShot2Option(option);
+    if (option != "Yes") {
+      setVaccinationShot3Option(option);
+    }
     setVaccinationShot2(false);
   };
 
@@ -1629,28 +1657,395 @@ const Pet: NextPage = () => {
     onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   }
 
-  // CustomInput component with explicit types for the props
-  const CustomVaccine3Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
-    <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
-      <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-      </svg>
-      <div className="m-1 mr-2">(Select here): </div>
-      {isUpdate
-        ? vaccinationShot3Date.getDate().toString() +
-          "/" +
-          (vaccinationShot3Date.getMonth() + 1).toString() +
-          "/" +
-          vaccinationShot3Date.getFullYear().toString()
-        : value}
-    </button>
-  );
+  // // CustomInput component with explicit types for the props
+  // const CustomVaccine3Input: React.FC<CustomInputProps> = ({ value, onClick }) => (
+  //   <button className="form-input flex items-center rounded-md border px-1 py-2" onClick={onClick}>
+  //     <svg className="z-10 mr-2 h-4 w-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+  //       <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+  //     </svg>
+  //     <div className="m-1 mr-2">(Select here): </div>
+  //     {isUpdate
+  //       ? vaccinationShot3Date.getDate().toString() +
+  //         "/" +
+  //         (vaccinationShot3Date.getMonth() + 1).toString() +
+  //         "/" +
+  //         vaccinationShot3Date.getFullYear().toString()
+  //       : value}
+  //   </button>
+  // );
 
   // useEffect(() => {
   //   if (vaccinationShot3Option === "Yes") {
   //     setVaccinationShot3Date(new Date());
   //   }
   // }, [vaccinationShot3Option]);
+
+  //VACCINATION 1 TYPE
+  const [vaccination1TypeList, setVaccination1TypeList] = useState<string[]>([]);
+  const handleToggleVaccination1Type = () => {
+    setIsVaccination1TypeOpen(!isVaccination1TypeOpen);
+  };
+
+  const handleVaccination1TypeOption = (option: SetStateAction<string>) => {
+    setVaccination1TypeOption(option);
+    setIsVaccination1TypeOpen(false);
+    if (!vaccination1TypeList.includes(String(option))) {
+      setVaccination1TypeList([...vaccination1TypeList, String(option)]);
+    }
+  };
+
+  //const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+  const [vaccination1TypeListOptions, setVaccination1TypeListOptions] = useState<VaccinationTypeOptions[]>([]);
+  const [vaccination1TypeSelection, setVaccination1TypeSelection] = useState<VaccinationTypeSelect>();
+
+  const vaccinationTypeDogOptions = ["DP", "5 in 1", "Rabies", "Kennel Cough", "LEPTO"];
+
+  const vaccinationTypeCatOptions = ["3 in 1", "Leukemia", "Rabies"];
+
+  const [vaccinationTypeOptions, setVaccinationTypeOptions] = useState([""]);
+
+  useEffect(() => {
+    //const selected = colourListOptions.some((colour) => colour.state === true);
+    //check if the current colourListOptions has a specific species colours
+    const vaccinationTypes = vaccination1TypeListOptions.map((type) => type.type);
+    // const catColours = colours.includes((colour) => colour === "Calico (Tri-Colour)");
+
+    //check if the colours are the same as the cat colours
+    const vaccinationTypeCats = vaccinationTypes.some((type) => type == "3 in 1");
+    // console.log("Cat Colours: ", catColours);
+    if (speciesOption == "Cat" && !vaccinationTypeCats) {
+      setVaccination1TypeListOptions(vaccinationTypeCatOptions.map((type) => ({ type: type, state: false })));
+      setVaccination2TypeListOptions(vaccinationTypeCatOptions.map((type) => ({ type: type, state: false })));
+      setVaccination3TypeListOptions(vaccinationTypeCatOptions.map((type) => ({ type: type, state: false })));
+    } else if (speciesOption == "Dog" && (vaccinationTypeCats || isCreate)) {
+      setVaccination1TypeListOptions(vaccinationTypeDogOptions.map((type) => ({ type: type, state: false })));
+      setVaccination2TypeListOptions(vaccinationTypeDogOptions.map((type) => ({ type: type, state: false })));
+      setVaccination3TypeListOptions(vaccinationTypeDogOptions.map((type) => ({ type: type, state: false })));
+    }
+    // else if (speciesOption == "Dog" && isCreate) {
+    //   setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: false })));
+    // }
+  }, [speciesOption]);
+
+  const handleVaccination1Type = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setVaccination1TypeOption("Select All");
+      setVaccination1TypeSelection({ allSelected: state, clear: false });
+
+      const vaccinationTypes = vaccination1TypeListOptions.map((type) => type.type);
+      setVaccination1TypeList(vaccinationTypes);
+      //order the roleList in alphabetical order
+      // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      setVaccination1TypeListOptions(vaccination1TypeListOptions.map((type) => ({ ...type, state: true })));
+    } else if (selectionCategory === "clear") {
+      setVaccination1TypeOption("Clear All");
+      setVaccination1TypeSelection({ allSelected: false, clear: state });
+
+      setVaccination1TypeList([]);
+      setVaccination1TypeListOptions(vaccination1TypeListOptions.map((type) => ({ ...type, state: false })));
+    } else if (selectionCategory === "normal") {
+      setVaccination1TypeOption(option);
+      setVaccination1TypeSelection({ allSelected: false, clear: false });
+      if (state) {
+        if (!vaccination1TypeList.includes(String(option))) {
+          setVaccination1TypeList([...vaccination1TypeList, String(option)]);
+          //order the roleList in alphabetical order
+          // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        }
+
+        setVaccination1TypeListOptions(vaccination1TypeListOptions.map((type) => (type.type === option ? { ...type, state: true } : type)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedVaccination1TypeList = vaccination1TypeList.filter((type) => type !== option);
+        setVaccination1TypeList(updatedVaccination1TypeList);
+        //order the roleList in alphabetical order
+        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        setVaccination1TypeListOptions(vaccination1TypeListOptions.map((type) => (type.type === option ? { ...type, state: false } : type)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        vaccination1TypeRef.current &&
+        !vaccination1TypeRef.current.contains(event.target as Node) &&
+        btnVaccination1TypeRef.current &&
+        !btnVaccination1TypeRef.current.contains(event.target as Node)
+      ) {
+        setIsVaccination1TypeOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  //VACCINATION 2 TYPE
+  const [vaccination2TypeList, setVaccination2TypeList] = useState<string[]>([]);
+  const handleToggleVaccination2Type = () => {
+    setIsVaccination2TypeOpen(!isVaccination2TypeOpen);
+  };
+
+  const handleVaccination2TypeOption = (option: SetStateAction<string>) => {
+    setVaccination2TypeOption(option);
+    setIsVaccination2TypeOpen(false);
+    if (!vaccination2TypeList.includes(String(option))) {
+      setVaccination2TypeList([...vaccination2TypeList, String(option)]);
+    }
+  };
+
+  //const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+  const [vaccination2TypeListOptions, setVaccination2TypeListOptions] = useState<VaccinationTypeOptions[]>([]);
+  const [vaccination2TypeSelection, setVaccination2TypeSelection] = useState<VaccinationTypeSelect>();
+
+  const handleVaccination2Type = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setVaccination2TypeOption("Select All");
+      setVaccination2TypeSelection({ allSelected: state, clear: false });
+
+      const vaccinationTypes = vaccination2TypeListOptions.map((type) => type.type);
+      setVaccination2TypeList(vaccinationTypes);
+      //order the roleList in alphabetical order
+      // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      setVaccination2TypeListOptions(vaccination2TypeListOptions.map((type) => ({ ...type, state: true })));
+    } else if (selectionCategory === "clear") {
+      setVaccination2TypeOption("Clear All");
+      setVaccination2TypeSelection({ allSelected: false, clear: state });
+
+      setVaccination2TypeList([]);
+      setVaccination2TypeListOptions(vaccination2TypeListOptions.map((type) => ({ ...type, state: false })));
+    } else if (selectionCategory === "normal") {
+      setVaccination2TypeOption(option);
+      setVaccination2TypeSelection({ allSelected: false, clear: false });
+      if (state) {
+        if (!vaccination2TypeList.includes(String(option))) {
+          setVaccination2TypeList([...vaccination2TypeList, String(option)]);
+          //order the roleList in alphabetical order
+          // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        }
+
+        setVaccination2TypeListOptions(vaccination2TypeListOptions.map((type) => (type.type === option ? { ...type, state: true } : type)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedVaccination2TypeList = vaccination2TypeList.filter((type) => type !== option);
+        setVaccination2TypeList(updatedVaccination2TypeList);
+        //order the roleList in alphabetical order
+        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        setVaccination2TypeListOptions(vaccination2TypeListOptions.map((type) => (type.type === option ? { ...type, state: false } : type)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        vaccination2TypeRef.current &&
+        !vaccination2TypeRef.current.contains(event.target as Node) &&
+        btnVaccination2TypeRef.current &&
+        !btnVaccination2TypeRef.current.contains(event.target as Node)
+      ) {
+        setIsVaccination2TypeOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  //VACCINATION 3 TYPE
+  const [vaccination3TypeList, setVaccination3TypeList] = useState<string[]>([]);
+  const handleToggleVaccination3Type = () => {
+    setIsVaccination3TypeOpen(!isVaccination2TypeOpen);
+  };
+
+  const handleVaccination3TypeOption = (option: SetStateAction<string>) => {
+    setVaccination3TypeOption(option);
+    setIsVaccination3TypeOpen(false);
+    if (!vaccination3TypeList.includes(String(option))) {
+      setVaccination3TypeList([...vaccination3TypeList, String(option)]);
+    }
+  };
+
+  //const [greaterAreaListOptions, setGreaterAreaListOptions] = useState<GreaterAreaOptions[]>([]);
+  const [vaccination3TypeListOptions, setVaccination3TypeListOptions] = useState<VaccinationTypeOptions[]>([]);
+  const [vaccination3TypeSelection, setVaccination3TypeSelection] = useState<VaccinationTypeSelect>();
+
+  const handleVaccination3Type = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setVaccination3TypeOption("Select All");
+      setVaccination3TypeSelection({ allSelected: state, clear: false });
+
+      const vaccinationTypes = vaccination3TypeListOptions.map((type) => type.type);
+      setVaccination3TypeList(vaccinationTypes);
+      //order the roleList in alphabetical order
+      // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      setVaccination3TypeListOptions(vaccination3TypeListOptions.map((type) => ({ ...type, state: true })));
+    } else if (selectionCategory === "clear") {
+      setVaccination3TypeOption("Clear All");
+      setVaccination3TypeSelection({ allSelected: false, clear: state });
+
+      setVaccination3TypeList([]);
+      setVaccination3TypeListOptions(vaccination3TypeListOptions.map((type) => ({ ...type, state: false })));
+    } else if (selectionCategory === "normal") {
+      setVaccination3TypeOption(option);
+      setVaccination3TypeSelection({ allSelected: false, clear: false });
+      if (state) {
+        if (!vaccination3TypeList.includes(String(option))) {
+          setVaccination3TypeList([...vaccination3TypeList, String(option)]);
+          //order the roleList in alphabetical order
+          // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        }
+
+        setVaccination3TypeListOptions(vaccination3TypeListOptions.map((type) => (type.type === option ? { ...type, state: true } : type)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedVaccination3TypeList = vaccination3TypeList.filter((type) => type !== option);
+        setVaccination3TypeList(updatedVaccination3TypeList);
+        //order the roleList in alphabetical order
+        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        setVaccination3TypeListOptions(vaccination3TypeListOptions.map((type) => (type.type === option ? { ...type, state: false } : type)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        vaccination3TypeRef.current &&
+        !vaccination3TypeRef.current.contains(event.target as Node) &&
+        btnVaccination3TypeRef.current &&
+        !btnVaccination3TypeRef.current.contains(event.target as Node)
+      ) {
+        setIsVaccination3TypeOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  //VACCINATION 1 PAID
+  const handleToggleVaccination1Paid = () => {
+    setVaccination1Paid(!vaccination1Paid);
+  };
+
+  const handleVaccination1PaidOption = (option: SetStateAction<string>) => {
+    setVaccination1PaidOption(option);
+    setVaccination1Paid(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        vaccination1PaidRef.current &&
+        !vaccination1PaidRef.current.contains(event.target as Node) &&
+        btnVaccination1PaidRef.current &&
+        !btnVaccination1PaidRef.current.contains(event.target as Node)
+      ) {
+        setVaccination1Paid(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  //Make sure it has Select one and not nothing
+  useEffect(() => {
+    if (vaccinationShot1Option === "Yes" && vaccination1PaidOption === "") {
+      setVaccination1PaidOption("Select one");
+    }
+  }, [vaccinationShot1Option]);
+
+  const vaccinationPaidOptions = ["Yes", "No", "Free"];
+
+  //VACCINATION 2 PAID
+  const handleToggleVaccination2Paid = () => {
+    setVaccination2Paid(!vaccination2Paid);
+  };
+
+  const handleVaccination2PaidOption = (option: SetStateAction<string>) => {
+    setVaccination2PaidOption(option);
+    setVaccination2Paid(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        vaccination2PaidRef.current &&
+        !vaccination2PaidRef.current.contains(event.target as Node) &&
+        btnVaccination2PaidRef.current &&
+        !btnVaccination2PaidRef.current.contains(event.target as Node)
+      ) {
+        setVaccination2Paid(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  //Make sure it has Select one and not nothing
+  useEffect(() => {
+    if (vaccinationShot2Option === "Yes" && vaccination2PaidOption === "") {
+      setVaccination2PaidOption("Select one");
+    }
+  }, [vaccinationShot2Option]);
+
+  //VACCINATION 3 PAID
+  const handleToggleVaccination3Paid = () => {
+    setVaccination3Paid(!vaccination3Paid);
+  };
+
+  const handleVaccination3PaidOption = (option: SetStateAction<string>) => {
+    setVaccination3PaidOption(option);
+    setVaccination3Paid(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        vaccination3PaidRef.current &&
+        !vaccination3PaidRef.current.contains(event.target as Node) &&
+        btnVaccination3PaidRef.current &&
+        !btnVaccination3PaidRef.current.contains(event.target as Node)
+      ) {
+        setVaccination3Paid(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  //Make sure it has Select one and not nothing
+  useEffect(() => {
+    if (vaccinationShot3Option === "Yes" && vaccination3PaidOption === "") {
+      setVaccination3PaidOption("Select one");
+    }
+  }, [vaccinationShot3Option]);
 
   //MEMBERSHIP TYPE
   const handleToggleMembershipType = () => {
@@ -2296,7 +2691,19 @@ const Pet: NextPage = () => {
       setBreedList(userData?.breed ?? "Select here");
       setColourList(userData?.colour ?? "Select here");
       setColourOption("Select here");
+
+      setVaccination1TypeList(userData?.vaccination1Type ?? "Select here");
+      setVaccination1TypeOption("Select here");
+      setVaccination2TypeList(userData?.vaccination2Type ?? "Select here");
+      setVaccination2TypeOption("Select here");
+      setVaccination2TypeList(userData?.vaccination3Type ?? "Select here");
+      setVaccination3TypeOption("Select here");
+
       setSizeOption(userData?.size ?? "Select one");
+      setVaccination1PaidOption(userData?.vaccination1Paid ?? "Select one");
+      setVaccination2PaidOption(userData?.vaccination2Paid ?? "Select one");
+      setVaccination3PaidOption(userData?.vaccination3Paid ?? "Select one");
+
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
       console.log("Request signed at____ :", userData?.sterilisedRequestSigned);
@@ -2326,6 +2733,28 @@ const Pet: NextPage = () => {
             state: userData.breed.includes(breed),
           })),
         );
+
+        setVaccinationTypeOptions(vaccinationTypeCatOptions);
+        setVaccination1TypeListOptions(
+          vaccinationTypeCatOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination1Type.includes(type),
+          })),
+        );
+
+        setVaccination2TypeListOptions(
+          vaccinationTypeCatOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination2Type.includes(type),
+          })),
+        );
+
+        setVaccination3TypeListOptions(
+          vaccinationTypeCatOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination3Type.includes(type),
+          })),
+        );
         // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
       } else if (userData?.species == "Dog") {
         //setColourOption("Select one");
@@ -2344,6 +2773,28 @@ const Pet: NextPage = () => {
           breedDogOptions.map((breed) => ({
             breed: breed,
             state: userData.breed.includes(breed),
+          })),
+        );
+
+        setVaccinationTypeOptions(vaccinationTypeDogOptions);
+        setVaccination1TypeListOptions(
+          vaccinationTypeDogOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination1Type.includes(type),
+          })),
+        );
+
+        setVaccination2TypeListOptions(
+          vaccinationTypeDogOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination2Type.includes(type),
+          })),
+        );
+
+        setVaccination3TypeListOptions(
+          vaccinationTypeDogOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination3Type.includes(type),
           })),
         );
         // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
@@ -2583,6 +3034,10 @@ const Pet: NextPage = () => {
       setBreedList(userData?.breed ?? "Select here");
       setColourList(userData?.colour ?? "Select here");
       setSizeOption(userData?.size ?? "Select one");
+      setVaccination1PaidOption(userData?.vaccination1Paid ?? "Select one");
+      setVaccination2PaidOption(userData?.vaccination2Paid ?? "Select one");
+      setVaccination3PaidOption(userData?.vaccination3Paid ?? "Select one");
+
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "Select one");
       //setSterilisationStatusOption(userData?.sterilisedStatus ?? "Select one");
@@ -2778,6 +3233,10 @@ const Pet: NextPage = () => {
           : new Date(0)
         : new Date(0);
 
+    const vaccination1Type_ = vaccination1TypeList.filter((type) => type != "");
+    const vaccination2Type_ = vaccination2TypeList.filter((type) => type != "");
+    const vaccination3Type_ = vaccination3TypeList.filter((type) => type != "");
+
     await updatePet.mutateAsync({
       petID: id,
       petName: petName,
@@ -2802,6 +3261,12 @@ const Pet: NextPage = () => {
       vaccinationShot1: vaccine1,
       vaccinationShot2: vaccine2,
       vaccinationShot3: vaccine3,
+      vaccination1Type: vaccinationShot1Option === "Yes" ? vaccination1Type_ : [""],
+      vaccination2Type: vaccinationShot2Option === "Yes" ? vaccination2Type_ : [""],
+      vaccination3Type: vaccinationShot3Option === "Yes" ? vaccination3Type_ : [""],
+      vaccination1Paid: vaccinationShot1Option === "Yes" ? vaccination1PaidOption : "",
+      vaccination2Paid: vaccinationShot2Option === "Yes" ? vaccination2PaidOption : "",
+      vaccination3Paid: vaccinationShot3Option === "Yes" ? vaccination3PaidOption : "",
       // vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
       // vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
       // vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
@@ -2827,7 +3292,13 @@ const Pet: NextPage = () => {
     setAgeOption("Select one");
     setBreedOption("Select here");
     setColourOption("Select here");
+    setVaccination1TypeOption("Select here");
+    setVaccination2TypeOption("Select here");
+    setVaccination3TypeOption("Select here");
     setSizeOption("Select one");
+    setVaccination1PaidOption("Select one");
+    setVaccination2PaidOption("Select one");
+    setVaccination3PaidOption("Select one");
     setMarkings("");
     setStatusOption("Select one");
     setSterilisationStatusOption("Select one");
@@ -2872,6 +3343,27 @@ const Pet: NextPage = () => {
       })),
     );
 
+    setVaccination1TypeListOptions(
+      vaccinationTypeOptions.map((type) => ({
+        type: type,
+        state: false,
+      })),
+    );
+
+    setVaccination2TypeListOptions(
+      vaccinationTypeOptions.map((type) => ({
+        type: type,
+        state: false,
+      })),
+    );
+
+    setVaccination3TypeListOptions(
+      vaccinationTypeOptions.map((type) => ({
+        type: type,
+        state: false,
+      })),
+    );
+
     setBreedListOptions(
       breedOptions.map((breed) => ({
         breed: breed,
@@ -2888,6 +3380,9 @@ const Pet: NextPage = () => {
     setClinicListOptions(clinics);
     setKennelList([]);
     setColourList([]);
+    setVaccination1TypeList([]);
+    setVaccination2TypeList([]);
+    setVaccination3TypeList([]);
     setBreedList([]);
 
     setTreatmentList([]);
@@ -2940,7 +3435,13 @@ const Pet: NextPage = () => {
     setAgeOption("Select one");
     setBreedOption("Select here");
     setColourOption("Select here");
+    setVaccination1TypeOption("Select here");
+    setVaccination2TypeOption("Select here");
+    setVaccination3TypeOption("Select here");
     setSizeOption("Select one");
+    setVaccination1PaidOption("Select one");
+    setVaccination2PaidOption("Select one");
+    setVaccination3PaidOption("Select one");
     setMarkings("");
     setStatusOption("Active");
     setSterilisationStatusOption("Select one");
@@ -3006,6 +3507,28 @@ const Pet: NextPage = () => {
           state: false,
         })),
       );
+
+      setVaccinationTypeOptions(vaccinationTypeCatOptions);
+      setVaccination1TypeListOptions(
+        vaccinationTypeCatOptions.map((type) => ({
+          type: type,
+          state: false,
+        })),
+      );
+
+      setVaccination2TypeListOptions(
+        vaccinationTypeCatOptions.map((type) => ({
+          type: type,
+          state: false,
+        })),
+      );
+
+      setVaccination3TypeListOptions(
+        vaccinationTypeCatOptions.map((type) => ({
+          type: type,
+          state: false,
+        })),
+      );
       // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
     } else if (speciesOption == "Dog") {
       //setColourOption("Select one");
@@ -3024,10 +3547,36 @@ const Pet: NextPage = () => {
           state: false,
         })),
       );
+
+      setVaccinationTypeOptions(vaccinationTypeDogOptions);
+      setVaccination1TypeListOptions(
+        vaccinationTypeDogOptions.map((type) => ({
+          type: type,
+          state: false,
+        })),
+      );
+
+      setVaccination2TypeListOptions(
+        vaccinationTypeDogOptions.map((type) => ({
+          type: type,
+          state: false,
+        })),
+      );
+
+      setVaccination3TypeListOptions(
+        vaccinationTypeDogOptions.map((type) => ({
+          type: type,
+          state: false,
+        })),
+      );
       // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
     } else {
       setColourOptions([]);
       setColourListOptions([]);
+      setVaccinationTypeOptions([]);
+      setVaccination1TypeListOptions([]);
+      setVaccination2TypeListOptions([]);
+      setVaccination3TypeListOptions([]);
       setBreedOptions([]);
       setBreedListOptions([]);
     }
@@ -3164,6 +3713,10 @@ const Pet: NextPage = () => {
           : new Date(0)
         : new Date(0);
 
+    const vaccination1Type_ = vaccination1TypeList.filter((type) => type != "");
+    const vaccination2Type_ = vaccination2TypeList.filter((type) => type != "");
+    const vaccination3Type_ = vaccination3TypeList.filter((type) => type != "");
+
     // //vaccinations
     // const vaccine1 = vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(0);
     // const vaccine2 = vaccinationShot1Option === "Yes" ? (vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0)) : new Date(0);
@@ -3202,6 +3755,12 @@ const Pet: NextPage = () => {
       vaccinationShot1: vaccine1,
       vaccinationShot2: vaccine2,
       vaccinationShot3: vaccine3,
+      vaccination1Type: vaccinationShot1Option === "Yes" ? vaccination1Type_ : [""],
+      vaccination2Type: vaccinationShot2Option === "Yes" ? vaccination1Type_ : [""],
+      vaccination3Type: vaccinationShot3Option === "Yes" ? vaccination1Type_ : [""],
+      vaccination1Paid: vaccinationShot1Option === "Yes" ? vaccination1PaidOption : "",
+      vaccination2Paid: vaccinationShot2Option === "Yes" ? vaccination2PaidOption : "",
+      vaccination3Paid: vaccinationShot3Option === "Yes" ? vaccination3PaidOption : "",
       // vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
       // vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
       // vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
@@ -3298,7 +3857,15 @@ const Pet: NextPage = () => {
       //  setBreedOption(userData?.breed ?? "");
       setBreedList(userData?.breed ?? "");
       setColourList(userData?.colour ?? "");
+
+      setVaccination1TypeList(userData?.vaccination1Type ?? "");
+      setVaccination2TypeList(userData?.vaccination2Type ?? "");
+      setVaccination3TypeList(userData?.vaccination3Type ?? "");
+
       setSizeOption(userData?.size ?? "");
+      setVaccination1PaidOption(userData?.vaccination1Paid ?? "");
+      setVaccination2PaidOption(userData?.vaccination2Paid ?? "");
+      setVaccination3PaidOption(userData?.vaccination3Paid ?? "");
       setMarkings(userData?.markings ?? "");
       setStatusOption(userData?.status ?? "");
       //setSterilisationStatusOption(userData?.sterilisedStatus ?? "");
@@ -3428,6 +3995,26 @@ const Pet: NextPage = () => {
             state: userData.breed.includes(breed),
           })),
         );
+
+        setVaccinationTypeOptions(vaccinationTypeCatOptions);
+        setVaccination1TypeListOptions(
+          vaccinationTypeCatOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination1Type.includes(type),
+          })),
+        );
+        setVaccination2TypeListOptions(
+          vaccinationTypeCatOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination2Type.includes(type),
+          })),
+        );
+        setVaccination3TypeListOptions(
+          vaccinationTypeCatOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination3Type.includes(type),
+          })),
+        );
         // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
       } else if (userData?.species == "Dog") {
         //setColourOption("Select one");
@@ -3447,6 +4034,26 @@ const Pet: NextPage = () => {
           })),
         );
         // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
+
+        setVaccinationTypeOptions(vaccinationTypeDogOptions);
+        setVaccination1TypeListOptions(
+          vaccinationTypeDogOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination1Type.includes(type),
+          })),
+        );
+        setVaccination2TypeListOptions(
+          vaccinationTypeDogOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination2Type.includes(type),
+          })),
+        );
+        setVaccination3TypeListOptions(
+          vaccinationTypeDogOptions.map((type) => ({
+            type: type,
+            state: userData.vaccination3Type.includes(type),
+          })),
+        );
       }
 
       setKennelListOptions(
@@ -3655,6 +4262,9 @@ const Pet: NextPage = () => {
           setBreedList(petData?.breed ?? ["Select here"]);
           setColourList(petData?.colour ?? ["Select here"]);
           setSizeOption(petData?.size ?? "Select one");
+          setVaccination1PaidOption(petData?.vaccination1Paid ?? "Select one");
+          setVaccination2PaidOption(petData?.vaccination2Paid ?? "Select one");
+          setVaccination3PaidOption(petData?.vaccination3Paid ?? "Select one");
           setMarkings(petData?.markings ?? "");
           setStatusOption(petData?.status ?? "Select one");
           console.log("URL UseEffect Request signed at____ :", petData?.sterilisedRequestSigned);
@@ -3738,6 +4348,26 @@ const Pet: NextPage = () => {
                 state: petData.breed.includes(breed) ?? false,
               })),
             );
+
+            setVaccinationTypeOptions(vaccinationTypeCatOptions);
+            setVaccination1TypeListOptions(
+              vaccinationTypeCatOptions.map((type) => ({
+                type: type,
+                state: petData.vaccination1Type.includes(type),
+              })),
+            );
+            setVaccination2TypeListOptions(
+              vaccinationTypeCatOptions.map((type) => ({
+                type: type,
+                state: petData.vaccination2Type.includes(type),
+              })),
+            );
+            setVaccination3TypeListOptions(
+              vaccinationTypeCatOptions.map((type) => ({
+                type: type,
+                state: petData.vaccination3Type.includes(type),
+              })),
+            );
             // setColourListOptions(colourCatOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
           } else if (petData?.species == "Dog") {
             //setColourOption("Select one");
@@ -3756,6 +4386,26 @@ const Pet: NextPage = () => {
               breedDogOptions.map((breed) => ({
                 breed: breed,
                 state: petData.breed.includes(breed) ?? false,
+              })),
+            );
+
+            setVaccinationTypeOptions(vaccinationTypeDogOptions);
+            setVaccination1TypeListOptions(
+              vaccinationTypeDogOptions.map((type) => ({
+                type: type,
+                state: petData.vaccination1Type.includes(type),
+              })),
+            );
+            setVaccination2TypeListOptions(
+              vaccinationTypeDogOptions.map((type) => ({
+                type: type,
+                state: petData.vaccination2Type.includes(type),
+              })),
+            );
+            setVaccination3TypeListOptions(
+              vaccinationTypeDogOptions.map((type) => ({
+                type: type,
+                state: petData.vaccination3Type.includes(type),
               })),
             );
             // setColourListOptions(colourDogOptions.map((colour) => ({ colour: colour, state: colourList.includes(colour) })));
@@ -3779,7 +4429,13 @@ const Pet: NextPage = () => {
           //setBreedOption(petData?.breed ?? "");
           setBreedList(petData?.breed ?? ["Select here"]);
           setColourList(petData?.colour ?? ["Select here"]);
+          setVaccination1TypeList(petData?.vaccination1Type ?? ["Select here"]);
+          setVaccination2TypeList(petData?.vaccination2Type ?? ["Select here"]);
+          setVaccination3TypeList(petData?.vaccination3Type ?? ["Select here"]);
           setSizeOption(petData?.size ?? "");
+          setVaccination1PaidOption(petData?.vaccination1Paid ?? "");
+          setVaccination2PaidOption(petData?.vaccination2Paid ?? "");
+          setVaccination3PaidOption(petData?.vaccination3Paid ?? "");
           setMarkings(petData?.markings ?? "");
           setStatusOption(petData?.status ?? "");
           console.log("View profile useEffect Request signed at____ :", petData?.sterilisedRequestSigned);
@@ -3953,7 +4609,13 @@ const Pet: NextPage = () => {
     setAgeOption("Select one");
     setBreedOption("Select here");
     setColourOption("Select here");
+    setVaccination1TypeOption("Select here");
+    setVaccination2TypeOption("Select here");
+    setVaccination3TypeOption("Select here");
     setSizeOption("Select one");
+    setVaccination1PaidOption("Select one");
+    setVaccination2PaidOption("Select one");
+    setVaccination3PaidOption("Select one");
     setMarkings("");
     setStatusOption("Select one");
     setSterilisationStatusOption("Select one");
@@ -3978,10 +4640,16 @@ const Pet: NextPage = () => {
     setComments("");
     setClinicList([]);
     setColourList([]);
+    setVaccination1TypeList([]);
+    setVaccination2TypeList([]);
+    setVaccination3TypeList([]);
     setBreedList([]);
     setTreatmentList([]);
     setShowClinicMessage(false);
     setColourSelection({ allSelected: false, clear: false });
+    setVaccination1TypeSelection({ allSelected: false, clear: false });
+    setVaccination2TypeSelection({ allSelected: false, clear: false });
+    setVaccination3TypeSelection({ allSelected: false, clear: false });
     setClinicSelection({ allSelected: false, clear: false });
     setKennelList([]);
     setKennelSelection({ allSelected: false, clear: false });
@@ -5481,6 +6149,118 @@ const Pet: NextPage = () => {
                     )}
                   </div>
 
+                  {/* Vaccination 1 type */}
+                  {vaccinationShot1Option === "Yes" && (
+                    <>
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-5">
+                          <div className=" flex">Vaccination Shot 1 Type(s): </div>
+                        </div>
+                        <div className="flex flex-col">
+                          <button
+                            ref={btnVaccination1TypeRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                            type="button"
+                            onClick={handleToggleVaccination1Type}
+                          >
+                            {vaccination1TypeOption + " "}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {isVaccination1TypeOpen && (
+                            <div ref={vaccination1TypeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                              {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {colourOptions.map((option) => (
+                              <li key={option} onClick={() => handleColourOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul> */}
+                              <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
+                                <li key={1}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="1"
+                                      type="checkbox"
+                                      checked={vaccination1TypeSelection?.allSelected}
+                                      onChange={(e) => handleVaccination1Type("", e.target.checked, "allSelected")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
+                                      Select All
+                                    </label>
+                                  </div>
+                                </li>
+                                <li key={2}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="2"
+                                      type="checkbox"
+                                      checked={vaccination1TypeSelection?.clear}
+                                      onChange={(e) => handleVaccination1Type("", e.target.checked, "clear")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
+                                      Clear All
+                                    </label>
+                                  </div>
+                                </li>
+                                {vaccination1TypeListOptions?.map((option) => (
+                                  <li key={option.type}>
+                                    <div className="flex items-center px-4">
+                                      <input
+                                        id={String(option.type)}
+                                        type="checkbox"
+                                        checked={option.state}
+                                        onChange={(e) => handleVaccination1Type(option.type, e.target.checked, "normal")}
+                                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                      />
+                                      <label htmlFor={String(option.type)} className="ms-2 text-sm font-medium text-gray-900">
+                                        {option.type}
+                                      </label>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Vaccination 1 paid */}
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-4">
+                          <label>Vaccination Shot 1 Paid: </label>
+                        </div>
+                        <div className="flex flex-col">
+                          <button
+                            ref={btnVaccination1PaidRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                            type="button"
+                            onClick={handleToggleVaccination1Paid}
+                          >
+                            {vaccination1PaidOption + " "}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {vaccination1Paid && (
+                            <div ref={vaccination1PaidRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                              <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
+                                {vaccinationPaidOptions.map((option) => (
+                                  <li key={option} onClick={() => handleVaccination1PaidOption(option)}>
+                                    <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
                   {vaccinationShot1Option === "Yes" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
@@ -5545,6 +6325,118 @@ const Pet: NextPage = () => {
                     </div>
                   )}
 
+                  {/* Vaccination 2 type */}
+                  {vaccinationShot2Option === "Yes" && (
+                    <>
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-5">
+                          <div className=" flex">Vaccination Shot 2 Type(s): </div>
+                        </div>
+                        <div className="flex flex-col">
+                          <button
+                            ref={btnVaccination2TypeRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                            type="button"
+                            onClick={handleToggleVaccination2Type}
+                          >
+                            {vaccination2TypeOption + " "}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {isVaccination2TypeOpen && (
+                            <div ref={vaccination2TypeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                              {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {colourOptions.map((option) => (
+                              <li key={option} onClick={() => handleColourOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul> */}
+                              <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
+                                <li key={1}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="1"
+                                      type="checkbox"
+                                      checked={vaccination2TypeSelection?.allSelected}
+                                      onChange={(e) => handleVaccination2Type("", e.target.checked, "allSelected")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
+                                      Select All
+                                    </label>
+                                  </div>
+                                </li>
+                                <li key={2}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="2"
+                                      type="checkbox"
+                                      checked={vaccination2TypeSelection?.clear}
+                                      onChange={(e) => handleVaccination2Type("", e.target.checked, "clear")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
+                                      Clear All
+                                    </label>
+                                  </div>
+                                </li>
+                                {vaccination2TypeListOptions?.map((option) => (
+                                  <li key={option.type}>
+                                    <div className="flex items-center px-4">
+                                      <input
+                                        id={String(option.type)}
+                                        type="checkbox"
+                                        checked={option.state}
+                                        onChange={(e) => handleVaccination2Type(option.type, e.target.checked, "normal")}
+                                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                      />
+                                      <label htmlFor={String(option.type)} className="ms-2 text-sm font-medium text-gray-900">
+                                        {option.type}
+                                      </label>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Vaccination 2 paid */}
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-4">
+                          <label>Vaccination Shot 2 Paid: </label>
+                        </div>
+                        <div className="flex flex-col">
+                          <button
+                            ref={btnVaccination2PaidRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                            type="button"
+                            onClick={handleToggleVaccination2Paid}
+                          >
+                            {vaccination2PaidOption + " "}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {vaccination2Paid && (
+                            <div ref={vaccination2PaidRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                              <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
+                                {vaccinationPaidOptions.map((option) => (
+                                  <li key={option} onClick={() => handleVaccination2PaidOption(option)}>
+                                    <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
                   {vaccinationShot2Option === "Yes" && vaccinationShot1Option === "Yes" && (
                     <div className="flex items-start">
                       <div className="mr-3 flex items-center pt-5">
@@ -5607,6 +6499,118 @@ const Pet: NextPage = () => {
                         </div>
                       )}
                     </div>
+                  )}
+
+                  {/* Vaccination 3 type */}
+                  {vaccinationShot3Option === "Yes" && (
+                    <>
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-5">
+                          <div className=" flex">Vaccination Shot 3 Type(s): </div>
+                        </div>
+                        <div className="flex flex-col">
+                          <button
+                            ref={btnVaccination3TypeRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                            type="button"
+                            onClick={handleToggleVaccination3Type}
+                          >
+                            {vaccination3TypeOption + " "}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {isVaccination3TypeOpen && (
+                            <div ref={vaccination3TypeRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                              {/* <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownHoverButton">
+                            {colourOptions.map((option) => (
+                              <li key={option} onClick={() => handleColourOption(option)}>
+                                <button className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">{option}</button>
+                              </li>
+                            ))}
+                          </ul> */}
+                              <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
+                                <li key={1}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="1"
+                                      type="checkbox"
+                                      checked={vaccination3TypeSelection?.allSelected}
+                                      onChange={(e) => handleVaccination3Type("", e.target.checked, "allSelected")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
+                                      Select All
+                                    </label>
+                                  </div>
+                                </li>
+                                <li key={2}>
+                                  <div className="flex items-center px-4">
+                                    <input
+                                      id="2"
+                                      type="checkbox"
+                                      checked={vaccination3TypeSelection?.clear}
+                                      onChange={(e) => handleVaccination3Type("", e.target.checked, "clear")}
+                                      className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                    />
+                                    <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
+                                      Clear All
+                                    </label>
+                                  </div>
+                                </li>
+                                {vaccination3TypeListOptions?.map((option) => (
+                                  <li key={option.type}>
+                                    <div className="flex items-center px-4">
+                                      <input
+                                        id={String(option.type)}
+                                        type="checkbox"
+                                        checked={option.state}
+                                        onChange={(e) => handleVaccination3Type(option.type, e.target.checked, "normal")}
+                                        className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                      />
+                                      <label htmlFor={String(option.type)} className="ms-2 text-sm font-medium text-gray-900">
+                                        {option.type}
+                                      </label>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Vaccination 3 paid */}
+                      <div className="flex items-start">
+                        <div className="mr-3 flex items-center pt-4">
+                          <label>Vaccination Shot 3 Paid: </label>
+                        </div>
+                        <div className="flex flex-col">
+                          <button
+                            ref={btnVaccination3PaidRef}
+                            className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                            type="button"
+                            onClick={handleToggleVaccination3Paid}
+                          >
+                            {vaccination3PaidOption + " "}
+                            <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                            </svg>
+                          </button>
+                          {vaccination3Paid && (
+                            <div ref={vaccination3PaidRef} className="z-10 w-44 divide-y divide-gray-100 rounded-lg bg-white shadow ">
+                              <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
+                                {vaccinationPaidOptions.map((option) => (
+                                  <li key={option} onClick={() => handleVaccination3PaidOption(option)}>
+                                    <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
                   )}
 
                   {isUpdate && treatmentList.length > 0 && ownUser?.role != "General Data Capturer" && (
@@ -6332,6 +7336,22 @@ const Pet: NextPage = () => {
                         )}
                       </div>
 
+                      {vaccinationShot1Option === "Yes" && (
+                        <div className="mb-2 flex items-center">
+                          <b className="mr-3">Vaccination Shot 1 Type(s):</b>{" "}
+                          {vaccination1TypeList
+                            // .slice(1, colourList.length)
+                            .map((type) => type)
+                            .join(", ")}
+                        </div>
+                      )}
+
+                      {vaccinationShot1Option === "Yes" && (
+                        <div className="mb-2 flex items-center">
+                          <b className="mr-3">Vaccination Shot 1 Paid:</b> {vaccination1PaidOption}
+                        </div>
+                      )}
+
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Vaccination Shot 2:</b>
                         {vaccinationShot2Option === "Yes" && vaccinationShot1Option === "Yes" ? (
@@ -6345,6 +7365,22 @@ const Pet: NextPage = () => {
                         )}
                       </div>
 
+                      {vaccinationShot2Option === "Yes" && (
+                        <div className="mb-2 flex items-center">
+                          <b className="mr-3">Vaccination Shot 2 Type(s):</b>{" "}
+                          {vaccination2TypeList
+                            // .slice(1, colourList.length)
+                            .map((type) => type)
+                            .join(", ")}
+                        </div>
+                      )}
+
+                      {vaccinationShot2Option === "Yes" && (
+                        <div className="mb-2 flex items-center">
+                          <b className="mr-3">Vaccination Shot 2 Paid:</b> {vaccination2PaidOption}
+                        </div>
+                      )}
+
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Vaccination Shot 3:</b>
                         {vaccinationShot3Option === "Yes" && vaccinationShot1Option === "Yes" && vaccinationShot2Option === "Yes" ? (
@@ -6357,6 +7393,22 @@ const Pet: NextPage = () => {
                           <div className="ml-3">Unknown</div>
                         )}
                       </div>
+
+                      {vaccinationShot3Option === "Yes" && (
+                        <div className="mb-2 flex items-center">
+                          <b className="mr-3">Vaccination Shot 3 Type(s):</b>{" "}
+                          {vaccination3TypeList
+                            // .slice(1, colourList.length)
+                            .map((type) => type)
+                            .join(", ")}
+                        </div>
+                      )}
+
+                      {vaccinationShot3Option === "Yes" && (
+                        <div className="mb-2 flex items-center">
+                          <b className="mr-3">Vaccination Shot 3 Paid:</b> {vaccination3PaidOption}
+                        </div>
+                      )}
 
                       {/* <div className="mb-2 flex items-center">
                         <b className="mr-3">Treatments:</b> {treatmentList.map((treatment) => treatment.type + " (" + treatment.category + ")").join("; ")}

@@ -1970,10 +1970,10 @@ const Pet: NextPage = () => {
 
   //Make sure it has Select one and not nothing
   useEffect(() => {
-    if (vaccinationShot1Option === "Yes" && vaccination1PaidOption === "") {
+    if (vaccinationShot1Option === "Yes" && vaccination1PaidOption === "" && !isViewProfilePage) {
       setVaccination1PaidOption("Select one");
     }
-  }, [vaccinationShot1Option]);
+  }, [vaccinationShot1Option, isUpdate]);
 
   const vaccinationPaidOptions = ["Yes", "No", "Free"];
 
@@ -2007,10 +2007,10 @@ const Pet: NextPage = () => {
 
   //Make sure it has Select one and not nothing
   useEffect(() => {
-    if (vaccinationShot2Option === "Yes" && vaccination2PaidOption === "") {
+    if (vaccinationShot2Option === "Yes" && vaccination2PaidOption === "" && !isViewProfilePage) {
       setVaccination2PaidOption("Select one");
     }
-  }, [vaccinationShot2Option]);
+  }, [vaccinationShot2Option, isUpdate]);
 
   //VACCINATION 3 PAID
   const handleToggleVaccination3Paid = () => {
@@ -2042,10 +2042,10 @@ const Pet: NextPage = () => {
 
   //Make sure it has Select one and not nothing
   useEffect(() => {
-    if (vaccinationShot3Option === "Yes" && vaccination3PaidOption === "") {
+    if (vaccinationShot3Option === "Yes" && vaccination3PaidOption === "" && !isViewProfilePage) {
       setVaccination3PaidOption("Select one");
     }
-  }, [vaccinationShot3Option]);
+  }, [vaccinationShot3Option, isUpdate]);
 
   //MEMBERSHIP TYPE
   const handleToggleMembershipType = () => {
@@ -3264,9 +3264,9 @@ const Pet: NextPage = () => {
       vaccination1Type: vaccinationShot1Option === "Yes" ? vaccination1Type_ : [""],
       vaccination2Type: vaccinationShot2Option === "Yes" ? vaccination2Type_ : [""],
       vaccination3Type: vaccinationShot3Option === "Yes" ? vaccination3Type_ : [""],
-      vaccination1Paid: vaccinationShot1Option === "Yes" ? vaccination1PaidOption : "",
-      vaccination2Paid: vaccinationShot2Option === "Yes" ? vaccination2PaidOption : "",
-      vaccination3Paid: vaccinationShot3Option === "Yes" ? vaccination3PaidOption : "",
+      vaccination1Paid: vaccinationShot1Option === "Yes" ? (vaccination1PaidOption != "Select one" ? vaccination1PaidOption : "") : "",
+      vaccination2Paid: vaccinationShot2Option === "Yes" ? (vaccination2PaidOption != "Select one" ? vaccination2PaidOption : "") : "",
+      vaccination3Paid: vaccinationShot3Option === "Yes" ? (vaccination3PaidOption != "Select one" ? vaccination3PaidOption : "") : "",
       // vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
       // vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
       // vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
@@ -3756,11 +3756,11 @@ const Pet: NextPage = () => {
       vaccinationShot2: vaccine2,
       vaccinationShot3: vaccine3,
       vaccination1Type: vaccinationShot1Option === "Yes" ? vaccination1Type_ : [""],
-      vaccination2Type: vaccinationShot2Option === "Yes" ? vaccination1Type_ : [""],
-      vaccination3Type: vaccinationShot3Option === "Yes" ? vaccination1Type_ : [""],
-      vaccination1Paid: vaccinationShot1Option === "Yes" ? vaccination1PaidOption : "",
-      vaccination2Paid: vaccinationShot2Option === "Yes" ? vaccination2PaidOption : "",
-      vaccination3Paid: vaccinationShot3Option === "Yes" ? vaccination3PaidOption : "",
+      vaccination2Type: vaccinationShot2Option === "Yes" ? vaccination2Type_ : [""],
+      vaccination3Type: vaccinationShot3Option === "Yes" ? vaccination3Type_ : [""],
+      vaccination1Paid: vaccinationShot1Option === "Yes" ? (vaccination1PaidOption != "Select one" ? vaccination1PaidOption : "") : "",
+      vaccination2Paid: vaccinationShot2Option === "Yes" ? (vaccination2PaidOption != "Select one" ? vaccination2PaidOption : "") : "",
+      vaccination3Paid: vaccinationShot3Option === "Yes" ? (vaccination3PaidOption != "Select one" ? vaccination3PaidOption : "") : "",
       // vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
       // vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
       // vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),

@@ -94,6 +94,7 @@ const Owner: NextPage = () => {
   type Pet = {
     id: number;
     name: string;
+    species: string;
     breed: string;
   };
 
@@ -906,10 +907,11 @@ const Owner: NextPage = () => {
     const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
     const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
     const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+    const petsSpecies = pets?.map((pet_) => pet_.map((pet) => pet.species))[0] ?? [];
     const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed.join(", ")))[0] ?? [];
 
     const combined = petsID.map((id, index) => {
-      return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
+      return { id: id, name: petsName[index] ?? "", species: petsSpecies[index] ?? "", breed: petsBreed[index] ?? "" };
     });
     setPetsCombined(combined);
 
@@ -1143,6 +1145,13 @@ const Owner: NextPage = () => {
     setAreaID(0);
     setStreetID(0);
 
+    //set the most recently updated to true
+    //setOrder("updatedAt");
+    //Set table to only show record which is updated
+    const q = "N" + owner.ownerID.toString();
+    setQuery(getQueryFromSearchPhrase(q));
+    console.log("Query of a owner!___: ", q);
+
     setIsLoading(false);
   };
 
@@ -1243,6 +1252,12 @@ const Owner: NextPage = () => {
       handleUploadModal(newUser_?.ownerID ?? "", firstName, newUser_?.image ?? "");
       setIsCreate(false);
       setIsUpdate(false);
+
+      //set the most recently updated to true
+      //setOrder("updatedAt");
+      //Set table to only show record which is updated
+      const q = "N" + newUser_.ownerID.toString();
+      setQuery(getQueryFromSearchPhrase(q));
     } catch (error) {
       console.log("Mobile number is already in database");
       const mandatoryFields: string[] = [];
@@ -1310,10 +1325,11 @@ const Owner: NextPage = () => {
       const pets = pet_data?.filter((pet) => pet[0]?.ownerID === id);
       const petsID = pets?.map((pet_) => pet_.map((pet) => pet.petID))[0] ?? [];
       const petsName = pets?.map((pet_) => pet_.map((pet) => pet.petName))[0] ?? [];
+      const petsSpecies = pets?.map((pet_) => pet_.map((pet) => pet.species))[0] ?? [];
       const petsBreed = pets?.map((pet_) => pet_.map((pet) => pet.breed.join(", ")))[0] ?? [];
 
       const combined = petsID.map((id, index) => {
-        return { id: id, name: petsName[index] ?? "", breed: petsBreed[index] ?? "" };
+        return { id: id, name: petsName[index] ?? "", species: petsSpecies[index] ?? "", breed: petsBreed[index] ?? "" };
       });
       setPetsCombined(combined);
 
@@ -1414,6 +1430,7 @@ const Owner: NextPage = () => {
         userData.pets?.map((pet) => ({
           id: pet.petID,
           name: pet.petName ?? "",
+          species: pet.species ?? "",
           breed: pet.breed.join(", ") ?? "",
         })) ?? [];
 
@@ -2524,7 +2541,7 @@ const Owner: NextPage = () => {
                         {petsCombined.map((pet) => (
                           // <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
                           <div>
-                            {pet?.breed === "Not Applicable"
+                            {pet?.species === "Cat"
                               ? (pet?.name ?? "") + " (Cat, P" + (pet?.id ?? "") + ")"
                               : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
                           </div>
@@ -2712,7 +2729,7 @@ const Owner: NextPage = () => {
                             .sort((a, b) => a.name.localeCompare(b.name))
                             .map((pet) => (
                               <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
-                                {pet?.breed === "Not Applicable" || pet?.breed === "Not applicable"
+                                {pet?.species === "Cat"
                                   ? (pet?.name ?? "") + " (Cat, P" + (pet?.id ?? "") + ")"
                                   : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
                               </button>

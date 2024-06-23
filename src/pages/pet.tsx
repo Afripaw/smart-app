@@ -109,6 +109,7 @@ const Pet: NextPage = () => {
   //For moving between different pages
   const router = useRouter();
 
+  //const context = api.useContext();
   const newPet = api.pet.create.useMutation();
   const updatePet = api.pet.update.useMutation();
   const [isUpdate, setIsUpdate] = useState(false);
@@ -570,6 +571,7 @@ const Pet: NextPage = () => {
   useEffect(() => {
     void refetch();
   }, [isUpdate, isDeleted, isCreate, query, order]);
+
   //[isUpdate, isDeleted, isCreate, query, order, clinicList]
 
   //clinicList,  isDoneUploading
@@ -2160,7 +2162,7 @@ const Pet: NextPage = () => {
       } else if (filteredClinicsActiveMember.length >= 3) {
         return "(Active)";
       } else {
-        return "";
+        return "(Active)";
       }
     } else {
       return "";
@@ -3449,6 +3451,14 @@ const Pet: NextPage = () => {
     // if (vaccination1TypeList_.length > 0 || vaccination2TypeList_.length > 0 || vaccination3TypeList_.length > 0) {
     window.location.reload();
     //  }
+
+    // //Invalidate
+    // await context.pet.searchPetsInfinite.invalidate({
+    //   petID: id,
+    //   limit: limit,
+    //   searchQuery: query,
+    //   order: order,
+    // });
 
     setIsLoading(false);
   };

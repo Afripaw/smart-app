@@ -2146,7 +2146,7 @@ const Pet: NextPage = () => {
       clinicDates.sort((a, b) => a.getTime() - b.getTime());
 
       let isLapsed = false;
-      let lapseDate: Date | null = null;
+      let lapseDate = new Date(0);
 
       // Check for gaps of 3 months or more
       for (let i = 1; i < clinicDates.length; i++) {
@@ -2174,12 +2174,12 @@ const Pet: NextPage = () => {
         if (currentDate! >= pastDate) {
           //console.log("lapsed by: ", currentDate);
           isLapsed = true;
-          lapseDate = currentDate ?? null;
+          lapseDate = currentDate ?? new Date(0);
           break;
         }
       }
 
-      if (isLapsed && lapseDate) {
+      if (isLapsed && lapseDate.getFullYear() != 1970) {
         const sixMonthsAfterLapse = new Date(lapseDate);
         sixMonthsAfterLapse.setMonth(lapseDate.getMonth() + 6);
 

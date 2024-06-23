@@ -1164,6 +1164,7 @@ const Owner: NextPage = () => {
     setPreferredCommunicationOption("Select one");
     setStatusOption("Active");
     setStartingDate(new Date());
+    setStartingDatejs(dayjs(new Date()));
     setComments("");
     setSouthAfricanIDOption("Select one");
     setSouthAfricanID("");
@@ -1405,6 +1406,7 @@ const Owner: NextPage = () => {
       //setAddressPostalCode(userData.addressPostalCode ?? "");
       setAddressFreeForm(userData.addressFreeForm ?? "");
       setPreferredCommunicationOption(userData.preferredCommunication ?? "");
+
       setStartingDate(userData.startingDate ?? new Date());
       setStartingDatejs(dayjs(userData.startingDate ?? new Date()));
       setStatusOption(userData.status ?? "");

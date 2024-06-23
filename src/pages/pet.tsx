@@ -2135,35 +2135,144 @@ const Pet: NextPage = () => {
       membershipTypeOption === "Gold Card Holder" ||
       membershipTypeOption === "Gold card holder"
     ) {
-      const currentDate = new Date();
-
+      const today = new Date();
       // Convert clinicList dates to Date objects
       const clinicDates = clinicList.map((clinicDate) => {
         const [day, month, year] = clinicDate.date.split("/").map(Number);
         return new Date(year ?? 0, (month ?? 0) - 1, day);
       });
 
-      // Filter clinics within the last 'time' months
-      const filteredClinicsLapsedMember = clinicDates.filter((clinicDate) => {
-        const pastDate = new Date(currentDate);
-        pastDate.setMonth(currentDate.getMonth() - 3);
-        return clinicDate >= pastDate;
-      });
+      // Sort clinic dates in ascending order
+      clinicDates.sort((a, b) => a.getTime() - b.getTime());
 
-      const filteredClinicsActiveMember = clinicDates.filter((clinicDate) => {
-        const pastDate = new Date(currentDate);
-        pastDate.setMonth(currentDate.getMonth() - 6);
-        return clinicDate >= pastDate;
-      });
+      let isLapsed = false;
+      let lapseDate: Date | null = null;
 
-      if (filteredClinicsLapsedMember.length < 1) {
-        //setCardStatusOption("Lapsed card holder");
-        return "(Lapsed)";
-      } else if (filteredClinicsActiveMember.length >= 3) {
-        return "(Active)";
+      // Check for gaps of 3 months or more
+      for (let i = 1; i < clinicDates.length; i++) {
+        const prevDate = clinicDates[i - 1];
+        const currentDate = clinicDates[i];
+        // console.log("Prev date: ", prevDate);
+        // console.log("Current date: ", currentDate);
+        const pastDate = new Date(prevDate!);
+        pastDate.setMonth((prevDate?.getMonth() ?? 0) + 3);
+
+        const today_ = new Date(today);
+        today_.setMonth(today.getMonth() - 3);
+        //console.log("clinicDates[0]: ", clinicDates[0]);
+        //console.log("today_", today_);
+        const today__ = today_.getTime();
+        const latestClinicDate = clinicDates[clinicDates.length - 1]?.getTime() ?? 0;
+
+        if (today__ >= latestClinicDate) {
+          //console.log("lapsed by today");
+          isLapsed = true;
+          lapseDate = today;
+          break;
+        }
+
+        if (currentDate! >= pastDate) {
+          //console.log("lapsed by: ", currentDate);
+          isLapsed = true;
+          lapseDate = currentDate ?? null;
+          break;
+        }
+      }
+
+      if (isLapsed && lapseDate) {
+        const sixMonthsAfterLapse = new Date(lapseDate);
+        sixMonthsAfterLapse.setMonth(lapseDate.getMonth() + 6);
+
+        //console.log("Lapsed date: ", lapseDate);
+        //console.log("Six months after lapse: ", sixMonthsAfterLapse);
+
+        const clinicsInNextSixMonths = clinicDates.filter((date) => date > lapseDate && date <= sixMonthsAfterLapse);
+
+        //console.log("Clinics in next sixe months: ", clinicsInNextSixMonths.length);
+
+        if (clinicsInNextSixMonths.length >= 3) {
+          return "(Active)";
+        } else {
+          return "(Lapsed)";
+        }
       } else {
         return "(Active)";
       }
+
+      //recent chatgpt code
+      // const currentDate = new Date();
+
+      // // Convert clinicList dates to Date objects
+      // const clinicDates = clinicList.map((clinicDate) => {
+      //   const [day, month, year] = clinicDate.date.split("/").map(Number);
+      //   return new Date(year ?? 0, (month ?? 0) - 1, day);
+      // });
+
+      // // Sort clinic dates in descending order
+      // clinicDates.sort((a, b) => b.getTime() - a.getTime());
+
+      // // Check for lapses and activity status
+      // let lastActiveDate = currentDate;
+      // let isLapsed = false;
+      // let recentClinicCount = 0;
+
+      // for (const date of clinicDates) {
+      //   const pastDate = new Date(lastActiveDate);
+      //   pastDate.setMonth(lastActiveDate.getMonth() - 3);
+
+      //   if (date < pastDate) {
+      //     isLapsed = true;
+      //     break;
+      //   }
+
+      //   lastActiveDate = date;
+      // }
+
+      // // Check for activity within the last 6 months after the last lapse
+      // if (isLapsed) {
+      //   const sixMonthsAgo = new Date(currentDate);
+      //   sixMonthsAgo.setMonth(currentDate.getMonth() - 6);
+      //   recentClinicCount = clinicDates.filter((date) => date >= sixMonthsAgo).length;
+
+      //   if (recentClinicCount >= 3) {
+      //     return "(Active)";
+      //   } else {
+      //     return "(Lapsed)";
+      //   }
+      // } else {
+      //   return "(Active)";
+      // }
+
+      //old code
+      // const currentDate = new Date();
+
+      // // Convert clinicList dates to Date objects
+      // const clinicDates = clinicList.map((clinicDate) => {
+      //   const [day, month, year] = clinicDate.date.split("/").map(Number);
+      //   return new Date(year ?? 0, (month ?? 0) - 1, day);
+      // });
+
+      // // Filter clinics within the last 'time' months
+      // const filteredClinicsLapsedMember = clinicDates.filter((clinicDate) => {
+      //   const pastDate = new Date(currentDate);
+      //   pastDate.setMonth(currentDate.getMonth() - 3);
+      //   return clinicDate >= pastDate;
+      // });
+
+      // const filteredClinicsActiveMember = clinicDates.filter((clinicDate) => {
+      //   const pastDate = new Date(currentDate);
+      //   pastDate.setMonth(currentDate.getMonth() - 6);
+      //   return clinicDate >= pastDate;
+      // });
+
+      // if (filteredClinicsLapsedMember.length < 1) {
+      //   //setCardStatusOption("Lapsed card holder");
+      //   return "(Lapsed)";
+      // } else if (filteredClinicsActiveMember.length >= 3) {
+      //   return "(Active)";
+      // } else {
+      //   return "(Lapsed)";
+      // }
     } else {
       return "";
     }
@@ -5383,15 +5492,24 @@ const Pet: NextPage = () => {
                               </td>
 
                               <td className="border px-2 py-1">
-                                {pet.clinic_data && pet.clinic_data.length > 0 ? (
-                                  <>
-                                    {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getDate().toString()}/
-                                    {((pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
-                                    {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getFullYear().toString()}
-                                  </>
-                                ) : (
-                                  "None"
-                                )}
+                                {pet.clinic_data && pet.clinic_data.length > 0
+                                  ? (() => {
+                                      const latestDate = new Date(Math.max(...pet.clinic_data.map((data) => new Date(data.clinic.date).getTime())));
+                                      return `${latestDate.getDate()}/${latestDate.getMonth() + 1}/${latestDate.getFullYear()}`;
+                                    })()
+                                  : // <>
+                                    //   {new Date(Math.max(...pet.clinic_data.map((data) => new Date(data.clinic.date).getTime())))
+                                    //     .toLocaleDateString("en-GB")
+                                    //     .split("/")
+                                    //     .map((datePart) => datePart.padStart(2, "0"))
+                                    //     .join("/")}
+                                    // </>
+                                    // <>
+                                    //   {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getDate().toString()}/
+                                    //   {((pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getMonth() ?? 0) + 1).toString()}/
+                                    //   {pet?.clinic_data?.[pet?.clinic_data.length - 1]?.clinic?.date.getFullYear().toString()}
+                                    // </>
+                                    "None"}
                               </td>
 
                               <td className="border px-2 py-1">

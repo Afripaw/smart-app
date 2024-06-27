@@ -1324,7 +1324,7 @@ const Pet: NextPage = () => {
   //if sterilisation outcome is actioned the sterilisation yes
   useEffect(() => {
     //took away the && sterilisationStatusDate.getFullYear() === 1970) on 19 may 2024
-    if (sterilisationOutcomeOption === "Actioned") {
+    if (sterilisationOutcomeOption === "Actioned" && sterilisationStatusOption !== "Yes") {
       setSterilisationStatusOption("Yes");
       setSterilisationStatusDate(new Date());
       setSterilisationStatusDatejs(dayjs(new Date()));

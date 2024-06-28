@@ -4851,8 +4851,8 @@ const Pet: NextPage = () => {
       setKennelList(pet_?.data?.pet_data?.kennelReceived ?? []);
     }
 
-    setBreedList(pet_?.data?.pet_data?.breed ?? ["Select here"]);
-    setColourList(pet_?.data?.pet_data?.colour ?? ["Select here"]);
+    setBreedList(pet_?.data?.pet_data?.breed ?? [""]);
+    setColourList(pet_?.data?.pet_data?.colour ?? [""]);
 
     setOwnerID(pet_?.data?.owner_data?.ownerID ?? 0);
     setFirstName(pet_?.data?.owner_data?.firstName ?? "");

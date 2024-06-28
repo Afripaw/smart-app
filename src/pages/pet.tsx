@@ -4448,7 +4448,7 @@ const Pet: NextPage = () => {
 
         const petData = userData?.pet_data;
 
-        if (isUpdate && isViewProfilePage && router.asPath.includes("petID")) {
+        if (isUpdate && router.asPath.includes("petID")) {
           setPetName(petData?.petName ?? "");
           setSpeciesOption(petData?.species ?? "Select one");
           setSexOption(petData?.sex ?? "Select one");
@@ -4854,7 +4854,7 @@ const Pet: NextPage = () => {
     setBreedList(pet_?.data?.pet_data?.breed ?? [""]);
     setColourList(pet_?.data?.pet_data?.colour ?? [""]);
 
-    setOwnerID(pet_?.data?.owner_data?.ownerID ?? 0);
+    //setOwnerID(pet_?.data?.owner_data?.ownerID ?? 0);
     setFirstName(pet_?.data?.owner_data?.firstName ?? "");
     setSurname(pet_?.data?.owner_data?.surname ?? "");
     setGreaterArea(pet_?.data?.owner_data?.addressGreaterArea.greaterArea ?? "");

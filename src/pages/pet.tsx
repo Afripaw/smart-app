@@ -4448,7 +4448,7 @@ const Pet: NextPage = () => {
 
         const petData = userData?.pet_data;
 
-        if (isUpdate && router.asPath.includes("petID")) {
+        if (isUpdate && isViewProfilePage && router.asPath.includes("petID")) {
           setPetName(petData?.petName ?? "");
           setSpeciesOption(petData?.species ?? "Select one");
           setSexOption(petData?.sex ?? "Select one");
@@ -4803,6 +4803,63 @@ const Pet: NextPage = () => {
     }
   }, [getPet]); // Effect runs when userQuery.data changes
   //[isViewProfilePage, user]
+
+  //Useeffect if pet_ has got data from database
+  useEffect(() => {
+    if (pet_?.data) {
+      const clinicData = pet_?.data?.clinic_data;
+      const clinicDates: Clinic[] =
+        clinicData?.map((clinic) => ({
+          id: clinic.clinicID,
+          date:
+            clinic.clinic.date.getDate().toString() +
+            "/" +
+            ((clinic.clinic.date.getMonth() ?? 0) + 1).toString() +
+            "/" +
+            clinic.clinic.date.getFullYear().toString(),
+          area: clinic.clinic.greaterArea.greaterArea,
+        })) ?? [];
+
+      setClinicList(clinicDates);
+
+      setClinicListOptions(
+        clinicsAttendedOptions.map((clinic) => ({
+          id: clinic.clinicID,
+          date: clinic.date.getDate().toString() + "/" + ((clinic.date.getMonth() ?? 0) + 1).toString() + "/" + clinic.date.getFullYear().toString(),
+          area: clinic.greaterArea.greaterArea,
+          state: clinicDates.map((clinic) => clinic.id).includes(clinic.clinicID),
+        })),
+      );
+
+      const treatmentData: Treatment[] =
+        pet_?.data?.treatment_data?.map((treatment) => ({
+          treatmentID: treatment.treatmentID,
+          date: treatment.date.getDate().toString() + "/" + (treatment.date.getMonth() + 1).toString() + "/" + treatment.date.getFullYear().toString(),
+          category: treatment.category,
+          type: treatment.type.map((type) => type.type.type),
+          comments: treatment.comments ?? "",
+        })) ?? [];
+
+      setTreatmentList(treatmentData);
+
+      setKennelListOptions(
+        kennelsReceivedOptions.map((kennel) => ({
+          year: kennel,
+          state: pet_?.data?.pet_data?.kennelReceived.includes(kennel) ?? false,
+        })),
+      );
+      setKennelList(pet_?.data?.pet_data?.kennelReceived ?? []);
+    }
+
+    setBreedList(pet_?.data?.pet_data?.breed ?? ["Select here"]);
+    setColourList(pet_?.data?.pet_data?.colour ?? ["Select here"]);
+
+    setOwnerID(pet_?.data?.owner_data?.ownerID ?? 0);
+    setFirstName(pet_?.data?.owner_data?.firstName ?? "");
+    setSurname(pet_?.data?.owner_data?.surname ?? "");
+    setGreaterArea(pet_?.data?.owner_data?.addressGreaterArea.greaterArea ?? "");
+    setArea(pet_?.data?.owner_data?.addressArea?.area ?? "");
+  }, [pet_?.data]);
 
   //Go to update page from the view profile page
   const handleUpdateFromViewProfilePage = async () => {

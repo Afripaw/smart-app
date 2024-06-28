@@ -7824,7 +7824,12 @@ const Pet: NextPage = () => {
 
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Qualifies For Kennel?:</b>{" "}
-                        {VetFees() === "No" ? <span className=" text-red-600">{VetFees()}</span> : <span className=" text-black">{VetFees()}</span>}
+                        {qualifiesForKennel() === "No" ? (
+                          <span className=" text-red-600">{qualifiesForKennel()}</span>
+                        ) : (
+                          <span className=" text-black">{qualifiesForKennel()}</span>
+                        )}
+                        {/* VetFees() === "No" ? <span className=" text-red-600">{VetFees()}</span> : <span className=" text-black">{VetFees()}</span> */}
                         {
                           <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
                             <Info size={24} className="block" />

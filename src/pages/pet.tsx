@@ -4855,10 +4855,10 @@ const Pet: NextPage = () => {
     setColourList(pet_?.data?.pet_data?.colour ?? [""]);
 
     //setOwnerID(pet_?.data?.owner_data?.ownerID ?? 0);
-    setFirstName(pet_?.data?.owner_data?.firstName ?? "");
-    setSurname(pet_?.data?.owner_data?.surname ?? "");
-    setGreaterArea(pet_?.data?.owner_data?.addressGreaterArea.greaterArea ?? "");
-    setArea(pet_?.data?.owner_data?.addressArea?.area ?? "");
+    // setFirstName(pet_?.data?.owner_data?.firstName ?? "");
+    // setSurname(pet_?.data?.owner_data?.surname ?? "");
+    // setGreaterArea(pet_?.data?.owner_data?.addressGreaterArea.greaterArea ?? "");
+    // setArea(pet_?.data?.owner_data?.addressArea?.area ?? "");
   }, [pet_?.data]);
 
   //Go to update page from the view profile page

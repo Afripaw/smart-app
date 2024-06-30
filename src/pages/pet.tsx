@@ -4806,7 +4806,7 @@ const Pet: NextPage = () => {
 
   //Useeffect if pet_ has got data from database
   useEffect(() => {
-    if (pet_?.data) {
+    if (pet_?.data && router.asPath.includes("petID")) {
       const clinicData = pet_?.data?.clinic_data;
       const clinicDates: Clinic[] =
         clinicData?.map((clinic) => ({

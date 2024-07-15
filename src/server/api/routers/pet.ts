@@ -1581,8 +1581,8 @@ export const petRouter = createTRPCRouter({
           Species: pet.species,
           Sex: pet.sex,
           Age: pet.age,
-          Breed: pet.breed.join(", "),
-          Colour: pet.colour.join(", "),
+          Breed: pet.breed.filter((breed) => breed != "").join(", "),
+          Colour: pet.colour.filter((colour) => colour != "").join(", "),
           Size: pet.size,
           Markings: pet.markings,
           Status: pet.status,
@@ -1591,11 +1591,11 @@ export const petRouter = createTRPCRouter({
           "Sterilised Request Signed": pet.sterilisedRequestSigned,
           "Sterilisation Outcome": pet.sterilisationOutcome,
           "Vaccination Shot 1":
-            pet.vaccinationShot1?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot1?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot1,
+            pet.vaccinationShot1?.getFullYear() === 1970 ? "No yet" : pet.vaccinationShot1?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot1,
           "Vaccination Shot 2":
-            pet.vaccinationShot2?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot2?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot2,
+            pet.vaccinationShot2?.getFullYear() === 1970 ? "No yet" : pet.vaccinationShot2?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot2,
           "Vaccination Shot 3":
-            pet.vaccinationShot3?.getFullYear() === 1970 ? "No Vaccination" : pet.vaccinationShot3?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot3,
+            pet.vaccinationShot3?.getFullYear() === 1970 ? "No yet" : pet.vaccinationShot3?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot3,
           "Last Deworming": pet.lastDeworming,
           Membership: pet.membership,
           "Card Status": pet.cardStatus,

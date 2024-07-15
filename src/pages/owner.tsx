@@ -1934,7 +1934,7 @@ const Owner: NextPage = () => {
                             </span>
                           </th>
 
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Email</th>
+                          {/* <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Email</th> */}
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Mobile</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Greater Area</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Area</th>
@@ -1973,7 +1973,7 @@ const Owner: NextPage = () => {
                               {/* <td className="border px-4 py-2">N{user.ownerID}</td> */}
                               <td className="border px-2 py-1">{user.firstName}</td>
                               <td className="border px-2 py-1">{user.surname}</td>
-                              <td className="border px-2 py-1">{user.email}</td>
+                              {/* <td className="border px-2 py-1">{user.email}</td> */}
                               <td className="border px-2 py-1">{user.mobile}</td>
                               <td className="border px-2 py-1">{user.addressGreaterArea.greaterArea}</td>
                               <td className="border px-2 py-1">{user.addressArea?.area ?? ""}</td>

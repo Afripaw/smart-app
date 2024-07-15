@@ -2168,36 +2168,38 @@ const Pet: NextPage = () => {
           //console.log("lapsed by today");
           isLapsed = true;
           lapseDate = today;
-          break;
+          // break;
         }
 
         if (currentDate! >= pastDate) {
           //console.log("lapsed by: ", currentDate);
           isLapsed = true;
           lapseDate = currentDate ?? new Date(0);
-          break;
+          //break;
         }
-      }
 
-      if (isLapsed && lapseDate.getFullYear() != 1970) {
-        const sixMonthsAfterLapse = new Date(lapseDate);
-        sixMonthsAfterLapse.setMonth(lapseDate.getMonth() + 6);
+        if (isLapsed && lapseDate.getFullYear() != 1970) {
+          const sixMonthsAfterLapse = new Date(lapseDate);
+          sixMonthsAfterLapse.setMonth(lapseDate.getMonth() + 6);
 
-        //console.log("Lapsed date: ", lapseDate);
-        //console.log("Six months after lapse: ", sixMonthsAfterLapse);
+          //console.log("Lapsed date: ", lapseDate);
+          //console.log("Six months after lapse: ", sixMonthsAfterLapse);
 
-        const clinicsInNextSixMonths = clinicDates.filter((date) => date > lapseDate && date <= sixMonthsAfterLapse);
+          const clinicsInNextSixMonths = clinicDates.filter((date) => date > lapseDate && date <= sixMonthsAfterLapse);
 
-        //console.log("Clinics in next sixe months: ", clinicsInNextSixMonths.length);
+          //console.log("Clinics in next sixe months: ", clinicsInNextSixMonths.length);
 
-        if (clinicsInNextSixMonths.length >= 3) {
-          return "(Active)";
+          if (clinicsInNextSixMonths.length >= 3) {
+            isLapsed = false;
+          } else {
+            isLapsed = true;
+          }
         } else {
-          return "(Lapsed)";
+          isLapsed = false;
         }
-      } else {
-        return "(Active)";
       }
+
+      return isLapsed ? "(Lapsed)" : "(Active)";
 
       //recent chatgpt code
       // const currentDate = new Date();
@@ -3385,6 +3387,9 @@ const Pet: NextPage = () => {
 
     const vaccination3TypeList_ = vaccination3TypeListOptions.filter((type) => type.state == true).map((type) => type.type);
 
+    const breedList_ = breedList.filter((breed) => breed != "");
+    const colourList_ = colourList.filter((colour) => colour != "");
+
     console.log("Vaccination1TypeListOptions: ", vaccination1TypeListOptions);
     console.log("Vaccination1TypeList_: ", vaccination1TypeList_);
 
@@ -3410,8 +3415,8 @@ const Pet: NextPage = () => {
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
-      breed: speciesOption === "Dog" ? breedList : ["Not Applicable"],
-      colour: colourList,
+      breed: speciesOption === "Dog" ? breedList_ : ["Not Applicable"],
+      colour: colourList_,
       size: speciesOption === "Dog" ? (sizeOption === "Select one" ? "" : sizeOption) : "",
       markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
@@ -3897,6 +3902,9 @@ const Pet: NextPage = () => {
     const vaccination2Type_ = vaccination2TypeList.filter((type) => type != "");
     const vaccination3Type_ = vaccination3TypeList.filter((type) => type != "");
 
+    const breedList_ = breedList.filter((breed) => breed != "");
+    const colourList_ = colourList.filter((colour) => colour != "");
+
     // //vaccinations
     // const vaccine1 = vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(0);
     // const vaccine2 = vaccinationShot1Option === "Yes" ? (vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0)) : new Date(0);
@@ -3917,8 +3925,8 @@ const Pet: NextPage = () => {
       species: speciesOption === "Select one" ? "" : speciesOption,
       sex: sexOption === "Select one" ? "" : sexOption,
       age: ageOption === "Select one" ? "" : ageOption,
-      breed: speciesOption === "Dog" ? breedList : ["Not Applicable"],
-      colour: colourList,
+      breed: speciesOption === "Dog" ? breedList_ : ["Not Applicable"],
+      colour: colourList_,
       size: speciesOption === "Dog" ? (sizeOption === "Select one" ? "" : sizeOption) : "",
       markings: markings,
       status: statusOption === "Select one" ? "" : statusOption,
@@ -5495,7 +5503,13 @@ const Pet: NextPage = () => {
                               </td>
                               {/* <td className="border px-4 py-2">P{pet.petID}</td> */}
                               <td className="border px-2 py-1">
-                                {pet.petName} ({pet.species === "Cat" ? "Cat" : pet.breed.join(", ")})
+                                {pet.petName} (
+                                {pet.species === "Cat"
+                                  ? "Cat"
+                                  : pet.breed.includes("Not Applicable")
+                                    ? "Dog"
+                                    : pet.breed.filter((breed) => breed != "").join(", ")}
+                                )
                               </td>
                               <td className="border px-2 py-1">
                                 <div className="flex items-center justify-around">
@@ -7521,10 +7535,18 @@ const Pet: NextPage = () => {
                       </div> */}
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Breed(s):</b>{" "}
-                        {breedList
+                        {user?.species === "Cat"
+                          ? "Cat"
+                          : breedList.map((breed) => breed).includes("Not Applicable")
+                            ? "Dog"
+                            : breedList
+                                .map((breed) => breed)
+                                .filter((breed) => breed != "")
+                                .join(", ")}
+                        {/* {breedList
                           // .slice(1, breedList.length)
-                          .map((breed) => breed)
-                          .join(", ")}
+                          .map((breed) => breed).filter((breed) => breed != "")
+                          .join(", ")} */}
                       </div>
 
                       <div className="mb-2 flex items-center">
@@ -7532,6 +7554,7 @@ const Pet: NextPage = () => {
                         {colourList
                           // .slice(1, colourList.length)
                           .map((colour) => colour)
+                          .filter((colour) => colour != "")
                           .join(", ")}
                       </div>
 

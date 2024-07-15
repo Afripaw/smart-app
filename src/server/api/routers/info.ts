@@ -4,6 +4,8 @@ import { Prisma } from "@prisma/client";
 
 import { createTRPCRouter, protectedProcedure, publicProcedure, accessProcedure } from "~/server/api/trpc";
 import Owner from "~/pages/owner";
+import { getYear } from "date-fns";
+import { equal } from "assert";
 
 export const infoRouter = createTRPCRouter({
   //Database report queries
@@ -26,7 +28,10 @@ export const infoRouter = createTRPCRouter({
         input.typeOfQuery === "Requested"
           ? { sterilisedRequested: { gte: input.startDate, lte: input.endDate } }
           : input.typeOfQuery === "Actioned"
-            ? { sterilisationOutcome: { equals: "Actioned" }, sterilisedStatus: { gte: input.startDate, lte: input.endDate } }
+            ? {
+                // sterilisationOutcome: { equals: "Actioned" },
+                sterilisedStatus: { gte: input.startDate, lte: input.endDate },
+              }
             : input.typeOfQuery === "No Show"
               ? { sterilisationOutcome: { equals: "No Show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
               : {};
@@ -114,6 +119,7 @@ export const infoRouter = createTRPCRouter({
               addressStreet: { select: { street: true } },
               addressStreetCode: true,
               addressStreetNumber: true,
+              mobile: true,
             },
           },
           clinicsAttended: {
@@ -342,7 +348,10 @@ export const infoRouter = createTRPCRouter({
         input.typeOfQuery === "Requested"
           ? { sterilisedRequested: { gte: input.startDate, lte: input.endDate } }
           : input.typeOfQuery === "Actioned"
-            ? { sterilisationOutcome: { equals: "Actioned" }, sterilisedStatus: { gte: input.startDate, lte: input.endDate } }
+            ? {
+                // sterilisationOutcome: { equals: "Actioned" },
+                sterilisedStatus: { gte: input.startDate, lte: input.endDate },
+              }
             : input.typeOfQuery === "No Show"
               ? { sterilisationOutcome: { equals: "No Show" }, sterilisationOutcomeDate: { gte: input.startDate, lte: input.endDate } }
               : {};
@@ -365,6 +374,10 @@ export const infoRouter = createTRPCRouter({
           vaccinationShot1: true,
           vaccinationShot2: true,
           vaccinationShot3: true,
+          vaccination1Type: true,
+          vaccination2Type: true,
+          vaccination3Type: true,
+          lastDeworming: true,
           owner: {
             select: {
               firstName: true,
@@ -397,11 +410,19 @@ export const infoRouter = createTRPCRouter({
         Breed: pet.breed.join(", "),
         Colour: pet.colour.join(", "),
         Size: pet.size,
-        "Sterilisation Requested": pet.sterilisedRequested,
+        "Sterilisation Requested": pet.sterilisedRequested?.getFullYear() != 1970 ? pet.sterilisedRequested : "",
         "Sterilisation Request Signed At": pet.sterilisedRequestSigned,
-        "Vaccination Shot 1": pet.vaccinationShot1,
-        "Vaccination Shot 2": pet.vaccinationShot2,
-        "Vaccination Shot 3": pet.vaccinationShot3,
+        "Last Deworming Date": pet.lastDeworming,
+        "Last Deworming Due": Number(pet?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - (pet?.species == "Cat" ? 3 : 6))) ? "Yes" : "No",
+        "Vaccination Shot 1":
+          pet.vaccinationShot1.getFullYear() == 1970 ? "Not yet" : pet.vaccinationShot1.getFullYear() == 1971 ? "Unknown" : pet.vaccinationShot1,
+        "Vaccination Shot 1 Type": pet.vaccination1Type,
+        "Vaccination Shot 2":
+          pet.vaccinationShot2?.getFullYear() == 1970 ? "Not yet" : pet.vaccinationShot2?.getFullYear() == 1971 ? "Unknown" : pet.vaccinationShot2,
+        "Vaccination Shot 2 Type": pet.vaccination2Type,
+        "Vaccination Shot 3":
+          pet.vaccinationShot3?.getFullYear() == 1970 ? "Not yet" : pet.vaccinationShot3?.getFullYear() == 1971 ? "Unknown" : pet.vaccinationShot3,
+        "Vaccination Shot 3 Type": pet.vaccination3Type,
       }));
 
       return {
@@ -442,10 +463,13 @@ export const infoRouter = createTRPCRouter({
           breed: true,
           colour: true,
           cardStatus: true,
+          status: true,
+          membership: true,
           owner: {
             select: {
               firstName: true,
               surname: true,
+              mobile: true,
               addressGreaterArea: { select: { greaterArea: true } },
               addressArea: { select: { area: true } },
               addressStreet: { select: { street: true } },
@@ -478,15 +502,100 @@ export const infoRouter = createTRPCRouter({
         });
       }
 
+      //Checks if card status of membership is lapsed or active
+      const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
+        if (
+          membershipType === "Standard Card Holder" ||
+          membershipType === "Standard card holder" ||
+          membershipType === "Gold Card Holder" ||
+          membershipType === "Gold card holder"
+        ) {
+          const today = new Date();
+          // Convert clinicList dates to Date objects
+          // const clinicDates = clinicsAttended.map((clinicDate) => {
+          //   const [day, month, year] = clinicDate.split("/").map(Number);
+          //   return new Date(year ?? 0, (month ?? 0) - 1, day);
+          // });
+          const clinicDates = clinicsAttended;
+
+          // Sort clinic dates in ascending order
+          clinicDates.sort((a, b) => a.getTime() - b.getTime());
+
+          let isLapsed = false;
+          let lapseDate = new Date(0);
+
+          // Check for gaps of 3 months or more
+          for (let i = 1; i < clinicDates.length; i++) {
+            const prevDate = clinicDates[i - 1];
+            const currentDate = clinicDates[i];
+            // console.log("Prev date: ", prevDate);
+            // console.log("Current date: ", currentDate);
+            const pastDate = new Date(prevDate!);
+            pastDate.setMonth((prevDate?.getMonth() ?? 0) + 3);
+
+            const today_ = new Date(today);
+            today_.setMonth(today.getMonth() - 3);
+            //console.log("clinicDates[0]: ", clinicDates[0]);
+            //console.log("today_", today_);
+            const today__ = today_.getTime();
+            const latestClinicDate = clinicDates[clinicDates.length - 1]?.getTime() ?? 0;
+
+            if (today__ >= latestClinicDate) {
+              //console.log("lapsed by today");
+              isLapsed = true;
+              lapseDate = today;
+              // break;
+            }
+
+            if (currentDate! >= pastDate) {
+              //console.log("lapsed by: ", currentDate);
+              isLapsed = true;
+              lapseDate = currentDate ?? new Date(0);
+              // break;
+            }
+
+            if (isLapsed && lapseDate.getFullYear() != 1970) {
+              const sixMonthsAfterLapse = new Date(lapseDate);
+              sixMonthsAfterLapse.setMonth(lapseDate.getMonth() + 6);
+
+              //console.log("Lapsed date: ", lapseDate);
+              //console.log("Six months after lapse: ", sixMonthsAfterLapse);
+
+              const clinicsInNextSixMonths = clinicDates.filter((date) => date > lapseDate && date <= sixMonthsAfterLapse);
+
+              //console.log("Clinics in next sixe months: ", clinicsInNextSixMonths.length);
+
+              if (clinicsInNextSixMonths.length >= 3) {
+                isLapsed = false;
+              } else {
+                isLapsed = true;
+              }
+            } else {
+              isLapsed = false;
+            }
+          }
+
+          return isLapsed ? "Lapsed" : "Active";
+        } else {
+          return "Not Applicable";
+        }
+      };
+
       const data = rawData.map((pet) => ({
         "Owner First Name": pet.owner?.firstName ?? "",
         "Owner Surname": pet.owner?.surname ?? "",
+        "Owner Mobile Number": pet.owner?.mobile ?? "",
         "Greater Area": pet.owner?.addressGreaterArea?.greaterArea ?? "",
         Area: pet.owner?.addressArea?.area ?? "",
         Street: pet.owner?.addressStreet?.street ?? "",
         "Street Code": pet.owner?.addressStreetCode ?? "",
         "Street Number": pet.owner.addressStreetNumber == 0 || pet.owner.addressStreetNumber == null ? "" : pet.owner.addressStreetNumber,
         "Pet Name": pet.petName ?? "",
+        "Pet Status": pet.status ?? "",
+        "Membership Status": membershipStatus(
+          pet.membership,
+          pet.clinicsAttended.map((clinic) => new Date(clinic.clinic.date)),
+        ),
         Species: pet.species ?? "",
         Sex: pet.sex ?? "",
         Age: pet.age ?? "",
@@ -574,40 +683,77 @@ export const infoRouter = createTRPCRouter({
       //Checks if card status of membership is lapsed or active
       const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
         if (
-          membershipType === "Standard card holder" ||
-          membershipType === "Gold card holder" ||
           membershipType === "Standard Card Holder" ||
-          membershipType === "Gold Card Holder"
+          membershipType === "Standard card holder" ||
+          membershipType === "Gold Card Holder" ||
+          membershipType === "Gold card holder"
         ) {
-          const currentDate = new Date();
-
-          // // Convert clinicList dates to Date objects
+          const today = new Date();
+          // Convert clinicList dates to Date objects
           // const clinicDates = clinicsAttended.map((clinicDate) => {
-          //   const [day, month, year] = clinicDate.clinic.date.split("/").map(Number);
+          //   const [day, month, year] = clinicDate.split("/").map(Number);
           //   return new Date(year ?? 0, (month ?? 0) - 1, day);
           // });
+          const clinicDates = clinicsAttended;
 
-          // Filter clinics within the last 'time' months
-          const filteredClinicsLapsedMember = clinicsAttended.filter((clinicDate) => {
-            const pastDate = new Date(currentDate);
-            pastDate.setMonth(currentDate.getMonth() - 3);
-            return clinicDate >= pastDate;
-          });
+          // Sort clinic dates in ascending order
+          clinicDates.sort((a, b) => a.getTime() - b.getTime());
 
-          const filteredClinicsActiveMember = clinicsAttended.filter((clinicDate) => {
-            const pastDate = new Date(currentDate);
-            pastDate.setMonth(currentDate.getMonth() - 6);
-            return clinicDate >= pastDate;
-          });
+          let isLapsed = false;
+          let lapseDate = new Date(0);
 
-          if (filteredClinicsLapsedMember.length < 1) {
-            //setCardStatusOption("Lapsed card holder");
-            return "Lapsed";
-          } else if (filteredClinicsActiveMember.length >= 3) {
-            return "Active";
-          } else {
-            return "Not Applicable";
+          // Check for gaps of 3 months or more
+          for (let i = 1; i < clinicDates.length; i++) {
+            const prevDate = clinicDates[i - 1];
+            const currentDate = clinicDates[i];
+            // console.log("Prev date: ", prevDate);
+            // console.log("Current date: ", currentDate);
+            const pastDate = new Date(prevDate!);
+            pastDate.setMonth((prevDate?.getMonth() ?? 0) + 3);
+
+            const today_ = new Date(today);
+            today_.setMonth(today.getMonth() - 3);
+            //console.log("clinicDates[0]: ", clinicDates[0]);
+            //console.log("today_", today_);
+            const today__ = today_.getTime();
+            const latestClinicDate = clinicDates[clinicDates.length - 1]?.getTime() ?? 0;
+
+            if (today__ >= latestClinicDate) {
+              //console.log("lapsed by today");
+              isLapsed = true;
+              lapseDate = today;
+              // break;
+            }
+
+            if (currentDate! >= pastDate) {
+              //console.log("lapsed by: ", currentDate);
+              isLapsed = true;
+              lapseDate = currentDate ?? new Date(0);
+              // break;
+            }
+
+            if (isLapsed && lapseDate.getFullYear() != 1970) {
+              const sixMonthsAfterLapse = new Date(lapseDate);
+              sixMonthsAfterLapse.setMonth(lapseDate.getMonth() + 6);
+
+              //console.log("Lapsed date: ", lapseDate);
+              //console.log("Six months after lapse: ", sixMonthsAfterLapse);
+
+              const clinicsInNextSixMonths = clinicDates.filter((date) => date > lapseDate && date <= sixMonthsAfterLapse);
+
+              //console.log("Clinics in next sixe months: ", clinicsInNextSixMonths.length);
+
+              if (clinicsInNextSixMonths.length >= 3) {
+                isLapsed = false;
+              } else {
+                isLapsed = true;
+              }
+            } else {
+              isLapsed = false;
+            }
           }
+
+          return isLapsed ? "Lapsed" : "Active";
         } else {
           return "Not Applicable";
         }

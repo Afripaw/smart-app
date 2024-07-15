@@ -104,43 +104,123 @@ const Info: NextPage = () => {
     return `${day}/${month}/${year}`;
   }
 
+  //old code
+  // //Checks if card status of membership is lapsed or active
+  // const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
+  //   if (
+  //     membershipType === "Standard card holder" ||
+  //     membershipType === "Gold card holder" ||
+  //     membershipType === "Standard Card Holder" ||
+  //     membershipType === "Gold Card Holder"
+  //   ) {
+  //     const currentDate = new Date();
+
+  //     // // Convert clinicList dates to Date objects
+  //     // const clinicDates = clinicsAttended.map((clinicDate) => {
+  //     //   const [day, month, year] = clinicDate.clinic.date.split("/").map(Number);
+  //     //   return new Date(year ?? 0, (month ?? 0) - 1, day);
+  //     // });
+
+  //     // Filter clinics within the last 'time' months
+  //     const filteredClinicsLapsedMember = clinicsAttended.filter((clinicDate) => {
+  //       const pastDate = new Date(currentDate);
+  //       pastDate.setMonth(currentDate.getMonth() - 3);
+  //       return clinicDate >= pastDate;
+  //     });
+
+  //     const filteredClinicsActiveMember = clinicsAttended.filter((clinicDate) => {
+  //       const pastDate = new Date(currentDate);
+  //       pastDate.setMonth(currentDate.getMonth() - 6);
+  //       return clinicDate >= pastDate;
+  //     });
+
+  //     if (filteredClinicsLapsedMember.length < 1) {
+  //       //setCardStatusOption("Lapsed card holder");
+  //       return "Lapsed";
+  //     } else if (filteredClinicsActiveMember.length >= 3) {
+  //       return "Active";
+  //     } else {
+  //       return "Not Applicab";
+  //     }
+  //   } else {
+  //     return "Not Applicable";
+  //   }
+  // };
+
   //Checks if card status of membership is lapsed or active
   const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
     if (
-      membershipType === "Standard card holder" ||
-      membershipType === "Gold card holder" ||
       membershipType === "Standard Card Holder" ||
-      membershipType === "Gold Card Holder"
+      membershipType === "Standard card holder" ||
+      membershipType === "Gold Card Holder" ||
+      membershipType === "Gold card holder"
     ) {
-      const currentDate = new Date();
-
-      // // Convert clinicList dates to Date objects
+      const today = new Date();
+      // Convert clinicList dates to Date objects
       // const clinicDates = clinicsAttended.map((clinicDate) => {
-      //   const [day, month, year] = clinicDate.clinic.date.split("/").map(Number);
+      //   const [day, month, year] = clinicDate.split("/").map(Number);
       //   return new Date(year ?? 0, (month ?? 0) - 1, day);
       // });
+      const clinicDates = clinicsAttended;
 
-      // Filter clinics within the last 'time' months
-      const filteredClinicsLapsedMember = clinicsAttended.filter((clinicDate) => {
-        const pastDate = new Date(currentDate);
-        pastDate.setMonth(currentDate.getMonth() - 3);
-        return clinicDate >= pastDate;
-      });
+      // Sort clinic dates in ascending order
+      clinicDates.sort((a, b) => a.getTime() - b.getTime());
 
-      const filteredClinicsActiveMember = clinicsAttended.filter((clinicDate) => {
-        const pastDate = new Date(currentDate);
-        pastDate.setMonth(currentDate.getMonth() - 6);
-        return clinicDate >= pastDate;
-      });
+      let isLapsed = false;
+      let lapseDate = new Date(0);
 
-      if (filteredClinicsLapsedMember.length < 1) {
-        //setCardStatusOption("Lapsed card holder");
-        return "Lapsed";
-      } else if (filteredClinicsActiveMember.length >= 3) {
-        return "Active";
-      } else {
-        return "Not Applicable";
+      // Check for gaps of 3 months or more
+      for (let i = 1; i < clinicDates.length; i++) {
+        const prevDate = clinicDates[i - 1];
+        const currentDate = clinicDates[i];
+        // console.log("Prev date: ", prevDate);
+        // console.log("Current date: ", currentDate);
+        const pastDate = new Date(prevDate!);
+        pastDate.setMonth((prevDate?.getMonth() ?? 0) + 3);
+
+        const today_ = new Date(today);
+        today_.setMonth(today.getMonth() - 3);
+        //console.log("clinicDates[0]: ", clinicDates[0]);
+        //console.log("today_", today_);
+        const today__ = today_.getTime();
+        const latestClinicDate = clinicDates[clinicDates.length - 1]?.getTime() ?? 0;
+
+        if (today__ >= latestClinicDate) {
+          //console.log("lapsed by today");
+          isLapsed = true;
+          lapseDate = today;
+          // break;
+        }
+
+        if (currentDate! >= pastDate) {
+          //console.log("lapsed by: ", currentDate);
+          isLapsed = true;
+          lapseDate = currentDate ?? new Date(0);
+          // break;
+        }
+
+        if (isLapsed && lapseDate.getFullYear() != 1970) {
+          const sixMonthsAfterLapse = new Date(lapseDate);
+          sixMonthsAfterLapse.setMonth(lapseDate.getMonth() + 6);
+
+          //console.log("Lapsed date: ", lapseDate);
+          //console.log("Six months after lapse: ", sixMonthsAfterLapse);
+
+          const clinicsInNextSixMonths = clinicDates.filter((date) => date > lapseDate && date <= sixMonthsAfterLapse);
+
+          //console.log("Clinics in next sixe months: ", clinicsInNextSixMonths.length);
+
+          if (clinicsInNextSixMonths.length >= 3) {
+            isLapsed = false;
+          } else {
+            isLapsed = true;
+          }
+        } else {
+          isLapsed = false;
+        }
       }
+
+      return isLapsed ? "Lapsed" : "Active";
     } else {
       return "Not Applicable";
     }
@@ -1672,9 +1752,33 @@ const Info: NextPage = () => {
                       <thead className="z-30 bg-gray-50">
                         <tr>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2" colSpan={2}>
+                            Deworming
+                          </th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
+                        </tr>
+                        <tr>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Owner Name</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Address</th>
-                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Cell number</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Mobile</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Pet Name</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Species</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Sex</th>
@@ -1684,9 +1788,15 @@ const Info: NextPage = () => {
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Size</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Sterilisation Requested Date</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Request Signed At</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Last</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Due</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Vaccination Shot 1 Date</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Vaccination Shot 1 Type</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Vaccination Shot 2 Date</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Vaccination Shot 2 Type</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Vaccination Shot 3 Date</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Vaccination Shot 3 Type</th>
+
                           {/* <th className="sticky top-0 z-10 w-[35px] bg-gray-50 px-4 py-2">
                             <span className="group relative inline-block">
                               <button className={`${order === "updatedAt" ? "underline" : ""}`} onClick={() => handleOrderFields("updatedAt")}>
@@ -1736,13 +1846,25 @@ const Info: NextPage = () => {
                               <td className="border px-2 py-1">{user.colour.join(", ")}</td>
                               <td className="border px-2 py-1">{user.size}</td>
                               <td className=" border px-2 py-1">
-                                {user?.sterilisedRequested?.getDate()?.toString() ?? ""}
-                                {"/"}
-                                {((user?.sterilisedRequested?.getMonth() ?? 0) + 1)?.toString() ?? ""}
-                                {"/"}
-                                {user?.sterilisedRequested?.getFullYear()?.toString() ?? ""}
+                                {user?.sterilisedRequested?.getFullYear() != 1970
+                                  ? `${user?.sterilisedRequested?.getDate()?.toString() ?? ""}/${(user?.sterilisedRequested?.getMonth() ?? 0) + 1}/${
+                                      user?.sterilisedRequested?.getFullYear()?.toString() ?? ""
+                                    }`
+                                  : ""}
                               </td>
                               <td className="border px-2 py-1">{user.sterilisedRequestSigned}</td>
+                              <td className="border px-2 py-1">
+                                {user?.lastDeworming?.getDate().toString() +
+                                  "/" +
+                                  ((user?.lastDeworming?.getMonth() ?? 0) + 1).toString() +
+                                  "/" +
+                                  user?.lastDeworming?.getFullYear().toString()}
+                              </td>
+                              <td className="border px-2 py-1">
+                                {Number(user?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - (user?.species == "Cat" ? 3 : 6)))
+                                  ? "Yes"
+                                  : "No"}
+                              </td>
                               <td className=" border px-2 py-1">
                                 {user?.vaccinationShot1?.getFullYear() === 1970
                                   ? "Not yet"
@@ -1752,6 +1874,7 @@ const Info: NextPage = () => {
                                       `${(user.vaccinationShot1.getMonth() + 1).toString()}/` +
                                       `${user.vaccinationShot1.getFullYear().toString()}`}
                               </td>
+                              <td className="border px-2 py-1">{user.vaccination1Type.join(", ")}</td>
                               <td className=" border px-2 py-1">
                                 {user?.vaccinationShot2?.getFullYear() === 1970
                                   ? "Not yet"
@@ -1762,6 +1885,7 @@ const Info: NextPage = () => {
                                       `${user.vaccinationShot2?.getFullYear().toString()}`}
                                 {/* .toString().padStart(2, "0") */}
                               </td>
+                              <td className="border px-2 py-1">{user.vaccination2Type.join(", ")}</td>
                               <td className=" border px-2 py-1">
                                 {user?.vaccinationShot3?.getFullYear() === 1970
                                   ? "Not yet"
@@ -1771,6 +1895,7 @@ const Info: NextPage = () => {
                                       `${((user.vaccinationShot3?.getMonth() ?? 0) + 1).toString()}/` +
                                       `${user.vaccinationShot3?.getFullYear().toString()}`}
                               </td>
+                              <td className="border px-2 py-1">{user.vaccination3Type.join(", ")}</td>
                             </tr>
                           );
                         })}
@@ -1801,6 +1926,7 @@ const Info: NextPage = () => {
                         <tr>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2"></th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Owner Name</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Mobile</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Address</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Pet Name</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Species</th>
@@ -1808,6 +1934,8 @@ const Info: NextPage = () => {
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Age</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Breed</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Colour</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Pet Status</th>
+                          <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Membership Status</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Card Status</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Clinic Dates Attended</th>
                           <th className="sticky top-0 z-10 bg-gray-50 px-4 py-2">Total number of Clinics Attended</th>
@@ -1831,6 +1959,7 @@ const Info: NextPage = () => {
                                 <div className="flex justify-center">{index + 1}</div>
                               </td>
                               <td className="border px-2 py-1">{user.owner.firstName + " " + user.owner.surname}</td>
+                              <td className="border px-2 py-1">{user.owner.mobile}</td>
                               <td className="border px-2 py-1">
                                 {[
                                   user.owner.addressGreaterArea.greaterArea,
@@ -1857,6 +1986,15 @@ const Info: NextPage = () => {
                               <td className="border px-2 py-1">{user.age}</td>
                               <td className="border px-2 py-1">{user.breed.join(", ")}</td>
                               <td className="border px-2 py-1">{user.colour.join(", ")}</td>
+                              <td className="border px-2 py-1">{user.status}</td>
+                              <td className="border px-2 py-1">
+                                {membershipStatus(
+                                  user.membership,
+                                  user.clinicsAttended.map((clinic) => {
+                                    return new Date(clinic.clinic.date);
+                                  }),
+                                )}
+                              </td>
                               <td className="border px-2 py-1">{user.cardStatus}</td>
                               <td className=" border px-2 py-1">
                                 {user.clinicsAttended

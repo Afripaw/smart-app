@@ -988,4 +988,328 @@ export const infoRouter = createTRPCRouter({
         data: data,
       };
     }),
+
+  //download whole database
+  downloadDatabase: accessProcedure(["System Administrator", "Data Analyst", "Data Consumer"]).query(async ({ ctx }) => {
+    //find user raw data
+    const rawUserData = await ctx.db.user.findMany({
+      include: {
+        addressGreaterArea: { select: { greaterArea: { select: { greaterAreaID: true } } } },
+      },
+    });
+
+    //find volunteer raw data
+    const rawVolunteerData = await ctx.db.volunteer.findMany({
+      include: {
+        addressGreaterArea: { select: { greaterArea: { select: { greaterAreaID: true } } } },
+        clinicsAttended: { select: { clinic: { select: { clinicID: true } } } },
+      },
+    });
+
+    //find pet owner raw data
+    const rawPetOwnerData = await ctx.db.petOwner.findMany({
+      include: {
+        addressGreaterArea: { select: { greaterAreaID: true } },
+        addressArea: { select: { areaID: true } },
+        addressStreet: { select: { streetID: true } },
+        //pets: { select: { petID: true } },
+      },
+    });
+
+    //find pet raw data
+    const rawPetData = await ctx.db.pet.findMany({
+      include: {
+        clinicsAttended: { select: { clinic: { select: { clinicID: true } } } },
+        petTreatments: { select: { treatmentID: true } },
+      },
+    });
+
+    //find treatment raw data
+    const rawTreatmentData = await ctx.db.petTreatment.findMany({
+      include: {
+        type: {
+          select: {
+            type: {
+              select: {
+                type: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // //find type raw data
+    // const rawTypeData = await ctx.db.type.findMany();
+
+    //find clinic raw data
+    const rawClinicData = await ctx.db.petClinic.findMany({
+      include: {
+        conditions: { select: { condition: { select: { condition: true } } } },
+      },
+    });
+
+    // //find conditions raw data
+    // const rawConditionsData = await ctx.db.conditions.findMany();
+
+    // find greater area raw data
+    const rawGreaterAreaData = await ctx.db.greaterArea.findMany();
+
+    // find area raw data
+    const rawAreaData = await ctx.db.area.findMany();
+
+    // find street raw data
+    const rawStreetData = await ctx.db.street.findMany();
+
+    // find message raw data
+    const rawMessageData = await ctx.db.communication.findMany({
+      include: {
+        greaterArea: { select: { greaterArea: { select: { greaterAreaID: true } } } },
+        area: { select: { area: { select: { areaID: true } } } },
+      },
+    });
+
+    //so that the dates look good on excel
+    function formatDateToExcel(date: Date): string {
+      return date.toLocaleString("en-UK", {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        //hour: "numeric",
+        //minute: "numeric",
+        //   second: "numeric",
+        //hour12: true, // Enables AM/PM formatting
+      });
+    }
+
+    //user
+    const userData = rawUserData.map((user) => ({
+      "User ID": user.userID,
+      "First Name": user.name,
+      Surname: user.surname,
+      "South African ID": user.southAfricanID,
+      Email: user.email,
+      "Mobile Number": user.mobile,
+      "Preferred Communication": user.preferredCommunication,
+      //"Email Verified": user.emailVerified ? formatDateToExcel(user.emailVerified) : null,
+      Image: user.image,
+      // Password: user.password
+      "Address Greater Area": user.addressGreaterArea.map((area) => area.greaterArea.greaterAreaID).join(", "),
+      "Address Street": user.addressStreet,
+      "Address Street Code": user.addressStreetCode,
+      "Address Street Number": user.addressStreetNumber,
+      "Address Suburb": user.addressSuburb,
+      "Address Postal Code": user.addressPostalCode,
+      "Address Free Form": user.addressFreeForm,
+      Role: user.role,
+      Status: user.status,
+      "Starting Date": formatDateToExcel(user.startingDate),
+      Comments: user.comments,
+    }));
+
+    //volunteer
+    const volunteerData = rawVolunteerData.map((volunteer) => ({
+      "Volunteer ID": volunteer.volunteerID,
+      "First Name": volunteer.firstName,
+      Surname: volunteer.surname,
+      "South African ID": volunteer.southAfricanID,
+      Email: volunteer.email,
+      "Mobile Number": volunteer.mobile,
+      "Preferred Communication": volunteer.preferredCommunication,
+      //"Email Verified": volunteer.emailVerified ? formatDateToExcel(volunteer.emailVerified) : null,
+      Image: volunteer.image,
+      //"Password": volunteer.password,
+      "Address Greater Area": volunteer.addressGreaterArea.map((area) => area.greaterArea.greaterAreaID).join(", "),
+      "Address Street": volunteer.addressStreet,
+      "Address Street Code": volunteer.addressStreetCode,
+      "Address Street Number": volunteer.addressStreetNumber,
+      "Address Suburb": volunteer.addressSuburb,
+      "Address Postal Code": volunteer.addressPostalCode,
+      "Address Free Form": volunteer.addressFreeForm,
+      Role: volunteer.role.join(", "),
+      CollaboratorOrganisation: volunteer.collaboratorOrg,
+      Status: volunteer.status,
+      "Clinic IDs Attended": volunteer.clinicsAttended.map((clinic) => clinic.clinic.clinicID).join(", "),
+      "Starting Date": formatDateToExcel(volunteer.startingDate),
+      Comments: volunteer.comments,
+    }));
+
+    //pet owner
+    const petOwnerData = rawPetOwnerData.map((petOwner) => ({
+      "Pet Owner ID": petOwner.ownerID,
+      "First Name": petOwner.firstName,
+      Surname: petOwner.surname,
+      "South African ID": petOwner.southAfricanID,
+      Email: petOwner.email,
+      "Mobile Number": petOwner.mobile,
+      "Preferred Communication": petOwner.preferredCommunication,
+      //"Email Verified": petOwner.emailVerified ? formatDateToExcel(petOwner.emailVerified) : null,
+      Image: petOwner.image,
+      "Address Greater Area": petOwner.addressGreaterArea.greaterAreaID,
+      "Address Area": petOwner.addressArea?.areaID ?? "",
+      "Address Street": petOwner.addressStreet?.streetID ?? "",
+      "Address Street Code": petOwner.addressStreetCode,
+      "Address Street Number": petOwner.addressStreetNumber,
+      //"Address Suburb": petOwner.addressSuburb
+      "Address Free Form": petOwner.addressFreeForm,
+      Status: petOwner.status,
+      Comments: petOwner.comments,
+      "Starting Date": formatDateToExcel(petOwner.startingDate),
+    }));
+
+    //pet
+    const petData = rawPetData.map((pet) => ({
+      "Pet ID": pet.petID,
+      "Pet Name": pet.petName,
+      Image: pet.image,
+      "Owner ID": pet.ownerID,
+      Species: pet.species,
+      Sex: pet.sex,
+      Age: pet.age,
+      Breed: pet.breed.filter((breed) => breed !== "").join(", "),
+      Colour: pet.colour.filter((colour) => colour !== "").join(", "),
+      Size: pet.size,
+      Markings: pet.markings,
+      Status: pet.status,
+      "Sterilised Status":
+        pet.sterilisedStatus.getFullYear() == 1970
+          ? "Not yet"
+          : pet.sterilisedStatus.getFullYear() == 1971
+            ? "Unknown"
+            : formatDateToExcel(pet.sterilisedStatus),
+      "Sterilised Requested": pet.sterilisedRequested
+        ? pet.sterilisedRequested.getFullYear() == 1970
+          ? "Not yet"
+          : pet.sterilisedRequested.getFullYear() == 1971
+            ? "Unknown"
+            : formatDateToExcel(pet.sterilisedRequested)
+        : null,
+      "Sterilised Request Signed": pet.sterilisedRequestSigned,
+      "Sterilisation Outcome": pet.sterilisationOutcome,
+      "Sterilisation Outcome Date": pet.sterilisationOutcomeDate
+        ? pet.sterilisationOutcomeDate.getFullYear() == 1970
+          ? "Not yet"
+          : pet.sterilisationOutcomeDate.getFullYear() == 1971
+            ? "Unknown"
+            : formatDateToExcel(pet.sterilisationOutcomeDate)
+        : null,
+      "Vaccination Shot 1":
+        pet.vaccinationShot1.getFullYear() == 1970
+          ? "Not yet"
+          : pet.vaccinationShot1.getFullYear() == 1971
+            ? "Unknown"
+            : formatDateToExcel(pet.vaccinationShot1),
+      "Vaccination Shot 2": pet.vaccinationShot2
+        ? pet.vaccinationShot2.getFullYear() == 1970
+          ? "Not yet"
+          : pet.vaccinationShot2.getFullYear() == 1971
+            ? "Unknown"
+            : formatDateToExcel(pet.vaccinationShot2)
+        : null,
+      "Vaccination Shot 3": pet.vaccinationShot3
+        ? pet.vaccinationShot3.getFullYear() == 1970
+          ? "Not yet"
+          : pet.vaccinationShot3.getFullYear() == 1971
+            ? "Unknown"
+            : formatDateToExcel(pet.vaccinationShot3)
+        : null,
+      "Vaccination 1 Type": pet.vaccination1Type.join(","),
+      "Vaccination 2 Type": pet.vaccination2Type.join(","),
+      "Vaccination 3 Type": pet.vaccination3Type.join(","),
+      "Vaccination 1 Paid": pet.vaccination1Paid,
+      "Vaccination 2 Paid": pet.vaccination2Paid,
+      "Vaccination 3 Paid": pet.vaccination3Paid,
+      "Clinic IDs Attended": pet.clinicsAttended.map((clinic) => clinic.clinic.clinicID).join(", "),
+      Programme: pet.programme.filter((programme) => programme !== "").join(", "),
+      "Last Deworming": pet.lastDeworming ? formatDateToExcel(pet.lastDeworming) : null,
+      Membership: pet.membership,
+      "Membership Date": pet.membershipDate ? (pet.membershipDate.getFullYear() == 1970 ? "Non-card Holder" : formatDateToExcel(pet.membershipDate)) : null,
+      "Card Status": pet.cardStatus,
+      "Kennel Received": pet.kennelReceived.filter((kennel) => kennel != "").join(", "),
+      Comments: pet.comments,
+    }));
+
+    //treatment
+    const treatmentData = rawTreatmentData.map((treatment) => ({
+      "Treatment ID": treatment.treatmentID,
+      Date: formatDateToExcel(treatment.date),
+      "Pet ID": treatment.petID,
+      Category: treatment.category,
+      Type: treatment.type.map((type) => type.type.type).join(", "),
+      Comments: treatment.comments,
+    }));
+
+    // //type
+    // const typeData = rawTypeData.map((type) => ({
+    //   "Type ID": type.typeID,
+    //   Type: type.type,
+    //   //Treatment: type.treatment,
+    // }));
+
+    //pet clinic
+    const clinicData = rawClinicData.map((clinic) => ({
+      "Clinic ID": clinic.clinicID,
+      // Pet: clinic.pet,
+      // Volunteer: clinic.volunteer,
+      Date: formatDateToExcel(clinic.date),
+      "Greater Area ID": clinic.greaterAreaID,
+      //"Area ID": clinic.areaID,
+      Conditions: clinic.conditions.map((condition) => condition.condition.condition).join(", "),
+      Comments: clinic.comments,
+    }));
+
+    // //conditions
+    // const conditionsData = rawConditionsData.map((condition) => ({
+    //   "Condition ID": condition.conditionID,
+    //   Condition: condition.condition,
+    //   //Clinic: condition.clinic,
+    // }));
+
+    //greaterArea
+    const greaterAreaData = rawGreaterAreaData.map((greaterArea) => ({
+      "Greater Area ID": greaterArea.greaterAreaID,
+      GreaterArea: greaterArea.greaterArea,
+    }));
+
+    //area
+    const areaData = rawAreaData.map((area) => ({
+      "Area ID": area.areaID,
+      Area: area.area,
+      "Greater Area ID": area.greaterAreaID,
+    }));
+
+    //street
+    const streetData = rawStreetData.map((street) => ({
+      "Street ID": street.streetID,
+      Street: street.street,
+      "Area ID": street.areaID,
+    }));
+
+    //message
+    const messageData = rawMessageData.map((communication) => ({
+      "Message ID": communication.communicationID,
+      Date: formatDateToExcel(communication.createdAt),
+      Type: communication.type,
+      Message: communication.message,
+      Recipients: communication.recipients,
+      "Greater Area": communication.greaterArea,
+      Area: communication.area,
+      Success: communication.success,
+    }));
+
+    return {
+      userData: userData,
+      volunteerData: volunteerData,
+      petOwnerData: petOwnerData,
+      petData: petData,
+      treatmentData: treatmentData,
+      // typeData: typeData,
+      clinicData: clinicData,
+      // conditionsData: conditionsData,
+      greaterAreaData: greaterAreaData,
+      areaData: areaData,
+      streetData: streetData,
+      messageData: messageData,
+    };
+  }),
 });

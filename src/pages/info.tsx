@@ -247,6 +247,176 @@ const Info: NextPage = () => {
   //   }
   // }
 
+  //--------------------------------------DOWNLOAD DATABASE---------------------------------------------------
+  //Download sterilisation
+  const downloadDatabase = api.info.downloadDatabase.useQuery();
+
+  //variable for checking if button was pressed
+  const [downloadData, setDownloadData] = useState(false);
+
+  // useEffect(() => {
+  //   if (downloadDatabase.isSuccess && !downloadDatabase.isFetching && downloadData) {
+  //     //take the download user table query data and put it in an excel file
+  //     const data = downloadDatabase.data;
+
+  //     //console.log("Sterilisation Data: ", data);
+  //     const fileName = `AfriPaw Database - ${formatDate(new Date())}`;
+  //     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  //     const fileExtension = ".xlsx";
+
+  //     //User sheet
+  //     const wsUser = XLSX.utils.json_to_sheet(data.userData ?? []);
+  //     const wbUser = { Sheets: { data: wsUser }, SheetNames: ["User"] };
+  //     const excelBufferUser: Uint8Array = XLSX.write(wbUser, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Volunteer sheet
+  //     const wsVolunteer = XLSX.utils.json_to_sheet(data.volunteerData ?? []);
+  //     const wbVolunteer = { Sheets: { data: wsVolunteer }, SheetNames: ["Volunteer"] };
+  //     const excelBufferVolunteer: Uint8Array = XLSX.write(wbVolunteer, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Pet Owner sheet
+  //     const wsPetOwner = XLSX.utils.json_to_sheet(data.petOwnerData ?? []);
+  //     const wbPetOwner = { Sheets: { data: wsPetOwner }, SheetNames: ["Pet Owner"] };
+  //     const excelBufferPetOwner: Uint8Array = XLSX.write(wbPetOwner, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Pet sheet
+  //     const wsPet = XLSX.utils.json_to_sheet(data.petData ?? []);
+  //     const wbPet = { Sheets: { data: wsPet }, SheetNames: ["Pet"] };
+  //     const excelBufferPet: Uint8Array = XLSX.write(wbPet, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Pet Treatment sheet
+  //     const wsPetTreatment = XLSX.utils.json_to_sheet(data.treatmentData ?? []);
+  //     const wbPetTreatment = { Sheets: { data: wsPetTreatment }, SheetNames: ["Pet Treatment"] };
+  //     const excelBufferPetTreatment: Uint8Array = XLSX.write(wbPetTreatment, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Type sheet
+  //     const wsType = XLSX.utils.json_to_sheet(data.typeData ?? []);
+  //     const wbType = { Sheets: { data: wsType }, SheetNames: ["Treatment Type"] };
+  //     const excelBufferType: Uint8Array = XLSX.write(wbType, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Pet Clinic sheet
+  //     const wsPetClinic = XLSX.utils.json_to_sheet(data.clinicData ?? []);
+  //     const wbPetClinic = { Sheets: { data: wsPetClinic }, SheetNames: ["Pet Clinic"] };
+  //     const excelBufferPetClinic: Uint8Array = XLSX.write(wbPetClinic, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Conditions sheet
+  //     const wsConditions = XLSX.utils.json_to_sheet(data.conditionsData ?? []);
+  //     const wbConditions = { Sheets: { data: wsConditions }, SheetNames: ["Conditions"] };
+  //     const excelBufferConditions: Uint8Array = XLSX.write(wbConditions, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Greater Area sheet
+  //     const wsGreaterArea = XLSX.utils.json_to_sheet(data.greaterAreaData ?? []);
+  //     const wbGreaterArea = { Sheets: { data: wsGreaterArea }, SheetNames: ["Greater Area"] };
+  //     const excelBufferGreaterArea: Uint8Array = XLSX.write(wbGreaterArea, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Area sheet
+  //     const wsArea = XLSX.utils.json_to_sheet(data.areaData ?? []);
+  //     const wbArea = { Sheets: { data: wsArea }, SheetNames: ["Area"] };
+  //     const excelBufferArea: Uint8Array = XLSX.write(wbArea, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Street sheet
+  //     const wsStreet = XLSX.utils.json_to_sheet(data.streetData ?? []);
+  //     const wbStreet = { Sheets: { data: wsStreet }, SheetNames: ["Street"] };
+  //     const excelBufferStreet: Uint8Array = XLSX.write(wbStreet, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     //Message sheet
+  //     const wsMessage = XLSX.utils.json_to_sheet(data.messageData ?? []);
+  //     const wbMessage = { Sheets: { data: wsMessage }, SheetNames: ["Message"] };
+  //     const excelBufferMessage: Uint8Array = XLSX.write(wbMessage, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     const dataFile = new Blob(
+  //       [
+  //         excelBufferUser,
+  //         excelBufferVolunteer,
+  //         excelBufferPetOwner,
+  //         excelBufferPet,
+  //         excelBufferPetTreatment,
+  //         excelBufferType,
+  //         excelBufferPetClinic,
+  //         excelBufferConditions,
+  //         excelBufferGreaterArea,
+  //         excelBufferArea,
+  //         excelBufferStreet,
+  //         excelBufferMessage,
+  //       ],
+  //       { type: fileType },
+  //     );
+  //     FileSaver.saveAs(dataFile, fileName + fileExtension);
+
+  //     setDownloadData(false);
+  //     setIsLoading(false);
+  //   }
+  // }, [downloadDatabase.isFetched, downloadDatabase.isSuccess, downloadDatabase.isFetching]);
+  useEffect(() => {
+    if (downloadDatabase.isSuccess && !downloadDatabase.isFetching && downloadData) {
+      const data = downloadDatabase.data;
+
+      const fileName = `AfriPaw Database - ${formatDate(new Date())}`;
+      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+      const fileExtension = ".xlsx";
+
+      // Create a new workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Add each sheet to the workbook
+      const wsUser = XLSX.utils.json_to_sheet(data.userData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsUser, "User");
+
+      const wsVolunteer = XLSX.utils.json_to_sheet(data.volunteerData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsVolunteer, "Volunteer");
+
+      const wsPetOwner = XLSX.utils.json_to_sheet(data.petOwnerData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsPetOwner, "Pet Owner");
+
+      const wsPet = XLSX.utils.json_to_sheet(data.petData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsPet, "Pet");
+
+      const wsPetTreatment = XLSX.utils.json_to_sheet(data.treatmentData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsPetTreatment, "Pet Treatment");
+
+      // const wsType = XLSX.utils.json_to_sheet(data.typeData ?? []);
+      // XLSX.utils.book_append_sheet(workbook, wsType, "Treatment Type");
+
+      const wsPetClinic = XLSX.utils.json_to_sheet(data.clinicData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsPetClinic, "Pet Clinic");
+
+      // const wsConditions = XLSX.utils.json_to_sheet(data.conditionsData ?? []);
+      // XLSX.utils.book_append_sheet(workbook, wsConditions, "Conditions");
+
+      const wsGreaterArea = XLSX.utils.json_to_sheet(data.greaterAreaData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsGreaterArea, "Greater Area");
+
+      const wsArea = XLSX.utils.json_to_sheet(data.areaData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsArea, "Area");
+
+      const wsStreet = XLSX.utils.json_to_sheet(data.streetData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsStreet, "Street");
+
+      const wsMessage = XLSX.utils.json_to_sheet(data.messageData ?? []);
+      XLSX.utils.book_append_sheet(workbook, wsMessage, "Message");
+
+      // Write the workbook to a binary buffer
+      const excelBuffer: Uint8Array = XLSX.write(workbook, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+      // Create a Blob from the binary buffer
+      const dataFile = new Blob([excelBuffer], { type: fileType });
+
+      // Save the Blob as an Excel file
+      FileSaver.saveAs(dataFile, fileName + fileExtension);
+
+      setDownloadData(false);
+      setIsLoading(false);
+    }
+  }, [downloadDatabase.isFetched, downloadDatabase.isSuccess, downloadDatabase.isFetching]);
+
+  const handleDownloadDatabase = async () => {
+    setIsLoading(true);
+
+    void downloadDatabase.refetch();
+    setDownloadData(true);
+    setIsLoading(false);
+  };
+
   //---------------------------------------STERILISATION DUE QUERIES------------------------------------------------
   //STERILISATION DUE
   const [sterilisationDue, setSterilisationDue] = useState(false);
@@ -511,7 +681,7 @@ const Info: NextPage = () => {
       //take the download user table query data and put it in an excel file
       const data = downloadSterilisationTable.data?.data;
 
-      console.log("Sterilisation Data: ", data);
+      // console.log("Sterilisation Data: ", data);
       const fileName = `Sterilisation ${sterilisationDueOption} Table`;
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
       const fileExtension = ".xlsx";
@@ -1138,21 +1308,37 @@ const Info: NextPage = () => {
         <Navbar />
 
         <div className="grid h-full w-full grow grid-rows-6">
-          <div className="row-span-2 grid grid-rows-3">
+          <div className="row-span-2 grid grid-rows-4">
+            {/* DOWNLOAD DATABASE */}
+            <div className="row-span-1 flex items-center justify-center border-2">
+              <button
+                onClick={handleDownloadDatabase}
+                className="my-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+              >
+                {downloadData ? (
+                  <div
+                    className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+                    role="status"
+                  />
+                ) : (
+                  <div>Download Database</div>
+                )}
+              </button>
+            </div>
             {/* STERILISATION DUE QUERIES */}
             <div className="row-span-1 grid grid-cols-5 border-2">
               <div className="col-span-4 grid grid-cols-2">
                 <div className="col-span-1 flex justify-evenly">
                   <div className="flex items-center">
                     <div className="mx-3 flex items-center">
-                      <label className="">
+                      <label className="my-2 pb-1">
                         Sterilisation Due<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                     </div>
                     <div className="relative flex flex-col">
                       <button
                         ref={btnSterilisationDueRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                        className="my-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleSterilisationDue}
                       >
@@ -1163,7 +1349,7 @@ const Info: NextPage = () => {
                       </button>
                       {sterilisationDue && (
                         <div ref={sterilisationDueRef} className="absolute top-[60px] z-10 w-full divide-y divide-gray-100 rounded-lg bg-white shadow">
-                          <ul className="py-2 text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
+                          <ul className=" text-sm text-gray-700 " aria-labelledby="dropdownHoverButton">
                             {sterilisationDueOptions.map((option) => (
                               <li key={option} onClick={() => handleSterilisationDueOption(option)}>
                                 <button className="block px-4 py-2 hover:bg-gray-100 ">{option}</button>
@@ -1209,14 +1395,14 @@ const Info: NextPage = () => {
 
                   <div className="mx-3 flex items-center">
                     <div className="mx-3 flex items-center">
-                      <label className="">
+                      <label className="my-2 pb-1">
                         Species<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                     </div>
                     <div className="relative flex flex-col">
                       <button
                         ref={btnSpeciesRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                        className="my-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleSpecies}
                       >
@@ -1253,10 +1439,10 @@ const Info: NextPage = () => {
 
                 <div className="col-span-1 flex items-center gap-5">
                   <div className="flex items-center">
-                    <label className="">
+                    <label className="my-2 pb-1">
                       From<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
-                    <div className="z-50 p-4">
+                    <div className="z-50 my-2 px-4">
                       {/* MUI Datepicker */}
                       <ThemeProvider theme={theme}>
                         <Typography>
@@ -1284,10 +1470,10 @@ const Info: NextPage = () => {
                   </div>
 
                   <div className="flex items-center">
-                    <label className="">
+                    <label className="my-2 pb-1">
                       To<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
-                    <div className="z-50 p-4">
+                    <div className="z-50 my-2 px-4">
                       {/* MUI Datepicker */}
                       <ThemeProvider theme={theme}>
                         <Typography>
@@ -1317,7 +1503,7 @@ const Info: NextPage = () => {
               </div>
 
               <div className="col-span-1 flex items-center justify-around">
-                <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleSteriliseGenerate}>
+                <button className="my-1 h-10 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleSteriliseGenerate}>
                   {isLoading ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -1328,7 +1514,7 @@ const Info: NextPage = () => {
                   )}
                 </button>
 
-                <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadSterilisationTable}>
+                <button className="my-1 h-10 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadSterilisationTable}>
                   {downloadSterilise ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -1347,14 +1533,14 @@ const Info: NextPage = () => {
                 <div className="col-span-1 flex justify-evenly">
                   <div className="flex items-center">
                     <div className="mx-3 flex items-center">
-                      <label className="">
+                      <label className="my-2 pb-1">
                         Membership Type<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                     </div>
                     <div className="relative flex flex-col">
                       <button
                         ref={btnMembershipRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                        className="my-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleMembership}
                       >
@@ -1414,14 +1600,14 @@ const Info: NextPage = () => {
 
                   <div className="mx-3 flex items-center">
                     <div className="mx-3 flex items-center">
-                      <label className="">
+                      <label className="my-2 pb-1">
                         Species<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                     </div>
                     <div className="relative flex flex-col">
                       <button
                         ref={btnSpeciesMembershipRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                        className="my-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleSpeciesMembership}
                       >
@@ -1458,10 +1644,10 @@ const Info: NextPage = () => {
 
                 <div className="col-span-1 flex items-center gap-5">
                   <div className="flex items-center">
-                    <label className="">
+                    <label className="my-2 pb-1">
                       From<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
-                    <div className="z-40 p-4">
+                    <div className="z-40 my-2 px-4">
                       {/* MUI Datepicker */}
                       <ThemeProvider theme={theme}>
                         <Typography>
@@ -1489,10 +1675,10 @@ const Info: NextPage = () => {
                   </div>
 
                   <div className="flex items-center">
-                    <label className="">
+                    <label className="my-2 pb-1">
                       To<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
-                    <div className="z-40 p-4">
+                    <div className="z-40 my-2 px-4">
                       {/* MUI Datepicker */}
                       <ThemeProvider theme={theme}>
                         <Typography>
@@ -1522,7 +1708,7 @@ const Info: NextPage = () => {
               </div>
 
               <div className="col-span-1 flex items-center justify-around">
-                <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleMembershipGenerate}>
+                <button className="my-1 h-10 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleMembershipGenerate}>
                   {isLoading ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -1533,7 +1719,7 @@ const Info: NextPage = () => {
                   )}
                 </button>
 
-                <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadMembershipTable}>
+                <button className="my-1 h-10 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadMembershipTable}>
                   {downloadMembership ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -1552,14 +1738,14 @@ const Info: NextPage = () => {
                 <div className="col-span-1 flex justify-evenly">
                   <div className="flex items-center">
                     <div className="mx-3 flex items-center">
-                      <label className="">
+                      <label className="my-2 pb-1">
                         Pet Clinic<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                     </div>
                     <div className="relative flex flex-col">
                       <button
                         ref={btnClinicRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                        className="my-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleToggleClinic}
                       >
@@ -1587,14 +1773,14 @@ const Info: NextPage = () => {
 
                   <div className="mx-3 flex items-center">
                     <div className="mx-3 flex items-center">
-                      <label className="">
+                      <label className="my-2 pb-1">
                         Time Filter<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
                     </div>
                     <div className="relative flex flex-col">
                       <button
                         ref={btnPeriodRef}
-                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                        className="my-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
                         type="button"
                         onClick={handleTogglePeriod}
                       >
@@ -1621,10 +1807,10 @@ const Info: NextPage = () => {
                 {periodOption === "Time Period" ? (
                   <div className="col-span-1 flex items-center gap-5">
                     <div className="flex items-center">
-                      <label className="">
+                      <label className="my-2 pb-1">
                         From<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
-                      <div className="z-30 p-4">
+                      <div className="z-30 my-2 px-4">
                         {/* MUI Datepicker */}
                         <ThemeProvider theme={theme}>
                           <Typography>
@@ -1652,10 +1838,10 @@ const Info: NextPage = () => {
                     </div>
 
                     <div className="flex items-center">
-                      <label className="">
+                      <label className="my-2 pb-1">
                         To<span className="text-lg text-main-orange">*</span>:{" "}
                       </label>
-                      <div className="z-30 p-4">
+                      <div className="z-30 my-2 px-4">
                         {/* MUI Datepicker */}
                         <ThemeProvider theme={theme}>
                           <Typography>
@@ -1684,10 +1870,10 @@ const Info: NextPage = () => {
                   </div>
                 ) : (
                   <div className="col-span-1 flex items-center">
-                    <label className="">
+                    <label className="my-2 pb-1">
                       Date<span className="text-lg text-main-orange">*</span>:{" "}
                     </label>
-                    <div className="z-30 p-4">
+                    <div className="z-30 my-2 px-4">
                       {/* MUI Datepicker */}
                       <ThemeProvider theme={theme}>
                         <Typography>
@@ -1717,7 +1903,7 @@ const Info: NextPage = () => {
               </div>
 
               <div className="col-span-1 flex items-center justify-around">
-                <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleClinicGenerate}>
+                <button className="my-1 h-10 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleClinicGenerate}>
                   {isLoading ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
@@ -1728,7 +1914,7 @@ const Info: NextPage = () => {
                   )}
                 </button>
 
-                <button className="h-12 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadClinicTable}>
+                <button className="my-1 h-10 rounded-lg bg-main-orange px-3 text-white hover:bg-orange-500" onClick={handleDownloadClinicTable}>
                   {downloadClinic ? (
                     <div
                       className="mx-2 inline-block h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-white border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"

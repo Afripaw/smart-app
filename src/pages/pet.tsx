@@ -463,6 +463,18 @@ const Pet: NextPage = () => {
     allSelected: boolean;
     clear: boolean;
   };
+
+  //------------------------------PROGRAMME-----------------------------------------
+  type ProgrammeOptions = {
+    option: string;
+    state: boolean;
+  };
+
+  type ProgrammeSelect = {
+    allSelected: boolean;
+    clear: boolean;
+  };
+
   // //-------------------------------CLINICS ATTENDED-----------------------------------------
   // type Clinic = {
   //   id: number;
@@ -585,6 +597,12 @@ const Pet: NextPage = () => {
   const handleDeleteAllUsers = async () => {
     await deleteAllUsers.mutateAsync();
     isDeleted ? setIsDeleted(false) : setIsDeleted(true);
+  };
+
+  //--------------------------------UPDATE PET BREED AND COLOUR---------------------------
+  const updateBreedAndColour = api.pet.updateBreedAndColour.useMutation();
+  const handleUpdateBreedAndColour = async () => {
+    await updateBreedAndColour.mutateAsync();
   };
 
   //---------------------------------PRINTING----------------------------------
@@ -819,6 +837,11 @@ const Pet: NextPage = () => {
   const [kennelsReceivedOption, setKennelsReceivedOption] = useState("Select here");
   const kennelsReceivedRef = useRef<HTMLDivElement>(null);
   const btnKennelsReceivedRef = useRef<HTMLButtonElement>(null);
+
+  const [programme, setProgramme] = useState(false);
+  const [programmeOption, setProgrammeOption] = useState("Select here");
+  const programmeRef = useRef<HTMLDivElement>(null);
+  const btnProgrammeRef = useRef<HTMLButtonElement>(null);
 
   //VaccinationType
   const [isVaccination1TypeOpen, setIsVaccination1TypeOpen] = useState(false);
@@ -2200,81 +2223,6 @@ const Pet: NextPage = () => {
       }
 
       return isLapsed ? "(Lapsed)" : "(Active)";
-
-      //recent chatgpt code
-      // const currentDate = new Date();
-
-      // // Convert clinicList dates to Date objects
-      // const clinicDates = clinicList.map((clinicDate) => {
-      //   const [day, month, year] = clinicDate.date.split("/").map(Number);
-      //   return new Date(year ?? 0, (month ?? 0) - 1, day);
-      // });
-
-      // // Sort clinic dates in descending order
-      // clinicDates.sort((a, b) => b.getTime() - a.getTime());
-
-      // // Check for lapses and activity status
-      // let lastActiveDate = currentDate;
-      // let isLapsed = false;
-      // let recentClinicCount = 0;
-
-      // for (const date of clinicDates) {
-      //   const pastDate = new Date(lastActiveDate);
-      //   pastDate.setMonth(lastActiveDate.getMonth() - 3);
-
-      //   if (date < pastDate) {
-      //     isLapsed = true;
-      //     break;
-      //   }
-
-      //   lastActiveDate = date;
-      // }
-
-      // // Check for activity within the last 6 months after the last lapse
-      // if (isLapsed) {
-      //   const sixMonthsAgo = new Date(currentDate);
-      //   sixMonthsAgo.setMonth(currentDate.getMonth() - 6);
-      //   recentClinicCount = clinicDates.filter((date) => date >= sixMonthsAgo).length;
-
-      //   if (recentClinicCount >= 3) {
-      //     return "(Active)";
-      //   } else {
-      //     return "(Lapsed)";
-      //   }
-      // } else {
-      //   return "(Active)";
-      // }
-
-      //old code
-      // const currentDate = new Date();
-
-      // // Convert clinicList dates to Date objects
-      // const clinicDates = clinicList.map((clinicDate) => {
-      //   const [day, month, year] = clinicDate.date.split("/").map(Number);
-      //   return new Date(year ?? 0, (month ?? 0) - 1, day);
-      // });
-
-      // // Filter clinics within the last 'time' months
-      // const filteredClinicsLapsedMember = clinicDates.filter((clinicDate) => {
-      //   const pastDate = new Date(currentDate);
-      //   pastDate.setMonth(currentDate.getMonth() - 3);
-      //   return clinicDate >= pastDate;
-      // });
-
-      // const filteredClinicsActiveMember = clinicDates.filter((clinicDate) => {
-      //   const pastDate = new Date(currentDate);
-      //   pastDate.setMonth(currentDate.getMonth() - 6);
-      //   return clinicDate >= pastDate;
-      // });
-
-      // if (filteredClinicsLapsedMember.length < 1) {
-      //   //setCardStatusOption("Lapsed card holder");
-      //   return "(Lapsed)";
-      // } else if (filteredClinicsActiveMember.length >= 3) {
-      //   return "(Active)";
-      // } else {
-      //   return "(Lapsed)";
-      // }
     } else {
       return "";
     }
@@ -2365,7 +2313,6 @@ const Pet: NextPage = () => {
   };
 
   //KENNELS RECEIVED
-
   const [kennelListOptions, setKennelListOptions] = useState<KennelOptions[]>([]);
   const [kennelSelection, setKennelSelection] = useState<KennelSelect>();
   //to select multiple kennels
@@ -2502,6 +2449,95 @@ const Pet: NextPage = () => {
   //     return "";
   //   }
   // };
+
+  //PROGRAMME
+  const [programmeListOptions, setProgrammeListOptions] = useState<ProgrammeOptions[]>([]);
+  const [programmeSelection, setProgrammeSelection] = useState<ProgrammeSelect>();
+  //to select multiple programmes
+  const [programmeList, setProgrammeList] = useState<string[]>([]);
+
+  const handleProgramme = (option: SetStateAction<string>, state: boolean, selectionCategory: string) => {
+    if (selectionCategory === "allSelected") {
+      setProgrammeOption("Select All");
+      setProgrammeSelection({ allSelected: state, clear: false });
+
+      const programmes = programmeListOptions.map((programme) => programme.option);
+      setProgrammeList(programmes);
+      //order the roleList in alphabetical order
+      // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+      setProgrammeListOptions(programmeListOptions.map((programme) => ({ ...programme, state: true })));
+    } else if (selectionCategory === "clear") {
+      setProgrammeOption("Clear All");
+      setProgrammeSelection({ allSelected: false, clear: state });
+
+      setProgrammeList([]);
+      setProgrammeListOptions(programmeListOptions.map((programme) => ({ ...programme, state: false })));
+    } else if (selectionCategory === "normal") {
+      setProgrammeOption(option);
+      setProgrammeSelection({ allSelected: false, clear: false });
+      if (state) {
+        if (!programmeList.includes(String(option))) {
+          setProgrammeList([...programmeList, String(option)]);
+          //order the roleList in alphabetical order
+          // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        }
+
+        setProgrammeListOptions(programmeListOptions.map((programme) => (programme.option === option ? { ...programme, state: true } : programme)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      } else {
+        const updatedProgrammeList = programmeList.filter((programme) => programme !== option);
+        setProgrammeList(updatedProgrammeList);
+        //order the roleList in alphabetical order
+        // setRoleList(roleList.sort((a, b) => a.localeCompare(b)));
+        setProgrammeListOptions(programmeListOptions.map((programme) => (programme.option === option ? { ...programme, state: false } : programme)));
+        // console.log("Greater Area list: ", greaterAreaList);
+        // console.log("Greater Area List Options: ", greaterAreaListOptions);
+      }
+
+      console.log("programmeList: ", programmeList);
+    }
+  };
+
+  // const [kennelList, setKennelList] = useState<string[]>([]);
+  //show all available options
+  const programmeOptions = ["Feeding Scheme", "Golden Oldy", "Grooming", "Taxi Service"];
+
+  const handleToggleProgramme = () => {
+    setProgramme(!programme);
+  };
+
+  const handleProgrammeOption = (option: SetStateAction<string>) => {
+    setProgrammeOption(option);
+    setProgramme(false);
+    if (!programmeList.includes(String(option))) {
+      setProgrammeList([...programmeList, String(option)]);
+    }
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        programmeRef.current &&
+        !programmeRef.current.contains(event.target as Node) &&
+        btnProgrammeRef.current &&
+        !btnProgrammeRef.current.contains(event.target as Node)
+      ) {
+        setProgramme(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  //show all the clinics that the volunteer attended
+  const [showProgramme, setShowProgramme] = useState(false);
+  const handleShowProgramme = () => {
+    setShowProgramme(!showProgramme);
+  };
 
   //CLINICSATTENDED
   const [clinicListOptions, setClinicListOptions] = useState<ClinicOptions[]>([]);
@@ -3043,6 +3079,7 @@ const Pet: NextPage = () => {
 
       setCardStatusOption(userData?.cardStatus ?? "Select one");
       setKennelList(userData?.kennelReceived ?? []);
+      setProgrammeList(userData?.programme ?? []);
       setSterilisationStatusDate(userData?.sterilisedStatus ?? new Date(0));
       setSterilisationStatusDatejs(dayjs(userData?.sterilisedStatus ?? new Date(0)));
       setLastDeworming(userData?.lastDeworming ?? new Date());
@@ -3074,6 +3111,13 @@ const Pet: NextPage = () => {
         kennelsReceivedOptions.map((kennel) => ({
           year: kennel,
           state: userData.kennelReceived.includes(kennel),
+        })),
+      );
+
+      setProgrammeListOptions(
+        programmeOptions.map((programme) => ({
+          option: programme,
+          state: userData.programme.includes(programme),
         })),
       );
     }
@@ -3265,6 +3309,7 @@ const Pet: NextPage = () => {
         setCardStatusOption(userData?.cardStatus ?? "Select one");
       }
       setKennelList(userData?.kennelReceived ?? []);
+      setProgrammeList(userData?.programme ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
       setLastDewormingjs(dayjs(userData?.lastDeworming ?? new Date()));
       setMembershipDate(userData?.membershipDate ?? new Date(0));
@@ -3341,6 +3386,13 @@ const Pet: NextPage = () => {
           state: userData.kennelReceived.includes(kennel),
         })),
       );
+
+      setProgrammeListOptions(
+        programmeOptions.map((programme) => ({
+          option: programme,
+          state: userData.programme.includes(programme),
+        })),
+      );
     }
   }, [isUpdate]);
 
@@ -3409,6 +3461,15 @@ const Pet: NextPage = () => {
     console.log("Vaccination3TypeList: ", vaccination3TypeList);
     console.log("Vaccination3Type_: ", vaccination3Type_);
 
+    const programmeList_ = programmeList.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).filter((programme) => programme != "");
+
+    console.log("ProgrammeList: ", programmeList);
+    console.log("ProgrammeList_: ", programmeList_);
+    const kennelList_ = kennelList.filter((kennel) => kennel != "");
+
+    console.log("KennelList: ", kennelList);
+    console.log("KennelList_: ", kennelList_);
+
     await updatePet.mutateAsync({
       petID: id,
       petName: petName,
@@ -3442,6 +3503,7 @@ const Pet: NextPage = () => {
       // vaccinationShot1: vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(),
       // vaccinationShot2: vaccinationShot2Option === "Yes" ? vaccinationShot2Date : new Date(0),
       // vaccinationShot3: vaccinationShot3Option === "Yes" ? vaccinationShot3Date : new Date(0),
+      programme: programmeList_,
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
       membershipDate:
@@ -3452,7 +3514,7 @@ const Pet: NextPage = () => {
           ? membershipDate
           : new Date(0),
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
-      kennelReceived: kennelList,
+      kennelReceived: kennelList_,
       clinicsAttended: clinicIDList,
       comments: comments,
       treatments: "",
@@ -3495,6 +3557,7 @@ const Pet: NextPage = () => {
     setMembershipDatejs(dayjs(new Date(0)));
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select here");
+    setProgrammeOption("Select here");
     setLastDeworming(new Date());
     setLastDewormingjs(dayjs(new Date()));
     setComments("");
@@ -3549,6 +3612,13 @@ const Pet: NextPage = () => {
         state: false,
       })),
     );
+
+    setProgrammeListOptions(
+      programmeOptions.map((programme) => ({
+        option: programme,
+        state: false,
+      })),
+    );
     setClinicListOptions(clinics);
     setKennelList([]);
     setColourList([]);
@@ -3563,7 +3633,9 @@ const Pet: NextPage = () => {
     setIsCreate(false);
 
     // if (vaccination1TypeList_.length > 0 || vaccination2TypeList_.length > 0 || vaccination3TypeList_.length > 0) {
+
     window.location.reload();
+
     //  }
 
     // //Invalidate
@@ -3653,6 +3725,7 @@ const Pet: NextPage = () => {
     setMembershipDatejs(dayjs(new Date()));
     setCardStatusOption("Select one");
     setKennelsReceivedOption("No kennels received");
+    setProgrammeOption("Select here");
     setStartingDate(new Date());
     setLastDeworming(new Date());
     setLastDewormingjs(dayjs(new Date()));
@@ -3671,6 +3744,13 @@ const Pet: NextPage = () => {
     setKennelListOptions(
       kennelsReceivedOptions.map((kennel) => ({
         year: kennel,
+        state: false,
+      })),
+    );
+
+    setProgrammeListOptions(
+      programmeOptions.map((programme) => ({
+        option: programme,
         state: false,
       })),
     );
@@ -3773,6 +3853,7 @@ const Pet: NextPage = () => {
     //   })),
     // );
     setKennelList([]);
+    setProgrammeList([]);
     setClinicListOptions(clinics);
     setTreatmentList([]);
     setIsCreate(true);
@@ -3898,12 +3979,15 @@ const Pet: NextPage = () => {
           : new Date(0)
         : new Date(0);
 
-    const vaccination1Type_ = vaccination1TypeList.filter((type) => type != "");
-    const vaccination2Type_ = vaccination2TypeList.filter((type) => type != "");
-    const vaccination3Type_ = vaccination3TypeList.filter((type) => type != "");
+    const vaccination1Type_ = vaccination1TypeList.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).filter((type) => type != "");
+    const vaccination2Type_ = vaccination2TypeList.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).filter((type) => type != "");
+    const vaccination3Type_ = vaccination3TypeList.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).filter((type) => type != "");
 
     const breedList_ = breedList.filter((breed) => breed != "");
     const colourList_ = colourList.filter((colour) => colour != "");
+
+    const programmeList_ = programmeList.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase())).filter((programme) => programme != "");
+    const kennelList_ = kennelList.filter((kennel) => kennel != "");
 
     // //vaccinations
     // const vaccine1 = vaccinationShot1Option === "Yes" ? vaccinationShot1Date : new Date(0);
@@ -3955,6 +4039,7 @@ const Pet: NextPage = () => {
       // vaccinationShot1: vaccinationShot1Option === "Select one" ? "" : vaccinationShot1Option,
       // vaccinationShot2: vaccinationShot2Option === "Select one" ? "" : vaccinationShot2Option,
       // vaccinationShot3: vaccinationShot3Option === "Select one" ? "" : vaccinationShot3Option,
+      programme: programmeList_,
       lastDeWorming: lastDeworming ?? new Date(),
       membership: membershipTypeOption === "Select one" ? "" : membershipTypeOption,
       membershipDate:
@@ -3965,7 +4050,7 @@ const Pet: NextPage = () => {
           ? membershipDate
           : new Date(0),
       cardStatus: cardStatusOption === "Select one" ? "" : cardStatusOption,
-      kennelReceived: kennelList,
+      kennelReceived: kennelList_,
       clinicsAttended: clinicIDList,
       comments: comments,
       treatments: "",
@@ -4157,6 +4242,7 @@ const Pet: NextPage = () => {
 
       setCardStatusOption(userData?.cardStatus ?? "");
       setKennelList(userData?.kennelReceived ?? []);
+      setProgrammeList(userData?.programme ?? []);
       setLastDeworming(userData?.lastDeworming ?? new Date());
       setLastDewormingjs(dayjs(userData?.lastDeworming ?? new Date()));
       setComments(userData?.comments ?? "");
@@ -4265,6 +4351,13 @@ const Pet: NextPage = () => {
           state: userData.kennelReceived.includes(kennel),
         })),
       );
+
+      setProgrammeListOptions(
+        programmeOptions.map((programme) => ({
+          option: programme,
+          state: userData.programme.includes(programme),
+        })),
+      );
     }
 
     setIsUpdate(false);
@@ -4333,6 +4426,12 @@ const Pet: NextPage = () => {
         //last deworming
         setLastDeworming(user?.lastDeworming ?? new Date(0));
         setLastDewormingjs(dayjs(user?.lastDeworming ?? new Date(0)));
+
+        //programme
+        setProgrammeList(user?.programme ?? []);
+
+        //kennel
+        setKennelList(user?.kennelReceived ?? []);
 
         //Clinic data
         const clinicData = user?.clinic_data ?? [];
@@ -4637,6 +4736,15 @@ const Pet: NextPage = () => {
           );
 
           setKennelList(petData?.kennelReceived ?? []);
+
+          setProgrammeListOptions(
+            programmeOptions.map((programme) => ({
+              option: programme,
+              state: petData?.programme.includes(programme) ?? false,
+            })),
+          );
+
+          setProgrammeList(petData?.programme ?? []);
         }
         if (isViewProfilePage) {
           console.log("This should not execute because only view porifle button pressed");
@@ -4734,6 +4842,7 @@ const Pet: NextPage = () => {
         setSterilisationOutcomeDatejs(dayjs(petData?.sterilisationOutcomeDate ?? new Date(0)));
 
         setKennelList(petData?.kennelReceived ?? []);
+        setProgrammeList(petData?.programme ?? []);
         setLastDeworming(petData?.lastDeworming ?? new Date());
         setLastDewormingjs(dayjs(petData?.lastDeworming ?? new Date()));
         setMembershipDate(petData?.membershipDate ?? new Date(0));
@@ -4797,6 +4906,13 @@ const Pet: NextPage = () => {
           })),
         );
 
+        setProgrammeListOptions(
+          programmeOptions.map((programme) => ({
+            option: programme,
+            state: petData?.programme.includes(programme) ?? false,
+          })),
+        );
+
         // setClinicIDList(clinicIDs ?? []);
         const ownerData = userData?.owner_data;
 
@@ -4857,6 +4973,14 @@ const Pet: NextPage = () => {
         })),
       );
       setKennelList(pet_?.data?.pet_data?.kennelReceived ?? []);
+
+      setProgrammeListOptions(
+        programmeOptions.map((programme) => ({
+          option: programme,
+          state: pet_?.data?.pet_data?.programme.includes(programme) ?? false,
+        })),
+      );
+      setProgrammeList(pet_?.data?.pet_data?.programme ?? []);
     }
 
     setBreedList(pet_?.data?.pet_data?.breed ?? [""]);
@@ -4927,6 +5051,7 @@ const Pet: NextPage = () => {
     // setMembershipDate(new Date(0));
     setCardStatusOption("Select one");
     setKennelsReceivedOption("Select here");
+    setProgrammeOption("Select here");
     setComments("");
     setClinicList([]);
     setColourList([]);
@@ -4943,6 +5068,8 @@ const Pet: NextPage = () => {
     setClinicSelection({ allSelected: false, clear: false });
     setKennelList([]);
     setKennelSelection({ allSelected: false, clear: false });
+    setProgrammeList([]);
+    setProgrammeSelection({ allSelected: false, clear: false });
 
     window.history.replaceState(null, "", "/pet");
     //await router.replace("/pet", undefined, { shallow: true });
@@ -5417,6 +5544,9 @@ const Pet: NextPage = () => {
 
                   {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleDeleteAllUsers}>
                     Delete all users
+                  </button> */}
+                  {/* <button className="absolute left-0 top-0 mx-3 mb-3 rounded-lg bg-main-orange p-3 hover:bg-orange-500" onClick={handleUpdateBreedAndColour}>
+                    Update Breed and Colour
                   </button> */}
                 </div>
               </div>
@@ -7068,6 +7198,79 @@ const Pet: NextPage = () => {
                     {/* {showClinicMessage && <div className="ml-2 mt-5 text-red-600">(Veterinary fees covered)</div>} */}
                   </div>
 
+                  {/* PROGRAMME */}
+                  <div className="flex items-start">
+                    <div className="mr-3 flex items-center pt-5">
+                      <div className=" flex">Programme: </div>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <button
+                        ref={btnProgrammeRef}
+                        className="my-3 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
+                        type="button"
+                        onClick={handleToggleProgramme}
+                      >
+                        {programmeOption + " "}
+                        <svg className="ms-3 h-2.5 w-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
+                        </svg>
+                      </button>
+                      {programme && (
+                        <div ref={programmeRef} className="z-10 w-52 divide-y divide-gray-100 rounded-lg bg-white shadow">
+                          <ul className="py-2 text-sm text-gray-700" aria-labelledby="dropdownHoverButton">
+                            <li key={1}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="1"
+                                  type="checkbox"
+                                  checked={programmeSelection?.allSelected}
+                                  onChange={(e) => handleProgramme("", e.target.checked, "allSelected")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="1" className="ms-2 text-sm font-bold text-gray-900">
+                                  Select All
+                                </label>
+                              </div>
+                            </li>
+                            <li key={2}>
+                              <div className="flex items-center px-4">
+                                <input
+                                  id="2"
+                                  type="checkbox"
+                                  checked={programmeSelection?.clear}
+                                  onChange={(e) => handleProgramme("", e.target.checked, "clear")}
+                                  className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                />
+                                <label htmlFor="2" className="ms-2 text-sm font-bold text-gray-900">
+                                  Clear All
+                                </label>
+                              </div>
+                            </li>
+                            {programmeListOptions?.map((option) => (
+                              <li key={option.option}>
+                                <div className="flex items-center px-4">
+                                  <input
+                                    id={String(option.option)}
+                                    type="checkbox"
+                                    checked={option.state}
+                                    onChange={(e) => handleProgramme(option.option, e.target.checked, "normal")}
+                                    className="h-4 w-4 rounded bg-gray-100 text-main-orange accent-main-orange focus:ring-2"
+                                  />
+                                  <label htmlFor={String(option.option)} className="ms-2 text-sm font-medium text-gray-900">
+                                    {option.option}
+                                  </label>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* <div className="pl-2 pt-5 text-base text-red-600">{kennelMessage(kennelList)}</div> */}
+                  </div>
+
                   {/*LAST DEWORMING*/}
 
                   <div className="flex items-center">
@@ -7807,6 +8010,25 @@ const Pet: NextPage = () => {
                               ))}
                           </div>
                         )}
+                      </div>
+
+                      <div className="mb-2 flex items-start">
+                        <b className="mr-3">Programme:</b>
+                        {programmeList
+                          .filter((programme) => programme != "")
+                          //.sort((a, b) => a - b)
+                          .join(", ")}
+                        {/* {kennelList.length > 0 && (
+                          <div className="flex flex-col px-4">
+                            {kennelList
+                              .sort((a, b) => Number(a.slice(19, 23)) - Number(b.slice(19, 23)))
+                              .map((kennel, index) => (
+                                <div key={index}>{kennel}</div>
+                              ))}
+                          </div>
+                        )} */}
+                        {/* {kennelList.length > 0 && <>({kennelList.map((kennel, index) => (kennelList.length - 1 === index ? kennel : kennel + "; "))})</>} */}
+                        {/* <div className="pl-3 text-base text-red-600">{kennelMessage(kennelList)}</div> */}
                       </div>
 
                       <div className="mb-2 flex items-center">

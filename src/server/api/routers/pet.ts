@@ -36,6 +36,7 @@ export const petRouter = createTRPCRouter({
         vaccination3Paid: z.string(),
         treatments: z.string(),
         clinicsAttended: z.number().array(),
+        programme: z.string().array(),
         lastDeWorming: z.date(),
         membership: z.string(),
         membershipDate: z.date(),
@@ -77,6 +78,7 @@ export const petRouter = createTRPCRouter({
             vaccination1Paid: input.vaccination1Paid,
             vaccination2Paid: input.vaccination2Paid,
             vaccination3Paid: input.vaccination3Paid,
+            programme: input.programme,
             lastDeworming: input.lastDeWorming,
             membership: input.membership,
             membershipDate: input.membershipDate,
@@ -191,6 +193,7 @@ export const petRouter = createTRPCRouter({
         vaccination3Paid: z.string(),
         treatments: z.string(),
         clinicsAttended: z.number().array(),
+        programme: z.string().array(),
         lastDeWorming: z.date(),
         membership: z.string(),
         membershipDate: z.date(),
@@ -230,6 +233,7 @@ export const petRouter = createTRPCRouter({
             vaccination1Paid: input.vaccination1Paid,
             vaccination2Paid: input.vaccination2Paid,
             vaccination3Paid: input.vaccination3Paid,
+            programme: input.programme,
             lastDeworming: input.lastDeWorming,
             membership: input.membership,
             membershipDate: input.membershipDate,
@@ -345,6 +349,7 @@ export const petRouter = createTRPCRouter({
               { vaccination1Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination2Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination3Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { programme: { hasSome: [term] } },
               { markings: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { owner: { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
@@ -398,6 +403,7 @@ export const petRouter = createTRPCRouter({
               { vaccination1Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination2Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination3Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { programme: { hasSome: [term] } },
               { markings: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { owner: { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
@@ -451,6 +457,7 @@ export const petRouter = createTRPCRouter({
               { vaccination1Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination2Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination3Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { programme: { hasSome: [term] } },
               { markings: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { owner: { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
@@ -502,6 +509,7 @@ export const petRouter = createTRPCRouter({
               { vaccination1Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination2Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination3Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { programme: { hasSome: [term] } },
               { markings: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { owner: { firstName: { contains: term, mode: Prisma.QueryMode.insensitive } } },
@@ -1405,6 +1413,55 @@ export const petRouter = createTRPCRouter({
     };
   }),
 
+  //edit pets where there are empty strings in the breeds and colour arrays
+  updateBreedAndColour: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
+    const pets = await ctx.db.pet.findMany({
+      where: {
+        OR: [{ breed: { has: "" } }, { colour: { has: "" } }],
+      },
+    });
+
+    const updatePromises = pets.map((pet) => {
+      const breeds = pet.breed.filter((breed) => breed !== "");
+      const colours = pet.colour.filter((colour) => colour !== "");
+
+      return ctx.db.pet.update({
+        where: {
+          petID: pet.petID,
+        },
+        data: {
+          breed: breeds,
+          colour: colours,
+        },
+      });
+    });
+
+    const updatedPets = await Promise.all(updatePromises);
+
+    return updatedPets;
+  }),
+
+  //   updateBreedAndColour: accessProcedure(["System Administrator"]).mutation(async ({ ctx }) => {
+  //     const pets = await ctx.db.pet.findMany();
+
+  //     const updatedPets = pets.map((pet) => {
+  //       const breeds = pet.breed.filter((breed) => breed !== "");
+  //       const colours = pet.colour.filter((colour) => colour !== "");
+
+  //       return ctx.db.pet.update({
+  //         where: {
+  //           petID: pet.petID,
+  //         },
+  //         data: {
+  //           breed: breeds,
+  //           colour: colours,
+  //         },
+  //       });
+  //     });
+
+  //     return updatedPets;
+  // });
+
   //download
   download: accessProcedure(["System Administrator", "Data Analyst", "Treatment Data Capturer", "General Data Capturer"])
     .input(
@@ -1442,6 +1499,7 @@ export const petRouter = createTRPCRouter({
               { vaccination1Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination2Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination3Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { programme: { hasSome: [term] } },
               { markings: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               {
@@ -1487,6 +1545,7 @@ export const petRouter = createTRPCRouter({
               { vaccination1Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination2Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { vaccination3Paid: { contains: term, mode: Prisma.QueryMode.insensitive } },
+              { programme: { hasSome: [term] } },
               { markings: { contains: term, mode: Prisma.QueryMode.insensitive } },
               { status: { contains: term, mode: Prisma.QueryMode.insensitive } },
               {
@@ -1565,9 +1624,9 @@ export const petRouter = createTRPCRouter({
 
         orderBy: { petID: "asc" },
         include: {
-          owner: true,
+          owner: { select: { firstName: true, surname: true } },
           // petTreatments: true,
-          // clinicsAttended: true,
+          clinicsAttended: { select: { clinicID: true } },
         },
       });
 
@@ -1592,10 +1651,15 @@ export const petRouter = createTRPCRouter({
           "Sterilisation Outcome": pet.sterilisationOutcome,
           "Vaccination Shot 1":
             pet.vaccinationShot1?.getFullYear() === 1970 ? "No yet" : pet.vaccinationShot1?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot1,
+          "Vaccination Shot 1 Type": pet.vaccination1Type.filter((vac) => vac != "").join(", "),
           "Vaccination Shot 2":
             pet.vaccinationShot2?.getFullYear() === 1970 ? "No yet" : pet.vaccinationShot2?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot2,
+          "Vaccination Shot 2 Type": pet.vaccination2Type.filter((vac) => vac != "").join(", "),
           "Vaccination Shot 3":
             pet.vaccinationShot3?.getFullYear() === 1970 ? "No yet" : pet.vaccinationShot3?.getFullYear() === 1971 ? "Unknown" : pet.vaccinationShot3,
+          "Vaccination Shot 3 Type": pet.vaccination3Type.filter((vac) => vac != "").join(", "),
+          "Clinics Attended": pet.clinicsAttended.map((clinic) => clinic.clinicID).join(", "),
+          Programme: pet.programme.filter((programme) => programme != "").join(", "),
           "Last Deworming": pet.lastDeworming,
           Membership: pet.membership,
           "Card Status": pet.cardStatus,

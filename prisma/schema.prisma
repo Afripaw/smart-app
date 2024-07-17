@@ -162,6 +162,7 @@ model pet {
     vaccination2Paid         String?
     vaccination3Paid         String?
     clinicsAttended          petOnPetClinic[]
+    programme                String[]
     lastDeworming            DateTime?
     membership               String
     membershipDate           DateTime?

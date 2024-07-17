@@ -2545,7 +2545,7 @@ const Owner: NextPage = () => {
                           <div>
                             {pet?.species === "Cat"
                               ? (pet?.name ?? "") + " (Cat, P" + (pet?.id ?? "") + ")"
-                              : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                              : (pet?.name ?? "") + " (" + (pet?.breed == "Not Applicable" ? "Dog" : pet?.breed) + ", P" + (pet?.id ?? "") + ")"}
                           </div>
                           // </button>
                         ))}
@@ -2733,7 +2733,7 @@ const Owner: NextPage = () => {
                               <button key={pet?.id} className="underline hover:text-blue-400" onClick={() => handleGoToPetProfile(pet?.id)}>
                                 {pet?.species === "Cat"
                                   ? (pet?.name ?? "") + " (Cat, P" + (pet?.id ?? "") + ")"
-                                  : (pet?.name ?? "") + " (" + (pet?.breed ?? "") + ", P" + (pet?.id ?? "") + ")"}
+                                  : (pet?.name ?? "") + " (" + (pet?.breed == "Not Applicable" ? "Dog" : pet?.breed) + ", P" + (pet?.id ?? "") + ")"}
                               </button>
                             ))}
                         </div>

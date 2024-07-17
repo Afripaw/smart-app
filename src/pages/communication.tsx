@@ -694,71 +694,98 @@ const Communication: NextPage = () => {
         var_recipients.push("Users");
         setRecipients([...recipients, "Users"]);
         //loop through all the users and send them an email
-        allUsers?.data?.map(async (user) => {
-          const email = user?.email ?? "";
-          total_users = total_users + 1;
-          //do a try catch statement here
-          try {
-            //var_user_success_count = var_user_success_count + 1;
-            await sendEmail(message, email);
-            console.log("Email sent successfully");
-            //var_user_success = "Yes";
-            setUserSuccess("Yes");
-          } catch (error) {
-            var_user_unsuccess_count = var_user_unsuccess_count + 1;
-            console.error("Failed to send email", error);
-            //var_user_success = "No";
-            setUserSuccess("No");
-          }
-          //await sendEmail(message, email);
-        });
+        if (allUsers?.data) {
+          const emailPromises = allUsers.data.map(async (user) => {
+            const email = user?.email ?? "";
+            total_users += 1;
+
+            try {
+              await sendEmail(message, email);
+              console.log("Email sent successfully");
+              setUserSuccess("Yes");
+            } catch (error) {
+              var_user_unsuccess_count += 1;
+              console.error("Failed to send email", error);
+              setUserSuccess("No");
+            }
+          });
+
+          // Wait for all email sending operations to complete
+          await Promise.all(emailPromises);
+        }
+        // allUsers?.data?.map(async (user) => {
+        //   const email = user?.email ?? "";
+        //   total_users = total_users + 1;
+        //   //do a try catch statement here
+        //   try {
+        //     //var_user_success_count = var_user_success_count + 1;
+        //     await sendEmail(message, email);
+        //     console.log("Email sent successfully");
+        //     //var_user_success = "Yes";
+        //     setUserSuccess("Yes");
+        //   } catch (error) {
+        //     var_user_unsuccess_count = var_user_unsuccess_count + 1;
+        //     console.error("Failed to send email", error);
+        //     //var_user_success = "No";
+        //     setUserSuccess("No");
+        //   }
+        //   //await sendEmail(message, email);
+        // });
       }
 
       if (includePetOwner) {
         var_recipients.push("Pet Owners");
         setRecipients([...recipients, "Pet Owners"]);
         //loop through all the pet owners and send them an email
-        allPetOwners?.data?.map(async (petOwner) => {
-          const email = petOwner?.email ?? "";
-          //do a try statement here
-          try {
-            await sendEmail(message, email);
-            console.log("Email sent successfully");
-            //var_petOwner_success = "Yes";
-            var_petOwner_success_count = var_petOwner_success_count + 1;
-            setPetOwnerSuccess("Yes");
-          } catch (error) {
-            console.error("Failed to send email", error);
-            //var_petOwner_success = "No";
-            setPetOwnerSuccess("No");
-            var_petOwner_unsuccess_count = var_petOwner_unsuccess_count + 1;
-          }
-          // await sendEmail(message, email);
-        });
+        if (allPetOwners?.data) {
+          const emailPromises = allPetOwners?.data?.map(async (petOwner) => {
+            const email = petOwner?.email ?? "";
+            //do a try statement here
+            try {
+              await sendEmail(message, email);
+              console.log("Email sent successfully");
+              //var_petOwner_success = "Yes";
+              var_petOwner_success_count = var_petOwner_success_count + 1;
+              setPetOwnerSuccess("Yes");
+            } catch (error) {
+              console.error("Failed to send email", error);
+              //var_petOwner_success = "No";
+              setPetOwnerSuccess("No");
+              var_petOwner_unsuccess_count = var_petOwner_unsuccess_count + 1;
+            }
+            // await sendEmail(message, email);
+          });
+
+          await Promise.all(emailPromises);
+        }
       }
 
       if (includeVolunteer) {
         var_recipients.push("Volunteers");
         setRecipients([...recipients, "Volunteers"]);
         //loop through all the volunteers and send them an email
-        allVolunteers?.data?.map(async (volunteer) => {
-          const email = volunteer?.email ?? "";
-          //do a ttry statement here
-          try {
-            await sendEmail(message, email);
-            console.log("Email sent successfully");
-            //var_volunteer_success = "Yes";
-            setVolunteerSuccess("Yes");
-            var_volunteer_success_count = var_volunteer_success_count + 1;
-          } catch (error) {
-            console.error("Failed to send email", error);
-            //var_volunteer_success = "No";
-            setVolunteerSuccess("No");
-            var_volunteer_unsuccess_count = var_volunteer_unsuccess_count + 1;
-          }
+        if (allVolunteers?.data) {
+          const emailPromises = allVolunteers?.data?.map(async (volunteer) => {
+            const email = volunteer?.email ?? "";
+            //do a ttry statement here
+            try {
+              await sendEmail(message, email);
+              console.log("Email sent successfully");
+              //var_volunteer_success = "Yes";
+              setVolunteerSuccess("Yes");
+              var_volunteer_success_count = var_volunteer_success_count + 1;
+            } catch (error) {
+              console.error("Failed to send email", error);
+              //var_volunteer_success = "No";
+              setVolunteerSuccess("No");
+              var_volunteer_unsuccess_count = var_volunteer_unsuccess_count + 1;
+            }
+            //await sendEmail(message, email);
+          });
           //await sendEmail(message, email);
-        });
-        //await sendEmail(message, email);
+
+          await Promise.all(emailPromises);
+        }
       }
     }
 
@@ -770,66 +797,75 @@ const Communication: NextPage = () => {
         var_recipients.push("Users");
         setRecipients([...recipients, "Users"]);
         //loop through all the users
-        allUsers?.data?.map(async (user) => {
-          const mobile = user?.mobile ?? "";
-          const destinationNumber = mobile;
-          try {
-            await sendSMS(message, destinationNumber);
-            console.log("SMS sent successfully");
-            //var_user_success = "Yes";
-            setUserSuccess("Yes");
-            var_user_success_count = var_user_success_count + 1;
-          } catch (error) {
-            console.error("Failed to send SMS", error);
-            //var_user_success = "No";
-            setUserSuccess("No");
-            var_user_unsuccess_count = var_user_unsuccess_count + 1;
-          }
-        });
+        if (allUsers?.data) {
+          const smsPromises = allUsers?.data?.map(async (user) => {
+            const mobile = user?.mobile ?? "";
+            const destinationNumber = mobile;
+            try {
+              await sendSMS(message, destinationNumber);
+              console.log("SMS sent successfully");
+              //var_user_success = "Yes";
+              setUserSuccess("Yes");
+              var_user_success_count = var_user_success_count + 1;
+            } catch (error) {
+              console.error("Failed to send SMS", error);
+              //var_user_success = "No";
+              setUserSuccess("No");
+              var_user_unsuccess_count = var_user_unsuccess_count + 1;
+            }
+          });
+          await Promise.all(smsPromises);
+        }
       }
 
       if (includePetOwner) {
         var_recipients.push("Pet Owners");
         setRecipients([...recipients, "Pet Owners"]);
         //loop through all the pet owners
-        allPetOwners?.data?.map(async (petOwner) => {
-          const mobile = petOwner?.mobile ?? "";
-          const destinationNumber = mobile;
-          try {
-            await sendSMS(message, destinationNumber);
-            console.log("SMS sent successfully");
-            setPetOwnerSuccess("Yes");
-            var_petOwner_success_count = var_petOwner_success_count + 1;
-            //var_petOwner_success = "Yes";
-          } catch (error) {
-            console.error("Failed to send SMS", error);
-            setPetOwnerSuccess("No");
-            var_petOwner_unsuccess_count = var_petOwner_unsuccess_count + 1;
-            //var_petOwner_success = "No";
-          }
-        });
+        if (allPetOwners?.data) {
+          const smsPromises = allPetOwners?.data?.map(async (petOwner) => {
+            const mobile = petOwner?.mobile ?? "";
+            const destinationNumber = mobile;
+            try {
+              await sendSMS(message, destinationNumber);
+              console.log("SMS sent successfully");
+              setPetOwnerSuccess("Yes");
+              var_petOwner_success_count = var_petOwner_success_count + 1;
+              //var_petOwner_success = "Yes";
+            } catch (error) {
+              console.error("Failed to send SMS", error);
+              setPetOwnerSuccess("No");
+              var_petOwner_unsuccess_count = var_petOwner_unsuccess_count + 1;
+              //var_petOwner_success = "No";
+            }
+          });
+          await Promise.all(smsPromises);
+        }
       }
 
       if (includeVolunteer) {
         var_recipients.push("Volunteers");
         setRecipients([...recipients, "Volunteers"]);
         //loop through all the volunteers
-        allVolunteers?.data?.map(async (volunteer) => {
-          const mobile = volunteer?.mobile ?? "";
-          const destinationNumber = mobile;
-          try {
-            await sendSMS(message, destinationNumber);
-            console.log("SMS sent successfully");
-            setVolunteerSuccess("Yes");
-            var_volunteer_success_count = var_volunteer_success_count + 1;
-            //var_volunteer_success = "Yes";
-          } catch (error) {
-            console.error("Failed to send SMS", error);
-            setVolunteerSuccess("No");
-            var_volunteer_unsuccess_count = var_volunteer_unsuccess_count + 1;
-            //var_volunteer_success = "No";
-          }
-        });
+        if (allVolunteers?.data) {
+          const smsPromises = allVolunteers?.data?.map(async (volunteer) => {
+            const mobile = volunteer?.mobile ?? "";
+            const destinationNumber = mobile;
+            try {
+              await sendSMS(message, destinationNumber);
+              console.log("SMS sent successfully");
+              setVolunteerSuccess("Yes");
+              var_volunteer_success_count = var_volunteer_success_count + 1;
+              //var_volunteer_success = "Yes";
+            } catch (error) {
+              console.error("Failed to send SMS", error);
+              setVolunteerSuccess("No");
+              var_volunteer_unsuccess_count = var_volunteer_unsuccess_count + 1;
+              //var_volunteer_success = "No";
+            }
+          });
+          await Promise.all(smsPromises);
+        }
       }
     }
 

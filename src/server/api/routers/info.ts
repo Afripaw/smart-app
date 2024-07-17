@@ -1194,11 +1194,7 @@ export const infoRouter = createTRPCRouter({
             : formatDateToExcel(pet.sterilisationOutcomeDate)
         : null,
       "Vaccination Shot 1":
-        pet.vaccinationShot1.getFullYear() == 1970
-          ? "Not yet"
-          : pet.vaccinationShot1.getFullYear() == 1971
-            ? "Unknown"
-            : formatDateToExcel(pet.vaccinationShot1),
+        pet.vaccinationShot1.getFullYear() == 1970 ? "Not yet" : pet.vaccinationShot1.getFullYear() == 1971 ? "Unknown" : pet.vaccinationShot1,
       "Vaccination Shot 2": pet.vaccinationShot2
         ? pet.vaccinationShot2.getFullYear() == 1970
           ? "Not yet"
@@ -1221,7 +1217,7 @@ export const infoRouter = createTRPCRouter({
       "Vaccination 3 Paid": pet.vaccination3Paid,
       "Clinic IDs Attended": pet.clinicsAttended.map((clinic) => clinic.clinic.clinicID).join(", "),
       Programme: pet.programme.filter((programme) => programme !== "").join(", "),
-      "Last Deworming": pet.lastDeworming ? formatDateToExcel(pet.lastDeworming) : null,
+      "Last Deworming": pet.lastDeworming ? pet.lastDeworming : null,
       Membership: pet.membership,
       "Membership Date": pet.membershipDate ? (pet.membershipDate.getFullYear() == 1970 ? "Non-card Holder" : formatDateToExcel(pet.membershipDate)) : null,
       "Card Status": pet.cardStatus,
@@ -1232,6 +1228,7 @@ export const infoRouter = createTRPCRouter({
     //treatment
     const treatmentData = rawTreatmentData.map((treatment) => ({
       "Treatment ID": treatment.treatmentID,
+      // Date: formatDateToExcel(treatment.date),
       Date: formatDateToExcel(treatment.date),
       "Pet ID": treatment.petID,
       Category: treatment.category,
@@ -1252,6 +1249,7 @@ export const infoRouter = createTRPCRouter({
       // Pet: clinic.pet,
       // Volunteer: clinic.volunteer,
       Date: formatDateToExcel(clinic.date),
+      // Date: clinic.date,
       "Greater Area ID": clinic.greaterAreaID,
       //"Area ID": clinic.areaID,
       Conditions: clinic.conditions.map((condition) => condition.condition.condition).join(", "),
@@ -1288,6 +1286,7 @@ export const infoRouter = createTRPCRouter({
     //message
     const messageData = rawMessageData.map((communication) => ({
       "Message ID": communication.communicationID,
+      //Date: communication.createdAt,
       Date: formatDateToExcel(communication.createdAt),
       Type: communication.type,
       Message: communication.message,

@@ -104,49 +104,6 @@ const Info: NextPage = () => {
     return `${day}/${month}/${year}`;
   }
 
-  //old code
-  // //Checks if card status of membership is lapsed or active
-  // const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
-  //   if (
-  //     membershipType === "Standard card holder" ||
-  //     membershipType === "Gold card holder" ||
-  //     membershipType === "Standard Card Holder" ||
-  //     membershipType === "Gold Card Holder"
-  //   ) {
-  //     const currentDate = new Date();
-
-  //     // // Convert clinicList dates to Date objects
-  //     // const clinicDates = clinicsAttended.map((clinicDate) => {
-  //     //   const [day, month, year] = clinicDate.clinic.date.split("/").map(Number);
-  //     //   return new Date(year ?? 0, (month ?? 0) - 1, day);
-  //     // });
-
-  //     // Filter clinics within the last 'time' months
-  //     const filteredClinicsLapsedMember = clinicsAttended.filter((clinicDate) => {
-  //       const pastDate = new Date(currentDate);
-  //       pastDate.setMonth(currentDate.getMonth() - 3);
-  //       return clinicDate >= pastDate;
-  //     });
-
-  //     const filteredClinicsActiveMember = clinicsAttended.filter((clinicDate) => {
-  //       const pastDate = new Date(currentDate);
-  //       pastDate.setMonth(currentDate.getMonth() - 6);
-  //       return clinicDate >= pastDate;
-  //     });
-
-  //     if (filteredClinicsLapsedMember.length < 1) {
-  //       //setCardStatusOption("Lapsed card holder");
-  //       return "Lapsed";
-  //     } else if (filteredClinicsActiveMember.length >= 3) {
-  //       return "Active";
-  //     } else {
-  //       return "Not Applicab";
-  //     }
-  //   } else {
-  //     return "Not Applicable";
-  //   }
-  // };
-
   //Checks if card status of membership is lapsed or active
   const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
     if (
@@ -247,175 +204,82 @@ const Info: NextPage = () => {
   //   }
   // }
 
-  //--------------------------------------DOWNLOAD DATABASE---------------------------------------------------
-  //Download sterilisation
-  const downloadDatabase = api.info.downloadDatabase.useQuery();
+  // //--------------------------------------DOWNLOAD DATABASE---------------------------------------------------
+  // //Download sterilisation
+  // const downloadDatabase = api.info.downloadDatabase.useQuery();
 
-  //variable for checking if button was pressed
-  const [downloadData, setDownloadData] = useState(false);
+  // //variable for checking if button was pressed
+  // const [downloadData, setDownloadData] = useState(false);
 
   // useEffect(() => {
   //   if (downloadDatabase.isSuccess && !downloadDatabase.isFetching && downloadData) {
-  //     //take the download user table query data and put it in an excel file
   //     const data = downloadDatabase.data;
 
-  //     //console.log("Sterilisation Data: ", data);
   //     const fileName = `AfriPaw Database - ${formatDate(new Date())}`;
   //     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   //     const fileExtension = ".xlsx";
 
-  //     //User sheet
+  //     // Create a new workbook
+  //     const workbook = XLSX.utils.book_new();
+
+  //     // Add each sheet to the workbook
   //     const wsUser = XLSX.utils.json_to_sheet(data.userData ?? []);
-  //     const wbUser = { Sheets: { data: wsUser }, SheetNames: ["User"] };
-  //     const excelBufferUser: Uint8Array = XLSX.write(wbUser, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsUser, "User");
 
-  //     //Volunteer sheet
   //     const wsVolunteer = XLSX.utils.json_to_sheet(data.volunteerData ?? []);
-  //     const wbVolunteer = { Sheets: { data: wsVolunteer }, SheetNames: ["Volunteer"] };
-  //     const excelBufferVolunteer: Uint8Array = XLSX.write(wbVolunteer, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsVolunteer, "Volunteer");
 
-  //     //Pet Owner sheet
   //     const wsPetOwner = XLSX.utils.json_to_sheet(data.petOwnerData ?? []);
-  //     const wbPetOwner = { Sheets: { data: wsPetOwner }, SheetNames: ["Pet Owner"] };
-  //     const excelBufferPetOwner: Uint8Array = XLSX.write(wbPetOwner, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsPetOwner, "Pet Owner");
 
-  //     //Pet sheet
   //     const wsPet = XLSX.utils.json_to_sheet(data.petData ?? []);
-  //     const wbPet = { Sheets: { data: wsPet }, SheetNames: ["Pet"] };
-  //     const excelBufferPet: Uint8Array = XLSX.write(wbPet, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsPet, "Pet");
 
-  //     //Pet Treatment sheet
   //     const wsPetTreatment = XLSX.utils.json_to_sheet(data.treatmentData ?? []);
-  //     const wbPetTreatment = { Sheets: { data: wsPetTreatment }, SheetNames: ["Pet Treatment"] };
-  //     const excelBufferPetTreatment: Uint8Array = XLSX.write(wbPetTreatment, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsPetTreatment, "Pet Treatment");
 
-  //     //Type sheet
-  //     const wsType = XLSX.utils.json_to_sheet(data.typeData ?? []);
-  //     const wbType = { Sheets: { data: wsType }, SheetNames: ["Treatment Type"] };
-  //     const excelBufferType: Uint8Array = XLSX.write(wbType, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     // const wsType = XLSX.utils.json_to_sheet(data.typeData ?? []);
+  //     // XLSX.utils.book_append_sheet(workbook, wsType, "Treatment Type");
 
-  //     //Pet Clinic sheet
   //     const wsPetClinic = XLSX.utils.json_to_sheet(data.clinicData ?? []);
-  //     const wbPetClinic = { Sheets: { data: wsPetClinic }, SheetNames: ["Pet Clinic"] };
-  //     const excelBufferPetClinic: Uint8Array = XLSX.write(wbPetClinic, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsPetClinic, "Pet Clinic");
 
-  //     //Conditions sheet
-  //     const wsConditions = XLSX.utils.json_to_sheet(data.conditionsData ?? []);
-  //     const wbConditions = { Sheets: { data: wsConditions }, SheetNames: ["Conditions"] };
-  //     const excelBufferConditions: Uint8Array = XLSX.write(wbConditions, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     // const wsConditions = XLSX.utils.json_to_sheet(data.conditionsData ?? []);
+  //     // XLSX.utils.book_append_sheet(workbook, wsConditions, "Conditions");
 
-  //     //Greater Area sheet
   //     const wsGreaterArea = XLSX.utils.json_to_sheet(data.greaterAreaData ?? []);
-  //     const wbGreaterArea = { Sheets: { data: wsGreaterArea }, SheetNames: ["Greater Area"] };
-  //     const excelBufferGreaterArea: Uint8Array = XLSX.write(wbGreaterArea, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsGreaterArea, "Greater Area");
 
-  //     //Area sheet
   //     const wsArea = XLSX.utils.json_to_sheet(data.areaData ?? []);
-  //     const wbArea = { Sheets: { data: wsArea }, SheetNames: ["Area"] };
-  //     const excelBufferArea: Uint8Array = XLSX.write(wbArea, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsArea, "Area");
 
-  //     //Street sheet
   //     const wsStreet = XLSX.utils.json_to_sheet(data.streetData ?? []);
-  //     const wbStreet = { Sheets: { data: wsStreet }, SheetNames: ["Street"] };
-  //     const excelBufferStreet: Uint8Array = XLSX.write(wbStreet, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsStreet, "Street");
 
-  //     //Message sheet
   //     const wsMessage = XLSX.utils.json_to_sheet(data.messageData ?? []);
-  //     const wbMessage = { Sheets: { data: wsMessage }, SheetNames: ["Message"] };
-  //     const excelBufferMessage: Uint8Array = XLSX.write(wbMessage, { bookType: "xlsx", type: "array" }) as Uint8Array;
+  //     XLSX.utils.book_append_sheet(workbook, wsMessage, "Message");
 
-  //     const dataFile = new Blob(
-  //       [
-  //         excelBufferUser,
-  //         excelBufferVolunteer,
-  //         excelBufferPetOwner,
-  //         excelBufferPet,
-  //         excelBufferPetTreatment,
-  //         excelBufferType,
-  //         excelBufferPetClinic,
-  //         excelBufferConditions,
-  //         excelBufferGreaterArea,
-  //         excelBufferArea,
-  //         excelBufferStreet,
-  //         excelBufferMessage,
-  //       ],
-  //       { type: fileType },
-  //     );
+  //     // Write the workbook to a binary buffer
+  //     const excelBuffer: Uint8Array = XLSX.write(workbook, { bookType: "xlsx", type: "array" }) as Uint8Array;
+
+  //     // Create a Blob from the binary buffer
+  //     const dataFile = new Blob([excelBuffer], { type: fileType });
+
+  //     // Save the Blob as an Excel file
   //     FileSaver.saveAs(dataFile, fileName + fileExtension);
 
   //     setDownloadData(false);
   //     setIsLoading(false);
   //   }
   // }, [downloadDatabase.isFetched, downloadDatabase.isSuccess, downloadDatabase.isFetching]);
-  useEffect(() => {
-    if (downloadDatabase.isSuccess && !downloadDatabase.isFetching && downloadData) {
-      const data = downloadDatabase.data;
 
-      const fileName = `AfriPaw Database - ${formatDate(new Date())}`;
-      const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-      const fileExtension = ".xlsx";
+  // const handleDownloadDatabase = async () => {
+  //   setIsLoading(true);
 
-      // Create a new workbook
-      const workbook = XLSX.utils.book_new();
-
-      // Add each sheet to the workbook
-      const wsUser = XLSX.utils.json_to_sheet(data.userData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsUser, "User");
-
-      const wsVolunteer = XLSX.utils.json_to_sheet(data.volunteerData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsVolunteer, "Volunteer");
-
-      const wsPetOwner = XLSX.utils.json_to_sheet(data.petOwnerData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsPetOwner, "Pet Owner");
-
-      const wsPet = XLSX.utils.json_to_sheet(data.petData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsPet, "Pet");
-
-      const wsPetTreatment = XLSX.utils.json_to_sheet(data.treatmentData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsPetTreatment, "Pet Treatment");
-
-      // const wsType = XLSX.utils.json_to_sheet(data.typeData ?? []);
-      // XLSX.utils.book_append_sheet(workbook, wsType, "Treatment Type");
-
-      const wsPetClinic = XLSX.utils.json_to_sheet(data.clinicData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsPetClinic, "Pet Clinic");
-
-      // const wsConditions = XLSX.utils.json_to_sheet(data.conditionsData ?? []);
-      // XLSX.utils.book_append_sheet(workbook, wsConditions, "Conditions");
-
-      const wsGreaterArea = XLSX.utils.json_to_sheet(data.greaterAreaData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsGreaterArea, "Greater Area");
-
-      const wsArea = XLSX.utils.json_to_sheet(data.areaData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsArea, "Area");
-
-      const wsStreet = XLSX.utils.json_to_sheet(data.streetData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsStreet, "Street");
-
-      const wsMessage = XLSX.utils.json_to_sheet(data.messageData ?? []);
-      XLSX.utils.book_append_sheet(workbook, wsMessage, "Message");
-
-      // Write the workbook to a binary buffer
-      const excelBuffer: Uint8Array = XLSX.write(workbook, { bookType: "xlsx", type: "array" }) as Uint8Array;
-
-      // Create a Blob from the binary buffer
-      const dataFile = new Blob([excelBuffer], { type: fileType });
-
-      // Save the Blob as an Excel file
-      FileSaver.saveAs(dataFile, fileName + fileExtension);
-
-      setDownloadData(false);
-      setIsLoading(false);
-    }
-  }, [downloadDatabase.isFetched, downloadDatabase.isSuccess, downloadDatabase.isFetching]);
-
-  const handleDownloadDatabase = async () => {
-    setIsLoading(true);
-
-    void downloadDatabase.refetch();
-    setDownloadData(true);
-    setIsLoading(false);
-  };
+  //   void downloadDatabase.refetch();
+  //   setDownloadData(true);
+  //   setIsLoading(false);
+  // };
 
   //---------------------------------------STERILISATION DUE QUERIES------------------------------------------------
   //STERILISATION DUE
@@ -1308,9 +1172,9 @@ const Info: NextPage = () => {
         <Navbar />
 
         <div className="grid h-full w-full grow grid-rows-6">
-          <div className="row-span-2 grid grid-rows-4">
+          <div className="row-span-2 grid grid-rows-3">
             {/* DOWNLOAD DATABASE */}
-            <div className="row-span-1 flex items-center justify-center border-2">
+            {/* <div className="row-span-1 flex items-center justify-center border-2">
               <button
                 onClick={handleDownloadDatabase}
                 className="my-2 inline-flex items-center rounded-lg bg-main-orange px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-orange-500 focus:outline-none focus:ring-4 focus:ring-blue-300 "
@@ -1324,7 +1188,7 @@ const Info: NextPage = () => {
                   <div>Download Database</div>
                 )}
               </button>
-            </div>
+            </div> */}
             {/* STERILISATION DUE QUERIES */}
             <div className="row-span-1 grid grid-cols-5 border-2">
               <div className="col-span-4 grid grid-cols-2">

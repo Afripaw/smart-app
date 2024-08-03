@@ -3634,11 +3634,11 @@ const Pet: NextPage = () => {
 
     // if (vaccination1TypeList_.length > 0 || vaccination2TypeList_.length > 0 || vaccination3TypeList_.length > 0) {
 
-    window.location.reload();
+    // window.location.reload();
 
     //  }
 
-    // //Invalidate
+    //Invalidate
     // await context.pet.searchPetsInfinite.invalidate({
     //   petID: id,
     //   limit: limit,

@@ -393,6 +393,20 @@ export const infoRouter = createTRPCRouter({
         },
       });
 
+      //checks if deworming was more than 3 months ago if cat and 6 months ago if dog
+      const isMoreThanSixMonthsAgo = (date: Date, species: string): boolean => {
+        const sixMonthsAgo = new Date();
+        if (species === "Cat") {
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 2);
+          sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 15);
+        } else {
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+          sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 15);
+        }
+
+        return date < sixMonthsAgo;
+      };
+
       // Programmatically flatten the data into a more accessible structure
       const data = rawData.map((pet) => ({
         "Owner First name": pet.owner?.firstName ?? "",
@@ -413,7 +427,7 @@ export const infoRouter = createTRPCRouter({
         "Sterilisation Requested": pet.sterilisedRequested?.getFullYear() != 1970 ? pet.sterilisedRequested : "",
         "Sterilisation Request Signed At": pet.sterilisedRequestSigned,
         "Last Deworming Date": pet.lastDeworming,
-        "Last Deworming Due": Number(pet?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - (pet?.species == "Cat" ? 3 : 6))) ? "Yes" : "No",
+        "Last Deworming Due": isMoreThanSixMonthsAgo(pet?.lastDeworming ?? new Date(), pet?.species) ? "Yes" : "No",
         "Vaccination Shot 1":
           pet.vaccinationShot1.getFullYear() == 1970 ? "Not yet" : pet.vaccinationShot1.getFullYear() == 1971 ? "Unknown" : pet.vaccinationShot1,
         "Vaccination Shot 1 Type": pet.vaccination1Type,

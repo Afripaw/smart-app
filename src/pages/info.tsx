@@ -104,6 +104,20 @@ const Info: NextPage = () => {
     return `${day}/${month}/${year}`;
   }
 
+  //checks if deworming was more than 3 months ago if cat and 6 months ago if dog
+  const isMoreThanSixMonthsAgo = (date: Date, species: string): boolean => {
+    const sixMonthsAgo = new Date();
+    if (species === "Cat") {
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 2);
+      sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 15);
+    } else {
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+      sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 15);
+    }
+
+    return date < sixMonthsAgo;
+  };
+
   //Checks if card status of membership is lapsed or active
   const membershipStatus = (membershipType: string, clinicsAttended: Date[]): string => {
     if (
@@ -1910,11 +1924,7 @@ const Info: NextPage = () => {
                                   "/" +
                                   user?.lastDeworming?.getFullYear().toString()}
                               </td>
-                              <td className="border px-2 py-1">
-                                {Number(user?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - (user?.species == "Cat" ? 3 : 6)))
-                                  ? "Yes"
-                                  : "No"}
-                              </td>
+                              <td className="border px-2 py-1">{isMoreThanSixMonthsAgo(user?.lastDeworming ?? new Date(), user?.species) ? "Yes" : "No"}</td>
                               <td className=" border px-2 py-1">
                                 {user?.vaccinationShot1?.getFullYear() === 1970
                                   ? "Not yet"

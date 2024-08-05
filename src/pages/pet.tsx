@@ -2762,12 +2762,14 @@ const Pet: NextPage = () => {
   // }, []);
 
   //checks if deworming was more than 3 months ago if cat and 6 months ago if dog
-  const isMoreThanSixMonthsAgo = (date: Date): boolean => {
+  const isMoreThanSixMonthsAgo = (date: Date, species: string): boolean => {
     const sixMonthsAgo = new Date();
-    if (speciesOption === "Cat") {
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 3);
+    if (species === "Cat") {
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 2);
+      sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 15);
     } else {
-      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+      sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 15);
     }
 
     return date < sixMonthsAgo;
@@ -5408,7 +5410,7 @@ const Pet: NextPage = () => {
   //   }
   // }, [clinicList]);
 
-  const handleAddTodaysClinic = async (petID: number, clinicID: number, lastDeworming_: number, species_: string) => {
+  const handleAddTodaysClinic = async (petID: number, clinicID: number, lastDeworming_: Date, species_: string) => {
     if (addClinic.isLoading) return;
     setIsClinicLoading(true);
 
@@ -5432,8 +5434,13 @@ const Pet: NextPage = () => {
       setRecordBusy({ state: true, record: petID });
 
       //check if due for deworming
-      const due = lastDeworming_ < Number(new Date().setMonth(new Date().getMonth() - (species_ == "Cat" ? 3 : 6))) ? "Yes" : "No";
-      console.log("DUE!!!: ", due);
+      //const due = lastDeworming_ < Number(new Date().setMonth(new Date().getMonth() - (species_ == "Cat" ? 3 : 6))) ? "Yes" : "No";
+      const due = isMoreThanSixMonthsAgo(lastDeworming_, species_) ? "Yes" : "No";
+      // lastDeworming_ < Number(new Date(new Date().setMonth(new Date().getMonth() - (species_ === "Cat" ? 2 : 5))).setDate(new Date().getDate() - 15))
+      //   ? "Yes"
+      //   : "No";
+
+      //console.log("DUE!!!: ", due);
 
       //update the pet table to add the clinic to the pet
       await addClinic.mutateAsync({
@@ -5687,9 +5694,8 @@ const Pet: NextPage = () => {
                                   pet?.lastDeworming?.getFullYear().toString()}
                               </td>
                               <td className="border px-2 py-1">
-                                {Number(pet?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - (pet?.species == "Cat" ? 3 : 6)))
-                                  ? "Yes"
-                                  : "No"}
+                                {/* {Number(pet?.lastDeworming) < Number(new Date().setMonth(new Date().getMonth() - (pet?.species == "Cat" ? 3 : 6))) */}
+                                {isMoreThanSixMonthsAgo(pet?.lastDeworming ?? new Date(), pet?.species) ? "Yes" : "No"}
                               </td>
 
                               <td className="border px-2 py-1">
@@ -5807,7 +5813,7 @@ const Pet: NextPage = () => {
                                                 todayClinicList.map((option) => (
                                                   <li
                                                     key={option.id}
-                                                    onClick={() => handleAddTodaysClinic(pet.petID, option.id, Number(pet.lastDeworming), pet.species)}
+                                                    onClick={() => handleAddTodaysClinic(pet.petID, option.id, pet?.lastDeworming ?? new Date(), pet.species)}
                                                   >
                                                     <button className="block px-4 py-2 hover:bg-gray-100 ">
                                                       {
@@ -7303,8 +7309,8 @@ const Pet: NextPage = () => {
                       /> */}
                     </div>
 
-                    {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && <div className="text-red-600">(Due for deworming)</div>}
-                    {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && (
+                    {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming, speciesOption) && <div className="text-red-600">(Due for deworming)</div>}
+                    {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming, speciesOption) && (
                       <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
                         <Info size={24} className="block" />
                         <span className="absolute left-[90%] top-[90%] z-20 hidden w-[12rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
@@ -8034,8 +8040,8 @@ const Pet: NextPage = () => {
                       <div className="mb-2 flex items-center">
                         <b className="mr-3">Last Deworming:</b>{" "}
                         {lastDeworming?.getDate() + "/" + (lastDeworming.getMonth() + 1) + "/" + lastDeworming.getFullYear()}
-                        {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && <div className="ml-3 text-red-600">(Due for deworming)</div>}
-                        {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming) && (
+                        {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming, speciesOption) && <div className="ml-3 text-red-600">(Due for deworming)</div>}
+                        {lastDeworming && isMoreThanSixMonthsAgo(lastDeworming, speciesOption) && (
                           <div className="group relative mx-[5px] flex items-center justify-center rounded-lg hover:bg-orange-200">
                             <Info size={24} className="block" />
                             <span className="absolute left-[90%] top-[90%] z-20 hidden w-[14rem] rounded-md border border-black bg-white px-2 py-1 text-sm text-gray-700 shadow-sm group-hover:block">
